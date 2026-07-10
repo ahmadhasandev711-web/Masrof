@@ -1,0 +1,71 @@
+"use server";
+
+import { getTranslations } from "next-intl/server";
+import { getReportRangeLabel, type ReportRangePreset } from "@/features/reports/date-ranges";
+import { fetchReportExportPayload } from "@/features/reports/export-data";
+import { createWorkbook, workbookToBase64 } from "@/lib/excel";
+import { fromMinorUnits } from "@/lib/money";
+
+function exportAmount(value: number | null): string | number {
+  return value == null ? "N/A" : fromMinorUnits(value);
+}
+
+export async function exportReportExcelAction(input: {
+  workspaceId: string;
+  preset: ReportRangePreset;
+  from?: string;
+  to?: string;
+}): Promise<{ base64: string; filename: string } | { error: string }> {
+  const [payload, t] = await Promise.all([
+    fetchReportExportPayload(input),
+    getTranslations("reports.exportLabels"),
+  ]);
+
+  if ("error" in payload) {
+    return { error: payload.error };
+  }
+
+  const generatedAt = new Date().toISOString().slice(0, 10);
+  const fromLabel = payload.range.from.toISOString().slice(0, 10);
+  const toLabel = payload.range.to.toISOString().slice(0, 10);
+  const periodLabel = await getReportRangeLabel(payload.preset);
+
+  const workbook = createWorkbook([
+    {
+      name: t("summarySheet"),
+      rows: [
+        [t("reportTitle")],
+        [t("workspace"), payload.workspaceName],
+        [t("currency"), payload.currency],
+        [t("period"), periodLabel],
+        [t("from"), fromLabel],
+        [t("to"), toLabel],
+        [t("exportDate"), generatedAt],
+        [],
+        [t("item"), t("amount")],
+        [t("income"), exportAmount(payload.summary.income)],
+        [t("expenses"), exportAmount(payload.summary.expense)],
+        [t("net"), exportAmount(payload.summary.net)],
+      ],
+    },
+    {
+      name: t("expensesSheet"),
+      rows: [
+        [t("category"), t("amount")],
+        ...payload.expenseBreakdown.map((row) => [row.name, exportAmount(row.total)]),
+      ],
+    },
+    {
+      name: t("incomeSheet"),
+      rows: [
+        [t("category"), t("amount")],
+        ...payload.incomeBreakdown.map((row) => [row.name, exportAmount(row.total)]),
+      ],
+    },
+  ]);
+
+  return {
+    base64: workbookToBase64(workbook),
+    filename: `masrofaty-report-${fromLabel}.xlsx`,
+  };
+}

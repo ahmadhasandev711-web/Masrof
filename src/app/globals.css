@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-marketing-display: "Markazi Text", "Cairo", serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Form controls always use dark text on white — never inherit body color in dark OS mode */
+@layer base {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]),
+  select,
+  textarea {
+    color: #171717;
+    background-color: #ffffff;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #a3a3a3;
+  }
+
+  option {
+    color: #171717;
+    background-color: #ffffff;
+  }
+
+  /* Date/number inputs on WebKit */
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  input[type="number"] {
+    color-scheme: light;
+  }
+}

@@ -1,0 +1,70 @@
+/* Invoice print layouts — A4 professional + 80mm thermal POS */
+
+.invoice-print-page {
+  min-height: 100vh;
+  background: #f3f4f6;
+  padding: 1.5rem 1rem;
+}
+
+@media print {
+  .invoice-print-page {
+    background: #fff;
+    padding: 0;
+  }
+}
+
+.invoice-sheet {
+  margin-inline: auto;
+  background: #fff;
+  box-shadow: 0 4px 24px rgb(0 0 0 / 8%);
+}
+
+@media print {
+  .invoice-sheet {
+    box-shadow: none;
+    margin: 0;
+  }
+}
+
+/* --- A4 (210 × 297 mm) --- */
+.invoice-sheet-a4 {
+  width: 210mm;
+  min-height: 297mm;
+  max-width: 100%;
+  padding: 16mm 18mm;
+}
+
+@media print {
+  html[data-invoice-format="a4"] .invoice-sheet-a4 {
+    width: 100%;
+    min-height: auto;
+    padding: 0;
+  }
+}
+
+/* --- POS / thermal (~80mm) --- */
+.invoice-sheet-pos {
+  width: 80mm;
+  max-width: 100%;
+  padding: 4mm 3mm;
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+@media print {
+  html[data-invoice-format="pos"] .invoice-sheet-pos {
+    width: 80mm;
+    padding: 2mm;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  html[data-invoice-format="pos"] .invoice-sheet-pos {
+    width: 80mm;
+    padding: 2mm;
+  }
+}

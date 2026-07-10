@@ -1,0 +1,89 @@
+const auth = {
+  auth: {
+    loginTitle: "تسجيل الدخول",
+    loginSubtitle: "أهلاً بيك تاني في مصروفاتي",
+    loading: "جارِ التحميل...",
+    forgotPassword: "نسيت كلمة المرور؟",
+    noAccount: "لسه معملتش حساب؟",
+    registerLink: "إنشاء حساب جديد",
+    registerTitle: "إنشاء حساب جديد",
+    registerSubtitle: "ابدأ تتابع فلوسك في دقيقتين",
+    hasAccount: "عندك حساب بالفعل؟",
+    loginLink: "تسجيل الدخول",
+    signOut: "تسجيل الخروج",
+    fields: {
+      email: "البريد الإلكتروني",
+      password: "كلمة المرور",
+      name: "الاسم",
+      newPassword: "كلمة المرور الجديدة",
+    },
+    submit: {
+      login: "تسجيل الدخول",
+      loggingIn: "جارِ الدخول...",
+      register: "إنشاء حساب",
+      creating: "جارِ الإنشاء...",
+      sendReset: "إرسال رابط إعادة التعيين",
+      sending: "جارِ الإرسال...",
+      savePassword: "حفظ كلمة المرور الجديدة",
+      resendVerification: "إعادة إرسال بريد التأكيد",
+    },
+    google: {
+      continue: "المتابعة بحساب Google",
+      register: "التسجيل بحساب Google",
+    },
+    divider: {
+      or: "أو",
+    },
+    alerts: {
+      verified: "تم تأكيد بريدك الإلكتروني — تقدر تدخل دلوقتي.",
+      resetSuccess: "تم تغيير كلمة المرور بنجاح — سجّل دخولك.",
+      verifyEmailLink: "تأكيد البريد الإلكتروني",
+    },
+    errors: {
+      invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+      userNotFound: "لا يوجد حساب بهذا البريد الإلكتروني.",
+      createAccountInstead: "أنشئ حساباً جديداً",
+      registerFailed: "تعذر إنشاء الحساب، حاول مرة أخرى",
+      resetSendFailed: "تعذر إرسال رابط إعادة التعيين",
+      resetFailed: "تعذر إعادة تعيين كلمة المرور",
+      verificationSendFailed: "تعذر إرسال بريد التأكيد",
+    },
+    forgot: {
+      title: "نسيت كلمة المرور؟",
+      description: "هنبعتلك رابط لإعادة التعيين على بريدك الإلكتروني",
+      backToLogin: "رجوع لتسجيل الدخول",
+      resetMessage:
+        "لو البريد موجود عندنا، هيوصلك رابط إعادة التعيين. في التطوير المحلي، شوف التيرمنال للرابط.",
+    },
+    reset: {
+      title: "كلمة مرور جديدة",
+      description: "اختار كلمة مرور قوية (8 أحرف على الأقل)",
+      invalidToken: "الرابط منتهي أو غير صالح.",
+      invalidLink: "الرابط غير صالح أو منتهي الصلاحية.",
+      requestNewLink: "اطلب رابط جديد",
+    },
+    verify: {
+      title: "تأكيد البريد الإلكتروني",
+      description: "لازم تؤكد بريدك قبل ما تقدر تدخل. لو ماوصلكش الرسالة، ابعتها تاني.",
+      resendMessage:
+        "لو البريد موجود وغير مؤكد، هيوصلك رابط التأكيد. في التطوير، شوف التيرمنال.",
+    },
+    oauth: {
+      accountNotLinked:
+        "يوجد حساب بنفس البريد مسجّل بكلمة مرور. سجّل دخولك بالبريد أولاً، ثم جرّب Google مرة أخرى.",
+      unableToLink: "تعذر ربط حساب Google. حاول مرة أخرى أو تواصل مع الدعم.",
+      signupDisabled: "التسجيل الجديد غير متاح حالياً.",
+      emailMismatch: "البريد في Google لا يطابق حسابك الحالي.",
+      accessDenied: "تم إلغاء تسجيل الدخول بحساب Google.",
+      internalError: "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.",
+      generic: "تعذر تسجيل الدخول بحساب Google.",
+    },
+    suspended: {
+      title: "الحساب معلّق",
+      body: "تم تعليق حسابك مؤقتاً. تواصل مع الدعم لو محتاج مساعدة.",
+      backToLogin: "العودة لتسجيل الدخول",
+    },
+  },
+} as const;
+
+export default auth;

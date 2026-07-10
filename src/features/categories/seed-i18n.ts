@@ -1,0 +1,20 @@
+/** Maps system category slugs to `forms.categories.seed.*` message keys. */
+export const SEED_CATEGORY_MESSAGE_KEYS: Record<string, string> = {
+  "income-salary": "salary",
+  "income-client-payments": "clientPayments",
+  "income-sales": "sales",
+  "income-services": "services",
+  "income-other": "otherIncome",
+  "expense-food": "food",
+  "expense-transportation": "transportation",
+  "expense-rent": "rent",
+  "expense-shopping": "shopping",
+  "expense-healthcare": "healthcare",
+  "expense-software": "software",
+  "expense-internet": "internet",
+  "expense-equipment": "equipment",
+  "expense-marketing": "marketing",
+  "expense-salaries": "salaries",
+  "expense-utilities": "utilities",
+  "expense-other": "otherExpense",
+};

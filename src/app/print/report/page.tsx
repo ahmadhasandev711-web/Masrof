@@ -1,0 +1,163 @@
+import { requireSession } from "@/features/auth/session";
+import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
+import { redirect } from "next/navigation";
+import { getWorkspaceSummary } from "@/features/transactions/data";
+import { getCategoryBreakdown } from "@/features/reports/data";
+import {
+  resolveReportDateRange,
+  REPORT_RANGE_PRESETS,
+  type ReportRangePreset,
+} from "@/features/reports/date-ranges";
+import { PrintToolbar } from "@/features/reports/components/print-toolbar";
+import { formatMoney } from "@/lib/money";
+import { getDateLocale } from "@/i18n/dates";
+import { getIntlLocale, type AppLocale } from "@/i18n/config";
+import { getLocale, getTranslations } from "next-intl/server";
+
+type SearchParams = Record<string, string | undefined>;
+
+function isValidPreset(value: string | undefined): value is ReportRangePreset {
+  return !!value && (REPORT_RANGE_PRESETS as readonly string[]).includes(value);
+}
+
+function formatDate(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+export default async function PrintReportPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const session = await requireSession();
+  const locale = (await getLocale()) as AppLocale;
+  const moneyLocale = getIntlLocale(locale);
+  const dateLocale = getDateLocale(locale);
+  const tPages = await getTranslations("pages.print");
+  const tReports = await getTranslations("reports");
+
+  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const workspaceId = activeWorkspace._id.toString();
+
+  const pdfError = await assertWorkspacePlanFeature(session.user.id, workspaceId, "pdfExport");
+  if (pdfError) {
+    redirect("/dashboard/reports?upgrade=pdf");
+  }
+
+  const currency = activeWorkspace.currency;
+
+  const rawParams = await searchParams;
+  const preset: ReportRangePreset = isValidPreset(rawParams.range) ? rawParams.range : "thisMonth";
+  const range = resolveReportDateRange(preset, {
+    from: rawParams.from ? new Date(rawParams.from) : undefined,
+    to: rawParams.to ? new Date(rawParams.to) : undefined,
+  });
+
+  const [summary, expenseBreakdownResult, incomeBreakdownResult] = await Promise.all([
+    getWorkspaceSummary(workspaceId, range),
+    getCategoryBreakdown(workspaceId, "expense", range),
+    getCategoryBreakdown(workspaceId, "income", range),
+  ]);
+  const expenseBreakdown = expenseBreakdownResult.rows;
+  const incomeBreakdown = incomeBreakdownResult.rows;
+  const tConversion = await getTranslations("reports.conversion");
+
+  const generatedAt = formatDate(new Date(), dateLocale);
+  const presetLabel = tReports(`range.${preset}`);
+
+  return (
+    <main className="mx-auto max-w-3xl px-6 py-10">
+      <PrintToolbar />
+
+      <header className="border-b border-neutral-200 pb-6">
+        <p className="text-sm text-neutral-500">{tPages("reportTitle")}</p>
+        <h1 className="mt-1 text-2xl font-bold text-neutral-900">{activeWorkspace.name}</h1>
+        <p className="mt-2 text-sm text-neutral-600">
+          {presetLabel} · {tReports("exportLabels.from")} {formatDate(range.from, dateLocale)} {tReports("exportLabels.to")}{" "}
+          {formatDate(range.to, dateLocale)}
+        </p>
+        <p className="mt-1 text-xs text-neutral-400">{tPages("generatedAt")} {generatedAt}</p>
+      </header>
+
+      <section className="mt-8 grid grid-cols-3 gap-4">
+        <div className="rounded-xl border border-neutral-200 p-4 text-center">
+          <p className="text-xs text-neutral-500">{tReports("summary.totalIncome")}</p>
+          <p className="mt-1 text-lg font-bold text-emerald-700">
+            {summary.income == null
+              ? tConversion("unavailable")
+              : formatMoney(summary.income, { currency, locale: moneyLocale })}
+          </p>
+        </div>
+        <div className="rounded-xl border border-neutral-200 p-4 text-center">
+          <p className="text-xs text-neutral-500">{tReports("summary.totalExpense")}</p>
+          <p className="mt-1 text-lg font-bold text-red-600">
+            {summary.expense == null
+              ? tConversion("unavailable")
+              : formatMoney(summary.expense, { currency, locale: moneyLocale })}
+          </p>
+        </div>
+        <div className="rounded-xl border border-neutral-200 p-4 text-center">
+          <p className="text-xs text-neutral-500">{tReports("summary.net")}</p>
+          <p className="mt-1 text-lg font-bold text-neutral-900">
+            {summary.net == null
+              ? tConversion("unavailable")
+              : formatMoney(summary.net, { currency, locale: moneyLocale })}
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-3 text-lg font-semibold">{tPages("expenseBreakdown")}</h2>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-neutral-200 text-neutral-500">
+              <th className="py-2 text-right font-medium">{tReports("exportLabels.category")}</th>
+              <th className="py-2 text-left font-medium">{tReports("exportLabels.amount")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {expenseBreakdown.map((row) => (
+              <tr key={row.name} className="border-b border-neutral-100">
+                <td className="py-2">{row.name}</td>
+                <td className="py-2 text-left">
+                  {row.total == null
+                    ? tConversion("unavailable")
+                    : formatMoney(row.total, { currency, locale: moneyLocale })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-3 text-lg font-semibold">{tPages("incomeBreakdown")}</h2>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-neutral-200 text-neutral-500">
+              <th className="py-2 text-right font-medium">{tReports("exportLabels.category")}</th>
+              <th className="py-2 text-left font-medium">{tReports("exportLabels.amount")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {incomeBreakdown.map((row) => (
+              <tr key={row.name} className="border-b border-neutral-100">
+                <td className="py-2">{row.name}</td>
+                <td className="py-2 text-left">
+                  {row.total == null
+                    ? tConversion("unavailable")
+                    : formatMoney(row.total, { currency, locale: moneyLocale })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  );
+}
