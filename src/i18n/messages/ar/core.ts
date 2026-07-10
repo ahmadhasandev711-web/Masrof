@@ -49,6 +49,8 @@ const core = {
     plan: "خطتي",
     team: "الفريق",
     more: "المزيد",
+    openMenu: "فتح القائمة",
+    closeMenu: "إغلاق",
     newWorkspace: "+ مساحة جديدة",
     addWorkspace: "+ مساحة",
     admin: "الإدارة",

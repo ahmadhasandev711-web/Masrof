@@ -49,6 +49,8 @@ const core = {
     plan: "My plan",
     team: "Team",
     more: "More",
+    openMenu: "Open menu",
+    closeMenu: "Close",
     newWorkspace: "+ New workspace",
     addWorkspace: "+ Workspace",
     admin: "Admin",

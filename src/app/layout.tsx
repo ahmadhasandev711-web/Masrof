@@ -25,6 +25,11 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("title"),
     description: t("description"),
     manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: t("title"),
+    },
     icons: {
       icon: "/icons/icon-512.png",
       apple: "/icons/apple-touch-icon.png",
@@ -36,6 +41,7 @@ export const viewport: Viewport = {
   themeColor: "#065F46",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({

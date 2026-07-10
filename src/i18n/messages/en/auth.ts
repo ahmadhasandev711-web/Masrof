@@ -11,6 +11,7 @@ const auth = {
     hasAccount: "Already have an account?",
     loginLink: "Log in",
     signOut: "Sign out",
+    signOutShort: "Out",
     fields: {
       email: "Email",
       password: "Password",

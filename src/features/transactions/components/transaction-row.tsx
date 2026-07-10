@@ -88,14 +88,14 @@ export function TransactionRow({
   }
 
   return (
-    <li className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-5 py-3 shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className="text-xl">{transaction.categoryIcon ?? "🏷️"}</span>
-        <div>
-          <p className="font-medium text-neutral-900">
+    <li className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="shrink-0 text-xl">{transaction.categoryIcon ?? "🏷️"}</span>
+        <div className="min-w-0">
+          <p className="truncate font-medium text-neutral-900">
             {transaction.description || transaction.categoryName || tShared("none")}
           </p>
-          <p className="text-xs text-neutral-500">
+          <p className="truncate text-xs text-neutral-500">
             {transaction.categoryName} · {transaction.accountName} ·{" "}
             {formatDate(transaction.transactionDate)}
             {transaction.clientName ? ` · ${transaction.clientName}` : ""}
@@ -113,7 +113,7 @@ export function TransactionRow({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
         <span className={`font-semibold ${isIncome ? "text-emerald-700" : "text-red-600"}`}>
           {isIncome ? "+" : "-"}
           {formatMoney(transaction.amountMinor, { currency })}

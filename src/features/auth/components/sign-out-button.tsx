@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth/client";
 
-export function SignOutButton() {
+export function SignOutButton({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const t = useTranslations("auth");
 
@@ -17,9 +17,9 @@ export function SignOutButton() {
   return (
     <button
       onClick={handleSignOut}
-      className="rounded-lg border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100"
+      className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100 sm:px-3"
     >
-      {t("signOut")}
+      {compact ? t("signOutShort") : t("signOut")}
     </button>
   );
 }

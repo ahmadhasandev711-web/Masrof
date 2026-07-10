@@ -11,6 +11,7 @@ const auth = {
     hasAccount: "عندك حساب بالفعل؟",
     loginLink: "تسجيل الدخول",
     signOut: "تسجيل الخروج",
+    signOutShort: "خروج",
     fields: {
       email: "البريد الإلكتروني",
       password: "كلمة المرور",

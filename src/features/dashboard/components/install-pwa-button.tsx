@@ -25,7 +25,7 @@ function isStandalone() {
  * when install criteria are met (HTTPS, manifest, SW in production, engagement).
  * We always show the button with manual steps when the native prompt is absent.
  */
-export function InstallPwaButton() {
+export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("pwa");
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
@@ -79,9 +79,9 @@ export function InstallPwaButton() {
       <button
         type="button"
         onClick={() => (deferredPrompt ? handleNativeInstall() : setOpen((v) => !v))}
-        className="rounded-lg border border-[#065F46]/20 bg-[#ECFDF5] px-3 py-1.5 text-sm font-medium text-[#065F46] transition hover:bg-[#D1FAE5]"
+        className="rounded-lg border border-[#065F46]/20 bg-[#ECFDF5] px-2 py-1.5 text-sm font-medium text-[#065F46] transition hover:bg-[#D1FAE5] sm:px-3"
       >
-        {t("install")}
+        {compact ? "📲" : t("install")}
       </button>
 
       {open && !deferredPrompt && (

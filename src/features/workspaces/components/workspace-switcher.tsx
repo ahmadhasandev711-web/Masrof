@@ -13,9 +13,11 @@ type WorkspaceOption = {
 export function WorkspaceSwitcher({
   workspaces,
   activeWorkspaceId,
+  className,
 }: {
   workspaces: WorkspaceOption[];
   activeWorkspaceId: string;
+  className?: string;
 }) {
   const tWorkspaceType = useTranslations("workspaceType");
   const [isPending, startTransition] = useTransition();
@@ -33,7 +35,7 @@ export function WorkspaceSwitcher({
       value={activeWorkspaceId}
       disabled={isPending}
       onChange={(e) => handleChange(e.target.value)}
-      className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 disabled:opacity-60"
+      className={`max-w-full truncate rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-sm font-medium text-neutral-700 disabled:opacity-60 sm:px-3 ${className ?? ""}`}
     >
       {workspaces.map((workspace) => (
         <option key={workspace.id} value={workspace.id}>
