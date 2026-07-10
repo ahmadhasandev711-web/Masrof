@@ -44,6 +44,7 @@ export default async function DashboardPage() {
         currency,
         budgetWarnings,
         dueRecurring,
+        locale,
       });
       await dispatchDashboardPushNotifications({
         userId: session.user.id,
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
         currency,
         budgetWarnings,
         dueRecurring,
+        locale,
       });
     } catch (error) {
       console.error("[notifications] dashboard dispatch failed:", error);

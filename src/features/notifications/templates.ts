@@ -1,4 +1,6 @@
 import { getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/config";
+import { DEFAULT_LOCALE } from "@/i18n/config";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -9,9 +11,9 @@ ${body}
 </div>`;
 }
 
-export async function welcomeEmail(name: string) {
-  const t = await getTranslations("notifications.welcome");
-  const tFooter = await getTranslations("notifications");
+export async function welcomeEmail(name: string, locale: AppLocale = DEFAULT_LOCALE) {
+  const t = await getTranslations({ locale, namespace: "notifications.welcome" });
+  const tFooter = await getTranslations({ locale, namespace: "notifications" });
   const greeting = name ? t("greeting", { name }) : t("greetingDefault");
   const footer = tFooter("footer", { appUrl });
 
@@ -25,9 +27,9 @@ export async function welcomeEmail(name: string) {
   };
 }
 
-export async function newsletterWelcomeEmail() {
-  const t = await getTranslations("notifications.newsletter");
-  const tFooter = await getTranslations("notifications");
+export async function newsletterWelcomeEmail(locale: AppLocale = DEFAULT_LOCALE) {
+  const t = await getTranslations({ locale, namespace: "notifications.newsletter" });
+  const tFooter = await getTranslations({ locale, namespace: "notifications" });
   const footer = tFooter("footer", { appUrl });
 
   return {
@@ -37,16 +39,19 @@ export async function newsletterWelcomeEmail() {
   };
 }
 
-export async function budgetWarningEmail(input: {
-  workspaceName: string;
-  budgetName: string;
-  percentage: number;
-  spentLabel: string;
-  limitLabel: string;
-  exceeded: boolean;
-}) {
-  const t = await getTranslations("notifications.budget");
-  const tFooter = await getTranslations("notifications");
+export async function budgetWarningEmail(
+  input: {
+    workspaceName: string;
+    budgetName: string;
+    percentage: number;
+    spentLabel: string;
+    limitLabel: string;
+    exceeded: boolean;
+  },
+  locale: AppLocale = DEFAULT_LOCALE,
+) {
+  const t = await getTranslations({ locale, namespace: "notifications.budget" });
+  const tFooter = await getTranslations({ locale, namespace: "notifications" });
   const footer = tFooter("footer", { appUrl });
   const title = input.exceeded ? t("exceededTitle") : t("warningTitle");
 
@@ -62,14 +67,17 @@ export async function budgetWarningEmail(input: {
   };
 }
 
-export async function recurringDueEmail(input: {
-  workspaceName: string;
-  description: string;
-  amountLabel: string;
-  dueDateLabel: string;
-}) {
-  const t = await getTranslations("notifications.recurring");
-  const tFooter = await getTranslations("notifications");
+export async function recurringDueEmail(
+  input: {
+    workspaceName: string;
+    description: string;
+    amountLabel: string;
+    dueDateLabel: string;
+  },
+  locale: AppLocale = DEFAULT_LOCALE,
+) {
+  const t = await getTranslations({ locale, namespace: "notifications.recurring" });
+  const tFooter = await getTranslations({ locale, namespace: "notifications" });
   const footer = tFooter("footer", { appUrl });
   const description = input.description || t("defaultDescription");
 
@@ -85,13 +93,16 @@ export async function recurringDueEmail(input: {
   };
 }
 
-export async function subscriptionExpiringEmail(input: {
-  planName: string;
-  expiresAtLabel: string;
-  daysLeft: number;
-}) {
-  const t = await getTranslations("notifications.subscription");
-  const tFooter = await getTranslations("notifications");
+export async function subscriptionExpiringEmail(
+  input: {
+    planName: string;
+    expiresAtLabel: string;
+    daysLeft: number;
+  },
+  locale: AppLocale = DEFAULT_LOCALE,
+) {
+  const t = await getTranslations({ locale, namespace: "notifications.subscription" });
+  const tFooter = await getTranslations({ locale, namespace: "notifications" });
   const footer = tFooter("footer", { appUrl });
 
   return {

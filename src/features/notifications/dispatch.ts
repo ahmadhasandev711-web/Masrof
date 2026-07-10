@@ -9,7 +9,8 @@ import { getLocalizedPlan } from "@/i18n/plans-localized";
 import type { PlanId } from "@/features/subscriptions/plans";
 import { assertPlanFeature } from "@/features/subscriptions/data";
 import { sendPushToUser } from "@/lib/push";
-import type { BudgetWarning } from "@/features/dashboard/alerts";
+import type { AppLocale } from "@/i18n/config";
+import { DEFAULT_LOCALE } from "@/i18n/config";
 import type { RecurringExpenseListItem } from "@/features/recurring-expenses/data";
 import {
   budgetWarningEmail,
@@ -23,6 +24,7 @@ import {
   markNotificationSent,
   wasNotificationSent,
 } from "@/features/notifications/data";
+import type { BudgetWarning } from "@/features/dashboard/alerts";
 
 async function sendOnce(
   dedupeKey: string,
@@ -86,8 +88,10 @@ export async function dispatchDashboardEmailNotifications(input: {
   currency: string;
   budgetWarnings: BudgetWarning[];
   dueRecurring: RecurringExpenseListItem[];
+  locale?: AppLocale;
 }) {
   if (!isEmailConfigured() || !input.userEmail) return;
+  const locale = input.locale ?? DEFAULT_LOCALE;
 
   for (const budget of input.budgetWarnings) {
     const dedupeKey = dailyDedupeKey([
@@ -98,14 +102,17 @@ export async function dispatchDashboardEmailNotifications(input: {
     ]);
     const spentLabel = formatMoney(budget.spent, { currency: input.currency });
     const limitLabel = formatMoney(budget.amount, { currency: input.currency });
-    const template = await budgetWarningEmail({
-      workspaceName: input.workspaceName,
-      budgetName: budget.name,
-      percentage: budget.percentage,
-      spentLabel,
-      limitLabel,
-      exceeded: budget.status === "exceeded",
-    });
+    const template = await budgetWarningEmail(
+      {
+        workspaceName: input.workspaceName,
+        budgetName: budget.name,
+        percentage: budget.percentage,
+        spentLabel,
+        limitLabel,
+        exceeded: budget.status === "exceeded",
+      },
+      locale,
+    );
 
     try {
       await sendOnce(dedupeKey, input.userId, "budget_warning", {
@@ -124,12 +131,15 @@ export async function dispatchDashboardEmailNotifications(input: {
       input.workspaceId,
       item.id,
     ]);
-    const template = await recurringDueEmail({
-      workspaceName: input.workspaceName,
-      description: item.description || item.categoryName,
-      amountLabel: formatMoney(item.amount, { currency: input.currency }),
-      dueDateLabel: formatArDate(item.nextDueDate),
-    });
+    const template = await recurringDueEmail(
+      {
+        workspaceName: input.workspaceName,
+        description: item.description || item.categoryName,
+        amountLabel: formatMoney(item.amount, { currency: input.currency }),
+        dueDateLabel: formatArDate(item.nextDueDate),
+      },
+      locale,
+    );
 
     try {
       await sendOnce(dedupeKey, input.userId, "recurring_due", {
@@ -141,7 +151,7 @@ export async function dispatchDashboardEmailNotifications(input: {
     }
   }
 
-  await dispatchSubscriptionExpiryNotification(input.userId, input.userEmail);
+  await dispatchSubscriptionExpiryNotification(input.userId, input.userEmail, locale);
 }
 
 export async function dispatchDashboardPushNotifications(input: {
@@ -151,13 +161,15 @@ export async function dispatchDashboardPushNotifications(input: {
   currency: string;
   budgetWarnings: BudgetWarning[];
   dueRecurring: RecurringExpenseListItem[];
+  locale?: AppLocale;
 }) {
   const featureError = await assertPlanFeature(input.userId, "pushNotifications");
   if (featureError) return;
+  const locale = input.locale ?? DEFAULT_LOCALE;
 
   const [tBudget, tRecurring] = await Promise.all([
-    getTranslations("notifications.budget"),
-    getTranslations("notifications.recurring"),
+    getTranslations({ locale, namespace: "notifications.budget" }),
+    getTranslations({ locale, namespace: "notifications.recurring" }),
   ]);
 
   for (const budget of input.budgetWarnings) {
@@ -212,7 +224,11 @@ export async function dispatchDashboardPushNotifications(input: {
   }
 }
 
-async function dispatchSubscriptionExpiryNotification(userId: string, userEmail: string) {
+async function dispatchSubscriptionExpiryNotification(
+  userId: string,
+  userEmail: string,
+  locale: AppLocale = DEFAULT_LOCALE,
+) {
   await connectToDatabase();
   const record = await UserSubscriptionModel.findOne({
     userId,
@@ -233,11 +249,14 @@ async function dispatchSubscriptionExpiryNotification(userId: string, userEmail:
 
   const dedupeKey = dailyDedupeKey([userId, "subscription_expiring", planId]);
   const localizedPlan = await getLocalizedPlan(planId);
-  const template = await subscriptionExpiringEmail({
-    planName: localizedPlan.name,
-    expiresAtLabel: formatArDate(expiresAt.toISOString()),
-    daysLeft,
-  });
+  const template = await subscriptionExpiringEmail(
+    {
+      planName: localizedPlan.name,
+      expiresAtLabel: formatArDate(expiresAt.toISOString()),
+      daysLeft,
+    },
+    locale,
+  );
 
   try {
     await sendOnce(dedupeKey, userId, "subscription_expiring", {
