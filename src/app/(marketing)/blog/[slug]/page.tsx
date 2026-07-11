@@ -125,6 +125,7 @@ export default async function BlogPostPage({
             alt={post.featuredImage?.alt || post.title}
             fill
             priority
+            unoptimized={imageUrl.startsWith("/uploads/")}
             sizes="(max-width: 768px) 100vw, 768px"
             className="object-cover"
           />

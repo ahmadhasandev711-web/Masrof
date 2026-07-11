@@ -183,7 +183,7 @@ export function DashboardShell({
   const moreActive = isMoreActive(pathname);
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-[#FBF9F4] pb-[calc(5rem+env(safe-area-inset-bottom))] text-[#1C1B1A] lg:pb-8">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-clip bg-[#FBF9F4] pb-[calc(5rem+env(safe-area-inset-bottom))] text-[#1C1B1A] lg:pb-8">
       <header className="border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 py-3 lg:px-8 lg:py-4">
           <div className="flex items-start justify-between gap-3">

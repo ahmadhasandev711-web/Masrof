@@ -25,7 +25,7 @@ export async function MonthlyTrendChart({
   const maxValue = Math.max(...months.flatMap((m) => [m.income ?? 0, m.expense ?? 0]), 1);
 
   return (
-    <div className="rounded-2xl border border-[#E4DFD3] bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="font-semibold text-[#1C1B1A]">{t("incomeVsExpense")}</h3>
         <div className="flex items-center gap-4 text-xs text-[#1C1B1A]/50">
@@ -38,7 +38,7 @@ export async function MonthlyTrendChart({
         </div>
       </div>
 
-      <div dir="ltr" className="flex items-end justify-between gap-2 overflow-x-auto pb-2 sm:gap-4">
+      <div dir="ltr" className="flex w-full max-w-full items-end justify-between gap-2 overflow-x-auto pb-2 sm:gap-4">
         {months.map((month) => (
           <div key={month.label} className="flex min-w-[3rem] flex-1 flex-col items-center gap-2">
             <div className="flex h-36 w-full max-w-[4rem] items-end justify-center gap-1.5">

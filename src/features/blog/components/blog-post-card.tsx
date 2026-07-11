@@ -44,6 +44,7 @@ export async function BlogPostCard({
             src={imageUrl}
             alt={post.featuredImage?.alt || post.title}
             fill
+            unoptimized={imageUrl.startsWith("/uploads/")}
             priority={priority}
             sizes={
               compact

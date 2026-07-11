@@ -61,7 +61,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex w-full max-w-full flex-col gap-6 overflow-x-clip">
       <div>
         <h1 className="text-xl font-semibold text-neutral-900">
           {activeWorkspace.name}

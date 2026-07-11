@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+import type { PrecacheEntry, RuntimeCaching, SerwistGlobalConfig } from "serwist";
+import { NetworkOnly, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -10,12 +10,43 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
+const PRIVATE_ROUTE_PREFIXES = [
+  "/dashboard",
+  "/admin",
+  "/onboarding",
+  "/invite",
+  "/print",
+] as const;
+
+const PRIVATE_EXACT = new Set([
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+]);
+
+function isPrivateAppRoute(pathname: string): boolean {
+  return (
+    PRIVATE_EXACT.has(pathname) ||
+    PRIVATE_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  );
+}
+
+/** Auth and workspace pages must always hit the network — never cache in SW. */
+const privateAppNetworkOnly: RuntimeCaching = {
+  matcher: ({ url: { pathname }, sameOrigin }) =>
+    sameOrigin && isPrivateAppRoute(pathname),
+  handler: new NetworkOnly(),
+};
+
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
-  navigationPreload: true,
-  runtimeCaching: defaultCache,
+  // Navigation preload can race with authenticated App Router pages on mobile PWA.
+  navigationPreload: false,
+  runtimeCaching: [privateAppNetworkOnly, ...defaultCache],
 });
 
 serwist.addEventListeners();
