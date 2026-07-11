@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Label } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 
-export function ResendVerificationForm({ defaultEmail = "" }: { defaultEmail?: string }) {
+export function ResendVerificationForm({
+  defaultEmail = "",
+  showDevEmailHint = false,
+}: {
+  defaultEmail?: string;
+  showDevEmailHint?: boolean;
+}) {
   const t = useTranslations("auth");
   const [email, setEmail] = useState(defaultEmail);
   const [message, setMessage] = useState<string | null>(null);
@@ -33,7 +39,11 @@ export function ResendVerificationForm({ defaultEmail = "" }: { defaultEmail?: s
       return;
     }
 
-    setMessage(t("verify.resendMessage"));
+    setMessage(
+      showDevEmailHint
+        ? `${t("verify.resendMessage")} ${t("verify.resendMessageDevHint")}`
+        : t("verify.resendMessage"),
+    );
   }
 
   return (

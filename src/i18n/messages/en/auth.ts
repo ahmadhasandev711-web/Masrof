@@ -53,8 +53,8 @@ const auth = {
       title: "Forgot password?",
       description: "We'll send a reset link to your email address",
       backToLogin: "Back to login",
-      resetMessage:
-        "If the email exists in our system, you'll receive a reset link. In local development, check the terminal for the link.",
+      resetMessage: "If the email exists in our system, you'll receive a reset link within a few minutes.",
+      resetMessageDevHint: "In local development without Resend, check the terminal for the link.",
     },
     reset: {
       title: "New password",
@@ -66,8 +66,8 @@ const auth = {
     verify: {
       title: "Verify email",
       description: "You must verify your email before signing in. If you didn't receive the message, send it again.",
-      resendMessage:
-        "If the email exists and is unverified, you'll receive a verification link. In development, check the terminal.",
+      resendMessage: "If the email exists and is unverified, you'll receive a verification link within a few minutes.",
+      resendMessageDevHint: "In local development without Resend, check the terminal for the link.",
     },
     oauth: {
       accountNotLinked:

@@ -22,8 +22,8 @@ import {
 } from "@/features/notifications/templates";
 import {
   dailyDedupeKey,
-  markNotificationSent,
-  wasNotificationSent,
+  releaseNotificationClaim,
+  tryClaimNotificationSend,
 } from "@/features/notifications/data";
 import type { BudgetWarning } from "@/features/dashboard/alerts";
 
@@ -40,12 +40,12 @@ async function sendOnce(
   type: string,
   payload: { to: string; subject: string; text: string; html: string },
 ) {
-  if (await wasNotificationSent(dedupeKey)) {
+  const claimed = await tryClaimNotificationSend(dedupeKey, userId, type);
+  if (!claimed) {
     return;
   }
 
   await sendEmail(payload);
-  await markNotificationSent(dedupeKey, userId, type);
 }
 
 export async function sendWelcomeNotification(input: {
@@ -193,7 +193,12 @@ export async function dispatchDashboardPushNotifications(input: {
       budget.id,
     ]);
 
-    if (await wasNotificationSent(dedupeKey)) continue;
+    const claimed = await tryClaimNotificationSend(
+      dedupeKey,
+      input.userId,
+      "push_budget_warning",
+    );
+    if (!claimed) continue;
 
     const result = await sendPushToUser(input.userId, {
       title:
@@ -206,8 +211,8 @@ export async function dispatchDashboardPushNotifications(input: {
       url: "/dashboard/budgets",
     });
 
-    if (result.sent > 0) {
-      await markNotificationSent(dedupeKey, input.userId, "push_budget_warning");
+    if (result.sent === 0) {
+      await releaseNotificationClaim(dedupeKey);
     }
   }
 
@@ -219,7 +224,12 @@ export async function dispatchDashboardPushNotifications(input: {
       item.id,
     ]);
 
-    if (await wasNotificationSent(dedupeKey)) continue;
+    const claimed = await tryClaimNotificationSend(
+      dedupeKey,
+      input.userId,
+      "push_recurring_due",
+    );
+    if (!claimed) continue;
 
     const result = await sendPushToUser(input.userId, {
       title: tRecurring.pushTitle,
@@ -229,8 +239,8 @@ export async function dispatchDashboardPushNotifications(input: {
       url: "/dashboard/budgets#recurring",
     });
 
-    if (result.sent > 0) {
-      await markNotificationSent(dedupeKey, input.userId, "push_recurring_due");
+    if (result.sent === 0) {
+      await releaseNotificationClaim(dedupeKey);
     }
   }
 }

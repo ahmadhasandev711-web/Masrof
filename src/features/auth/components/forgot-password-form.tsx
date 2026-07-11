@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Label } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ showDevEmailHint = false }: { showDevEmailHint?: boolean }) {
   const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -34,7 +34,11 @@ export function ForgotPasswordForm() {
       return;
     }
 
-    setMessage(t("forgot.resetMessage"));
+    setMessage(
+      showDevEmailHint
+        ? `${t("forgot.resetMessage")} ${t("forgot.resetMessageDevHint")}`
+        : t("forgot.resetMessage"),
+    );
   }
 
   return (

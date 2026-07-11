@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { PublicPostSummary } from "@/features/blog/data";
 import { estimateReadingMinutes } from "@/features/blog/utils";
+import { BlogFeaturedImage } from "@/features/blog/components/blog-featured-image";
 
 type PostCardData = PublicPostSummary;
 
@@ -40,11 +40,10 @@ export async function BlogPostCard({
         }`}
       >
         {imageUrl ? (
-          <Image
+          <BlogFeaturedImage
             src={imageUrl}
             alt={post.featuredImage?.alt || post.title}
-            fill
-            unoptimized={imageUrl.startsWith("/uploads/")}
+            fallbackLetter={post.title.trim().charAt(0) || "M"}
             priority={priority}
             sizes={
               compact
@@ -52,6 +51,7 @@ export async function BlogPostCard({
                 : "(max-width: 640px) 100vw, 224px"
             }
             className="object-cover transition duration-300 group-hover:scale-[1.02]"
+            placeholderClassName={`bg-gradient-to-br ${ACCENT_GRADIENTS[accentIndex % ACCENT_GRADIENTS.length]}`}
           />
         ) : (
           <div

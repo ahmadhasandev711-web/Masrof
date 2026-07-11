@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
@@ -7,6 +6,7 @@ import type { AppLocale } from "@/i18n/config";
 import { getPublishedPostBySlug, findAlternatePublishedLocale, listRelatedPosts } from "@/features/blog/data";
 import { PostLocaleUnavailable } from "@/features/blog/components/post-locale-unavailable";
 import { BlogPostCard } from "@/features/blog/components/blog-post-card";
+import { BlogFeaturedImage } from "@/features/blog/components/blog-featured-image";
 import { renderPostContent } from "@/features/blog/render";
 import { estimateReadingMinutes } from "@/features/blog/utils";
 import { AdSlot } from "@/features/marketing/components/ad-slot";
@@ -120,12 +120,11 @@ export default async function BlogPostPage({
 
       {imageUrl && (
         <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-2xl border border-[#E4DFD3]">
-          <Image
+          <BlogFeaturedImage
             src={imageUrl}
             alt={post.featuredImage?.alt || post.title}
-            fill
+            fallbackLetter={post.title.trim().charAt(0) || "M"}
             priority
-            unoptimized={imageUrl.startsWith("/uploads/")}
             sizes="(max-width: 768px) 100vw, 768px"
             className="object-cover"
           />
