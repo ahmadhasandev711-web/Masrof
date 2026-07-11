@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   createWorkspaceAction,
   type CreateWorkspaceState,
@@ -12,15 +13,22 @@ import { useTranslations } from "next-intl";
 
 const WORKSPACE_TYPE_OPTIONS: WorkspaceType[] = ["personal", "freelance", "business"];
 
-const initialState: CreateWorkspaceState = { error: null };
+const initialState: CreateWorkspaceState = { error: null, redirectTo: null };
 
 export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboarding" | "new" }) {
+  const router = useRouter();
   const tForm = useTranslations("forms.workspace");
   const tWorkspaceType = useTranslations("workspaceType");
   const tSeed = useTranslations("forms.categories.seed");
   const tAccountType = useTranslations("accountType");
   const [state, formAction, isPending] = useActionState(createWorkspaceAction, initialState);
   const [workspaceType, setWorkspaceType] = useState<WorkspaceType>("personal");
+
+  useEffect(() => {
+    if (!state.redirectTo) return;
+    router.replace(state.redirectTo);
+    router.refresh();
+  }, [state.redirectTo, router]);
 
   const suggestedCategories = getSuggestedCategoriesForType(workspaceType);
   const suggestedIncome = suggestedCategories.filter((c) => c.kind === "income");

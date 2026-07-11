@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listAccountsForWorkspace } from "@/features/accounts/data";
 import { listCategoriesForWorkspace } from "@/features/categories/data";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
@@ -12,7 +12,8 @@ export default async function BankImportPage() {
   const t = await getTranslations("pages.import");
   const tDashboard = await getTranslations("dashboard");
   const tPlan = await getTranslations("dashboard.plan");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
 

@@ -1,7 +1,7 @@
 import { requireSession } from "@/features/auth/session";
 import { getDashboardHomeData } from "@/features/dashboard/alerts";
 import { DashboardAlerts } from "@/features/dashboard/components/dashboard-alerts";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getMonthlyTrend } from "@/features/reports/data";
 import { MonthlyTrendChart } from "@/features/reports/components/monthly-trend-chart";
 import {
@@ -18,7 +18,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function DashboardPage() {
   const session = await requireSession();
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const currency = activeWorkspace.currency;
   const locale = (await getLocale()) as AppLocale;

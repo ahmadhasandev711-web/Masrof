@@ -1,5 +1,5 @@
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listAccountsForWorkspace, getWorkspaceBalanceSummary } from "@/features/accounts/data";
 import { CreateAccountForm } from "@/features/accounts/components/create-account-form";
 import { AccountList } from "@/features/accounts/components/account-list";
@@ -18,7 +18,8 @@ export default async function AccountsPage() {
   const t = await getTranslations("pages.accounts");
   const tFeatureGate = await getTranslations("dashboard.featureGate");
   const tPlan = await getTranslations("dashboard.plan");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const baseCurrency = activeWorkspace.currency as SupportedCurrency;

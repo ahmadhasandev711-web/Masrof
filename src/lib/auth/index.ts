@@ -94,6 +94,12 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
   },
+
+  advanced: {
+    ipAddress: {
+      ipAddressHeaders: ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"],
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;

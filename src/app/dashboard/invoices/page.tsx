@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listClientsForWorkspace } from "@/features/clients/data";
 import { listInvoicesForWorkspace } from "@/features/invoices/data";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
@@ -19,7 +19,8 @@ export default async function InvoicesPage({
   const t = await getTranslations("pages.invoices");
   const tDashboard = await getTranslations("dashboard");
   const tPlan = await getTranslations("dashboard.plan");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const rawParams = await searchParams;

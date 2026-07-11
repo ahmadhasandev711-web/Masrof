@@ -1,5 +1,5 @@
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listClientsForWorkspace } from "@/features/clients/data";
 import { CreateClientForm } from "@/features/clients/components/create-client-form";
 import { ClientList } from "@/features/clients/components/client-list";
@@ -8,7 +8,8 @@ import { getTranslations } from "next-intl/server";
 export default async function ClientsPage() {
   const session = await requireSession();
   const t = await getTranslations("pages.clients");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
 
   const workspaceId = activeWorkspace._id.toString();
   const clients = await listClientsForWorkspace(workspaceId);

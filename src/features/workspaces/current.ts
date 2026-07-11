@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cache } from "react";
-import { redirect } from "next/navigation";
 import type { Types } from "mongoose";
 import { listWorkspacesForUser } from "@/features/workspaces/data";
 import {
@@ -21,7 +20,7 @@ export const getCurrentWorkspaceContext = cache(async (userId: string) => {
   const workspaces = await listWorkspacesForUser(userId);
 
   if (workspaces.length === 0) {
-    redirect("/onboarding");
+    return { workspaces, activeWorkspace: null };
   }
 
   const requestedActiveId = await getActiveWorkspaceId();

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspaceAccess, isWorkspaceOwner } from "@/features/workspaces/access";
 import {
   listPendingInvitations,
@@ -16,7 +16,8 @@ export default async function WorkspaceMembersPage() {
   const session = await requireSession();
   const t = await getTranslations("workspaceTeam");
   const tPlan = await getTranslations("dashboard.plan");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
 
   const access = await getWorkspaceAccess(session.user.id, workspaceId);

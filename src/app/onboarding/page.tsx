@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { ClientRedirect } from "@/components/client-redirect";
 import { requireSession } from "@/features/auth/session";
 import { userHasAnyWorkspace } from "@/features/workspaces/data";
 import { getPendingInvitationsForEmail } from "@/features/workspaces/members-data";
@@ -12,7 +12,7 @@ export default async function OnboardingPage() {
 
   const hasWorkspace = await userHasAnyWorkspace(session.user.id);
   if (hasWorkspace) {
-    redirect("/dashboard");
+    return <ClientRedirect href="/dashboard" />;
   }
 
   const pendingInvites = await getPendingInvitationsForEmail(session.user.email);

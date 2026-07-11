@@ -6,10 +6,9 @@ import { createWorkspaceSchema } from "@/features/workspaces/schemas";
 import { createWorkspaceForUser } from "@/features/workspaces/data";
 import { assertCanCreateWorkspace } from "@/features/subscriptions/data";
 import { setActiveWorkspaceId } from "@/features/workspaces/active-workspace";
-import { redirect } from "next/navigation";
-
 export type CreateWorkspaceState = {
   error: string | null;
+  redirectTo?: string | null;
 };
 
 export async function createWorkspaceAction(
@@ -41,5 +40,5 @@ export async function createWorkspaceAction(
   const workspaceId = await createWorkspaceForUser(session.user.id, parsed.data);
   await setActiveWorkspaceId(workspaceId);
 
-  redirect("/dashboard");
+  return { error: null, redirectTo: "/dashboard" };
 }

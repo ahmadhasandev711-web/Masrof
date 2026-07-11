@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listSavingsGoals } from "@/features/savings-goals/data";
 import { CreateSavingsGoalForm } from "@/features/savings-goals/components/create-savings-goal-form";
 import { SavingsGoalList } from "@/features/savings-goals/components/savings-goal-list";
@@ -12,7 +12,8 @@ export default async function SavingsGoalsPage() {
   const t = await getTranslations("pages.goals");
   const tDashboard = await getTranslations("dashboard");
   const tPlan = await getTranslations("dashboard.plan");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
 

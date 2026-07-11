@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import { BackupPanel } from "@/features/backup/components/backup-panel";
 import { getTranslations } from "next-intl/server";
@@ -10,7 +10,8 @@ export default async function BackupPage() {
   const t = await getTranslations("pages.backup");
   const tDashboard = await getTranslations("dashboard");
   const tPlan = await getTranslations("dashboard.plan");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
 

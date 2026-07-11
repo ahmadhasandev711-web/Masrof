@@ -1,5 +1,5 @@
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listCategoriesForWorkspace } from "@/features/categories/data";
 import { CreateCategoryForm } from "@/features/categories/components/create-category-form";
 import { CategoryList } from "@/features/categories/components/category-list";
@@ -8,7 +8,8 @@ import { getTranslations } from "next-intl/server";
 export default async function CategoriesPage() {
   const session = await requireSession();
   const t = await getTranslations("pages.categories");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
 
   const workspaceId = activeWorkspace._id.toString();
   const categories = await listCategoriesForWorkspace(workspaceId);

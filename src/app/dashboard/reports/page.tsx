@@ -1,5 +1,5 @@
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listAccountsForWorkspace } from "@/features/accounts/data";
 import { getWorkspaceSummary } from "@/features/transactions/data";
 import { getCategoryBreakdown, getMonthlyTrend } from "@/features/reports/data";
@@ -37,7 +37,8 @@ export default async function ReportsPage({
   const moneyLocale = getIntlLocale((await getLocale()) as AppLocale);
   const tPages = await getTranslations("pages.reports");
   const tReports = await getTranslations("reports");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const currency = activeWorkspace.currency;

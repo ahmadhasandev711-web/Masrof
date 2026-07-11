@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import { getClientBreakdownReport, getCashFlowForecast } from "@/features/reports/advanced-data";
 import { ReportConversionNotice } from "@/features/reports/components/conversion-notice";
@@ -16,7 +16,8 @@ export default async function AdvancedReportsPage() {
   const tPages = await getTranslations("pages.reports");
   const tConversion = await getTranslations("reports.conversion");
   const tPlan = await getTranslations("dashboard.plan");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const currency = activeWorkspace.currency;

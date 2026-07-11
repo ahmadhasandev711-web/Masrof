@@ -1,7 +1,7 @@
+import { ClientRedirect } from "@/components/client-redirect";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
-import { redirect } from "next/navigation";
 import { getWorkspaceSummary } from "@/features/transactions/data";
 import { getCategoryBreakdown } from "@/features/reports/data";
 import {
@@ -41,12 +41,13 @@ export default async function PrintReportPage({
   const tPages = await getTranslations("pages.print");
   const tReports = await getTranslations("reports");
 
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
 
   const pdfError = await assertWorkspacePlanFeature(session.user.id, workspaceId, "pdfExport");
   if (pdfError) {
-    redirect("/dashboard/reports?upgrade=pdf");
+    return <ClientRedirect href="/dashboard/reports?upgrade=pdf" />;
   }
 
   const currency = activeWorkspace.currency;

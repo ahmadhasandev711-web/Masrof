@@ -1,5 +1,5 @@
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listClientsForWorkspace } from "@/features/clients/data";
 import { listProjectsWithTotals } from "@/features/projects/data";
 import { CreateProjectForm } from "@/features/projects/components/create-project-form";
@@ -10,7 +10,8 @@ import { getTranslations } from "next-intl/server";
 export default async function ProjectsPage() {
   const session = await requireSession();
   const t = await getTranslations("pages.projects");
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
+  if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const [clients, projects] = await Promise.all([

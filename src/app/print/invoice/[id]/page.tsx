@@ -1,6 +1,7 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { ClientRedirect } from "@/components/client-redirect";
 import { requireSession } from "@/features/auth/session";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { getInvoiceForPrint } from "@/features/invoices/data";
 import { parseInvoicePrintFormat } from "@/features/invoices/constants";
@@ -19,12 +20,15 @@ export default async function PrintInvoicePage({
   searchParams: Promise<SearchParams>;
 }) {
   const session = await requireSession();
-  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const { activeWorkspace, redirect: onboardingRedirect } = await getActiveWorkspaceForPage(
+    session.user.id,
+  );
+  if (onboardingRedirect) return onboardingRedirect;
   const workspaceId = activeWorkspace._id.toString();
 
   const pdfError = await assertWorkspacePlanFeature(session.user.id, workspaceId, "pdfExport");
   if (pdfError) {
-    redirect("/dashboard/invoices?upgrade=pdf");
+    return <ClientRedirect href="/dashboard/invoices?upgrade=pdf" />;
   }
 
   const clientsError = await assertWorkspacePlanFeature(
@@ -33,7 +37,7 @@ export default async function PrintInvoicePage({
     "clientsAndProjects",
   );
   if (clientsError) {
-    redirect("/dashboard/invoices?upgrade=clients");
+    return <ClientRedirect href="/dashboard/invoices?upgrade=clients" />;
   }
 
   const { id } = await params;

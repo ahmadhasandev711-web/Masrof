@@ -1,3 +1,4 @@
+import { ClientRedirect } from "@/components/client-redirect";
 import { requireSession } from "@/features/auth/session";
 import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
 import { getEffectiveSubscriptionForWorkspace, getUserSubscription } from "@/features/subscriptions/data";
@@ -19,6 +20,10 @@ export default async function DashboardLayout({
 
   if (userSubscription.isSuspended) {
     return <AccountSuspendedScreen />;
+  }
+
+  if (!activeWorkspace) {
+    return <ClientRedirect href="/onboarding" />;
   }
 
   const workspaceId = activeWorkspace._id.toString();
