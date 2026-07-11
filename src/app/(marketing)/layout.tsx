@@ -46,7 +46,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
                 {common("appName")}
               </Link>
               <p className="text-sm text-[#1C1B1A]/55">
-                © {new Date().getFullYear()} {common("appName")} — {common("madeIn")}
+                © {new Date().getFullYear()} {common("appName")}
               </p>
             </div>
 

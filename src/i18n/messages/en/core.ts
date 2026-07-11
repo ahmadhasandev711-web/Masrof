@@ -6,7 +6,6 @@ const core = {
   },
   common: {
     appName: "Masrofaty",
-    madeIn: "Made in Egypt",
     save: "Save",
     saveChanges: "Save changes",
     cancel: "Cancel",

@@ -6,7 +6,6 @@ const core = {
   },
   common: {
     appName: "مصروفاتي",
-    madeIn: "صُنع في مصر",
     save: "حفظ",
     saveChanges: "حفظ التعديلات",
     cancel: "إلغاء",
