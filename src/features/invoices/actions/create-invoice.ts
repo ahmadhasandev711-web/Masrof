@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
@@ -9,7 +8,10 @@ import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { createInvoiceSchema } from "@/features/invoices/schemas";
 import { createInvoice, InvalidInvoiceReferenceError } from "@/features/invoices/data";
 
-export type CreateInvoiceState = { error: string | null };
+export type CreateInvoiceState = {
+  error: string | null;
+  redirectTo?: string | null;
+};
 
 function parseItemsFromForm(formData: FormData) {
   const items: { description: string; amount: string }[] = [];
@@ -60,7 +62,10 @@ export async function createInvoiceAction(
     const invoice = await createInvoice(parsed.data);
     revalidatePath("/dashboard/invoices");
     revalidatePath("/dashboard/clients");
-    redirect(`/print/invoice/${String(invoice._id)}?format=a4`);
+    return {
+      error: null,
+      redirectTo: `/print/invoice/${String(invoice._id)}?format=a4`,
+    };
   } catch (error) {
     if (error instanceof InvalidInvoiceReferenceError) {
       return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };

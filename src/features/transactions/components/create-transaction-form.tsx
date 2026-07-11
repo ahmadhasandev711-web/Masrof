@@ -90,6 +90,11 @@ export function CreateTransactionForm({
 
       const endpoint = ocrReceipts ? "/api/receipts/scan" : "/api/uploads/receipt";
       const res = await fetch(endpoint, { method: "POST", body });
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        throw new Error(tErrors("uploadFailed"));
+      }
+
       const data = (await res.json()) as {
         url?: string;
         error?: string;

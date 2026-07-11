@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   // Serwist injects a webpack config; this tells Next.js 16 we intentionally
   // use Turbopack in dev (Serwist is disabled there anyway).
   turbopack: {},
+  // Tesseract spawns worker threads via paths relative to its package root.
+  // Bundling breaks those paths in production (worker-script/node/index.js missing).
+  serverExternalPackages: ["tesseract.js", "tesseract.js-core"],
 };
 
 // IMPORTANT: Next.js 16 defaults to Turbopack, but @serwist/next's build-time

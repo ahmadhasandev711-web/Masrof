@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-export function PrintToolbar() {
+export function PrintToolbar({ returnHref = "/dashboard/reports" }: { returnHref?: string }) {
   const tReports = useTranslations("reports.export");
   const tCommon = useTranslations("common");
   return (
@@ -14,13 +15,12 @@ export function PrintToolbar() {
       >
         {tReports("printPdf")}
       </button>
-      <button
-        type="button"
-        onClick={() => window.close()}
+      <Link
+        href={returnHref}
         className="rounded-lg border border-neutral-300 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
       >
-        {tCommon("cancel")}
-      </button>
+        {tCommon("back")}
+      </Link>
     </div>
   );
 }

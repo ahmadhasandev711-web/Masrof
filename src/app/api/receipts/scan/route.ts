@@ -98,8 +98,12 @@ export async function POST(request: Request) {
         }
       }
     } catch (error) {
-      console.error("[receipt] OCR scan failed:", error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("[receipt] OCR scan failed:", message);
       response.scanError = true;
+      if (message.includes("timed out")) {
+        response.scanErrorReason = "timeout";
+      }
     }
   }
 

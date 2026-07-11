@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   createInvoiceAction,
   type CreateInvoiceState,
@@ -9,7 +10,7 @@ import { useTranslations } from "next-intl";
 
 type ClientOption = { _id: string; name: string };
 
-const initialState: CreateInvoiceState = { error: null };
+const initialState: CreateInvoiceState = { error: null, redirectTo: null };
 
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
@@ -29,10 +30,16 @@ export function CreateInvoiceForm({
   const tForm = useTranslations("forms.invoice");
   const tShared = useTranslations("forms.shared");
   const tCommon = useTranslations("common");
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(createInvoiceAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const [rows, setRows] = useState<LineRow[]>([{ id: 1 }]);
   const nextRowId = useRef(2);
+
+  useEffect(() => {
+    if (!state.redirectTo) return;
+    router.replace(state.redirectTo);
+  }, [state.redirectTo, router]);
 
   function addRow() {
     setRows((current) => [...current, { id: nextRowId.current++ }]);
