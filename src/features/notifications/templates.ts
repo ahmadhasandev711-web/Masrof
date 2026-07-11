@@ -1,8 +1,61 @@
-import { getTranslations } from "next-intl/server";
 import type { AppLocale } from "@/i18n/config";
 import { DEFAULT_LOCALE } from "@/i18n/config";
+import { loadMessages } from "@/i18n/messages/loader";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+type NotificationMessages = {
+  footer: string;
+  welcome: {
+    greeting: string;
+    greetingDefault: string;
+    subject: string;
+    body: string;
+    dashboardLink: string;
+  };
+  newsletter: {
+    subject: string;
+    thanks: string;
+    promise: string;
+  };
+  budget: {
+    exceededTitle: string;
+    warningTitle: string;
+    inWorkspace: string;
+    spending: string;
+    reviewLink: string;
+    exceededPushTitle: string;
+    warningPushTitle: string;
+    pushBody: string;
+  };
+  recurring: {
+    subject: string;
+    dueInWorkspace: string;
+    dueDate: string;
+    recordLink: string;
+    defaultDescription: string;
+    pushTitle: string;
+  };
+  subscription: {
+    subject: string;
+    body: string;
+    daysLeft: string;
+    renewLink: string;
+    myPlanLink: string;
+  };
+};
+
+function fmt(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+    template,
+  );
+}
+
+function emailFooter(locale: AppLocale) {
+  const label = locale === "en" ? "Masrofaty" : "مصروفاتي";
+  return `${label} — <a href="${appUrl}">${appUrl}</a>`;
+}
 
 function layout(body: string, footer: string) {
   return `<div dir="rtl" style="font-family:Arial,sans-serif;line-height:1.6;color:#1C1B1A">
@@ -11,31 +64,34 @@ ${body}
 </div>`;
 }
 
+async function notificationsFor(locale: AppLocale): Promise<NotificationMessages> {
+  const messages = await loadMessages(locale);
+  return messages.notifications as NotificationMessages;
+}
+
 export async function welcomeEmail(name: string, locale: AppLocale = DEFAULT_LOCALE) {
-  const t = await getTranslations({ locale, namespace: "notifications.welcome" });
-  const tFooter = await getTranslations({ locale, namespace: "notifications" });
-  const greeting = name ? t("greeting", { name }) : t("greetingDefault");
-  const footer = tFooter("footer", { appUrl });
+  const n = await notificationsFor(locale);
+  const greeting = name ? fmt(n.welcome.greeting, { name }) : n.welcome.greetingDefault;
+  const footer = emailFooter(locale);
 
   return {
-    subject: t("subject"),
-    text: `${greeting},\n\n${t("body")}\n${appUrl}/dashboard`,
+    subject: n.welcome.subject,
+    text: `${greeting},\n\n${n.welcome.body}\n${appUrl}/dashboard`,
     html: layout(
-      `<p>${greeting},</p><p>${t("body")} <a href="${appUrl}/dashboard">${t("dashboardLink")}</a>.</p>`,
+      `<p>${greeting},</p><p>${n.welcome.body} <a href="${appUrl}/dashboard">${n.welcome.dashboardLink}</a>.</p>`,
       footer,
     ),
   };
 }
 
 export async function newsletterWelcomeEmail(locale: AppLocale = DEFAULT_LOCALE) {
-  const t = await getTranslations({ locale, namespace: "notifications.newsletter" });
-  const tFooter = await getTranslations({ locale, namespace: "notifications" });
-  const footer = tFooter("footer", { appUrl });
+  const n = await notificationsFor(locale);
+  const footer = emailFooter(locale);
 
   return {
-    subject: t("subject"),
-    text: `${t("thanks")}\n\n${t("promise")}`,
-    html: layout(`<p>${t("thanks")}</p><p>${t("promise")}</p>`, footer),
+    subject: n.newsletter.subject,
+    text: `${n.newsletter.thanks}\n\n${n.newsletter.promise}`,
+    html: layout(`<p>${n.newsletter.thanks}</p><p>${n.newsletter.promise}</p>`, footer),
   };
 }
 
@@ -50,18 +106,23 @@ export async function budgetWarningEmail(
   },
   locale: AppLocale = DEFAULT_LOCALE,
 ) {
-  const t = await getTranslations({ locale, namespace: "notifications.budget" });
-  const tFooter = await getTranslations({ locale, namespace: "notifications" });
-  const footer = tFooter("footer", { appUrl });
-  const title = input.exceeded ? t("exceededTitle") : t("warningTitle");
+  const n = await notificationsFor(locale);
+  const footer = emailFooter(locale);
+  const title = input.exceeded ? n.budget.exceededTitle : n.budget.warningTitle;
+  const inWorkspace = fmt(n.budget.inWorkspace, { workspace: input.workspaceName });
+  const spending = fmt(n.budget.spending, {
+    spent: input.spentLabel,
+    limit: input.limitLabel,
+    percentage: String(input.percentage),
+  });
 
   return {
     subject: `${title}: ${input.budgetName}`,
-    text: `${title} «${input.budgetName}» ${t("inWorkspace", { workspace: input.workspaceName })}\n\n${t("spending", { spent: input.spentLabel, limit: input.limitLabel, percentage: String(input.percentage) })}\n\n${appUrl}/dashboard/budgets`,
+    text: `${title} «${input.budgetName}» ${inWorkspace}\n\n${spending}\n\n${appUrl}/dashboard/budgets`,
     html: layout(
-      `<p><strong>${title}</strong> «${input.budgetName}» ${t("inWorkspace", { workspace: input.workspaceName })}</p>
-<p>${t("spending", { spent: input.spentLabel, limit: input.limitLabel, percentage: String(input.percentage) })}</p>
-<p><a href="${appUrl}/dashboard/budgets">${t("reviewLink")}</a></p>`,
+      `<p><strong>${title}</strong> «${input.budgetName}» ${inWorkspace}</p>
+<p>${spending}</p>
+<p><a href="${appUrl}/dashboard/budgets">${n.budget.reviewLink}</a></p>`,
       footer,
     ),
   };
@@ -76,18 +137,19 @@ export async function recurringDueEmail(
   },
   locale: AppLocale = DEFAULT_LOCALE,
 ) {
-  const t = await getTranslations({ locale, namespace: "notifications.recurring" });
-  const tFooter = await getTranslations({ locale, namespace: "notifications" });
-  const footer = tFooter("footer", { appUrl });
-  const description = input.description || t("defaultDescription");
+  const n = await notificationsFor(locale);
+  const footer = emailFooter(locale);
+  const description = input.description || n.recurring.defaultDescription;
+  const dueInWorkspace = fmt(n.recurring.dueInWorkspace, { workspace: input.workspaceName });
+  const dueDate = fmt(n.recurring.dueDate, { date: input.dueDateLabel });
 
   return {
-    subject: t("subject", { description }),
-    text: `${t("dueInWorkspace", { workspace: input.workspaceName })}\n\n${description} — ${input.amountLabel}\n${t("dueDate", { date: input.dueDateLabel })}\n\n${appUrl}/dashboard/budgets#recurring`,
+    subject: fmt(n.recurring.subject, { description }),
+    text: `${dueInWorkspace}\n\n${description} — ${input.amountLabel}\n${dueDate}\n\n${appUrl}/dashboard/budgets#recurring`,
     html: layout(
-      `<p>${t("dueInWorkspace", { workspace: input.workspaceName })}</p>
-<p><strong>${description}</strong> — ${input.amountLabel}<br/>${t("dueDate", { date: input.dueDateLabel })}</p>
-<p><a href="${appUrl}/dashboard/budgets#recurring">${t("recordLink")}</a></p>`,
+      `<p>${dueInWorkspace}</p>
+<p><strong>${description}</strong> — ${input.amountLabel}<br/>${dueDate}</p>
+<p><a href="${appUrl}/dashboard/budgets#recurring">${n.recurring.recordLink}</a></p>`,
       footer,
     ),
   };
@@ -101,17 +163,27 @@ export async function subscriptionExpiringEmail(
   },
   locale: AppLocale = DEFAULT_LOCALE,
 ) {
-  const t = await getTranslations({ locale, namespace: "notifications.subscription" });
-  const tFooter = await getTranslations({ locale, namespace: "notifications" });
-  const footer = tFooter("footer", { appUrl });
+  const n = await notificationsFor(locale);
+  const footer = emailFooter(locale);
+  const days = String(input.daysLeft);
 
   return {
-    subject: t("subject", { plan: input.planName, days: String(input.daysLeft) }),
-    text: `${t("body", { plan: input.planName, expiresAt: input.expiresAtLabel })}\n\n${appUrl}/support`,
+    subject: fmt(n.subscription.subject, { plan: input.planName, days }),
+    text: `${fmt(n.subscription.body, { plan: input.planName, expiresAt: input.expiresAtLabel })}\n\n${appUrl}/support`,
     html: layout(
-      `<p>${t("body", { plan: input.planName, expiresAt: input.expiresAtLabel })} ${t("daysLeft", { days: String(input.daysLeft) })}</p>
-<p><a href="${appUrl}/support">${t("renewLink")}</a> · <a href="${appUrl}/dashboard/plan">${t("myPlanLink")}</a></p>`,
+      `<p>${fmt(n.subscription.body, { plan: input.planName, expiresAt: input.expiresAtLabel })} ${fmt(n.subscription.daysLeft, { days })}</p>
+<p><a href="${appUrl}/support">${n.subscription.renewLink}</a> · <a href="${appUrl}/dashboard/plan">${n.subscription.myPlanLink}</a></p>`,
       footer,
     ),
   };
+}
+
+export async function getBudgetPushStrings(locale: AppLocale = DEFAULT_LOCALE) {
+  const n = await notificationsFor(locale);
+  return n.budget;
+}
+
+export async function getRecurringPushStrings(locale: AppLocale = DEFAULT_LOCALE) {
+  const n = await notificationsFor(locale);
+  return n.recurring;
 }

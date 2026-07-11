@@ -4,8 +4,7 @@ import { connectToDatabase } from "@/lib/db/mongoose";
 import { sendEmail, isEmailConfigured } from "@/lib/email/send";
 import { formatMoney } from "@/lib/money";
 import { UserSubscriptionModel } from "@/models/user-subscription";
-import { getTranslations } from "next-intl/server";
-import { getLocalizedPlan } from "@/i18n/plans-localized";
+import { getLocalizedPlanFromConfig } from "@/features/subscriptions/plan-config-data";
 import type { PlanId } from "@/features/subscriptions/plans";
 import { assertPlanFeature } from "@/features/subscriptions/data";
 import { sendPushToUser } from "@/lib/push";
@@ -18,6 +17,8 @@ import {
   recurringDueEmail,
   subscriptionExpiringEmail,
   welcomeEmail,
+  getBudgetPushStrings,
+  getRecurringPushStrings,
 } from "@/features/notifications/templates";
 import {
   dailyDedupeKey,
@@ -25,6 +26,13 @@ import {
   wasNotificationSent,
 } from "@/features/notifications/data";
 import type { BudgetWarning } from "@/features/dashboard/alerts";
+
+function fmt(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+    template,
+  );
+}
 
 async function sendOnce(
   dedupeKey: string,
@@ -40,11 +48,16 @@ async function sendOnce(
   await markNotificationSent(dedupeKey, userId, type);
 }
 
-export async function sendWelcomeNotification(input: { userId: string; email: string; name: string }) {
+export async function sendWelcomeNotification(input: {
+  userId: string;
+  email: string;
+  name: string;
+  locale?: AppLocale;
+}) {
   if (!isEmailConfigured()) return;
 
   const dedupeKey = `user:${input.userId}:welcome`;
-  const template = await welcomeEmail(input.name);
+  const template = await welcomeEmail(input.name, input.locale ?? DEFAULT_LOCALE);
 
   try {
     await sendOnce(dedupeKey, input.userId, "welcome", {
@@ -168,8 +181,8 @@ export async function dispatchDashboardPushNotifications(input: {
   const locale = input.locale ?? DEFAULT_LOCALE;
 
   const [tBudget, tRecurring] = await Promise.all([
-    getTranslations({ locale, namespace: "notifications.budget" }),
-    getTranslations({ locale, namespace: "notifications.recurring" }),
+    getBudgetPushStrings(locale),
+    getRecurringPushStrings(locale),
   ]);
 
   for (const budget of input.budgetWarnings) {
@@ -184,10 +197,8 @@ export async function dispatchDashboardPushNotifications(input: {
 
     const result = await sendPushToUser(input.userId, {
       title:
-        budget.status === "exceeded"
-          ? tBudget("exceededPushTitle")
-          : tBudget("warningPushTitle"),
-      body: tBudget("pushBody", {
+        budget.status === "exceeded" ? tBudget.exceededPushTitle : tBudget.warningPushTitle,
+      body: fmt(tBudget.pushBody, {
         name: budget.name,
         spent: formatMoney(budget.spent, { currency: input.currency }),
         limit: formatMoney(budget.amount, { currency: input.currency }),
@@ -211,7 +222,7 @@ export async function dispatchDashboardPushNotifications(input: {
     if (await wasNotificationSent(dedupeKey)) continue;
 
     const result = await sendPushToUser(input.userId, {
-      title: tRecurring("pushTitle"),
+      title: tRecurring.pushTitle,
       body: `${item.description || item.categoryName}: ${formatMoney(item.amount, {
         currency: input.currency,
       })}`,
@@ -248,7 +259,10 @@ async function dispatchSubscriptionExpiryNotification(
   if (daysLeft < 1 || daysLeft > 7) return;
 
   const dedupeKey = dailyDedupeKey([userId, "subscription_expiring", planId]);
-  const localizedPlan = await getLocalizedPlan(planId);
+  const localizedPlan = await getLocalizedPlanFromConfig(
+    planId,
+    locale === "en" ? "en" : "ar",
+  );
   const template = await subscriptionExpiringEmail(
     {
       planName: localizedPlan.name,

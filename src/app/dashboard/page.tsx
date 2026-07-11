@@ -14,7 +14,6 @@ import { CurrencyBalancesSummary } from "@/features/accounts/components/currency
 import { getIntlLocale, type AppLocale } from "@/i18n/config";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import Link from "next/link";
-import { after } from "next/server";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function DashboardPage() {
@@ -34,31 +33,29 @@ export default async function DashboardPage() {
       getUserWhatsAppPhone(session.user.id),
     ]);
 
-  after(async () => {
-    try {
-      await dispatchDashboardEmailNotifications({
-        userId: session.user.id,
-        userEmail: session.user.email,
-        workspaceId,
-        workspaceName: activeWorkspace.name,
-        currency,
-        budgetWarnings,
-        dueRecurring,
-        locale,
-      });
-      await dispatchDashboardPushNotifications({
-        userId: session.user.id,
-        workspaceId,
-        workspaceName: activeWorkspace.name,
-        currency,
-        budgetWarnings,
-        dueRecurring,
-        locale,
-      });
-    } catch (error) {
-      console.error("[notifications] dashboard dispatch failed:", error);
-    }
-  });
+  try {
+    await dispatchDashboardEmailNotifications({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      workspaceId,
+      workspaceName: activeWorkspace.name,
+      currency,
+      budgetWarnings,
+      dueRecurring,
+      locale,
+    });
+    await dispatchDashboardPushNotifications({
+      userId: session.user.id,
+      workspaceId,
+      workspaceName: activeWorkspace.name,
+      currency,
+      budgetWarnings,
+      dueRecurring,
+      locale,
+    });
+  } catch (error) {
+    console.error("[notifications] dashboard dispatch failed:", error);
+  }
 
   return (
     <div className="flex w-full max-w-full flex-col gap-6 overflow-x-clip">
