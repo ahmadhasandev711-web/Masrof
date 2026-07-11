@@ -16,6 +16,7 @@ import "@fontsource/ibm-plex-mono/600.css";
 
 import "./globals.css";
 import { getDirection, type AppLocale } from "@/i18n/config";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -56,6 +57,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} className="h-full antialiased" style={{ colorScheme: "light" }}>
       <body className="flex min-h-full flex-col font-sans">
+        <ServiceWorkerRegister />
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
       </body>
     </html>

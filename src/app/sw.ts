@@ -1,6 +1,5 @@
-import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, RuntimeCaching, SerwistGlobalConfig } from "serwist";
-import { NetworkOnly, Serwist } from "serwist";
+import { CacheFirst, ExpirationPlugin, NetworkOnly, Serwist, StaleWhileRevalidate } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -10,43 +9,72 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-const PRIVATE_ROUTE_PREFIXES = [
-  "/dashboard",
-  "/admin",
-  "/onboarding",
-  "/invite",
-  "/print",
-] as const;
-
-const PRIVATE_EXACT = new Set([
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/verify-email",
-]);
-
-function isPrivateAppRoute(pathname: string): boolean {
-  return (
-    PRIVATE_EXACT.has(pathname) ||
-    PRIVATE_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))
-  );
-}
-
-/** Auth and workspace pages must always hit the network — never cache in SW. */
-const privateAppNetworkOnly: RuntimeCaching = {
-  matcher: ({ url: { pathname }, sameOrigin }) =>
-    sameOrigin && isPrivateAppRoute(pathname),
-  handler: new NetworkOnly(),
-};
+/**
+ * Cache only immutable static assets.
+ * Do NOT cache HTML/RSC/navigation — authenticated App Router pages break when
+ * the service worker intercepts document requests (no-response / layout glitches).
+ */
+const staticRuntimeCaching: RuntimeCaching[] = [
+  {
+    matcher: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
+    handler: new CacheFirst({
+      cacheName: "google-fonts-webfonts",
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 4,
+          maxAgeSeconds: 365 * 24 * 60 * 60,
+        }),
+      ],
+    }),
+  },
+  {
+    matcher: /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
+    handler: new StaleWhileRevalidate({
+      cacheName: "google-fonts-stylesheets",
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 4,
+          maxAgeSeconds: 7 * 24 * 60 * 60,
+        }),
+      ],
+    }),
+  },
+  {
+    matcher: /\/_next\/static.+\.(?:js|css)$/i,
+    handler: new CacheFirst({
+      cacheName: "next-static-assets",
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 64,
+          maxAgeSeconds: 365 * 24 * 60 * 60,
+        }),
+      ],
+    }),
+  },
+  {
+    matcher: /\/icons\/.+\.(?:png|ico|svg|webp)$/i,
+    handler: new CacheFirst({
+      cacheName: "pwa-icons",
+      plugins: [
+        new ExpirationPlugin({
+          maxEntries: 8,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        }),
+      ],
+    }),
+  },
+  {
+    matcher: /\/api\/auth\/.*/i,
+    handler: new NetworkOnly(),
+  },
+];
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
-  // Navigation preload can race with authenticated App Router pages on mobile PWA.
   navigationPreload: false,
-  runtimeCaching: [privateAppNetworkOnly, ...defaultCache],
+  runtimeCaching: staticRuntimeCaching,
 });
 
 serwist.addEventListeners();
