@@ -9,11 +9,13 @@ import path from "node:path";
 
 const sourcePath = path.join(process.cwd(), "scripts/icon-source.svg");
 const outputDir = path.join(process.cwd(), "public/icons");
+const appIconPath = path.join(process.cwd(), "src/app/icon.png");
 
 const sizes = [
   { size: 192, name: "icon-192.png" },
   { size: 512, name: "icon-512.png" },
   { size: 180, name: "apple-touch-icon.png" }, // iOS home screen icon
+  { size: 32, name: "icon-32.png" }, // browser tab favicon source
 ];
 
 async function main() {
@@ -27,6 +29,10 @@ async function main() {
       .toFile(path.join(outputDir, name));
     console.log(`✅ generated ${name} (${size}x${size})`);
   }
+
+  // Next.js App Router: src/app/icon.png replaces the default Vercel favicon.ico
+  await sharp(sourcePath).resize(32, 32).png().toFile(appIconPath);
+  console.log("✅ generated src/app/icon.png (32x32 tab favicon)");
 }
 
 main();
