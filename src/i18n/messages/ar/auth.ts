@@ -42,6 +42,7 @@ const auth = {
     },
     errors: {
       invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+      emailNotVerified: "لازم تؤكد بريدك الإلكتروني قبل تسجيل الدخول.",
       userNotFound: "لا يوجد حساب بهذا البريد الإلكتروني.",
       createAccountInstead: "أنشئ حساباً جديداً",
       registerFailed: "تعذر إنشاء الحساب، حاول مرة أخرى",

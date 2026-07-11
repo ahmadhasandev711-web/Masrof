@@ -42,6 +42,7 @@ const auth = {
     },
     errors: {
       invalidCredentials: "Invalid email or password",
+      emailNotVerified: "Please verify your email before signing in.",
       userNotFound: "No account found with this email.",
       createAccountInstead: "Create an account instead",
       registerFailed: "Could not create account, please try again",

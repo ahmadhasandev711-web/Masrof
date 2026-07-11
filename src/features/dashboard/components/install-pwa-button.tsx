@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 
 type BeforeInstallPromptEvent = Event & {
@@ -27,16 +27,17 @@ function isStandalone() {
  */
 export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("pwa");
+  const installed = useSyncExternalStore(
+    () => () => {},
+    () => isStandalone(),
+    () => false,
+  );
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isStandalone()) {
-      setInstalled(true);
-      return;
-    }
+    if (installed) return;
 
     function handleBeforeInstall(event: Event) {
       event.preventDefault();
@@ -45,7 +46,7 @@ export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
-  }, []);
+  }, [installed]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -66,10 +67,7 @@ export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
   async function handleNativeInstall() {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    if (choice.outcome === "accepted") {
-      setInstalled(true);
-    }
+    await deferredPrompt.userChoice;
     setDeferredPrompt(null);
     setOpen(false);
   }

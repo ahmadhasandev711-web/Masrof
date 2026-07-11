@@ -52,10 +52,18 @@ export function LoginForm({ googleAuthEnabled = false }: { googleAuthEnabled?: b
 
     if (authError) {
       const rawMessage = authError.message ?? "";
+      const lowerMessage = rawMessage.toLowerCase();
+      const isUnverified =
+        lowerMessage.includes("verif") ||
+        lowerMessage.includes("not verified") ||
+        lowerMessage.includes("unverified");
       const isUnknownUser =
-        rawMessage.toLowerCase().includes("not found") ||
-        rawMessage.toLowerCase().includes("user not found");
-      const message = isUnknownUser ? t("errors.userNotFound") : rawMessage || t("errors.invalidCredentials");
+        lowerMessage.includes("not found") || lowerMessage.includes("user not found");
+      const message = isUnverified
+        ? t("errors.emailNotVerified")
+        : isUnknownUser
+          ? t("errors.userNotFound")
+          : rawMessage || t("errors.invalidCredentials");
       setError(message);
       return;
     }
@@ -115,7 +123,7 @@ export function LoginForm({ googleAuthEnabled = false }: { googleAuthEnabled?: b
               </Link>
             </p>
           )}
-          {error.toLowerCase().includes("verif") && (
+          {(error === t("errors.emailNotVerified") || error.toLowerCase().includes("verif")) && (
             <p className="text-sm text-neutral-500">
               <Link href="/verify-email" className="font-medium text-emerald-700">
                 {t("alerts.verifyEmailLink")}
