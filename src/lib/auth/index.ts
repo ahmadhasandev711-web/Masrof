@@ -13,9 +13,26 @@ const emailFeaturesEnabled = isAuthEmailConfigured();
  * Import `auth` wherever a session needs to be read or an auth API
  * route needs to be exposed — never construct a second instance.
  */
+const trustedOrigins = Array.from(
+  new Set(
+    [
+      env.BETTER_AUTH_URL,
+      process.env.NEXT_PUBLIC_APP_URL,
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+      process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : undefined,
+      ...(process.env.TRUSTED_ORIGINS
+        ? process.env.TRUSTED_ORIGINS.split(",").map((s) => s.trim())
+        : []),
+    ].filter((url): url is string => typeof url === "string" && url.trim().length > 0),
+  ),
+);
+
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
+  trustedOrigins,
 
   database: mongodbAdapter(mongoDb),
 
