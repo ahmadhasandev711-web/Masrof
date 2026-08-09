@@ -25,17 +25,22 @@ export default async function DashboardPage() {
   const locale = (await getLocale()) as AppLocale;
   const moneyLocale = getIntlLocale(locale);
   const t = await getTranslations("dashboard");
-  const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
 
-  const [{ balanceSummary, monthSummary, budgetWarnings, dueRecurring, receivableProjects }, monthlyTrendResult, userWhatsAppPhone] =
-    await Promise.all([
-      getDashboardHomeData(workspaceId),
-      getMonthlyTrend(workspaceId, 6, moneyLocale),
-      getUserWhatsAppPhone(session.user.id),
-    ]);
+  const [
+    { plan },
+    { balanceSummary, monthSummary, budgetWarnings, dueRecurring, receivableProjects },
+    monthlyTrendResult,
+    userWhatsAppPhone,
+  ] = await Promise.all([
+    getWorkspacePlanContext(session.user.id, workspaceId),
+    getDashboardHomeData(workspaceId),
+    getMonthlyTrend(workspaceId, 6, moneyLocale),
+    getUserWhatsAppPhone(session.user.id),
+  ]);
 
-  try {
-    await dispatchDashboardEmailNotifications({
+  // Don't block HTML on email/push — Hostinger TTFB was waiting on SMTP + dedupe writes.
+  void Promise.all([
+    dispatchDashboardEmailNotifications({
       userId: session.user.id,
       userEmail: session.user.email,
       workspaceId,
@@ -44,8 +49,8 @@ export default async function DashboardPage() {
       budgetWarnings,
       dueRecurring,
       locale,
-    });
-    await dispatchDashboardPushNotifications({
+    }),
+    dispatchDashboardPushNotifications({
       userId: session.user.id,
       workspaceId,
       workspaceName: activeWorkspace.name,
@@ -53,10 +58,10 @@ export default async function DashboardPage() {
       budgetWarnings,
       dueRecurring,
       locale,
-    });
-  } catch (error) {
+    }),
+  ]).catch((error) => {
     console.error("[notifications] dashboard dispatch failed:", error);
-  }
+  });
 
   return (
     <div className="flex w-full max-w-full flex-col gap-6 overflow-x-clip">

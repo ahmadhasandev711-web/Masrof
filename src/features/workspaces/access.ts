@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { Types } from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { WorkspaceMembershipModel, type WorkspaceRole } from "@/models/workspace-membership";
@@ -34,7 +35,7 @@ export type WorkspaceAccessContext = {
   membership: { role: WorkspaceRole; userId: string };
 };
 
-async function loadWorkspaceAccess(
+const loadWorkspaceAccess = cache(async function loadWorkspaceAccess(
   userId: string,
   workspaceId: string,
 ): Promise<WorkspaceAccessContext> {
@@ -65,7 +66,7 @@ async function loadWorkspaceAccess(
       userId: membership.userId,
     },
   };
-}
+});
 
 /**
  * THE central authorization gate for anything workspace-scoped.

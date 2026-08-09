@@ -137,21 +137,23 @@ export async function assertPlanFeature(
  * workspace owner's plan — so a Free member in a Plus workspace gets Plus tools
  * inside that workspace only.
  */
-export async function getEffectiveSubscriptionForWorkspace(
-  userId: string,
-  workspaceId: string,
-): Promise<WorkspaceSubscriptionContext> {
-  const { getWorkspaceAccess } = await import("@/features/workspaces/access");
-  const access = await getWorkspaceAccess(userId, workspaceId);
-  const ownerId = access.workspace.ownerId;
-  const ownerSub = await getUserSubscription(ownerId);
+export const getEffectiveSubscriptionForWorkspace = cache(
+  async function getEffectiveSubscriptionForWorkspace(
+    userId: string,
+    workspaceId: string,
+  ): Promise<WorkspaceSubscriptionContext> {
+    const { getWorkspaceAccess } = await import("@/features/workspaces/access");
+    const access = await getWorkspaceAccess(userId, workspaceId);
+    const ownerId = access.workspace.ownerId;
+    const ownerSub = await getUserSubscription(ownerId);
 
-  return {
-    ...ownerSub,
-    isTeamMember: ownerId !== userId,
-    ownerId,
-  };
-}
+    return {
+      ...ownerSub,
+      isTeamMember: ownerId !== userId,
+      ownerId,
+    };
+  },
+);
 
 export async function assertWorkspacePlanFeature(
   userId: string,

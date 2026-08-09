@@ -8,7 +8,7 @@ import { resolveAccountCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/models/workspace";
 import { listTransfersForWorkspace } from "@/features/transfers/data";
 import { listClientsForWorkspace } from "@/features/clients/data";
-import { listProjectsWithTotals } from "@/features/projects/data";
+import { listProjectsForWorkspace } from "@/features/projects/data";
 import { transactionFiltersSchema } from "@/features/transactions/schemas";
 import { CreateTransferForm } from "@/features/transfers/components/create-transfer-form";
 import { CreateTransactionForm } from "@/features/transactions/components/create-transaction-form";
@@ -55,7 +55,7 @@ export default async function TransactionsPage({
     listTransactions(filters),
     listTransfersForWorkspace(workspaceId),
     listClientsForWorkspace(workspaceId),
-    listProjectsWithTotals(workspaceId),
+    listProjectsForWorkspace(workspaceId),
   ]);
 
   const accountOptions = accounts.map((a) => ({
@@ -100,7 +100,7 @@ export default async function TransactionsPage({
             accounts={accountOptions}
             categories={categoryOptions}
             clients={clients.map((c) => ({ id: c._id, name: c.name }))}
-            projects={projects.map((p) => ({ id: p._id, name: p.name }))}
+            projects={projects.map((p) => ({ id: String(p._id), name: p.name }))}
             ocrReceipts={plan.ocrReceipts}
             aiCategory={plan.aiCategory}
           />
