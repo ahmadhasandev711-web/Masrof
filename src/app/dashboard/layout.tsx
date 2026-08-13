@@ -6,6 +6,8 @@ import { AccountSuspendedScreen } from "@/features/subscriptions/components/acco
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
 import { isAdminEmail } from "@/lib/admin";
 
+export const maxDuration = 60;
+
 export default async function DashboardLayout({
   children,
 }: {

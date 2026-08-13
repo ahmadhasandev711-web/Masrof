@@ -11,7 +11,7 @@ export default function DashboardError({
   reset: () => void;
 }) {
   const tPage = useTranslations("pages.error");
-  const tCoreErrors = useTranslations("core.errors");
+  const tCoreErrors = useTranslations("errors");
 
   return (
     <div className="rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">

@@ -16,6 +16,8 @@ import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 
+export const maxDuration = 60;
+
 export default async function DashboardPage() {
   const session = await requireSession();
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);

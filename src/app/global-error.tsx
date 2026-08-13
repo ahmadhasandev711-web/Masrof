@@ -22,7 +22,7 @@ function GlobalErrorContent({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const tCoreErrors = useTranslations("core.errors");
+  const tCoreErrors = useTranslations("errors");
 
   return (
     <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm">

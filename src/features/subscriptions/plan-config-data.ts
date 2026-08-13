@@ -104,6 +104,7 @@ function docToPlain(doc: Record<string, unknown>, planId: PlanId): PlanConfigDoc
 }
 
 async function fetchAllPlanConfigs(): Promise<Record<PlanId, PlanConfigDocument>> {
+  await ensurePlanConfigsExist();
   await connectToDatabase();
 
   const docs = await PlanConfigModel.find({ planId: { $in: PLAN_IDS } }).lean();
@@ -188,7 +189,6 @@ const getCachedPlanConfigs = unstable_cache(fetchAllPlanConfigs, ["plan-config-a
 
 export async function getAllPlanConfigs(): Promise<Record<PlanId, PlanConfigDocument>> {
   try {
-    await ensurePlanConfigsExist();
     return getCachedPlanConfigs();
   } catch (error) {
     console.error("[plan-config] load failed, using defaults:", error);
@@ -214,7 +214,7 @@ export function configToPlanDefinition(config: PlanConfigDocument): PlanDefiniti
     periodDisplay: config.periodDisplayAr,
     description: config.descriptionAr,
     features: config.featuresAr,
-    maxWorkspaces: config.maxWorkspaces === -1 ? Number.POSITIVE_INFINITY : config.maxWorkspaces,
+    maxWorkspaces: config.maxWorkspaces,
     highlighted: config.highlighted,
     cta: config.ctaAr,
     available: config.available,
@@ -243,7 +243,7 @@ export async function getLocalizedPlanFromConfig(
     periodDisplay: isEn ? config.periodDisplayEn : config.periodDisplayAr,
     description: isEn ? config.descriptionEn : config.descriptionAr,
     features: isEn ? config.featuresEn : config.featuresAr,
-    maxWorkspaces: config.maxWorkspaces === -1 ? Number.POSITIVE_INFINITY : config.maxWorkspaces,
+    maxWorkspaces: config.maxWorkspaces,
     highlighted: config.highlighted,
     cta: isEn ? config.ctaEn : config.ctaAr,
     available: config.available,

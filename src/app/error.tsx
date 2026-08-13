@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   const tPage = useTranslations("pages.error");
-  const tCoreErrors = useTranslations("core.errors");
+  const tCoreErrors = useTranslations("errors");
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
