@@ -10,9 +10,12 @@ export async function register() {
     const { configureDnsForWindows } = await import("@/lib/dns");
     configureDnsForWindows();
 
-    // Warm the DB pool in the background — don't block server startup.
-    import("@/lib/db/mongoose")
-      .then(({ connectToDatabase }) => connectToDatabase())
-      .catch(() => {});
+    // On Vercel each invocation is a fresh isolate — warming here races the
+    // request and opens a second handshake. Only warm long-lived Node hosts.
+    if (!process.env.VERCEL) {
+      import("@/lib/db/mongoose")
+        .then(({ connectToDatabase }) => connectToDatabase())
+        .catch(() => {});
+    }
   }
 }

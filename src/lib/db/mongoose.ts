@@ -35,12 +35,15 @@ if (!global.__mongooseCache) {
   global.__mongooseCache = cache;
 }
 
+const isServerless = Boolean(process.env.VERCEL);
+
 const CLIENT_OPTIONS = {
   dbName: env.MONGODB_DB_NAME,
-  maxPoolSize: 5,
-  serverSelectionTimeoutMS: 15_000,
-  socketTimeoutMS: 30_000,
-  // Windows networks often fail on IPv6 routes to Atlas — force IPv4.
+  maxPoolSize: isServerless ? 1 : 5,
+  minPoolSize: 0,
+  maxIdleTimeMS: isServerless ? 10_000 : 30_000,
+  serverSelectionTimeoutMS: isServerless ? 8_000 : 15_000,
+  socketTimeoutMS: 20_000,
   family: 4 as const,
 };
 

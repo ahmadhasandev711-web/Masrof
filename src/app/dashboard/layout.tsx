@@ -1,7 +1,7 @@
 import { ClientRedirect } from "@/components/client-redirect";
 import { requireSession } from "@/features/auth/session";
 import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
-import { getEffectiveSubscriptionForWorkspace, getUserSubscription } from "@/features/subscriptions/data";
+import { getEffectiveSubscriptionForOwner, getUserSubscription } from "@/features/subscriptions/data";
 import { AccountSuspendedScreen } from "@/features/subscriptions/components/account-suspended-screen";
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
 import { isAdminEmail } from "@/lib/admin";
@@ -28,10 +28,9 @@ export default async function DashboardLayout({
     return <ClientRedirect href="/onboarding" />;
   }
 
-  const workspaceId = activeWorkspace._id.toString();
-  const workspaceSubscription = await getEffectiveSubscriptionForWorkspace(
+  const workspaceSubscription = await getEffectiveSubscriptionForOwner(
     session.user.id,
-    workspaceId,
+    activeWorkspace.ownerId,
   );
 
   return (

@@ -30,19 +30,19 @@ declare global {
 function createClient(): MongoClient {
   configureDnsForWindows();
   const uri = getMongoConnectionUri(env.MONGODB_URI);
+  const isServerless = Boolean(process.env.VERCEL);
   const client = new MongoClient(uri, {
-    maxPoolSize: 5,
-    serverSelectionTimeoutMS: 15_000,
+    maxPoolSize: isServerless ? 1 : 5,
+    minPoolSize: 0,
+    maxIdleTimeMS: isServerless ? 10_000 : 30_000,
+    serverSelectionTimeoutMS: isServerless ? 8_000 : 15_000,
     family: 4,
   });
-  // Fire-and-forget: establishes the connection in the background.
-  // We swallow (and log) the initial rejection here so it never becomes
-  // an unhandled promise rejection at boot; any real query issued later
-  // still surfaces its own error to the caller (Server Action / Route
-  // Handler error boundary) through the driver's normal retry/queueing.
-  client.connect().catch((error: unknown) => {
-    console.error("[mongo-client] initial connection attempt failed:", error);
-  });
+  if (!isServerless) {
+    client.connect().catch((error: unknown) => {
+      console.error("[mongo-client] initial connection attempt failed:", error);
+    });
+  }
   return client;
 }
 

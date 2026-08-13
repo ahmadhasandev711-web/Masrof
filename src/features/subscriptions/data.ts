@@ -14,6 +14,7 @@ import {
 import type { PlanQuantityLimitKey } from "@/features/subscriptions/default-plans";
 import { isUnlimitedQuantity } from "@/features/subscriptions/default-plans";
 import { listWorkspacesForUser } from "@/features/workspaces/data";
+import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
 import { countOwnedWorkspacesForUser } from "@/features/workspaces/members-data";
 import {
   getLocalizedPlan,
@@ -152,9 +153,16 @@ export const getEffectiveSubscriptionForWorkspace = cache(
   ): Promise<WorkspaceSubscriptionContext> {
     const { getWorkspaceAccess } = await import("@/features/workspaces/access");
     const access = await getWorkspaceAccess(userId, workspaceId);
-    const ownerId = access.workspace.ownerId;
-    const ownerSub = await getUserSubscription(ownerId);
+    return getEffectiveSubscriptionForOwner(userId, access.workspace.ownerId);
+  },
+);
 
+export const getEffectiveSubscriptionForOwner = cache(
+  async function getEffectiveSubscriptionForOwner(
+    userId: string,
+    ownerId: string,
+  ): Promise<WorkspaceSubscriptionContext> {
+    const ownerSub = await getUserSubscription(ownerId);
     return {
       ...ownerSub,
       isTeamMember: ownerId !== userId,
@@ -206,7 +214,13 @@ export async function userHasWorkspacePlanFeature(
 }
 
 export async function getWorkspacePlanContext(userId: string, workspaceId: string) {
-  const subscription = await getEffectiveSubscriptionForWorkspace(userId, workspaceId);
+  const { workspaces, activeWorkspace } = await getCurrentWorkspaceContext(userId);
+  const workspace =
+    workspaces.find((item) => item._id.toString() === workspaceId) ?? activeWorkspace;
+  const subscription = await getEffectiveSubscriptionForOwner(
+    userId,
+    workspace?.ownerId ?? userId,
+  );
   const plan = await getLocalizedPlan(subscription.plan);
   return { subscription, plan };
 }
