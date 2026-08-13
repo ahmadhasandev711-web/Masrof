@@ -5,19 +5,27 @@ import { listSavingsGoals } from "@/features/savings-goals/data";
 import { CreateSavingsGoalForm } from "@/features/savings-goals/components/create-savings-goal-form";
 import { SavingsGoalList } from "@/features/savings-goals/components/savings-goal-list";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
+import { countSavingsGoalsForWorkspace, toQuantityUsage } from "@/features/subscriptions/plan-usage";
+import { PlanUsageMeter } from "@/features/subscriptions/components/plan-usage-meter";
 import { getTranslations } from "next-intl/server";
 
 export default async function SavingsGoalsPage() {
   const session = await requireSession();
   const t = await getTranslations("pages.goals");
+  const tUsage = await getTranslations("dashboard.usage");
   const tDashboard = await getTranslations("dashboard");
   const tPlan = await getTranslations("dashboard.plan");
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
-  const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
-
-  const goals = await listSavingsGoals(workspaceId);
+  const [{ plan, subscription }, goals, goalCount] = await Promise.all([
+    getWorkspacePlanContext(session.user.id, workspaceId),
+    listSavingsGoals(workspaceId),
+    countSavingsGoalsForWorkspace(workspaceId),
+  ]);
+  const goalLimit = await getPlanQuantityLimit(subscription.plan, "maxSavingsGoals");
+  const usage = toQuantityUsage(goalCount, goalLimit);
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
@@ -28,7 +36,8 @@ export default async function SavingsGoalsPage() {
 
       {plan.savingsGoals ? (
         <>
-          <CreateSavingsGoalForm workspaceId={workspaceId} />
+          <PlanUsageMeter usage={usage} label={tUsage("savingsGoals")} />
+          {usage.atLimit ? null : <CreateSavingsGoalForm workspaceId={workspaceId} />}
           <SavingsGoalList
             goals={goals.map((g) => ({
               _id: String(g._id),

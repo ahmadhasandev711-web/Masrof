@@ -42,3 +42,6 @@ export async function countRecurringExpensesForWorkspace(workspaceId: string): P
   await connectToDatabase();
   return RecurringExpenseModel.countDocuments({ workspaceId, isArchived: false });
 }
+
+export type { QuantityUsage } from "@/features/subscriptions/quantity-usage";
+export { toQuantityUsage } from "@/features/subscriptions/quantity-usage";

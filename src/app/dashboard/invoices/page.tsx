@@ -4,6 +4,12 @@ import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listClientsForWorkspace } from "@/features/clients/data";
 import { listInvoicesForWorkspace } from "@/features/invoices/data";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
+import {
+  countInvoicesCreatedThisMonth,
+  toQuantityUsage,
+} from "@/features/subscriptions/plan-usage";
+import { PlanUsageMeter } from "@/features/subscriptions/components/plan-usage-meter";
 import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
 import { InvoiceList } from "@/features/invoices/components/invoice-list";
 import { getTranslations } from "next-intl/server";
@@ -17,19 +23,23 @@ export default async function InvoicesPage({
 }) {
   const session = await requireSession();
   const t = await getTranslations("pages.invoices");
+  const tUsage = await getTranslations("dashboard.usage");
   const tDashboard = await getTranslations("dashboard");
   const tPlan = await getTranslations("dashboard.plan");
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
-  const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const rawParams = await searchParams;
   const defaultClientId = rawParams.clientId;
 
-  const [clients, invoices] = await Promise.all([
+  const [{ plan, subscription }, clients, invoices, invoiceCount] = await Promise.all([
+    getWorkspacePlanContext(session.user.id, workspaceId),
     listClientsForWorkspace(workspaceId),
     listInvoicesForWorkspace(workspaceId),
+    countInvoicesCreatedThisMonth(workspaceId),
   ]);
+  const invoiceLimit = await getPlanQuantityLimit(subscription.plan, "maxInvoicesPerMonth");
+  const usage = toQuantityUsage(invoiceCount, invoiceLimit);
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -40,11 +50,14 @@ export default async function InvoicesPage({
 
       {plan.clientsAndProjects ? (
         <>
-          <CreateInvoiceForm
-            workspaceId={workspaceId}
-            clients={clients}
-            defaultClientId={defaultClientId}
-          />
+          <PlanUsageMeter usage={usage} label={tUsage("invoicesThisMonth")} />
+          {usage.atLimit ? null : (
+            <CreateInvoiceForm
+              workspaceId={workspaceId}
+              clients={clients}
+              defaultClientId={defaultClientId}
+            />
+          )}
           <InvoiceList
             invoices={invoices}
             currency={activeWorkspace.currency}

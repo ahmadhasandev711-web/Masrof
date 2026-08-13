@@ -110,6 +110,17 @@ const dashboard = {
       export: "تصدير CSV و Excel و PDF متاح في باقة برو.",
       whatsapp: "تذكيرات واتساب متاحة في باقة برو.",
     },
+    usage: {
+      invoicesThisMonth: "فواتير هذا الشهر",
+      clients: "العملاء",
+      activeProjects: "مشاريع نشطة",
+      savingsGoals: "أهداف الادخار",
+      recurringExpenses: "مصاريف متكررة",
+      workspaces: "مساحات العمل",
+      members: "أعضاء الفريق",
+      upgradeHint: "وصلت لحد الباقة المجانية.",
+      upgradeLink: "ترقّى لبرو",
+    },
   },
 } as const;
 

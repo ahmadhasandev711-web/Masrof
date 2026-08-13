@@ -48,6 +48,9 @@ public/uploads/blog/*
 public/uploads/receipts/*
 !public/uploads/receipts/.gitkeep
 
+# deploy archives
+masrofaty-deploy.zip
+
 # vercel
 .vercel
 

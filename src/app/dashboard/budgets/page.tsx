@@ -9,6 +9,12 @@ import { BudgetList } from "@/features/budgets/components/budget-list";
 import { CreateRecurringExpenseForm } from "@/features/recurring-expenses/components/create-recurring-form";
 import { RecurringExpenseList } from "@/features/recurring-expenses/components/recurring-expense-list";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
+import {
+  countRecurringExpensesForWorkspace,
+  toQuantityUsage,
+} from "@/features/subscriptions/plan-usage";
+import { PlanUsageMeter } from "@/features/subscriptions/components/plan-usage-meter";
 import { getUserWhatsAppPhone } from "@/features/whatsapp/data";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -18,18 +24,23 @@ export default async function BudgetsPage() {
   const t = await getTranslations("pages.budgets");
   const tDashboard = await getTranslations("dashboard");
   const tPlan = await getTranslations("dashboard.plan");
+  const tUsage = await getTranslations("dashboard.usage");
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
-  const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
+  const { plan, subscription } = await getWorkspacePlanContext(session.user.id, workspaceId);
 
-  const [expenseCategories, budgets, accounts, recurringExpenses, userWhatsAppPhone] = await Promise.all([
-    listCategoriesForWorkspace(workspaceId, "expense"),
-    listBudgetsWithProgress(workspaceId),
-    listAccountsForWorkspace(workspaceId),
-    listRecurringExpenses(workspaceId),
-    getUserWhatsAppPhone(session.user.id),
-  ]);
+  const [expenseCategories, budgets, accounts, recurringExpenses, userWhatsAppPhone, recurringCount] =
+    await Promise.all([
+      listCategoriesForWorkspace(workspaceId, "expense"),
+      listBudgetsWithProgress(workspaceId),
+      listAccountsForWorkspace(workspaceId),
+      listRecurringExpenses(workspaceId),
+      getUserWhatsAppPhone(session.user.id),
+      countRecurringExpensesForWorkspace(workspaceId),
+    ]);
+  const recurringLimit = await getPlanQuantityLimit(subscription.plan, "maxRecurringExpenses");
+  const recurringUsage = toQuantityUsage(recurringCount, recurringLimit);
 
   const accountOptions = accounts.map((a) => ({ id: a._id.toString(), name: a.name }));
   const categoryOptions = expenseCategories.map((c) => ({
@@ -88,11 +99,14 @@ export default async function BudgetsPage() {
         </div>
         {plan.recurringExpenses ? (
           <>
-            <CreateRecurringExpenseForm
-              workspaceId={workspaceId}
-              accounts={accountOptions}
-              expenseCategories={categoryOptions}
-            />
+            <PlanUsageMeter usage={recurringUsage} label={tUsage("recurringExpenses")} />
+            {recurringUsage.atLimit ? null : (
+              <CreateRecurringExpenseForm
+                workspaceId={workspaceId}
+                accounts={accountOptions}
+                expenseCategories={categoryOptions}
+              />
+            )}
             <RecurringExpenseList
               items={recurringExpenses}
               workspaceId={workspaceId}

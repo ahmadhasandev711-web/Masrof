@@ -31,5 +31,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "scripts/generate-icons.ts"]
+  "exclude": ["node_modules", "scripts/generate-icons.ts", "mobile"]
 }

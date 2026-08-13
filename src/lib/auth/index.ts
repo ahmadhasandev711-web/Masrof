@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { expo } from "@better-auth/expo";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { mongoDb } from "@/lib/db/mongo-client";
 import { env } from "@/lib/env";
@@ -25,6 +26,8 @@ const trustedOrigins = Array.from(
       ...(process.env.TRUSTED_ORIGINS
         ? process.env.TRUSTED_ORIGINS.split(",").map((s) => s.trim())
         : []),
+      "masrofaty://",
+      ...(process.env.NODE_ENV === "development" ? ["exp://", "exp://**"] : []),
     ].filter((url): url is string => typeof url === "string" && url.trim().length > 0),
   ),
 );
@@ -33,6 +36,7 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins,
+  plugins: [expo()],
 
   database: mongodbAdapter(mongoDb),
 

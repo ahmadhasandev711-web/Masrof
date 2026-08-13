@@ -110,6 +110,17 @@ const dashboard = {
       export: "CSV, Excel, and PDF export are available on the Pro plan.",
       whatsapp: "WhatsApp reminders are available on the Pro plan.",
     },
+    usage: {
+      invoicesThisMonth: "Invoices this month",
+      clients: "Clients",
+      activeProjects: "Active projects",
+      savingsGoals: "Savings goals",
+      recurringExpenses: "Recurring expenses",
+      workspaces: "Workspaces",
+      members: "Team members",
+      upgradeHint: "You reached the Free limit.",
+      upgradeLink: "Upgrade to Pro",
+    },
   },
 } as const;
 
