@@ -4,10 +4,11 @@ import { cache } from "react";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { toPlain } from "@/lib/db/plain";
 import { toMinorUnits } from "@/lib/money";
-import { InvoiceModel } from "@/models/invoice";
+import { InvoiceModel, type InvoiceStatus } from "@/models/invoice";
 import { ClientModel } from "@/models/client";
 import type { CreateInvoiceInput } from "@/features/invoices/schemas";
 import type { InvoiceListItem, InvoicePrintView } from "@/features/invoices/types";
+import { resolveInvoiceDisplayStatus } from "@/features/invoices/status";
 
 export class InvalidInvoiceReferenceError extends Error {
   readonly code: string;
@@ -55,9 +56,30 @@ export async function createInvoice(input: CreateInvoiceInput) {
     dueDate: input.dueDate ?? null,
     items,
     notes: input.notes ?? "",
+    status: "sent",
+    paidAt: null,
   });
 
   return invoice.toObject();
+}
+
+export async function updateInvoiceStatus(
+  invoiceId: string,
+  workspaceId: string,
+  status: InvoiceStatus,
+) {
+  await connectToDatabase();
+
+  const updates: { status: InvoiceStatus; paidAt: Date | null } = {
+    status,
+    paidAt: status === "paid" ? new Date() : null,
+  };
+
+  return InvoiceModel.findOneAndUpdate(
+    { _id: invoiceId, workspaceId, isArchived: false },
+    updates,
+    { returnDocument: "after" },
+  ).lean();
 }
 
 export const listInvoicesForWorkspace = cache(async (workspaceId: string): Promise<InvoiceListItem[]> => {
@@ -72,6 +94,7 @@ export const listInvoicesForWorkspace = cache(async (workspaceId: string): Promi
     invoices.map((invoice): InvoiceListItem => {
       const client = invoice.clientId as { _id?: unknown; name?: string } | null;
       const total = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+      const status = (invoice.status ?? "sent") as InvoiceStatus;
 
       return {
         _id: String(invoice._id),
@@ -81,16 +104,31 @@ export const listInvoicesForWorkspace = cache(async (workspaceId: string): Promi
         total,
         clientName: client?.name ?? "—",
         clientId: client?._id ? String(client._id) : String(invoice.clientId),
+        status,
+        displayStatus: resolveInvoiceDisplayStatus({
+          status,
+          dueDate: invoice.dueDate,
+        }),
+        paidAt: invoice.paidAt ? new Date(invoice.paidAt).toISOString() : null,
       };
     }),
   );
 });
 
+export type WorkspaceBrandingForPrint = {
+  name: string;
+  businessName?: string | null;
+  logoUrl?: string | null;
+  taxId?: string | null;
+  businessPhone?: string | null;
+  businessAddress?: string | null;
+  currency: string;
+};
+
 export async function getInvoiceForPrint(
   invoiceId: string,
   workspaceId: string,
-  workspaceName: string,
-  currency: string,
+  branding: WorkspaceBrandingForPrint,
 ): Promise<InvoicePrintView | null> {
   await connectToDatabase();
 
@@ -115,6 +153,8 @@ export async function getInvoiceForPrint(
     amount: item.amount,
   }));
 
+  const displayName = (branding.businessName || "").trim() || branding.name;
+
   return {
     id: String(invoice._id),
     invoiceNumber: invoice.invoiceNumber,
@@ -123,12 +163,18 @@ export async function getInvoiceForPrint(
     items,
     total: items.reduce((sum, item) => sum + item.amount, 0),
     notes: invoice.notes ?? "",
+    status: (invoice.status ?? "sent") as InvoiceStatus,
     client: {
       name: client?.name ?? "—",
       email: client?.email ?? null,
       phone: client?.phone ?? null,
     },
-    workspaceName,
-    currency,
+    workspaceName: branding.name,
+    businessName: displayName,
+    logoUrl: branding.logoUrl || null,
+    taxId: branding.taxId || null,
+    businessPhone: branding.businessPhone || null,
+    businessAddress: branding.businessAddress || null,
+    currency: branding.currency,
   };
 }

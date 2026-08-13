@@ -45,7 +45,12 @@ async function sendOnce(
     return;
   }
 
-  await sendEmail(payload);
+  try {
+    await sendEmail(payload);
+  } catch (error) {
+    await releaseNotificationClaim(dedupeKey);
+    throw error;
+  }
 }
 
 export async function sendWelcomeNotification(input: {

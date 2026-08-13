@@ -6,12 +6,20 @@ import { UserSubscriptionModel } from "@/models/user-subscription";
 import { type PlanId, type PlanFeature } from "@/features/subscriptions/plans";
 import {
   getPlanConfig,
+  getPlanQuantityLimit,
+  planAllowsQuantity,
   planAllowsWorkspaces,
   planHasFeature,
 } from "@/features/subscriptions/plan-config-data";
+import type { PlanQuantityLimitKey } from "@/features/subscriptions/default-plans";
+import { isUnlimitedQuantity } from "@/features/subscriptions/default-plans";
 import { listWorkspacesForUser } from "@/features/workspaces/data";
 import { countOwnedWorkspacesForUser } from "@/features/workspaces/members-data";
-import { getLocalizedPlan, getLocalizedPlanFeatureMessage } from "@/i18n/plans-localized";
+import {
+  getLocalizedPlan,
+  getLocalizedPlanFeatureMessage,
+  getLocalizedQuantityLimitMessage,
+} from "@/i18n/plans-localized";
 import { getTranslations } from "next-intl/server";
 
 export type UserSubscriptionView = {
@@ -168,6 +176,24 @@ export async function assertWorkspacePlanFeature(
   }
 
   return null;
+}
+
+export async function assertWorkspaceQuantityLimit(
+  userId: string,
+  workspaceId: string,
+  limitKey: PlanQuantityLimitKey,
+  currentCount: number,
+): Promise<string | null> {
+  await assertUserNotSuspended(userId);
+
+  const subscription = await getEffectiveSubscriptionForWorkspace(userId, workspaceId);
+  if (await planAllowsQuantity(subscription.plan, limitKey, currentCount)) {
+    return null;
+  }
+
+  const limit = await getPlanQuantityLimit(subscription.plan, limitKey);
+  const displayLimit = isUnlimitedQuantity(limit) ? "∞" : String(limit);
+  return getLocalizedQuantityLimitMessage(limitKey, displayLimit);
 }
 
 export async function userHasWorkspacePlanFeature(

@@ -29,7 +29,7 @@ export default async function PricingPage() {
         <p className="mt-3 text-lg text-[#1C1B1A]/65">{t("subtitle")}</p>
       </div>
 
-      <div className="mt-12 grid gap-6 lg:grid-cols-3">
+      <div className="mt-12 grid gap-6 lg:grid-cols-2 lg:mx-auto lg:max-w-3xl">
         {planOrder.map((planId) => {
           const plan = plans[planId];
           return (

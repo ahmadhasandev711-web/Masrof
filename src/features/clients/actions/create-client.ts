@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
+import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createClientSchema } from "@/features/clients/schemas";
 import { createClient } from "@/features/clients/data";
+import { countClientsForWorkspace } from "@/features/subscriptions/plan-usage";
 
 export type CreateClientState = {
   error: string | null;
@@ -36,6 +37,17 @@ export async function createClientAction(
   const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "clientsAndProjects");
   if (featureError) {
     return { error: featureError };
+  }
+
+  const clientCount = await countClientsForWorkspace(parsed.data.workspaceId);
+  const limitError = await assertWorkspaceQuantityLimit(
+    session.user.id,
+    parsed.data.workspaceId,
+    "maxClients",
+    clientCount,
+  );
+  if (limitError) {
+    return { error: limitError };
   }
 
   await createClient(parsed.data);

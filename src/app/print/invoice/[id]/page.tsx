@@ -44,12 +44,15 @@ export default async function PrintInvoicePage({
   const rawParams = await searchParams;
   const format = parseInvoicePrintFormat(rawParams.format);
 
-  const invoice = await getInvoiceForPrint(
-    id,
-    workspaceId,
-    activeWorkspace.name,
-    activeWorkspace.currency,
-  );
+  const invoice = await getInvoiceForPrint(id, workspaceId, {
+    name: activeWorkspace.name,
+    businessName: activeWorkspace.businessName,
+    logoUrl: activeWorkspace.logoUrl,
+    taxId: activeWorkspace.taxId,
+    businessPhone: activeWorkspace.businessPhone,
+    businessAddress: activeWorkspace.businessAddress,
+    currency: activeWorkspace.currency,
+  });
 
   if (!invoice) {
     notFound();

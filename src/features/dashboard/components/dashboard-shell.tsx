@@ -28,6 +28,7 @@ const MORE_NAV_ITEMS = [
   { href: "/dashboard/import", labelKey: "import", icon: "🏦" },
   { href: "/dashboard/backup", labelKey: "backup", icon: "💾" },
   { href: "/dashboard/plan", labelKey: "plan", icon: "⭐" },
+  { href: "/dashboard/settings", labelKey: "settings", icon: "⚙️" },
 ] as const;
 
 type WorkspaceOption = {

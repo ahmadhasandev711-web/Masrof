@@ -1,16 +1,17 @@
-import { mkdir } from "node:fs/promises";
-import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
 import sharp from "sharp";
 import { getCurrentSession } from "@/features/auth/session";
-import { verifyWorkspaceAccess, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
+import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { scanReceiptImage } from "@/features/receipts/extract-receipt-text";
 import { suggestCategoryForTransaction } from "@/features/transactions/suggest-category";
+import { storePublicObject } from "@/lib/storage";
+import { checkMemoryRateLimit, clientKeyFromRequest } from "@/lib/rate-limit/memory";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -20,6 +21,18 @@ export async function POST(request: Request) {
   const session = await getCurrentSession();
   if (!session) {
     return NextResponse.json({ error: tErrors("unauthorized") }, { status: 401 });
+  }
+
+  const rate = checkMemoryRateLimit(
+    `ocr:${clientKeyFromRequest(request, session.user.id)}`,
+    10,
+    60_000,
+  );
+  if (!rate.ok) {
+    return NextResponse.json(
+      { error: tErrors("rateLimited") },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
+    );
   }
 
   const formData = await request.formData();
@@ -56,10 +69,6 @@ export async function POST(request: Request) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const filename = `${Date.now()}-${randomBytes(6).toString("hex")}.webp`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "receipts");
-  const outputPath = path.join(uploadDir, filename);
-
-  await mkdir(uploadDir, { recursive: true });
 
   const processed = await sharp(buffer)
     .rotate()
@@ -68,10 +77,15 @@ export async function POST(request: Request) {
     .webp({ quality: 82 })
     .toBuffer();
 
-  await sharp(processed).toFile(outputPath);
+  const stored = await storePublicObject({
+    folder: "receipts",
+    filename,
+    body: processed,
+    contentType: "image/webp",
+  });
 
   const response: Record<string, unknown> = {
-    url: `/uploads/receipts/${filename}`,
+    url: stored.url,
   };
 
   if (scanRequested) {

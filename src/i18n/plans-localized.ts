@@ -9,6 +9,7 @@ import {
 } from "@/features/subscriptions/plan-config-data";
 import { getTranslations } from "next-intl/server";
 import type { PlanFeature, PlanId } from "@/features/subscriptions/plans";
+import type { PlanQuantityLimitKey } from "@/features/subscriptions/default-plans";
 
 export type LocalizedPlan = LocalizedPlanView;
 
@@ -26,6 +27,15 @@ export async function getLocalizedPlanFeatureMessage(feature: PlanFeature): Prom
   const t = await getTranslations("plans");
   const key = `planFeature.${feature}` as Parameters<typeof t>[0];
   return t(key);
+}
+
+export async function getLocalizedQuantityLimitMessage(
+  limitKey: PlanQuantityLimitKey,
+  limit: string,
+): Promise<string> {
+  const t = await getTranslations("plans");
+  const key = `quantityLimit.${limitKey}` as Parameters<typeof t>[0];
+  return t(key, { limit });
 }
 
 export async function getAllLocalizedPlans(): Promise<Record<PlanId, LocalizedPlan>> {

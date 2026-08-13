@@ -58,7 +58,7 @@ const reports = {
       incomeColumn: "دخل",
       expenseColumn: "مصروف",
       netColumn: "الصافي",
-      gateMessage: "التقارير المتقدمة متاحة في باقة بلس.",
+      gateMessage: "التقارير المتقدمة متاحة في باقة برو.",
     },
     exportLabels: {
       reportTitle: "تقرير مصروفاتي",

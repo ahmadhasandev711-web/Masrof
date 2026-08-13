@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
+import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createProjectSchema } from "@/features/projects/schemas";
 import { createProject } from "@/features/projects/data";
+import { countActiveProjectsForWorkspace } from "@/features/subscriptions/plan-usage";
 
 export type CreateProjectState = {
   error: string | null;
@@ -42,6 +43,19 @@ export async function createProjectAction(
   const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "clientsAndProjects");
   if (featureError) {
     return { error: featureError };
+  }
+
+  if (parsed.data.status === "active") {
+    const activeCount = await countActiveProjectsForWorkspace(parsed.data.workspaceId);
+    const limitError = await assertWorkspaceQuantityLimit(
+      session.user.id,
+      parsed.data.workspaceId,
+      "maxActiveProjects",
+      activeCount,
+    );
+    if (limitError) {
+      return { error: limitError };
+    }
   }
 
   await createProject(parsed.data);

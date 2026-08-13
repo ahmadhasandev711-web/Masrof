@@ -10,7 +10,13 @@ const nextConfig: NextConfig = {
   turbopack: {},
   // Tesseract spawns worker threads via paths relative to its package root.
   // Bundling breaks those paths in production (worker-script/node/index.js missing).
-  serverExternalPackages: ["tesseract.js", "tesseract.js-core"],
+  serverExternalPackages: ["tesseract.js", "tesseract.js-core", "@aws-sdk/client-s3"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "localhost" },
+    ],
+  },
 };
 
 // IMPORTANT: Next.js 16 defaults to Turbopack, but @serwist/next's build-time

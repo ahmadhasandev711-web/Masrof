@@ -5,7 +5,7 @@ import {
   updatePlanConfigAction,
   type UpdatePlanConfigState,
 } from "@/features/admin/actions/plan-config";
-import { PLAN_FLAG_KEYS } from "@/features/subscriptions/default-plans";
+import { PLAN_FLAG_KEYS, PLAN_QUANTITY_LIMIT_KEYS } from "@/features/subscriptions/default-plans";
 import type { PlanConfigDocument } from "@/features/subscriptions/default-plans";
 import { useTranslations } from "next-intl";
 
@@ -48,6 +48,19 @@ export function PlanConfigForm({ config }: { config: PlanConfigDocument }) {
         <Field label={t("maxWorkspaces")} name="maxWorkspaces" type="number" defaultValue={config.maxWorkspaces} hint={t("maxWorkspacesHint")} />
         <Field label={t("maxMembers")} name="maxMembers" type="number" defaultValue={config.maxMembers} hint={t("maxMembersHint")} />
         <Field label={t("sortOrder")} name="sortOrder" type="number" defaultValue={config.sortOrder} />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {PLAN_QUANTITY_LIMIT_KEYS.map((key) => (
+          <Field
+            key={key}
+            label={t(key)}
+            name={key}
+            type="number"
+            defaultValue={config[key]}
+            hint={t("quantityLimitHint")}
+          />
+        ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

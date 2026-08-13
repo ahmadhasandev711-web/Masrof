@@ -7,8 +7,12 @@ import { toPlain } from "@/lib/db/plain";
 import {
   DEFAULT_PLAN_CONFIGS,
   PLAN_FLAG_KEYS,
+  PLAN_LIMITS_VERSION,
+  PLAN_QUANTITY_LIMIT_KEYS,
+  isUnlimitedQuantity,
   type PlanConfigDocument,
   type PlanFlags,
+  type PlanQuantityLimitKey,
 } from "@/features/subscriptions/default-plans";
 import {
   PLAN_IDS,
@@ -38,6 +42,12 @@ function mergeWithDefaults(doc: Partial<PlanConfigDocument> | null, planId: Plan
     priceYearly: doc.priceYearly ?? defaults.priceYearly,
     maxWorkspaces: doc.maxWorkspaces ?? defaults.maxWorkspaces,
     maxMembers: doc.maxMembers ?? defaults.maxMembers,
+    maxInvoicesPerMonth: doc.maxInvoicesPerMonth ?? defaults.maxInvoicesPerMonth,
+    maxClients: doc.maxClients ?? defaults.maxClients,
+    maxActiveProjects: doc.maxActiveProjects ?? defaults.maxActiveProjects,
+    maxSavingsGoals: doc.maxSavingsGoals ?? defaults.maxSavingsGoals,
+    maxRecurringExpenses: doc.maxRecurringExpenses ?? defaults.maxRecurringExpenses,
+    limitsVersion: doc.limitsVersion ?? defaults.limitsVersion,
     highlighted: doc.highlighted ?? defaults.highlighted,
     available: doc.available ?? defaults.available,
     sortOrder: doc.sortOrder ?? defaults.sortOrder,
@@ -65,6 +75,12 @@ function docToPlain(doc: Record<string, unknown>, planId: PlanId): PlanConfigDoc
       priceYearly: doc.priceYearly,
       maxWorkspaces: doc.maxWorkspaces,
       maxMembers: doc.maxMembers,
+      maxInvoicesPerMonth: doc.maxInvoicesPerMonth,
+      maxClients: doc.maxClients,
+      maxActiveProjects: doc.maxActiveProjects,
+      maxSavingsGoals: doc.maxSavingsGoals,
+      maxRecurringExpenses: doc.maxRecurringExpenses,
+      limitsVersion: doc.limitsVersion,
       highlighted: doc.highlighted,
       available: doc.available,
       sortOrder: doc.sortOrder,
@@ -102,20 +118,67 @@ async function fetchAllPlanConfigs(): Promise<Record<PlanId, PlanConfigDocument>
   return result;
 }
 
+/** One-time sync when freemium limits model changes. */
+async function migratePlanConfigsToCurrentLimitsVersion() {
+  await connectToDatabase();
+
+  for (const planId of PLAN_IDS) {
+    const defaults = DEFAULT_PLAN_CONFIGS[planId];
+    await PlanConfigModel.updateOne(
+      {
+        planId,
+        $or: [{ limitsVersion: { $exists: false } }, { limitsVersion: { $lt: PLAN_LIMITS_VERSION } }],
+      },
+      {
+        $set: {
+          flags: defaults.flags,
+          maxWorkspaces: defaults.maxWorkspaces,
+          maxMembers: defaults.maxMembers,
+          maxInvoicesPerMonth: defaults.maxInvoicesPerMonth,
+          maxClients: defaults.maxClients,
+          maxActiveProjects: defaults.maxActiveProjects,
+          maxSavingsGoals: defaults.maxSavingsGoals,
+          maxRecurringExpenses: defaults.maxRecurringExpenses,
+          priceYearly: defaults.priceYearly,
+          priceDisplayAr: defaults.priceDisplayAr,
+          priceDisplayEn: defaults.priceDisplayEn,
+          periodDisplayAr: defaults.periodDisplayAr,
+          periodDisplayEn: defaults.periodDisplayEn,
+          descriptionAr: defaults.descriptionAr,
+          descriptionEn: defaults.descriptionEn,
+          featuresAr: defaults.featuresAr,
+          featuresEn: defaults.featuresEn,
+          ctaAr: defaults.ctaAr,
+          ctaEn: defaults.ctaEn,
+          nameAr: defaults.nameAr,
+          nameEn: defaults.nameEn,
+          highlighted: defaults.highlighted,
+          available: defaults.available,
+          sortOrder: defaults.sortOrder,
+          limitsVersion: PLAN_LIMITS_VERSION,
+          updatedBy: "system-limits-v2",
+        },
+      },
+    );
+  }
+}
+
 async function ensurePlanConfigsExist() {
   await connectToDatabase();
   const existing = await PlanConfigModel.find({ planId: { $in: PLAN_IDS } }).select("planId").lean();
   const existingIds = new Set(existing.map((row) => String(row.planId)));
 
   const missing = PLAN_IDS.filter((id) => !existingIds.has(id));
-  if (missing.length === 0) return;
+  if (missing.length > 0) {
+    await PlanConfigModel.insertMany(
+      missing.map((planId) => ({
+        ...DEFAULT_PLAN_CONFIGS[planId],
+        updatedBy: "system-seed",
+      })),
+    );
+  }
 
-  await PlanConfigModel.insertMany(
-    missing.map((planId) => ({
-      ...DEFAULT_PLAN_CONFIGS[planId],
-      updatedBy: "system-seed",
-    })),
-  );
+  await migratePlanConfigsToCurrentLimitsVersion();
 }
 
 const getCachedPlanConfigs = unstable_cache(fetchAllPlanConfigs, ["plan-config-all"], {
@@ -210,6 +273,24 @@ export async function getMaxMembersForPlan(planId: PlanId): Promise<number> {
   return config.maxMembers;
 }
 
+export async function getPlanQuantityLimit(
+  planId: PlanId,
+  limitKey: PlanQuantityLimitKey,
+): Promise<number> {
+  const config = await getPlanConfig(planId);
+  return config[limitKey];
+}
+
+export async function planAllowsQuantity(
+  planId: PlanId,
+  limitKey: PlanQuantityLimitKey,
+  currentCount: number,
+): Promise<boolean> {
+  const limit = await getPlanQuantityLimit(planId, limitKey);
+  if (isUnlimitedQuantity(limit)) return true;
+  return currentCount < limit;
+}
+
 export async function planHasFeature(planId: PlanId, feature: PlanFeature): Promise<boolean> {
   const config = await getPlanConfig(planId);
   return Boolean(config.flags[feature as keyof PlanFlags]);
@@ -217,9 +298,9 @@ export async function planHasFeature(planId: PlanId, feature: PlanFeature): Prom
 
 export async function getPricingPlansOrdered(): Promise<PlanId[]> {
   const configs = await getAllPlanConfigs();
-  return [...PRICING_PLANS_ORDER].sort(
-    (a, b) => (configs[a]?.sortOrder ?? 0) - (configs[b]?.sortOrder ?? 0),
-  );
+  return [...PRICING_PLANS_ORDER]
+    .filter((id) => configs[id]?.available)
+    .sort((a, b) => (configs[a]?.sortOrder ?? 0) - (configs[b]?.sortOrder ?? 0));
 }
 
 export async function getPlanConfigsForAdmin(): Promise<PlanConfigDocument[]> {
@@ -227,3 +308,5 @@ export async function getPlanConfigsForAdmin(): Promise<PlanConfigDocument[]> {
   const configs = await getAllPlanConfigs();
   return PRICING_PLANS_ORDER.map((id) => configs[id]);
 }
+
+export { PLAN_QUANTITY_LIMIT_KEYS };

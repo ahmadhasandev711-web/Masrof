@@ -174,3 +174,73 @@ git push -u origin main
 
 - Origins: `https://masrofaty.qema-tech.com`
 - Redirect: `https://masrofaty.qema-tech.com/api/auth/callback/google`
+
+## النقل إلى Vercel (الخطوة الحالية)
+
+الملف [`vercel.json`](vercel.json) جاهز — region `fra1` (قريب من MongoDB Atlas أوروبا).
+
+**Repo:** `https://github.com/ahmadhasandev711-web/Masrof`
+
+### 1) ادفع آخر التغييرات على GitHub
+
+```bash
+git add .
+git commit -m "Prepare Vercel deploy: freemium limits, plan sync, vercel.json."
+git push origin main
+```
+
+### 2) Vercel Dashboard
+
+1. [vercel.com/new](https://vercel.com/new) → **Import Git Repository** → `ahmadhasandev711-web/Masrof`
+2. Framework: **Next.js** (يتعرّف تلقائي)
+3. Build: `npm run build` · Install: `npm ci` · Output: default
+4. **Environment Variables** (Production) — انسخ من `.env.local` وعدّل الـ URLs:
+
+| Variable | Production value |
+|----------|------------------|
+| `MONGODB_URI` | نفس Atlas |
+| `MONGODB_DB_NAME` | `masrofaty` |
+| `BETTER_AUTH_SECRET` | نفس السر |
+| `BETTER_AUTH_URL` | `https://masrofaty.qema-tech.com` |
+| `NEXT_PUBLIC_APP_URL` | `https://masrofaty.qema-tech.com` |
+| `TRUSTED_ORIGINS` | `https://masrofaty.qema-tech.com,https://*.vercel.app` |
+| `ADMIN_EMAILS` | بريدك |
+| `RESEND_API_KEY` + `AUTH_EMAIL_FROM` | (اختياري) |
+| `S3_BUCKET` + `S3_*` + `S3_PUBLIC_BASE_URL` | **مطلوب** — Cloudflare R2 موصى به |
+
+5. **Deploy** — انتظر أول build (~2–3 دقائق)
+
+### 3) Custom Domain + DNS
+
+1. Vercel → Project → **Settings → Domains** → أضف `masrofaty.qema-tech.com`
+2. Vercel يعطيك سجل DNS (CNAME أو A)
+3. في Hostinger hPanel → **DNS** للدومين `qema-tech.com`:
+   - غيّر `masrofaty` من Hostinger Node إلى **CNAME** يشير لـ `cname.vercel-dns.com` (أو اللي Vercel يطلبه)
+4. SSL يتفعّل تلقائي من Vercel (5–30 دقيقة)
+
+### 4) بعد ما الدومين يشتغل
+
+- [ ] Google OAuth: origins + redirect → `https://masrofaty.qema-tech.com`
+- [ ] Resend: domain verified لـ `qema-tech.com`
+- [ ] Atlas Network Access: `0.0.0.0/0` أو IP ranges Vercel
+- [ ] اختبر: login · dashboard · فاتورة · رفع إيصال
+- [ ] **أوقف** Node app على Hostinger (بعد التأكد)
+
+### 5) Object storage (R2) — مطلوب للملفات
+
+بدون S3/R2، الرفع يشتغل مؤقتًا بس **يُمسح عند كل redeploy**.
+
+1. Cloudflare R2 → Create bucket
+2. API token → Access Key + Secret
+3. Public access / custom domain → `S3_PUBLIC_BASE_URL`
+4. في Vercel env:
+   ```
+   S3_BUCKET=masrofaty
+   S3_ACCESS_KEY_ID=...
+   S3_SECRET_ACCESS_KEY=...
+   S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+   S3_REGION=auto
+   S3_PUBLIC_BASE_URL=https://pub-xxxxx.r2.dev
+   ```
+
+Build يبقى `npm run build` (= `next build --webpack` لـ Serwist).

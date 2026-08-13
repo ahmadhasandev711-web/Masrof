@@ -2,7 +2,8 @@ const pages = {
   pages: {
     onboarding: {
       title: "Let's set up your first workspace",
-      subtitle: "Everything you track (accounts, categories, budgets) lives inside this workspace",
+      subtitle:
+        "Create a workspace for freelancing or personal money — then add accounts, log transactions, and issue client invoices.",
     },
     error: {
       title: "An unexpected error occurred",
@@ -52,6 +53,10 @@ const pages = {
     },
     invoices: {
       title: "Client invoices",
+    },
+    settings: {
+      title: "Workspace settings",
+      ownerOnly: "Only the workspace owner can edit invoice branding.",
     },
     newWorkspace: {
       title: "New workspace",

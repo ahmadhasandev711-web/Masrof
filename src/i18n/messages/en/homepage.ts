@@ -1,9 +1,9 @@
 const homepage = {
   homepage: {
-    heroBadge: "Income & expense tracking — made for Egypt",
+    heroBadge: "For freelancers and small projects in Egypt",
     heroTitle: "Know exactly where your money\ncomes from and where it goes.",
     heroSubtitle:
-      "Masrofaty is one place to track your income and expenses — whether personal, freelance, or small business — without accounting complexity.",
+      "Track income and expenses, manage clients and invoices in one Arabic workspace — EGP-first, without accounting complexity.",
     heroCtaPrimary: "Start free now",
     heroCtaSecondary: "Read the blog",
     stepsTitle: "Get started in 3 simple steps",
@@ -12,8 +12,8 @@ const homepage = {
     steps0Body:
       "Personal, freelance, or small business — each workspace has its own accounts and categories.",
     steps1Number: "02",
-    steps1Title: "Log transactions",
-    steps1Body: "Every income and expense is recorded in seconds, and your balance updates instantly.",
+    steps1Title: "Log transactions and clients",
+    steps1Body: "Record income and expenses in seconds — upgrade to issue PDF invoices for clients.",
     steps2Number: "03",
     steps2Title: "See the full picture",
     steps2Body:
@@ -36,8 +36,8 @@ const homepage = {
       },
       {
         number: "02",
-        title: "Log transactions",
-        body: "Every income and expense is recorded in seconds, and your balance updates instantly.",
+        title: "Log transactions and clients",
+        body: "Record income and expenses in seconds — upgrade to issue PDF invoices for clients.",
       },
       {
         number: "03",

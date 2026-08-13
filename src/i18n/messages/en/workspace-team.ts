@@ -34,7 +34,7 @@ const workspaceTeam = {
     errors: {
       invalidData: "Invalid data",
       selfInvite: "You cannot invite yourself",
-      teamFeatureRequired: "Team workspace requires Plus on the workspace owner's plan",
+      teamFeatureRequired: "Team workspace requires Pro on the workspace owner's plan",
       alreadyMember: "This email is already a member",
       invitePending: "A pending invite already exists for this email",
       inviteFailed: "Could not send invite",

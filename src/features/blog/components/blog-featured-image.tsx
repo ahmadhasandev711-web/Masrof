@@ -36,9 +36,10 @@ export function BlogFeaturedImage({
     );
   }
 
-  if (src.startsWith("/uploads/")) {
+  // Local disk uploads and absolute object-storage URLs may 404 after redeploy.
+  if (src.startsWith("/uploads/") || src.startsWith("http://") || src.startsWith("https://")) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- local uploads may be missing after redeploy; avoid Next optimizer errors.
+      // eslint-disable-next-line @next/next/no-img-element -- avoid Next optimizer hard-fail on missing uploads.
       <img
         src={src}
         alt={alt}

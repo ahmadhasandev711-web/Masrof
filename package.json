@@ -16,6 +16,7 @@
     "db:ping": "tsx --env-file=.env.local scripts/db-ping.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1106.0",
     "@fontsource/cairo": "^5.2.7",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/markazi-text": "^5.2.9",
@@ -34,8 +35,8 @@
     "serwist": "^9.5.11",
     "sharp": "^0.35.3",
     "tailwindcss": "^4",
-    "typescript": "^5",
     "tesseract.js": "^7.0.0",
+    "typescript": "^5",
     "web-push": "^3.6.7",
     "xlsx": "^0.18.5",
     "zod": "^4.4.3"

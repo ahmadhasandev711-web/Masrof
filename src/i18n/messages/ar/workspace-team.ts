@@ -34,7 +34,7 @@ const workspaceTeam = {
     errors: {
       invalidData: "البيانات غير صالحة",
       selfInvite: "لا يمكنك دعوة نفسك",
-      teamFeatureRequired: "مساحة الفريق متاحة في باقة بلس لمالك المساحة",
+      teamFeatureRequired: "مساحة الفريق متاحة في باقة برو لمالك المساحة",
       alreadyMember: "هذا البريد عضو بالفعل",
       invitePending: "يوجد دعوة معلّقة لهذا البريد",
       inviteFailed: "تعذّر إرسال الدعوة",

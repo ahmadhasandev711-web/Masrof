@@ -58,7 +58,7 @@ const reports = {
       incomeColumn: "Income",
       expenseColumn: "Expense",
       netColumn: "Net",
-      gateMessage: "Advanced reports are available on the Plus plan.",
+      gateMessage: "Advanced reports are available on the Pro plan.",
     },
     exportLabels: {
       reportTitle: "Masrofaty report",

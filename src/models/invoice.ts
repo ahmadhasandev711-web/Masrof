@@ -1,5 +1,8 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 
+export const INVOICE_STATUSES = ["draft", "sent", "paid", "cancelled"] as const;
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
+
 const invoiceItemSchema = new Schema(
   {
     description: { type: String, required: true, trim: true, maxlength: 200 },
@@ -17,6 +20,13 @@ const invoiceSchema = new Schema(
     dueDate: { type: Date, default: null },
     items: { type: [invoiceItemSchema], required: true, minlength: 1 },
     notes: { type: String, trim: true, maxlength: 500, default: "" },
+    status: {
+      type: String,
+      enum: INVOICE_STATUSES,
+      required: true,
+      default: "sent",
+    },
+    paidAt: { type: Date, default: null },
     isArchived: { type: Boolean, required: true, default: false },
   },
   { timestamps: true },

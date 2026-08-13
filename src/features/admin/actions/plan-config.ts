@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/admin";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { PlanConfigModel } from "@/models/plan-config";
 import { PLAN_CONFIG_TAG } from "@/features/subscriptions/plan-config-data";
-import { PLAN_FLAG_KEYS } from "@/features/subscriptions/default-plans";
+import { PLAN_FLAG_KEYS, PLAN_LIMITS_VERSION } from "@/features/subscriptions/default-plans";
 import { isPlanId, type PlanId } from "@/features/subscriptions/plans";
 
 function parseFeatures(raw: FormDataEntryValue | null): string[] {
@@ -29,6 +29,11 @@ function createPlanConfigSchema() {
     priceYearly: z.coerce.number().min(0),
     maxWorkspaces: z.coerce.number().int().min(-1),
     maxMembers: z.coerce.number().int().min(-1),
+    maxInvoicesPerMonth: z.coerce.number().int().min(-1),
+    maxClients: z.coerce.number().int().min(-1),
+    maxActiveProjects: z.coerce.number().int().min(-1),
+    maxSavingsGoals: z.coerce.number().int().min(-1),
+    maxRecurringExpenses: z.coerce.number().int().min(-1),
     highlighted: z.coerce.boolean(),
     available: z.coerce.boolean(),
     sortOrder: z.coerce.number().int().min(0).max(99),
@@ -67,6 +72,11 @@ export async function updatePlanConfigAction(
     priceYearly: formData.get("priceYearly"),
     maxWorkspaces: formData.get("maxWorkspaces"),
     maxMembers: formData.get("maxMembers"),
+    maxInvoicesPerMonth: formData.get("maxInvoicesPerMonth"),
+    maxClients: formData.get("maxClients"),
+    maxActiveProjects: formData.get("maxActiveProjects"),
+    maxSavingsGoals: formData.get("maxSavingsGoals"),
+    maxRecurringExpenses: formData.get("maxRecurringExpenses"),
     highlighted: formData.get("highlighted") === "on",
     available: formData.get("available") === "on",
     sortOrder: formData.get("sortOrder"),
@@ -100,6 +110,7 @@ export async function updatePlanConfigAction(
       { planId: data.planId },
       {
         ...data,
+        limitsVersion: PLAN_LIMITS_VERSION,
         updatedBy: admin.user.email,
       },
       { upsert: true, returnDocument: "after" },

@@ -30,6 +30,13 @@ const workspaceSchema = new Schema(
       default: () => new Map(),
     },
 
+    // Optional branding shown on invoices / print.
+    businessName: { type: String, trim: true, maxlength: 120, default: "" },
+    logoUrl: { type: String, trim: true, maxlength: 500, default: "" },
+    taxId: { type: String, trim: true, maxlength: 60, default: "" },
+    businessPhone: { type: String, trim: true, maxlength: 30, default: "" },
+    businessAddress: { type: String, trim: true, maxlength: 240, default: "" },
+
     // Denormalized owner id (better-auth user id, a plain string — better-auth
     // manages its own `user` collection separately from our Mongoose models).
     // Kept alongside WorkspaceMembership for fast "my workspaces" queries

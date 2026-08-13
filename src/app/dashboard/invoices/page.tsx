@@ -45,7 +45,11 @@ export default async function InvoicesPage({
             clients={clients}
             defaultClientId={defaultClientId}
           />
-          <InvoiceList invoices={invoices} currency={activeWorkspace.currency} />
+          <InvoiceList
+            invoices={invoices}
+            currency={activeWorkspace.currency}
+            workspaceId={workspaceId}
+          />
         </>
       ) : (
         <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">

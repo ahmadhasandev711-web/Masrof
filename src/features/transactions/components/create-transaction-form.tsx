@@ -49,6 +49,7 @@ export function CreateTransactionForm({
   const [attachmentName, setAttachmentName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [scanHint, setScanHint] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [suggesting, setSuggesting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -82,6 +83,7 @@ export function CreateTransactionForm({
 
     setUploading(true);
     setScanHint(null);
+    setUploadError(null);
     try {
       const body = new FormData();
       body.append("workspaceId", workspaceId);
@@ -133,7 +135,7 @@ export function CreateTransactionForm({
         setCategoryId(data.categorySuggestion.categoryId);
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : tErrors("uploadFailed"));
+      setUploadError(error instanceof Error ? error.message : tErrors("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -142,6 +144,7 @@ export function CreateTransactionForm({
   async function handleSuggestCategory() {
     if (!aiCategory) return;
     setSuggesting(true);
+    setUploadError(null);
     try {
       const res = await fetch("/api/transactions/suggest-category", {
         method: "POST",
@@ -162,7 +165,7 @@ export function CreateTransactionForm({
       setCategoryId(data.suggestion.categoryId);
       setScanHint(tAi("categorySuggested", { confidence: Math.round(data.suggestion.confidence * 100) }));
     } catch (error) {
-      alert(error instanceof Error ? error.message : tAi("suggestFailed"));
+      setUploadError(error instanceof Error ? error.message : tAi("suggestFailed"));
     } finally {
       setSuggesting(false);
     }
@@ -345,6 +348,7 @@ export function CreateTransactionForm({
             </p>
           )}
           {scanHint && <p className="text-xs text-neutral-500">{scanHint}</p>}
+          {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">

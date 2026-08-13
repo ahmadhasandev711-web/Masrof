@@ -98,7 +98,16 @@ export async function userHasAnyWorkspace(userId: string): Promise<boolean> {
 
 export async function updateWorkspace(
   workspaceId: string,
-  updates: { name?: string; currency?: string; exchangeRates?: Record<string, number> },
+  updates: {
+    name?: string;
+    currency?: string;
+    exchangeRates?: Record<string, number>;
+    businessName?: string;
+    logoUrl?: string;
+    taxId?: string;
+    businessPhone?: string;
+    businessAddress?: string;
+  },
 ) {
   await connectToDatabase();
   return WorkspaceModel.findByIdAndUpdate(workspaceId, updates, { returnDocument: "after" }).lean();

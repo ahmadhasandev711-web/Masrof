@@ -18,17 +18,75 @@ export async function InvoicePrintDocument({
   invoice: InvoicePrintView;
   format: InvoicePrintFormat;
 }) {
-  const [tForm, tCommon, tDashboard] = await Promise.all([
+  const [tForm, tCommon, tDashboard, tBrand] = await Promise.all([
     getTranslations("forms.invoice"),
     getTranslations("common"),
     getTranslations("dashboard.alerts"),
+    getTranslations("forms.workspaceBranding"),
   ]);
 
   if (format === "pos") {
-    return <InvoicePosLayout invoice={invoice} tForm={tForm} tCommon={tCommon} tDashboard={tDashboard} />;
+    return (
+      <InvoicePosLayout
+        invoice={invoice}
+        tForm={tForm}
+        tCommon={tCommon}
+        tDashboard={tDashboard}
+        tBrand={tBrand}
+      />
+    );
   }
 
-  return <InvoiceA4Layout invoice={invoice} tForm={tForm} tCommon={tCommon} tDashboard={tDashboard} />;
+  return (
+    <InvoiceA4Layout
+      invoice={invoice}
+      tForm={tForm}
+      tCommon={tCommon}
+      tDashboard={tDashboard}
+      tBrand={tBrand}
+    />
+  );
+}
+
+type TFn = Awaited<ReturnType<typeof getTranslations>>;
+
+function BrandBlock({
+  invoice,
+  tBrand,
+  compact = false,
+}: {
+  invoice: InvoicePrintView;
+  tBrand: TFn;
+  compact?: boolean;
+}) {
+  return (
+    <div className={compact ? "text-center" : ""}>
+      {invoice.logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={invoice.logoUrl}
+          alt=""
+          className={compact ? "mx-auto mb-2 h-10 w-auto object-contain" : "mb-3 h-14 w-auto object-contain"}
+        />
+      ) : null}
+      <h1 className={compact ? "text-base font-bold" : "text-3xl font-bold text-neutral-900"}>
+        {invoice.businessName}
+      </h1>
+      {invoice.taxId ? (
+        <p className={compact ? "mt-0.5 text-[10px] text-neutral-600" : "mt-1 text-sm text-neutral-600"}>
+          {tBrand("taxId")}: {invoice.taxId}
+        </p>
+      ) : null}
+      {(invoice.businessPhone || invoice.businessAddress) && (
+        <p
+          className={compact ? "mt-0.5 text-[10px] text-neutral-500" : "mt-1 text-sm text-neutral-500"}
+          dir="ltr"
+        >
+          {[invoice.businessPhone, invoice.businessAddress].filter(Boolean).join(" · ")}
+        </p>
+      )}
+    </div>
+  );
 }
 
 function InvoiceA4Layout({
@@ -36,18 +94,22 @@ function InvoiceA4Layout({
   tForm,
   tCommon,
   tDashboard,
+  tBrand,
 }: {
   invoice: InvoicePrintView;
-  tForm: Awaited<ReturnType<typeof getTranslations>>;
-  tCommon: Awaited<ReturnType<typeof getTranslations>>;
-  tDashboard: Awaited<ReturnType<typeof getTranslations>>;
+  tForm: TFn;
+  tCommon: TFn;
+  tDashboard: TFn;
+  tBrand: TFn;
 }) {
   return (
     <article className="invoice-sheet invoice-sheet-a4 text-neutral-900">
       <header className="flex items-start justify-between gap-8 border-b-2 border-neutral-800 pb-6">
         <div>
           <p className="text-xs font-semibold tracking-wide text-neutral-500">{tForm("title")}</p>
-          <h1 className="mt-2 text-3xl font-bold text-neutral-900">{invoice.workspaceName}</h1>
+          <div className="mt-2">
+            <BrandBlock invoice={invoice} tBrand={tBrand} />
+          </div>
         </div>
         <div className="min-w-[220px] rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm">
           <p className="font-bold text-emerald-800">{invoice.invoiceNumber}</p>
@@ -74,8 +136,12 @@ function InvoiceA4Layout({
         </div>
         <div className="rounded-lg border border-neutral-200 p-4">
           <p className="text-xs font-semibold uppercase text-neutral-500">{tDashboard("from")}</p>
-          <p className="mt-2 text-lg font-semibold">{invoice.workspaceName}</p>
-          <p className="mt-2 text-sm text-neutral-600">{tCommon("appName")}</p>
+          <p className="mt-2 text-lg font-semibold">{invoice.businessName}</p>
+          {invoice.taxId ? (
+            <p className="mt-1 text-sm text-neutral-600">
+              {tBrand("taxId")}: {invoice.taxId}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -105,7 +171,7 @@ function InvoiceA4Layout({
       <section className="mt-6 flex justify-end">
         <div className="min-w-[280px] rounded-lg border-2 border-emerald-800 bg-emerald-50 px-6 py-4">
           <div className="flex items-center justify-between gap-8 text-lg font-bold">
-            <span>Total</span>
+            <span>{tForm("total")}</span>
             <span className="text-emerald-900">
               {formatMoney(invoice.total, { currency: invoice.currency })}
             </span>
@@ -121,7 +187,7 @@ function InvoiceA4Layout({
       )}
 
       <footer className="mt-12 border-t border-neutral-200 pt-4 text-center text-xs text-neutral-400">
-        {tCommon("appName")} · {formatDate(new Date().toISOString())}
+        {tForm("thanks")} · {invoice.businessName} · {formatDate(new Date().toISOString())}
       </footer>
     </article>
   );
@@ -132,17 +198,19 @@ function InvoicePosLayout({
   tForm,
   tCommon,
   tDashboard,
+  tBrand,
 }: {
   invoice: InvoicePrintView;
-  tForm: Awaited<ReturnType<typeof getTranslations>>;
-  tCommon: Awaited<ReturnType<typeof getTranslations>>;
-  tDashboard: Awaited<ReturnType<typeof getTranslations>>;
+  tForm: TFn;
+  tCommon: TFn;
+  tDashboard: TFn;
+  tBrand: TFn;
 }) {
   return (
     <article className="invoice-sheet invoice-sheet-pos text-neutral-900">
       <header className="border-b border-dashed border-neutral-400 pb-3 text-center">
         <p className="text-[11px] text-neutral-500">{tForm("title")}</p>
-        <h1 className="text-base font-bold">{invoice.workspaceName}</h1>
+        <BrandBlock invoice={invoice} tBrand={tBrand} compact />
         <p className="mt-1 text-[11px] font-semibold text-emerald-800">{invoice.invoiceNumber}</p>
         <p className="mt-1 text-[10px] text-neutral-600">{formatDate(invoice.issueDate)}</p>
         {invoice.dueDate && (
@@ -178,7 +246,7 @@ function InvoicePosLayout({
 
       <section className="border-t-2 border-neutral-800 py-3">
         <div className="flex items-center justify-between text-sm font-bold">
-          <span>Total</span>
+          <span>{tForm("total")}</span>
           <span>{formatMoney(invoice.total, { currency: invoice.currency })}</span>
         </div>
       </section>
@@ -190,7 +258,10 @@ function InvoicePosLayout({
         </section>
       )}
 
-      <p className="mt-3 text-center text-[9px] text-neutral-400">{tCommon("appName")}</p>
+      <p className="mt-3 text-center text-[9px] text-neutral-400">
+        {tForm("thanks")} · {tCommon("appName")}
+      </p>
+      <span className="sr-only">{tDashboard("from")}</span>
     </article>
   );
 }

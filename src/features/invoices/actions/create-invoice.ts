@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
+import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createInvoiceSchema } from "@/features/invoices/schemas";
 import { createInvoice, InvalidInvoiceReferenceError } from "@/features/invoices/data";
+import { countInvoicesCreatedThisMonth } from "@/features/subscriptions/plan-usage";
 
 export type CreateInvoiceState = {
   error: string | null;
@@ -56,6 +57,17 @@ export async function createInvoiceAction(
   const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "clientsAndProjects");
   if (featureError) {
     return { error: featureError };
+  }
+
+  const invoiceCount = await countInvoicesCreatedThisMonth(parsed.data.workspaceId);
+  const limitError = await assertWorkspaceQuantityLimit(
+    session.user.id,
+    parsed.data.workspaceId,
+    "maxInvoicesPerMonth",
+    invoiceCount,
+  );
+  if (limitError) {
+    return { error: limitError };
   }
 
   try {

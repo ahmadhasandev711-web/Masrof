@@ -14,6 +14,8 @@ import {
 } from "@/lib/currency";
 import type { SupportedCurrency } from "@/models/workspace";
 import { WorkspaceModel } from "@/models/workspace";
+import { TransferModel } from "@/models/transfer";
+import { computeAccountBalanceMinor } from "@/features/accounts/balance-math";
 import type { CreateAccountInput } from "@/features/accounts/schemas";
 
 /**
@@ -137,33 +139,47 @@ export async function adjustAccountBalance(
 }
 
 /**
- * Recomputes `cachedBalance` from scratch as `openingBalance + sum(income) - sum(expense)`.
+ * Recomputes `cachedBalance` from scratch:
+ * openingBalance + income − expense + transferIn − transferOut.
  *
- * This is the integrity-check safety net described in the balance strategy:
- * call it periodically (e.g. a scheduled job) or on-demand if a mismatch is
- * ever suspected, to correct any drift the incremental `$inc` updates might
- * have accumulated.
+ * Transfers must be included — omitting them would wipe transfer effects
+ * and corrupt balances if this safety net is ever run.
  */
 export async function recalculateAccountBalance(accountId: string) {
   await connectToDatabase();
   const account = await AccountModel.findById(accountId).lean();
   if (!account) return null;
 
-  const [totals] = await TransactionModel.aggregate<{
-    income: number;
-    expense: number;
-  }>([
-    { $match: { accountId: new mongoose.Types.ObjectId(accountId), isArchived: false } },
-    {
-      $group: {
-        _id: null,
-        income: { $sum: { $cond: [{ $eq: ["$type", "income"] }, "$amount", 0] } },
-        expense: { $sum: { $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0] } },
+  const accountObjectId = new mongoose.Types.ObjectId(accountId);
+
+  const [[totals], [transferIn], [transferOut]] = await Promise.all([
+    TransactionModel.aggregate<{ income: number; expense: number }>([
+      { $match: { accountId: accountObjectId, isArchived: false } },
+      {
+        $group: {
+          _id: null,
+          income: { $sum: { $cond: [{ $eq: ["$type", "income"] }, "$amount", 0] } },
+          expense: { $sum: { $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0] } },
+        },
       },
-    },
+    ]),
+    TransferModel.aggregate<{ total: number }>([
+      { $match: { toAccountId: accountObjectId, isArchived: false } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]),
+    TransferModel.aggregate<{ total: number }>([
+      { $match: { fromAccountId: accountObjectId, isArchived: false } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]),
   ]);
 
-  const recalculated = account.openingBalance + (totals?.income ?? 0) - (totals?.expense ?? 0);
+  const recalculated = computeAccountBalanceMinor({
+    openingBalance: account.openingBalance,
+    incomeTotal: totals?.income ?? 0,
+    expenseTotal: totals?.expense ?? 0,
+    transferInTotal: transferIn?.total ?? 0,
+    transferOutTotal: transferOut?.total ?? 0,
+  });
 
   return AccountModel.findByIdAndUpdate(
     accountId,

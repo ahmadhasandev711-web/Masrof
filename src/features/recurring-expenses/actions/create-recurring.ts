@@ -4,12 +4,13 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
+import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createRecurringExpenseSchema } from "@/features/recurring-expenses/schemas";
 import {
   createRecurringExpense,
   InvalidRecurringExpenseError,
 } from "@/features/recurring-expenses/data";
+import { countRecurringExpensesForWorkspace } from "@/features/subscriptions/plan-usage";
 
 export type CreateRecurringState = { error: string | null };
 
@@ -44,6 +45,17 @@ export async function createRecurringExpenseAction(
   const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "recurringExpenses");
   if (featureError) {
     return { error: featureError };
+  }
+
+  const recurringCount = await countRecurringExpensesForWorkspace(parsed.data.workspaceId);
+  const limitError = await assertWorkspaceQuantityLimit(
+    session.user.id,
+    parsed.data.workspaceId,
+    "maxRecurringExpenses",
+    recurringCount,
+  );
+  if (limitError) {
+    return { error: limitError };
   }
 
   try {
