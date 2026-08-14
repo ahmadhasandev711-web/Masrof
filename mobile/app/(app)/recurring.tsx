@@ -25,8 +25,10 @@ import {
 import { formatDate, formatMoney, todayISO } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 export default function RecurringScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<
     {
@@ -52,20 +54,20 @@ export default function RecurringScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchRecurring(workspaceId);
+    const data = await fetchRecurring(workspaceId, skipCache);
     setItems(
       data.items.map((item) => ({
         id: String(item.id ?? item._id),
         amount: Number(item.amount),
-        description: String(item.description || "مصروف متكرر"),
+        description: String(item.description || (isRTL ? "مصروف متكرر" : "Recurring")),
         nextDueDate: String(item.nextDueDate),
         accountName: item.accountName ? String(item.accountName) : undefined,
         categoryName: item.categoryName ? String(item.categoryName) : undefined,
       })),
     );
-  }, [workspaceId]);
+  }, [workspaceId, isRTL]);
 
   useFocusEffect(
     useCallback(() => {
@@ -76,7 +78,7 @@ export default function RecurringScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -97,16 +99,16 @@ export default function RecurringScreen() {
   async function onCreate() {
     if (!workspaceId) return;
     if (!description.trim()) {
-      setError("يرجى إدخال وصف المصروف المتكرر");
+      setError(isRTL ? "يرجى إدخال وصف المصروف المتكرر" : "Enter recurring expense description");
       return;
     }
     const val = Number(amount);
     if (!Number.isFinite(val) || val <= 0) {
-      setError("أدخل مبلغاً صحيحاً أكبر من صفر");
+      setError(isRTL ? "أدخل مبلغاً صحيحاً أكبر من صفر" : "Enter a valid amount");
       return;
     }
     if (!accountId || !categoryId) {
-      setError("يرجى اختيار الحساب والتصنيف");
+      setError(isRTL ? "يرجى اختيار الحساب والتصنيف" : "Please select account and category");
       return;
     }
 
@@ -126,9 +128,9 @@ export default function RecurringScreen() {
       setOpen(false);
       setDescription("");
       setAmount("");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر حفظ المصروف المتكرر");
+      setError(isRTL ? "تعذر حفظ المصروف المتكرر" : "Failed to create recurring expense");
     } finally {
       setBusy(false);
     }
@@ -139,7 +141,7 @@ export default function RecurringScreen() {
     setRecordingId(recurringId);
     try {
       await recordRecurring({ workspaceId, recurringId });
-      await load();
+      await load(true);
     } finally {
       setRecordingId(null);
     }
@@ -147,9 +149,9 @@ export default function RecurringScreen() {
 
   return (
     <Screen
-      title="المصاريف والاشتراكات المتكررة"
+      title={t.recurring.title}
       showBack
-      actionLabel="+ إضافة"
+      actionLabel={t.recurring.add}
       actionIcon="add"
       onAction={() => {
         setError(null);
@@ -168,21 +170,21 @@ export default function RecurringScreen() {
           <View style={shared.center}>
             <AppIcon name="repeat" size={44} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              لا توجد مصاريف متكررة أو اشتراكات مجدولة
+              {t.recurring.noRecurring}
             </Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={shared.card}>
-            <View style={shared.row}>
-              <View style={shared.rowStart}>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <View style={[shared.iconCircle, { backgroundColor: colors.infoSoft }]}>
                   <AppIcon name="repeat" size={18} color={colors.info} />
                 </View>
-                <View style={{ alignItems: "flex-end" }}>
+                <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
                   <Text style={[shared.value, { fontSize: 16 }]}>{item.description}</Text>
                   <Text style={[shared.label, { fontSize: 12 }]}>
-                    تاريخ الاستحقاق: {formatDate(item.nextDueDate)}
+                    {t.recurring.nextDue}: {formatDate(item.nextDueDate)}
                   </Text>
                 </View>
               </View>
@@ -193,7 +195,7 @@ export default function RecurringScreen() {
             </View>
 
             {item.accountName || item.categoryName ? (
-              <View style={{ flexDirection: "row-reverse", gap: 6, marginVertical: 2 }}>
+              <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 6, marginVertical: 2 }}>
                 {item.categoryName && (
                   <View style={[shared.badge, { backgroundColor: "#F3F4F6" }]}>
                     <Text style={[shared.badgeText, { color: colors.muted }]}>
@@ -214,7 +216,7 @@ export default function RecurringScreen() {
             <Pressable
               style={[
                 shared.buttonSecondary,
-                { marginTop: 4 },
+                { marginTop: 4, flexDirection: isRTL ? "row-reverse" : "row" },
                 recordingId === item.id && { opacity: 0.6 },
               ]}
               onPress={() => onRecord(item.id)}
@@ -222,7 +224,7 @@ export default function RecurringScreen() {
             >
               <AppIcon name="checkmark" size={15} color={colors.primary} />
               <Text style={shared.buttonSecondaryText}>
-                {recordingId === item.id ? "جارِ التسجيل..." : "تسجيل هذا المصروف الآن"}
+                {recordingId === item.id ? t.common.loading : t.recurring.recordNow}
               </Text>
             </Pressable>
           </View>
@@ -247,38 +249,44 @@ export default function RecurringScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>مصروف متكرر جديد</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>{t.recurring.newTitle}</Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>الوصف / اسم الاشتراك</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.recurring.descriptionPlaceholder}
+            </Text>
             <TextInput
-              style={shared.input}
-              placeholder="مثال: اشتراك نتفليكس، إيجار المكتب، فاتورة الكهرباء..."
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={isRTL ? "مثال: اشتراك نتفليكس، إيجار المكتب" : "e.g. Netflix subscription, Office rent"}
               placeholderTextColor={colors.faint}
               value={description}
               onChangeText={setDescription}
             />
 
-            <Text style={shared.label}>المبلغ ({currency})</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.common.amount} ({currency})
+            </Text>
             <TextInput
-              style={[shared.input, { fontSize: 20, fontWeight: "700", color: colors.expense }]}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               placeholder="0.00"
               placeholderTextColor={colors.faint}
-              keyboardType="decimal-pad"
               value={amount}
               onChangeText={setAmount}
+              keyboardType="numeric"
             />
 
-            <Text style={shared.label}>التكرار</Text>
-            <View style={{ flexDirection: "row-reverse", gap: 8 }}>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.recurring.frequency}
+            </Text>
+            <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 8 }}>
               {[
-                { value: "monthly", label: "شهرياً" },
-                { value: "weekly", label: "أسبوعياً" },
-                { value: "yearly", label: "سنوياً" },
+                { value: "monthly", label: t.recurring.monthly },
+                { value: "weekly", label: t.recurring.weekly },
+                { value: "yearly", label: t.recurring.yearly },
               ].map((f) => {
                 const active = frequency === f.value;
                 return (
@@ -291,7 +299,12 @@ export default function RecurringScreen() {
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
-                    <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+                    <Text
+                      style={[
+                        shared.chipText,
+                        active && { color: "#FFFFFF", fontWeight: "700" },
+                      ]}
+                    >
                       {f.label}
                     </Text>
                   </Pressable>
@@ -299,15 +312,23 @@ export default function RecurringScreen() {
               })}
             </View>
 
-            <Text style={shared.label}>تاريخ أول استحقاق (YYYY-MM-DD)</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.recurring.nextDue} (YYYY-MM-DD)
+            </Text>
             <TextInput
-              style={shared.input}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               value={nextDueDate}
               onChangeText={setNextDueDate}
             />
 
-            <Text style={shared.label}>الحساب المسحوب منه</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "الحساب المسحوب منه" : "Source Account"}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+            >
               {accounts.map((account) => {
                 const active = accountId === account.id;
                 return (
@@ -327,8 +348,14 @@ export default function RecurringScreen() {
               })}
             </ScrollView>
 
-            <Text style={shared.label}>التصنيف</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "التصنيف" : "Category"}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+            >
               {categories.map((category) => {
                 const active = categoryId === category.id;
                 return (
@@ -358,10 +385,7 @@ export default function RecurringScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>حفظ الاشتراك</Text>
-                </>
+                <Text style={shared.buttonText}>{t.common.save}</Text>
               )}
             </Pressable>
           </Pressable>

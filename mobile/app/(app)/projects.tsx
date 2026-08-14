@@ -17,6 +17,7 @@ import { createProject, fetchClients, fetchProjects } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 type ProjectRow = {
   _id: string;
@@ -28,14 +29,8 @@ type ProjectRow = {
   paidTotal?: number;
 };
 
-const PROJECT_STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
-  active: { label: "قيد التنفيذ", bg: colors.primarySoft, text: colors.primary },
-  completed: { label: "مكتمل", bg: colors.incomeSoft, text: colors.incomeText },
-  on_hold: { label: "متوقف مؤقتاً", bg: colors.warningSoft, text: colors.warningText },
-  cancelled: { label: "ملغي", bg: colors.expenseSoft, text: colors.expenseText },
-};
-
 export default function ProjectsScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<ProjectRow[]>([]);
   const [clients, setClients] = useState<{ _id: string; name: string }[]>([]);
@@ -48,11 +43,18 @@ export default function ProjectsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const PROJECT_STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
+    active: { label: isRTL ? "قيد التنفيذ" : "Active", bg: colors.primarySoft, text: colors.primary },
+    completed: { label: isRTL ? "مكتمل" : "Completed", bg: colors.incomeSoft, text: colors.incomeText },
+    on_hold: { label: isRTL ? "متوقف مؤقتاً" : "On Hold", bg: colors.warningSoft, text: colors.warningText },
+    cancelled: { label: isRTL ? "ملغي" : "Cancelled", bg: colors.expenseSoft, text: colors.expenseText },
+  };
+
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     const [projects, clientData] = await Promise.all([
-      fetchProjects(workspaceId),
-      fetchClients(workspaceId),
+      fetchProjects(workspaceId, skipCache),
+      fetchClients(workspaceId, skipCache),
     ]);
     setItems(projects.items as unknown as ProjectRow[]);
     setClients(clientData.items);
@@ -67,7 +69,7 @@ export default function ProjectsScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -75,12 +77,12 @@ export default function ProjectsScreen() {
 
   async function onCreate() {
     if (!workspaceId || name.trim().length < 2) {
-      setError("يرجى إدخال اسم المشروع (حرفين على الأقل)");
+      setError(isRTL ? "يرجى إدخال اسم المشروع (حرفين على الأقل)" : "Enter project name (min 2 chars)");
       return;
     }
     const exp = expected ? Number(expected) : null;
     if (exp !== null && (!Number.isFinite(exp) || exp < 0)) {
-      setError("أدخل مبلغاً صحيحاً");
+      setError(isRTL ? "أدخل مبلغاً صحيحاً" : "Enter a valid amount");
       return;
     }
 
@@ -98,9 +100,9 @@ export default function ProjectsScreen() {
       setName("");
       setExpected("");
       setClientId(null);
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر إنشاء المشروع");
+      setError(isRTL ? "تعذر إنشاء المشروع" : "Failed to create project");
     } finally {
       setBusy(false);
     }
@@ -117,8 +119,8 @@ export default function ProjectsScreen() {
 
   return (
     <Screen
-      title="المشاريع"
-      actionLabel="+ مشروع"
+      title={isRTL ? "المشاريع" : "Projects"}
+      actionLabel={isRTL ? "+ مشروع" : "+ Project"}
       actionIcon="add"
       onAction={() => {
         setError(null);
@@ -128,8 +130,8 @@ export default function ProjectsScreen() {
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>
         <TextInput
-          style={shared.input}
-          placeholder="بحث باسم المشروع أو العميل..."
+          style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          placeholder={isRTL ? "بحث باسم المشروع أو العميل..." : "Search project or client..."}
           placeholderTextColor={colors.faint}
           value={search}
           onChangeText={setSearch}
@@ -148,13 +150,13 @@ export default function ProjectsScreen() {
           <View style={shared.center}>
             <AppIcon name="briefcase-outline" size={44} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              {search ? "لا توجد نتائج مطابقة للبحث" : "لا توجد مشاريع مضافة بعد"}
+              {search ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching projects found") : (isRTL ? "لا توجد مشاريع مضافة بعد" : "No projects added yet")}
             </Text>
           </View>
         }
         renderItem={({ item }) => {
           const statusConf = PROJECT_STATUS_MAP[item.status] ?? {
-            label: item.status || "نشط",
+            label: item.status || (isRTL ? "نشط" : "Active"),
             bg: colors.primarySoft,
             text: colors.primary,
           };
@@ -164,15 +166,15 @@ export default function ProjectsScreen() {
 
           return (
             <View style={shared.card}>
-              <View style={shared.row}>
-                <View style={shared.rowStart}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <View style={shared.iconCircle}>
                     <AppIcon name="briefcase" size={18} color={colors.primary} />
                   </View>
-                  <View style={{ alignItems: "flex-end" }}>
+                  <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
                     <Text style={[shared.value, { fontSize: 16 }]}>{item.name}</Text>
                     <Text style={[shared.label, { fontSize: 12 }]}>
-                      👤 {item.clientName || "بدون عميل مرتبط"}
+                      👤 {item.clientName || (isRTL ? "بدون عميل مرتبط" : "No linked client")}
                     </Text>
                   </View>
                 </View>
@@ -186,12 +188,12 @@ export default function ProjectsScreen() {
 
               {exp > 0 ? (
                 <View style={{ gap: 4, marginTop: 4 }}>
-                  <View style={shared.row}>
+                  <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                     <Text style={shared.label}>
-                      المحصل: {formatMoney(paid, currency)}
+                      {isRTL ? "المحصل" : "Collected"}: {formatMoney(paid, currency)}
                     </Text>
                     <Text style={shared.label}>
-                      المتوقع: {formatMoney(exp, currency)} ({pct}%)
+                      {isRTL ? "المتوقع" : "Expected"}: {formatMoney(exp, currency)} ({pct}%)
                     </Text>
                   </View>
                   <View style={shared.progressBarBg}>
@@ -230,36 +232,48 @@ export default function ProjectsScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>إضافة مشروع جديد</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>
+                {isRTL ? "إضافة مشروع جديد" : "New Project"}
+              </Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>اسم المشروع</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "اسم المشروع" : "Project Name"}
+            </Text>
             <TextInput
-              style={shared.input}
-              placeholder="مثال: تطبيق متجر إلكتروني، حملة تسويقية..."
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={isRTL ? "مثال: تطبيق متجر إلكتروني، حملة تسويقية..." : "e.g. Mobile App, Branding Campaign..."}
               placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={shared.label}>المبلغ المتوقع / قيمة المشروع ({currency})</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "المبلغ المتوقع / قيمة المشروع" : "Expected Budget"} ({currency})
+            </Text>
             <TextInput
-              style={[shared.input, { fontSize: 18, fontWeight: "700", color: colors.primary }]}
-              placeholder="0.00 (اختياري)"
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder="0.00"
               placeholderTextColor={colors.faint}
-              keyboardType="decimal-pad"
+              keyboardType="numeric"
               value={expected}
               onChangeText={setExpected}
             />
 
             {clients.length > 0 ? (
               <View style={{ gap: 6 }}>
-                <Text style={shared.label}>ربط بالعميل (اختياري)</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+                  {isRTL ? "ربط بالعميل (اختياري)" : "Link Client (Optional)"}
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+                >
                   <Pressable
                     onPress={() => setClientId(null)}
                     style={[
@@ -267,8 +281,13 @@ export default function ProjectsScreen() {
                       clientId === null && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
-                    <Text style={[shared.chipText, clientId === null && { color: "#FFFFFF" }]}>
-                      بدون عميل
+                    <Text
+                      style={[
+                        shared.chipText,
+                        clientId === null && { color: "#FFFFFF", fontWeight: "700" },
+                      ]}
+                    >
+                      {isRTL ? "بدون عميل" : "No Client"}
                     </Text>
                   </Pressable>
                   {clients.map((c) => {
@@ -282,7 +301,12 @@ export default function ProjectsScreen() {
                           active && { backgroundColor: colors.primary, borderColor: colors.primary },
                         ]}
                       >
-                        <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+                        <Text
+                          style={[
+                            shared.chipText,
+                            active && { color: "#FFFFFF", fontWeight: "700" },
+                          ]}
+                        >
                           👤 {c.name}
                         </Text>
                       </Pressable>
@@ -302,10 +326,7 @@ export default function ProjectsScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>حفظ المشروع</Text>
-                </>
+                <Text style={shared.buttonText}>{t.common.save}</Text>
               )}
             </Pressable>
           </Pressable>

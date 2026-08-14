@@ -42,6 +42,7 @@ export type IconName =
   | "business"
   | "call"
   | "mail"
+  | "globe"
   | "menu";
 
 export function AppIcon({
@@ -134,6 +135,8 @@ export function AppIcon({
       return <Ionicons name="call-outline" size={size} color={color} />;
     case "mail":
       return <Ionicons name="mail-outline" size={size} color={color} />;
+    case "globe":
+      return <Ionicons name="globe-outline" size={size} color={color} />;
     case "menu":
       return <Ionicons name="menu" size={size} color={color} />;
     default:

@@ -8,14 +8,16 @@ import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "@/lib/i18n";
 
 export default function HomeScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency, workspaces, setWorkspaceId, entitlements } = useWorkspace();
   const { data: session } = authClient.useSession();
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     const summary = await fetchDashboard(workspaceId);
     setData(summary);
@@ -30,40 +32,48 @@ export default function HomeScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
   }
 
   const planLabel =
-    entitlements?.plan === "pro" ? "برو" : entitlements?.plan === "plus" ? "بلس" : "مجاني";
+    entitlements?.plan === "pro"
+      ? t.plan.pro
+      : entitlements?.plan === "plus"
+        ? t.plan.plus
+        : t.plan.free;
 
   const netSavings = (data?.monthIncome ?? 0) - (data?.monthExpense ?? 0);
 
   return (
-    <Screen title="الرئيسية">
+    <Screen title={t.tabs.home}>
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
         contentContainerStyle={{ gap: 14, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
         {/* User Greeting & Plan */}
-        <View style={shared.row}>
-          <View style={{ alignItems: "flex-end" }}>
-            <Text style={shared.subtitle}>أهلاً بك</Text>
+        <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+          <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
+            <Text style={shared.subtitle}>{isRTL ? "أهلاً بك" : "Welcome,"}</Text>
             <Text style={[shared.value, { fontSize: 18 }]}>
-              {session?.user.name || session?.user.email?.split("@")[0] || "المستخدم"}
+              {session?.user.name || session?.user.email?.split("@")[0] || "User"}
             </Text>
           </View>
           <View style={[shared.badge, { backgroundColor: colors.primarySoft }]}>
-            <Text style={[shared.badgeText, { color: colors.primary }]}>باقة {planLabel}</Text>
+            <Text style={[shared.badgeText, { color: colors.primary }]}>{planLabel}</Text>
           </View>
         </View>
 
         {/* Workspaces Switcher */}
         {workspaces.length > 1 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+          >
             {workspaces.map((ws) => {
               const active = ws.id === workspaceId;
               return (
@@ -86,17 +96,27 @@ export default function HomeScreen() {
 
         {/* Total Balance Card */}
         <View style={shared.cardHighlighted}>
-          <View style={shared.row}>
-            <Text style={shared.label}>إجمالي الرصيد الحالي</Text>
+          <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+            <Text style={shared.label}>{t.dashboard.totalBalance}</Text>
             <View style={shared.iconCircle}>
               <AppIcon name="wallet" size={20} color={colors.primary} />
             </View>
           </View>
-          <Text style={[shared.value, { fontSize: 30, color: colors.primary, fontWeight: "800" }]}>
+          <Text
+            style={[
+              shared.value,
+              {
+                fontSize: 30,
+                color: colors.primary,
+                fontWeight: "800",
+                textAlign: isRTL ? "right" : "left",
+              },
+            ]}
+          >
             {formatMoney(data?.totalBalance, currency)}
           </Text>
-          <View style={[shared.row, { marginTop: 4 }]}>
-            <Text style={shared.label}>صافي وفر الشهر:</Text>
+          <View style={[shared.row, { marginTop: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
+            <Text style={shared.label}>{t.dashboard.netSavings}:</Text>
             <Text
               style={[
                 shared.value,
@@ -113,23 +133,43 @@ export default function HomeScreen() {
         </View>
 
         {/* Month Income & Expense */}
-        <View style={shared.row}>
+        <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
           <View style={[shared.card, { flex: 1 }]}>
-            <View style={shared.row}>
-              <Text style={shared.label}>دخل الشهر</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={shared.label}>{t.dashboard.monthIncome}</Text>
               <AppIcon name="trending-up" size={18} color={colors.income} />
             </View>
-            <Text style={[shared.value, { color: colors.income, fontSize: 18, marginTop: 4 }]}>
+            <Text
+              style={[
+                shared.value,
+                {
+                  color: colors.income,
+                  fontSize: 18,
+                  marginTop: 4,
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
               {formatMoney(data?.monthIncome, currency)}
             </Text>
           </View>
 
           <View style={[shared.card, { flex: 1 }]}>
-            <View style={shared.row}>
-              <Text style={shared.label}>مصروف الشهر</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={shared.label}>{t.dashboard.monthExpense}</Text>
               <AppIcon name="trending-down" size={18} color={colors.expense} />
             </View>
-            <Text style={[shared.value, { color: colors.expense, fontSize: 18, marginTop: 4 }]}>
+            <Text
+              style={[
+                shared.value,
+                {
+                  color: colors.expense,
+                  fontSize: 18,
+                  marginTop: 4,
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
               {formatMoney(data?.monthExpense, currency)}
             </Text>
           </View>
@@ -137,8 +177,10 @@ export default function HomeScreen() {
 
         {/* Quick Actions Grid */}
         <View style={{ gap: 8 }}>
-          <Text style={[shared.label, { fontWeight: "700" }]}>إجراءات سريعة</Text>
-          <View style={{ flexDirection: "row-reverse", gap: 10 }}>
+          <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
+            {t.dashboard.quickActions}
+          </Text>
+          <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 10 }}>
             <Pressable
               style={[shared.card, { flex: 1, alignItems: "center", paddingVertical: 14 }]}
               onPress={() => router.push("/(app)/transaction-new")}
@@ -146,7 +188,9 @@ export default function HomeScreen() {
               <View style={[shared.iconCircle, { backgroundColor: colors.primarySoft }]}>
                 <AppIcon name="add" size={22} color={colors.primary} />
               </View>
-              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>عملية جديدة</Text>
+              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>
+                {t.dashboard.newTransaction}
+              </Text>
             </Pressable>
 
             <Pressable
@@ -156,7 +200,9 @@ export default function HomeScreen() {
               <View style={[shared.iconCircle, { backgroundColor: colors.infoSoft }]}>
                 <AppIcon name="receipt" size={20} color={colors.info} />
               </View>
-              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>فاتورة جديدة</Text>
+              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>
+                {t.dashboard.newInvoice}
+              </Text>
             </Pressable>
 
             <Pressable
@@ -166,7 +212,9 @@ export default function HomeScreen() {
               <View style={[shared.iconCircle, { backgroundColor: colors.warningSoft }]}>
                 <AppIcon name="swap-horizontal" size={20} color={colors.warning} />
               </View>
-              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>تحويل</Text>
+              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>
+                {t.dashboard.newTransfer}
+              </Text>
             </Pressable>
 
             <Pressable
@@ -176,7 +224,9 @@ export default function HomeScreen() {
               <View style={[shared.iconCircle, { backgroundColor: colors.incomeSoft }]}>
                 <AppIcon name="pie-chart" size={20} color={colors.income} />
               </View>
-              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>الميزانية</Text>
+              <Text style={[shared.value, { fontSize: 12, marginTop: 6 }]}>
+                {t.dashboard.budgets}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -186,50 +236,76 @@ export default function HomeScreen() {
           (data?.dueRecurring ?? 0) > 0 ||
           (data?.receivableProjects ?? 0) > 0) && (
           <View style={{ gap: 8 }}>
-            <Text style={[shared.label, { fontWeight: "700" }]}>تنبيهات هامة</Text>
+            <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
+              {t.dashboard.alerts}
+            </Text>
 
             {(data?.budgetWarnings ?? 0) > 0 && (
               <Pressable
-                style={[shared.card, shared.row, { borderColor: "#FCD34D" }]}
+                style={[
+                  shared.card,
+                  shared.row,
+                  { borderColor: "#FCD34D", flexDirection: isRTL ? "row-reverse" : "row" },
+                ]}
                 onPress={() => router.push("/(app)/budgets")}
               >
-                <View style={shared.rowStart}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <AppIcon name="alert-circle" size={20} color={colors.warning} />
                   <Text style={[shared.value, { fontSize: 13, color: colors.warningText }]}>
-                    تجاوز في الميزانيات: {data?.budgetWarnings} تصنيفات قاربت الحد
+                    {t.dashboard.budgetWarning} ({data?.budgetWarnings})
                   </Text>
                 </View>
-                <AppIcon name="chevron-back" size={16} color={colors.warning} />
+                <AppIcon
+                  name={isRTL ? "chevron-back" : "chevron-forward"}
+                  size={16}
+                  color={colors.warning}
+                />
               </Pressable>
             )}
 
             {(data?.dueRecurring ?? 0) > 0 && (
               <Pressable
-                style={[shared.card, shared.row, { borderColor: "#BAE6FD" }]}
+                style={[
+                  shared.card,
+                  shared.row,
+                  { borderColor: "#BAE6FD", flexDirection: isRTL ? "row-reverse" : "row" },
+                ]}
                 onPress={() => router.push("/(app)/recurring")}
               >
-                <View style={shared.rowStart}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <AppIcon name="repeat" size={20} color={colors.info} />
                   <Text style={[shared.value, { fontSize: 13, color: colors.infoText }]}>
-                    مصاريف متكررة مستحقة: {data?.dueRecurring} فواتير تستحق التسجيل
+                    {t.dashboard.dueRecurring} ({data?.dueRecurring})
                   </Text>
                 </View>
-                <AppIcon name="chevron-back" size={16} color={colors.info} />
+                <AppIcon
+                  name={isRTL ? "chevron-back" : "chevron-forward"}
+                  size={16}
+                  color={colors.info}
+                />
               </Pressable>
             )}
 
             {(data?.receivableProjects ?? 0) > 0 && (
               <Pressable
-                style={[shared.card, shared.row, { borderColor: "#A7F3D0" }]}
+                style={[
+                  shared.card,
+                  shared.row,
+                  { borderColor: "#A7F3D0", flexDirection: isRTL ? "row-reverse" : "row" },
+                ]}
                 onPress={() => router.push("/(app)/projects")}
               >
-                <View style={shared.rowStart}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <AppIcon name="briefcase" size={20} color={colors.primary} />
                   <Text style={[shared.value, { fontSize: 13, color: colors.primary }]}>
-                    مستحقات مشاريع غير محصلة: {data?.receivableProjects} مشروع
+                    {t.dashboard.receivableProjects} ({data?.receivableProjects})
                   </Text>
                 </View>
-                <AppIcon name="chevron-back" size={16} color={colors.primary} />
+                <AppIcon
+                  name={isRTL ? "chevron-back" : "chevron-forward"}
+                  size={16}
+                  color={colors.primary}
+                />
               </Pressable>
             )}
           </View>

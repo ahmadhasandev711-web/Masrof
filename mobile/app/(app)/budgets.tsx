@@ -16,8 +16,10 @@ import { createBudget, fetchBudgets } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 export default function BudgetsScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<
     {
@@ -36,9 +38,9 @@ export default function BudgetsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchBudgets(workspaceId);
+    const data = await fetchBudgets(workspaceId, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -51,7 +53,7 @@ export default function BudgetsScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -59,12 +61,12 @@ export default function BudgetsScreen() {
 
   async function onCreate() {
     if (!workspaceId || name.trim().length < 2) {
-      setError("أدخل اسم الميزانية (حرفين على الأقل)");
+      setError(isRTL ? "أدخل اسم الميزانية (حرفين على الأقل)" : "Enter budget name (min 2 chars)");
       return;
     }
     const val = Number(amount);
     if (!Number.isFinite(val) || val <= 0) {
-      setError("أدخل حداً مالياً صحيحاً أكبر من صفر");
+      setError(isRTL ? "أدخل حداً مالياً صحيحاً أكبر من صفر" : "Enter a valid amount greater than zero");
       return;
     }
 
@@ -75,9 +77,9 @@ export default function BudgetsScreen() {
       setOpen(false);
       setName("");
       setAmount("");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر إنشاء الميزانية");
+      setError(isRTL ? "تعذر إنشاء الميزانية" : "Failed to create budget");
     } finally {
       setBusy(false);
     }
@@ -85,9 +87,9 @@ export default function BudgetsScreen() {
 
   return (
     <Screen
-      title="الميزانيات الشهرية"
+      title={t.budgets.title}
       showBack
-      actionLabel="+ ميزانية"
+      actionLabel={t.budgets.add}
       actionIcon="add"
       onAction={() => {
         setError(null);
@@ -106,7 +108,7 @@ export default function BudgetsScreen() {
           <View style={shared.center}>
             <AppIcon name="pie-chart-outline" size={44} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              لا توجد ميزانيات محددة لهذا الشهر
+              {t.budgets.noBudgets}
             </Text>
           </View>
         }
@@ -127,8 +129,8 @@ export default function BudgetsScreen() {
 
           return (
             <View style={shared.card}>
-              <View style={shared.row}>
-                <View style={shared.rowStart}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <View style={[shared.iconCircle, { backgroundColor: badgeBg }]}>
                     <AppIcon name="pie-chart" size={18} color={badgeText} />
                   </View>
@@ -136,17 +138,17 @@ export default function BudgetsScreen() {
                 </View>
                 <View style={[shared.badge, { backgroundColor: badgeBg }]}>
                   <Text style={[shared.badgeText, { color: badgeText }]}>
-                    {item.percentage}% مستهلك
+                    {item.percentage}% {isRTL ? "مستهلك" : "spent"}
                   </Text>
                 </View>
               </View>
 
-              <View style={[shared.row, { marginVertical: 4 }]}>
+              <View style={[shared.row, { marginVertical: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <Text style={shared.label}>
-                  تم صرف: {formatMoney(item.spent, currency)}
+                  {t.budgets.spent}: {formatMoney(item.spent, currency)}
                 </Text>
                 <Text style={shared.label}>
-                  الحد: {formatMoney(item.amount, currency)}
+                  {t.budgets.limit}: {formatMoney(item.amount, currency)}
                 </Text>
               </View>
 
@@ -163,7 +165,7 @@ export default function BudgetsScreen() {
                 />
               </View>
 
-              <View style={[shared.row, { marginTop: 4 }]}>
+              <View style={[shared.row, { marginTop: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <Text
                   style={[
                     shared.label,
@@ -175,8 +177,8 @@ export default function BudgetsScreen() {
                   ]}
                 >
                   {isOver
-                    ? `تجاوزت الميزانية بـ ${formatMoney(Math.abs(item.remaining), currency)}`
-                    : `المتبقي: ${formatMoney(item.remaining, currency)}`}
+                    ? `${t.budgets.overBudget} (+${formatMoney(Math.abs(item.remaining), currency)})`
+                    : `${t.budgets.remaining}: ${formatMoney(item.remaining, currency)}`}
                 </Text>
               </View>
             </View>
@@ -202,30 +204,34 @@ export default function BudgetsScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>ميزانية شهرية جديدة</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>{t.budgets.newTitle}</Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>اسم الميزانية / التصنيف</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "اسم الميزانية" : "Budget Name"}
+            </Text>
             <TextInput
-              style={shared.input}
-              placeholder="مثال: الطعام والشراب، التسوق، المواصلات..."
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={t.budgets.namePlaceholder}
               placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={shared.label}>الحد الأقصى للصرف الشهري ({currency})</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.budgets.limit} ({currency})
+            </Text>
             <TextInput
-              style={[shared.input, { fontSize: 20, fontWeight: "700", color: colors.primary }]}
-              keyboardType="decimal-pad"
-              placeholder="0.00"
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={t.budgets.amountPlaceholder}
               placeholderTextColor={colors.faint}
               value={amount}
               onChangeText={setAmount}
+              keyboardType="numeric"
             />
 
             {error ? <Text style={shared.error}>{error}</Text> : null}
@@ -238,10 +244,7 @@ export default function BudgetsScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>حفظ الميزانية</Text>
-                </>
+                <Text style={shared.buttonText}>{t.common.save}</Text>
               )}
             </Pressable>
           </Pressable>

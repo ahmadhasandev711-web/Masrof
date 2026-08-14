@@ -1,12 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireAdmin } from "@/lib/admin";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { PostModel } from "@/models/post";
 import { postFormSchema } from "@/features/admin/schemas";
+import { BLOG_POSTS_TAG } from "@/features/blog/data";
 
 export type PostActionState = { error: string | null };
 
@@ -80,6 +81,7 @@ export async function createPostAction(
     publishedAt: isPublished ? now : null,
   });
 
+  revalidateTag(BLOG_POSTS_TAG, "max");
   revalidatePath("/blog");
   revalidatePath("/admin/posts");
   redirect(`/admin/posts/${post._id.toString()}/edit?created=1`);
@@ -141,6 +143,7 @@ export async function updatePostAction(
 
   await post.save();
 
+  revalidateTag(BLOG_POSTS_TAG, "max");
   revalidatePath("/blog");
   revalidatePath(`/blog/${post.slug}`);
   revalidatePath("/admin/posts");
@@ -153,6 +156,7 @@ export async function deletePostAction(postId: string) {
   await requireAdmin();
   await connectToDatabase();
   await PostModel.findByIdAndDelete(postId);
+  revalidateTag(BLOG_POSTS_TAG, "max");
   revalidatePath("/blog");
   revalidatePath("/admin/posts");
   redirect("/admin/posts");

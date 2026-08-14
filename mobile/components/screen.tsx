@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AdBanner } from "@/components/ad-banner";
 import { AppIcon, type IconName } from "@/components/icon";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 import { colors, shared } from "@/lib/styles";
 
 export function Screen({
@@ -23,11 +25,13 @@ export function Screen({
   showBack?: boolean;
   onBack?: () => void;
 }) {
+  const insets = useSafeAreaInsets();
+  const { isRTL, t } = useI18n();
   const { showAds, loading, error, workspace } = useWorkspace();
 
   if (loading) {
     return (
-      <View style={shared.center}>
+      <View style={[shared.center, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -35,18 +39,20 @@ export function Screen({
 
   if (!workspace) {
     return (
-      <View style={shared.center}>
-        <Text style={shared.subtitle}>لا توجد مساحة عمل نشطة. أنشئ مساحة من الموقع أولاً.</Text>
+      <View style={[shared.center, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <Text style={shared.subtitle}>{t.common.noData}</Text>
       </View>
     );
   }
 
+  const topPadding = Math.max(insets.top, 16) + 6;
+
   return (
     <View style={shared.screen}>
-      <View style={[shared.pad, { flex: 1, paddingBottom: 8 }]}>
+      <View style={[shared.pad, { flex: 1, paddingTop: topPadding, paddingBottom: 8 }]}>
         {(title || actionLabel || showBack) && (
-          <View style={shared.row}>
-            <View style={shared.rowStart}>
+          <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+            <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
               {showBack ? (
                 <Pressable
                   onPress={onBack ?? (() => router.back())}
@@ -61,14 +67,21 @@ export function Screen({
                     borderColor: colors.border,
                   }}
                 >
-                  <AppIcon name="chevron-forward" size={20} color={colors.text} />
+                  <AppIcon
+                    name={isRTL ? "chevron-forward" : "chevron-back"}
+                    size={20}
+                    color={colors.text}
+                  />
                 </Pressable>
               ) : null}
               {title ? <Text style={shared.title}>{title}</Text> : null}
             </View>
 
             {actionLabel && onAction ? (
-              <Pressable onPress={onAction} style={shared.buttonSecondary}>
+              <Pressable
+                onPress={onAction}
+                style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
+              >
                 {actionIcon ? <AppIcon name={actionIcon} size={16} color={colors.primary} /> : null}
                 <Text style={shared.buttonSecondaryText}>{actionLabel}</Text>
               </Pressable>

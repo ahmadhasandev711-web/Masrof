@@ -11,7 +11,41 @@ export class ApiError extends Error {
   }
 }
 
-async function mobileFetch<T>(path: string, init?: RequestInit): Promise<T> {
+const apiCache = new Map<string, { data: unknown; timestamp: number }>();
+const DEFAULT_CACHE_TTL_MS = 60_000; // 60 seconds
+
+export function invalidateCache(pattern?: string): void {
+  if (!pattern) {
+    apiCache.clear();
+    return;
+  }
+  for (const key of apiCache.keys()) {
+    if (key.includes(pattern)) {
+      apiCache.delete(key);
+    }
+  }
+}
+
+export function clearAllCache(): void {
+  apiCache.clear();
+}
+
+async function mobileFetch<T>(
+  path: string,
+  init?: RequestInit,
+  options?: { skipCache?: boolean; ttlMs?: number },
+): Promise<T> {
+  const method = init?.method?.toUpperCase() ?? "GET";
+  const isGet = method === "GET";
+
+  if (isGet && !options?.skipCache) {
+    const cached = apiCache.get(path);
+    const ttl = options?.ttlMs ?? DEFAULT_CACHE_TTL_MS;
+    if (cached && Date.now() - cached.timestamp < ttl) {
+      return cached.data as T;
+    }
+  }
+
   const cookies = getAuthCookie();
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -35,7 +69,13 @@ async function mobileFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
+  const result = (await response.json()) as T;
+
+  if (isGet) {
+    apiCache.set(path, { data: result, timestamp: Date.now() });
+  }
+
+  return result;
 }
 
 export type MobileEntitlements = {
@@ -107,77 +147,98 @@ export function fetchDashboard(workspaceId: string) {
   );
 }
 
-export function fetchAccounts(workspaceId: string) {
+export function fetchAccounts(workspaceId: string, skipCache = false) {
   return mobileFetch<{ items: AccountItem[] }>(
     `/api/mobile/accounts?workspaceId=${encodeURIComponent(workspaceId)}`,
+    undefined,
+    { skipCache },
   );
 }
 
-export function createAccount(body: {
+export async function createAccount(body: {
   workspaceId: string;
   name: string;
   type: string;
   openingBalance?: number;
 }) {
-  return mobileFetch<AccountItem>("/api/mobile/accounts", {
+  const result = await mobileFetch<AccountItem>("/api/mobile/accounts", {
     method: "POST",
     body: JSON.stringify(body),
   });
+  invalidateCache("accounts");
+  invalidateCache("dashboard");
+  invalidateCache("reports");
+  return result;
 }
 
-export function fetchCategories(workspaceId: string, kind?: "income" | "expense") {
+export function fetchCategories(workspaceId: string, kind?: "income" | "expense", skipCache = false) {
   const qs = new URLSearchParams({ workspaceId });
   if (kind) qs.set("kind", kind);
-  return mobileFetch<{ items: CategoryItem[] }>(`/api/mobile/categories?${qs}`);
+  return mobileFetch<{ items: CategoryItem[] }>(`/api/mobile/categories?${qs}`, undefined, { skipCache });
 }
 
-export function createCategory(body: { workspaceId: string; name: string; kind: string }) {
-  return mobileFetch("/api/mobile/categories", { method: "POST", body: JSON.stringify(body) });
+export async function createCategory(body: { workspaceId: string; name: string; kind: string }) {
+  const result = await mobileFetch("/api/mobile/categories", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("categories");
+  return result;
 }
 
-export function fetchTransactions(workspaceId: string, page = 1) {
+export function fetchTransactions(workspaceId: string, page = 1, skipCache = false) {
   const qs = new URLSearchParams({ workspaceId, page: String(page), pageSize: "30" });
   return mobileFetch<{
     items: TransactionItem[];
     total: number;
     page: number;
     totalPages: number;
-  }>(`/api/mobile/transactions?${qs}`);
+  }>(`/api/mobile/transactions?${qs}`, undefined, { skipCache });
 }
 
-export function createTransaction(body: Record<string, unknown>) {
-  return mobileFetch<{ id: string }>("/api/mobile/transactions", {
+export async function createTransaction(body: Record<string, unknown>) {
+  const result = await mobileFetch<{ id: string }>("/api/mobile/transactions", {
     method: "POST",
     body: JSON.stringify(body),
   });
+  invalidateCache("transactions");
+  invalidateCache("dashboard");
+  invalidateCache("accounts");
+  invalidateCache("reports");
+  invalidateCache("budgets");
+  return result;
 }
 
-export function fetchClients(workspaceId: string) {
+export function fetchClients(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     items: { _id: string; name: string; email: string | null; phone: string | null; projectCount: number }[];
-  }>(`/api/mobile/clients?workspaceId=${encodeURIComponent(workspaceId)}`);
+  }>(`/api/mobile/clients?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
-export function createClient(body: {
+export async function createClient(body: {
   workspaceId: string;
   name: string;
   email?: string;
   phone?: string;
 }) {
-  return mobileFetch("/api/mobile/clients", { method: "POST", body: JSON.stringify(body) });
+  const result = await mobileFetch("/api/mobile/clients", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("clients");
+  return result;
 }
 
-export function fetchProjects(workspaceId: string) {
+export function fetchProjects(workspaceId: string, skipCache = false) {
   return mobileFetch<{ items: Record<string, unknown>[] }>(
     `/api/mobile/projects?workspaceId=${encodeURIComponent(workspaceId)}`,
+    undefined,
+    { skipCache },
   );
 }
 
-export function createProject(body: Record<string, unknown>) {
-  return mobileFetch("/api/mobile/projects", { method: "POST", body: JSON.stringify(body) });
+export async function createProject(body: Record<string, unknown>) {
+  const result = await mobileFetch("/api/mobile/projects", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("projects");
+  invalidateCache("dashboard");
+  return result;
 }
 
-export function fetchInvoices(workspaceId: string) {
+export function fetchInvoices(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     items: {
       _id: string;
@@ -189,25 +250,33 @@ export function fetchInvoices(workspaceId: string) {
       issueDate: string;
       dueDate: string | null;
     }[];
-  }>(`/api/mobile/invoices?workspaceId=${encodeURIComponent(workspaceId)}`);
+  }>(`/api/mobile/invoices?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
-export function createInvoice(body: Record<string, unknown>) {
-  return mobileFetch<{ id: string; invoiceNumber: string }>("/api/mobile/invoices", {
+export async function createInvoice(body: Record<string, unknown>) {
+  const result = await mobileFetch<{ id: string; invoiceNumber: string }>("/api/mobile/invoices", {
     method: "POST",
     body: JSON.stringify(body),
   });
+  invalidateCache("invoices");
+  invalidateCache("dashboard");
+  invalidateCache("reports");
+  return result;
 }
 
-export function updateInvoiceStatus(body: {
+export async function updateInvoiceStatus(body: {
   workspaceId: string;
   invoiceId: string;
   status: string;
 }) {
-  return mobileFetch("/api/mobile/invoices", { method: "PATCH", body: JSON.stringify(body) });
+  const result = await mobileFetch("/api/mobile/invoices", { method: "PATCH", body: JSON.stringify(body) });
+  invalidateCache("invoices");
+  invalidateCache("dashboard");
+  invalidateCache("reports");
+  return result;
 }
 
-export function fetchBudgets(workspaceId: string) {
+export function fetchBudgets(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     items: {
       id: string;
@@ -217,19 +286,22 @@ export function fetchBudgets(workspaceId: string) {
       remaining: number;
       percentage: number;
     }[];
-  }>(`/api/mobile/budgets?workspaceId=${encodeURIComponent(workspaceId)}`);
+  }>(`/api/mobile/budgets?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
-export function createBudget(body: {
+export async function createBudget(body: {
   workspaceId: string;
   name: string;
   amount: number;
   categoryId?: string;
 }) {
-  return mobileFetch("/api/mobile/budgets", { method: "POST", body: JSON.stringify(body) });
+  const result = await mobileFetch("/api/mobile/budgets", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("budgets");
+  invalidateCache("dashboard");
+  return result;
 }
 
-export function fetchGoals(workspaceId: string) {
+export function fetchGoals(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     items: {
       id: string;
@@ -239,59 +311,81 @@ export function fetchGoals(workspaceId: string) {
       remaining: number;
       percentage: number;
     }[];
-  }>(`/api/mobile/goals?workspaceId=${encodeURIComponent(workspaceId)}`);
+  }>(`/api/mobile/goals?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
-export function createGoal(body: { workspaceId: string; name: string; targetAmount: number }) {
-  return mobileFetch("/api/mobile/goals", { method: "POST", body: JSON.stringify(body) });
+export async function createGoal(body: { workspaceId: string; name: string; targetAmount: number }) {
+  const result = await mobileFetch("/api/mobile/goals", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("goals");
+  invalidateCache("dashboard");
+  return result;
 }
 
-export function updateGoalProgress(body: {
+export async function updateGoalProgress(body: {
   workspaceId: string;
   goalId: string;
   amount: number;
 }) {
-  return mobileFetch("/api/mobile/goals", { method: "PATCH", body: JSON.stringify(body) });
+  const result = await mobileFetch("/api/mobile/goals", { method: "PATCH", body: JSON.stringify(body) });
+  invalidateCache("goals");
+  invalidateCache("dashboard");
+  return result;
 }
 
-export function fetchRecurring(workspaceId: string) {
+export function fetchRecurring(workspaceId: string, skipCache = false) {
   return mobileFetch<{ items: Record<string, unknown>[] }>(
     `/api/mobile/recurring?workspaceId=${encodeURIComponent(workspaceId)}`,
+    undefined,
+    { skipCache },
   );
 }
 
-export function createRecurring(body: Record<string, unknown>) {
-  return mobileFetch("/api/mobile/recurring", { method: "POST", body: JSON.stringify(body) });
+export async function createRecurring(body: Record<string, unknown>) {
+  const result = await mobileFetch("/api/mobile/recurring", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("recurring");
+  invalidateCache("dashboard");
+  return result;
 }
 
-export function recordRecurring(body: { workspaceId: string; recurringId: string }) {
-  return mobileFetch("/api/mobile/recurring", {
+export async function recordRecurring(body: { workspaceId: string; recurringId: string }) {
+  const result = await mobileFetch("/api/mobile/recurring", {
     method: "PATCH",
     body: JSON.stringify({ ...body, action: "record" }),
   });
+  invalidateCache("recurring");
+  invalidateCache("transactions");
+  invalidateCache("dashboard");
+  invalidateCache("accounts");
+  return result;
 }
 
-export function fetchTransfers(workspaceId: string) {
+export function fetchTransfers(workspaceId: string, skipCache = false) {
   return mobileFetch<{ items: { _id: string; amount: number; fromAccountName: string; toAccountName: string; transferDate: string; description: string }[] }>(
     `/api/mobile/transfers?workspaceId=${encodeURIComponent(workspaceId)}`,
+    undefined,
+    { skipCache },
   );
 }
 
-export function createTransfer(body: Record<string, unknown>) {
-  return mobileFetch("/api/mobile/transfers", { method: "POST", body: JSON.stringify(body) });
+export async function createTransfer(body: Record<string, unknown>) {
+  const result = await mobileFetch("/api/mobile/transfers", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("transfers");
+  invalidateCache("accounts");
+  invalidateCache("dashboard");
+  return result;
 }
 
-export function fetchReports(workspaceId: string, preset = "thisMonth") {
+export function fetchReports(workspaceId: string, preset = "thisMonth", skipCache = false) {
   const qs = new URLSearchParams({ workspaceId, preset });
   return mobileFetch<{
     summary: { income: number | null; expense: number | null; net: number | null };
     expenseBreakdown: { rows: { name: string; total: number | null }[] };
     incomeBreakdown: { rows: { name: string; total: number | null }[] };
     currency: string;
-  }>(`/api/mobile/reports?${qs}`);
+  }>(`/api/mobile/reports?${qs}`, undefined, { skipCache });
 }
 
-export function fetchPlan(workspaceId: string) {
+export function fetchPlan(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     plan: string;
     showAds: boolean;
@@ -299,28 +393,31 @@ export function fetchPlan(workspaceId: string) {
     features: string[];
     status: string;
     expiresAt: string | null;
-  }>(`/api/mobile/plan?workspaceId=${encodeURIComponent(workspaceId)}`);
+  }>(`/api/mobile/plan?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
-export function fetchBranding(workspaceId: string) {
+export function fetchBranding(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     businessName: string;
     logoUrl: string;
     taxId: string;
     businessPhone: string;
     businessAddress: string;
-  }>(`/api/mobile/branding?workspaceId=${encodeURIComponent(workspaceId)}`);
+  }>(`/api/mobile/branding?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
-export function saveBranding(body: Record<string, unknown>) {
-  return mobileFetch("/api/mobile/branding", { method: "POST", body: JSON.stringify(body) });
+export async function saveBranding(body: Record<string, unknown>) {
+  const result = await mobileFetch("/api/mobile/branding", { method: "POST", body: JSON.stringify(body) });
+  invalidateCache("branding");
+  invalidateCache("workspaces");
+  return result;
 }
 
-export function fetchTeam(workspaceId: string) {
+export function fetchTeam(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     members: { userId: string; name: string; email: string; role: string }[];
     invitations: { id: string; email: string; role: string }[];
-  }>(`/api/mobile/team?workspaceId=${encodeURIComponent(workspaceId)}`);
+  }>(`/api/mobile/team?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
 export { API_URL };

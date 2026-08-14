@@ -11,12 +11,16 @@ import {
   View,
 } from "react-native";
 import { Redirect, router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { authClient } from "@/lib/auth-client";
 import { API_URL } from "@/lib/config";
+import { useI18n } from "@/lib/i18n";
 import { colors, shared } from "@/lib/styles";
 import { AppIcon } from "@/components/icon";
 
 export default function LoginScreen() {
+  const insets = useSafeAreaInsets();
+  const { t, isRTL } = useI18n();
   const { data: session, isPending } = authClient.useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,7 +48,7 @@ export default function LoginScreen() {
     });
     setBusy(false);
     if (signInError) {
-      setError(signInError.message ?? "تعذر تسجيل الدخول. تأكد من صحة البريد وكلمة المرور.");
+      setError(signInError.message ?? t.login.errorInvalid);
       return;
     }
     router.replace("/(app)");
@@ -52,7 +56,10 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.screen}
+      style={[
+        styles.screen,
+        { paddingTop: Math.max(insets.top, 16) + 8, paddingBottom: Math.max(insets.bottom, 16) },
+      ]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
@@ -76,29 +83,33 @@ export default function LoginScreen() {
             >
               <AppIcon name="wallet" size={28} color={colors.primary} />
             </View>
-            <Text style={styles.brand}>مصروفاتي</Text>
-            <Text style={styles.subtitle}>سجّل بنفس بيانات حساب الويب</Text>
+            <Text style={styles.brand}>{isRTL ? "مصروفاتي" : "Masrofaty"}</Text>
+            <Text style={styles.subtitle}>{t.login.subtitle}</Text>
           </View>
 
-          <Text style={shared.label}>البريد الإلكتروني</Text>
+          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+            {t.login.emailPlaceholder}
+          </Text>
           <TextInput
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
             placeholder="name@example.com"
             placeholderTextColor={colors.faint}
-            style={styles.input}
+            style={[styles.input, { textAlign: isRTL ? "right" : "left" }]}
             value={email}
             onChangeText={setEmail}
           />
 
-          <Text style={shared.label}>كلمة المرور</Text>
+          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+            {t.login.passwordPlaceholder}
+          </Text>
           <TextInput
             secureTextEntry
             autoComplete="password"
             placeholder="••••••••"
             placeholderTextColor={colors.faint}
-            style={styles.input}
+            style={[styles.input, { textAlign: isRTL ? "right" : "left" }]}
             value={password}
             onChangeText={setPassword}
           />
@@ -117,12 +128,12 @@ export default function LoginScreen() {
             {busy ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>تسجيل الدخول</Text>
+              <Text style={styles.buttonText}>{t.login.submit}</Text>
             )}
           </Pressable>
 
           <Text style={styles.hint}>
-            حساب جديد أو استعادة كلمة المرور من الموقع: {API_URL.replace(/^https?:\/\//, "")}
+            {t.login.registerWeb}: {API_URL.replace(/^https?:\/\//, "")}
           </Text>
         </View>
       </ScrollView>

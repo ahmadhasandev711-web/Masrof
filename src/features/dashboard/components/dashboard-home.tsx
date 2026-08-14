@@ -13,6 +13,7 @@ import { getIntlLocale, type AppLocale } from "@/i18n/config";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import { after } from "next/server";
 
 export async function DashboardHome({
   userId,
@@ -43,28 +44,30 @@ export async function DashboardHome({
     getUserWhatsAppPhone(userId),
   ]);
 
-  void Promise.all([
-    dispatchDashboardEmailNotifications({
-      userId,
-      userEmail,
-      workspaceId,
-      workspaceName,
-      currency,
-      budgetWarnings,
-      dueRecurring,
-      locale,
-    }),
-    dispatchDashboardPushNotifications({
-      userId,
-      workspaceId,
-      workspaceName,
-      currency,
-      budgetWarnings,
-      dueRecurring,
-      locale,
-    }),
-  ]).catch((error) => {
-    console.error("[notifications] dashboard dispatch failed:", error);
+  after(() => {
+    void Promise.all([
+      dispatchDashboardEmailNotifications({
+        userId,
+        userEmail,
+        workspaceId,
+        workspaceName,
+        currency,
+        budgetWarnings,
+        dueRecurring,
+        locale,
+      }),
+      dispatchDashboardPushNotifications({
+        userId,
+        workspaceId,
+        workspaceName,
+        currency,
+        budgetWarnings,
+        dueRecurring,
+        locale,
+      }),
+    ]).catch((error) => {
+      console.error("[notifications] dashboard dispatch failed:", error);
+    });
   });
 
   return (

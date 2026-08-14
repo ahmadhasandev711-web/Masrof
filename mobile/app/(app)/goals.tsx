@@ -16,8 +16,10 @@ import { createGoal, fetchGoals, updateGoalProgress } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 export default function GoalsScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<
     {
@@ -38,9 +40,9 @@ export default function GoalsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchGoals(workspaceId);
+    const data = await fetchGoals(workspaceId, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -53,7 +55,7 @@ export default function GoalsScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -61,12 +63,12 @@ export default function GoalsScreen() {
 
   async function onCreate() {
     if (!workspaceId || name.trim().length < 2) {
-      setError("أدخل اسم الهدف (حرفين على الأقل)");
+      setError(isRTL ? "أدخل اسم الهدف (حرفين على الأقل)" : "Enter goal name (min 2 chars)");
       return;
     }
     const val = Number(target);
     if (!Number.isFinite(val) || val <= 0) {
-      setError("أدخل مبلغاً مستهدفاً صحيحاً أكبر من صفر");
+      setError(isRTL ? "أدخل مبلغاً مستهدفاً صحيحاً أكبر من صفر" : "Enter a valid target amount");
       return;
     }
 
@@ -77,9 +79,9 @@ export default function GoalsScreen() {
       setOpen(false);
       setName("");
       setTarget("");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر إنشاء الهدف");
+      setError(isRTL ? "تعذر إنشاء الهدف" : "Failed to create goal");
     } finally {
       setBusy(false);
     }
@@ -89,7 +91,7 @@ export default function GoalsScreen() {
     if (!workspaceId || !addOpen) return;
     const val = Number(addAmount);
     if (!Number.isFinite(val) || val <= 0) {
-      setError("أدخل مبلغاً صحيحاً أكبر من صفر");
+      setError(isRTL ? "أدخل مبلغاً صحيحاً أكبر من صفر" : "Enter a valid deposit amount");
       return;
     }
 
@@ -103,9 +105,9 @@ export default function GoalsScreen() {
       });
       setAddOpen(null);
       setAddAmount("");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر تحديث التقدم");
+      setError(isRTL ? "تعذر تحديث التقدم" : "Failed to update progress");
     } finally {
       setBusy(false);
     }
@@ -113,9 +115,9 @@ export default function GoalsScreen() {
 
   return (
     <Screen
-      title="أهداف الادخار"
+      title={t.goals.title}
       showBack
-      actionLabel="+ هدف جديد"
+      actionLabel={t.goals.add}
       actionIcon="add"
       onAction={() => {
         setError(null);
@@ -134,7 +136,7 @@ export default function GoalsScreen() {
           <View style={shared.center}>
             <AppIcon name="flag" size={44} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              لا توجد أهداف ادخار محددة بعد
+              {t.goals.noGoals}
             </Text>
           </View>
         }
@@ -142,8 +144,8 @@ export default function GoalsScreen() {
           const isDone = item.percentage >= 100;
           return (
             <View style={shared.card}>
-              <View style={shared.row}>
-                <View style={shared.rowStart}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <View
                     style={[
                       shared.iconCircle,
@@ -176,12 +178,12 @@ export default function GoalsScreen() {
                 </View>
               </View>
 
-              <View style={[shared.row, { marginVertical: 4 }]}>
+              <View style={[shared.row, { marginVertical: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <Text style={shared.label}>
-                  تم ادخار: {formatMoney(item.currentAmount, currency)}
+                  {t.goals.saved}: {formatMoney(item.currentAmount, currency)}
                 </Text>
                 <Text style={shared.label}>
-                  الهدف: {formatMoney(item.targetAmount, currency)}
+                  {t.goals.target}: {formatMoney(item.targetAmount, currency)}
                 </Text>
               </View>
 
@@ -198,22 +200,25 @@ export default function GoalsScreen() {
                 />
               </View>
 
-              <View style={[shared.row, { marginTop: 6 }]}>
+              <View style={[shared.row, { marginTop: 6, flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <Text style={[shared.label, { fontSize: 12 }]}>
                   {isDone
-                    ? "🎉 تم تحقيق الهدف بنجاح!"
-                    : `المتبقي: ${formatMoney(item.remaining, currency)}`}
+                    ? (isRTL ? "🎉 تم تحقيق الهدف بنجاح!" : "🎉 Goal completed!")
+                    : `${t.goals.remaining}: ${formatMoney(item.remaining, currency)}`}
                 </Text>
 
                 <Pressable
-                  style={[shared.buttonSecondary, { paddingVertical: 6, paddingHorizontal: 12 }]}
+                  style={[
+                    shared.buttonSecondary,
+                    { paddingVertical: 6, paddingHorizontal: 12, flexDirection: isRTL ? "row-reverse" : "row" },
+                  ]}
                   onPress={() => {
                     setError(null);
                     setAddOpen(item.id);
                   }}
                 >
                   <AppIcon name="add" size={14} color={colors.primary} />
-                  <Text style={[shared.buttonSecondaryText, { fontSize: 12 }]}>إيداع في الهدف</Text>
+                  <Text style={[shared.buttonSecondaryText, { fontSize: 12 }]}>{t.goals.deposit}</Text>
                 </Pressable>
               </View>
             </View>
@@ -239,30 +244,34 @@ export default function GoalsScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>هدف ادخار جديد</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>{t.goals.newTitle}</Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>اسم الهدف</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "اسم الهدف" : "Goal Name"}
+            </Text>
             <TextInput
-              style={shared.input}
-              placeholder="مثال: شراء لابتوب، صندوق الطوارئ، السفر..."
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={t.goals.namePlaceholder}
               placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={shared.label}>المبلغ المستهدف ({currency})</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.goals.target} ({currency})
+            </Text>
             <TextInput
-              style={[shared.input, { fontSize: 20, fontWeight: "700", color: colors.primary }]}
-              placeholder="0.00"
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={t.goals.targetPlaceholder}
               placeholderTextColor={colors.faint}
-              keyboardType="decimal-pad"
               value={target}
               onChangeText={setTarget}
+              keyboardType="numeric"
             />
 
             {error ? <Text style={shared.error}>{error}</Text> : null}
@@ -275,10 +284,7 @@ export default function GoalsScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>حفظ الهدف</Text>
-                </>
+                <Text style={shared.buttonText}>{t.common.save}</Text>
               )}
             </Pressable>
           </Pressable>
@@ -303,21 +309,23 @@ export default function GoalsScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>إيداع في هدف الادخار</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>{t.goals.depositTitle}</Text>
               <Pressable onPress={() => setAddOpen(null)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>المبلغ المضاف ({currency})</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.goals.depositAmount} ({currency})
+            </Text>
             <TextInput
-              style={[shared.input, { fontSize: 20, fontWeight: "700", color: colors.primary }]}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               placeholder="0.00"
               placeholderTextColor={colors.faint}
-              keyboardType="decimal-pad"
               value={addAmount}
               onChangeText={setAddAmount}
+              keyboardType="numeric"
               autoFocus
             />
 
@@ -331,10 +339,7 @@ export default function GoalsScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>تأكيد الإيداع</Text>
-                </>
+                <Text style={shared.buttonText}>{t.goals.confirmDeposit}</Text>
               )}
             </Pressable>
           </Pressable>

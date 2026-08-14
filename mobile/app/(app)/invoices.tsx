@@ -16,6 +16,7 @@ import { fetchInvoices, updateInvoiceStatus, API_URL } from "@/lib/api";
 import { formatDate, formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 type InvoiceRow = {
   _id: string;
@@ -28,15 +29,8 @@ type InvoiceRow = {
   dueDate: string | null;
 };
 
-const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
-  draft: { label: "مسودة", bg: "#F3F4F6", text: colors.muted },
-  sent: { label: "مُرسلة", bg: colors.infoSoft, text: colors.infoText },
-  paid: { label: "مدفوعة", bg: colors.incomeSoft, text: colors.incomeText },
-  overdue: { label: "متأخرة", bg: colors.expenseSoft, text: colors.expenseText },
-  cancelled: { label: "ملغاة", bg: "#FEE2E2", text: "#991B1B" },
-};
-
 export default function InvoicesScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<InvoiceRow[]>([]);
   const [filter, setFilter] = useState<string>("all");
@@ -44,9 +38,17 @@ export default function InvoicesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
+    draft: { label: t.invoices.statusDraft, bg: "#F3F4F6", text: colors.muted },
+    sent: { label: t.invoices.statusSent, bg: colors.infoSoft, text: colors.infoText },
+    paid: { label: t.invoices.statusPaid, bg: colors.incomeSoft, text: colors.incomeText },
+    overdue: { label: t.invoices.statusOverdue, bg: colors.expenseSoft, text: colors.expenseText },
+    cancelled: { label: t.invoices.statusCancelled, bg: "#FEE2E2", text: "#991B1B" },
+  };
+
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchInvoices(workspaceId);
+    const data = await fetchInvoices(workspaceId, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -59,7 +61,7 @@ export default function InvoicesScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -70,7 +72,7 @@ export default function InvoicesScreen() {
     setUpdatingId(invoiceId);
     try {
       await updateInvoiceStatus({ workspaceId, invoiceId, status: "paid" });
-      await load();
+      await load(true);
     } finally {
       setUpdatingId(null);
     }
@@ -80,8 +82,8 @@ export default function InvoicesScreen() {
     const url = `${API_URL}/print/invoice/${item._id}?format=a4`;
     try {
       await Share.share({
-        title: `فاتورة رقم ${item.invoiceNumber}`,
-        message: `فاتورة رقم ${item.invoiceNumber} للعميل ${item.clientName} بمبلغ ${formatMoney(item.total, currency)}\nرابط الفاتورة: ${url}`,
+        title: `${t.invoices.title} #${item.invoiceNumber}`,
+        message: `${t.invoices.title} #${item.invoiceNumber} - ${item.clientName}: ${formatMoney(item.total, currency)}\n${url}`,
         url,
       });
     } catch {
@@ -103,17 +105,17 @@ export default function InvoicesScreen() {
 
   return (
     <Screen
-      title="الفواتير"
+      title={t.invoices.title}
       showBack
-      actionLabel="+ فاتورة"
+      actionLabel={t.invoices.add}
       actionIcon="add"
       onAction={() => router.push("/(app)/invoice-new")}
     >
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>
         <TextInput
-          style={shared.input}
-          placeholder="بحث برقم الفاتورة أو اسم العميل..."
+          style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          placeholder={t.invoices.searchPlaceholder}
           placeholderTextColor={colors.faint}
           value={search}
           onChangeText={setSearch}
@@ -121,11 +123,11 @@ export default function InvoicesScreen() {
       </View>
 
       {/* Filter Tabs */}
-      <View style={{ flexDirection: "row-reverse", gap: 8, marginBottom: 6 }}>
+      <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 8, marginBottom: 6 }}>
         {[
-          { key: "all", label: "الكل" },
-          { key: "unpaid", label: "مستحقة" },
-          { key: "paid", label: "مدفوعة" },
+          { key: "all", label: t.common.all },
+          { key: "unpaid", label: t.invoices.unpaid },
+          { key: "paid", label: t.invoices.paid },
         ].map((tab) => {
           const active = filter === tab.key;
           return (
@@ -138,7 +140,12 @@ export default function InvoicesScreen() {
                 active && { backgroundColor: colors.primary, borderColor: colors.primary },
               ]}
             >
-              <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+              <Text
+                style={[
+                  shared.chipText,
+                  active && { color: "#FFFFFF", fontWeight: "700" },
+                ]}
+              >
                 {tab.label}
               </Text>
             </Pressable>
@@ -158,7 +165,7 @@ export default function InvoicesScreen() {
           <View style={shared.center}>
             <AppIcon name="receipt-outline" size={44} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              {search ? "لا توجد فواتير مطابقة للبحث" : "لا توجد فواتير منشأة بعد"}
+              {search ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching invoices found") : t.invoices.noInvoices}
             </Text>
           </View>
         }
@@ -170,15 +177,15 @@ export default function InvoicesScreen() {
           };
           return (
             <View style={shared.card}>
-              <View style={shared.row}>
-                <View style={shared.rowStart}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <View style={[shared.iconCircle, { backgroundColor: conf.bg }]}>
                     <AppIcon name="receipt" size={18} color={conf.text} />
                   </View>
-                  <View style={{ alignItems: "flex-end" }}>
+                  <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
                     <Text style={[shared.value, { fontSize: 16 }]}>{item.invoiceNumber}</Text>
                     <Text style={[shared.label, { fontSize: 12 }]}>
-                      👤 {item.clientName || "عميل عام"} · {formatDate(item.issueDate)}
+                      👤 {item.clientName || (isRTL ? "عميل عام" : "General Client")} · {formatDate(item.issueDate)}
                     </Text>
                   </View>
                 </View>
@@ -188,38 +195,38 @@ export default function InvoicesScreen() {
                 </View>
               </View>
 
-              <View style={[shared.row, { marginVertical: 4 }]}>
-                <Text style={shared.label}>الإجمالي:</Text>
+              <View style={[shared.row, { marginVertical: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <Text style={shared.label}>{t.common.total}:</Text>
                 <Text style={[shared.value, { fontSize: 18, color: colors.primary, fontWeight: "800" }]}>
                   {formatMoney(item.total, currency)}
                 </Text>
               </View>
 
               {/* Action Buttons for Invoices */}
-              <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: 8, marginTop: 6, borderTopWidth: 1, borderTopColor: colors.borderLight, paddingTop: 8 }}>
+              <View style={{ flexDirection: isRTL ? "row-reverse" : "row", flexWrap: "wrap", gap: 8, marginTop: 6, borderTopWidth: 1, borderTopColor: colors.borderLight, paddingTop: 8 }}>
                 {item.status !== "paid" ? (
                   <Pressable
-                    style={[shared.buttonSecondary, { backgroundColor: colors.incomeSoft, borderColor: "#A7F3D0" }]}
+                    style={[shared.buttonSecondary, { backgroundColor: colors.incomeSoft, borderColor: "#A7F3D0", flexDirection: isRTL ? "row-reverse" : "row" }]}
                     onPress={() => markPaid(item._id)}
                     disabled={updatingId === item._id}
                   >
                     <AppIcon name="checkmark" size={15} color={colors.income} />
                     <Text style={[shared.buttonSecondaryText, { color: colors.incomeText }]}>
-                      {updatingId === item._id ? "جارِ التحديث..." : "تعليم مدفوعة"}
+                      {updatingId === item._id ? t.common.loading : t.invoices.markPaid}
                     </Text>
                   </Pressable>
                 ) : null}
 
                 <Pressable
-                  style={shared.buttonSecondary}
+                  style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
                   onPress={() => shareInvoice(item)}
                 >
                   <AppIcon name="share-social" size={15} color={colors.primary} />
-                  <Text style={shared.buttonSecondaryText}>مشاركة</Text>
+                  <Text style={shared.buttonSecondaryText}>{t.invoices.shareText}</Text>
                 </Pressable>
 
                 <Pressable
-                  style={shared.buttonSecondary}
+                  style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
                   onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=a4`)}
                 >
                   <AppIcon name="print" size={15} color={colors.primary} />
@@ -227,7 +234,7 @@ export default function InvoicesScreen() {
                 </Pressable>
 
                 <Pressable
-                  style={shared.buttonSecondary}
+                  style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
                   onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=pos`)}
                 >
                   <AppIcon name="print" size={15} color={colors.primary} />

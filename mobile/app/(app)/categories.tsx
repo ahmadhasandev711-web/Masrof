@@ -15,8 +15,10 @@ import { AppIcon } from "@/components/icon";
 import { createCategory, fetchCategories, type CategoryItem } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 export default function CategoriesScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId } = useWorkspace();
   const [items, setItems] = useState<CategoryItem[]>([]);
   const [filter, setFilter] = useState<"all" | "expense" | "income">("all");
@@ -27,9 +29,9 @@ export default function CategoriesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchCategories(workspaceId);
+    const data = await fetchCategories(workspaceId, undefined, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -42,7 +44,7 @@ export default function CategoriesScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -50,7 +52,7 @@ export default function CategoriesScreen() {
 
   async function onCreate() {
     if (!workspaceId || name.trim().length < 2) {
-      setError("أدخل اسم التصنيف (حرفين على الأقل)");
+      setError(isRTL ? "أدخل اسم التصنيف (حرفين على الأقل)" : "Enter category name (min 2 chars)");
       return;
     }
     setBusy(true);
@@ -59,9 +61,9 @@ export default function CategoriesScreen() {
       await createCategory({ workspaceId, name: name.trim(), kind });
       setOpen(false);
       setName("");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر إنشاء التصنيف");
+      setError(isRTL ? "تعذر إنشاء التصنيف" : "Failed to create category");
     } finally {
       setBusy(false);
     }
@@ -74,9 +76,9 @@ export default function CategoriesScreen() {
 
   return (
     <Screen
-      title="التصنيفات"
+      title={isRTL ? "التصنيفات" : "Categories"}
       showBack
-      actionLabel="+ تصنيف"
+      actionLabel={isRTL ? "+ تصنيف" : "+ Category"}
       actionIcon="add"
       onAction={() => {
         setError(null);
@@ -84,11 +86,11 @@ export default function CategoriesScreen() {
       }}
     >
       {/* Filter Tabs */}
-      <View style={{ flexDirection: "row-reverse", gap: 8, marginBottom: 8 }}>
+      <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 8, marginBottom: 8 }}>
         {[
-          { key: "all", label: "الكل" },
-          { key: "expense", label: "المصروفات" },
-          { key: "income", label: "الإيرادات" },
+          { key: "all", label: t.common.all },
+          { key: "expense", label: t.transactions.expenseOnly },
+          { key: "income", label: t.transactions.incomeOnly },
         ].map((tab) => {
           const active = filter === tab.key;
           return (
@@ -101,7 +103,12 @@ export default function CategoriesScreen() {
                 active && { backgroundColor: colors.primary, borderColor: colors.primary },
               ]}
             >
-              <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+              <Text
+                style={[
+                  shared.chipText,
+                  active && { color: "#FFFFFF", fontWeight: "700" },
+                ]}
+              >
                 {tab.label}
               </Text>
             </Pressable>
@@ -120,14 +127,16 @@ export default function CategoriesScreen() {
         ListEmptyComponent={
           <View style={shared.center}>
             <AppIcon name="pricetag" size={44} color={colors.faint} />
-            <Text style={[shared.empty, { paddingVertical: 12 }]}>لا توجد تصنيفات مضافة</Text>
+            <Text style={[shared.empty, { paddingVertical: 12 }]}>
+              {isRTL ? "لا توجد تصنيفات مضافة" : "No categories found"}
+            </Text>
           </View>
         }
         renderItem={({ item }) => {
           const isIncome = item.kind === "income";
           return (
-            <View style={[shared.card, shared.row]}>
-              <View style={shared.rowStart}>
+            <View style={[shared.card, shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <View
                   style={[
                     shared.iconCircle,
@@ -155,7 +164,7 @@ export default function CategoriesScreen() {
                     { color: isIncome ? colors.incomeText : colors.expenseText },
                   ]}
                 >
-                  {isIncome ? "دخل" : "مصروف"}
+                  {isIncome ? t.common.income : t.common.expense}
                 </Text>
               </View>
             </View>
@@ -181,29 +190,35 @@ export default function CategoriesScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>إضافة تصنيف جديد</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>
+                {isRTL ? "إضافة تصنيف جديد" : "New Category"}
+              </Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>اسم التصنيف</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "اسم التصنيف" : "Category Name"}
+            </Text>
             <TextInput
-              style={shared.input}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               value={name}
               onChangeText={setName}
-              placeholder="مثال: مطاعم، مواصلات، استشارات..."
+              placeholder={isRTL ? "مثال: مطاعم، مواصلات، استشارات..." : "e.g. Dining, Travel, Software..."}
               placeholderTextColor={colors.faint}
             />
 
-            <Text style={shared.label}>النوع</Text>
-            <View style={shared.row}>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "النوع" : "Type"}
+            </Text>
+            <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 10 }}>
               <Pressable
                 onPress={() => setKind("expense")}
                 style={[
                   shared.buttonSecondary,
-                  { flex: 1 },
+                  { flex: 1, flexDirection: isRTL ? "row-reverse" : "row" },
                   kind === "expense" && {
                     backgroundColor: colors.expense,
                     borderColor: colors.expense,
@@ -213,10 +228,10 @@ export default function CategoriesScreen() {
                 <Text
                   style={[
                     shared.buttonSecondaryText,
-                    kind === "expense" && { color: "#FFFFFF" },
+                    kind === "expense" && { color: "#FFFFFF", fontWeight: "700" },
                   ]}
                 >
-                  مصروف
+                  {t.common.expense}
                 </Text>
               </Pressable>
 
@@ -224,7 +239,7 @@ export default function CategoriesScreen() {
                 onPress={() => setKind("income")}
                 style={[
                   shared.buttonSecondary,
-                  { flex: 1 },
+                  { flex: 1, flexDirection: isRTL ? "row-reverse" : "row" },
                   kind === "income" && {
                     backgroundColor: colors.income,
                     borderColor: colors.income,
@@ -234,10 +249,10 @@ export default function CategoriesScreen() {
                 <Text
                   style={[
                     shared.buttonSecondaryText,
-                    kind === "income" && { color: "#FFFFFF" },
+                    kind === "income" && { color: "#FFFFFF", fontWeight: "700" },
                   ]}
                 >
-                  دخل
+                  {t.common.income}
                 </Text>
               </Pressable>
             </View>
@@ -252,10 +267,7 @@ export default function CategoriesScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>حفظ التصنيف</Text>
-                </>
+                <Text style={shared.buttonText}>{t.common.save}</Text>
               )}
             </Pressable>
           </Pressable>

@@ -7,19 +7,21 @@ import { fetchTransactions, type TransactionItem } from "@/lib/api";
 import { formatDate, formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 type FilterType = "all" | "expense" | "income";
 
 export default function TransactionsScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<TransactionItem[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchTransactions(workspaceId);
+    const data = await fetchTransactions(workspaceId, 1, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -32,7 +34,7 @@ export default function TransactionsScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -52,16 +54,16 @@ export default function TransactionsScreen() {
 
   return (
     <Screen
-      title="العمليات"
-      actionLabel="+ إضافة عملية"
+      title={t.transactions.title}
+      actionLabel={t.transactions.add}
       actionIcon="add"
       onAction={() => router.push("/(app)/transaction-new")}
     >
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>
         <TextInput
-          style={shared.input}
-          placeholder="بحث بالوصف، التصنيف، أو الحساب..."
+          style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          placeholder={t.transactions.searchPlaceholder}
           placeholderTextColor={colors.faint}
           value={search}
           onChangeText={setSearch}
@@ -69,12 +71,12 @@ export default function TransactionsScreen() {
       </View>
 
       {/* Filter Tabs */}
-      <View style={{ flexDirection: "row-reverse", gap: 8, marginBottom: 6 }}>
+      <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 8, marginBottom: 6 }}>
         {(
           [
-            { key: "all", label: "الكل" },
-            { key: "expense", label: "المصروفات" },
-            { key: "income", label: "الإيرادات" },
+            { key: "all", label: t.common.all },
+            { key: "expense", label: t.transactions.expenseOnly },
+            { key: "income", label: t.transactions.incomeOnly },
           ] as const
         ).map((tab) => {
           const active = filter === tab.key;
@@ -92,7 +94,7 @@ export default function TransactionsScreen() {
                 style={[
                   shared.chipText,
                   { textAlign: "center" },
-                  active && { color: "#FFFFFF" },
+                  active && { color: "#FFFFFF", fontWeight: "700" },
                 ]}
               >
                 {tab.label}
@@ -115,7 +117,7 @@ export default function TransactionsScreen() {
           <View style={shared.center}>
             <AppIcon name="document-text" size={40} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              {search ? "لا توجد نتائج مطابقة للبحث" : "لا توجد عمليات مسجلة بعد"}
+              {search ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching transactions found") : t.transactions.noTransactions}
             </Text>
           </View>
         }
@@ -123,8 +125,8 @@ export default function TransactionsScreen() {
           const isIncome = item.type === "income";
           return (
             <View style={shared.card}>
-              <View style={shared.row}>
-                <View style={shared.rowStart}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <View
                     style={[
                       shared.iconCircle,
@@ -139,9 +141,9 @@ export default function TransactionsScreen() {
                       color={isIncome ? colors.income : colors.expense}
                     />
                   </View>
-                  <View style={{ alignItems: "flex-end" }}>
+                  <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
                     <Text style={[shared.value, { fontSize: 15 }]}>
-                      {item.description || item.categoryName || "عملية"}
+                      {item.description || item.categoryName || (isIncome ? t.common.income : t.common.expense)}
                     </Text>
                     <Text style={[shared.label, { fontSize: 12 }]}>
                       {formatDate(item.transactionDate)}
@@ -149,7 +151,7 @@ export default function TransactionsScreen() {
                   </View>
                 </View>
 
-                <View style={{ alignItems: "flex-start" }}>
+                <View style={{ alignItems: isRTL ? "flex-start" : "flex-end" }}>
                   <Text
                     style={[
                       shared.value,
@@ -167,7 +169,7 @@ export default function TransactionsScreen() {
               </View>
 
               {/* Tags for Category and Account */}
-              <View style={{ flexDirection: "row-reverse", gap: 6, marginTop: 4 }}>
+              <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 6, marginTop: 4 }}>
                 {item.categoryName ? (
                   <View
                     style={[

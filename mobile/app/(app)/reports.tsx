@@ -13,10 +13,12 @@ import { fetchReports } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 type PresetKey = "thisMonth" | "lastMonth" | "thisYear";
 
 export default function ReportsScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [preset, setPreset] = useState<PresetKey>("thisMonth");
   const [summary, setSummary] = useState<{
@@ -28,9 +30,9 @@ export default function ReportsScreen() {
   const [incomeRows, setIncomeRows] = useState<{ name: string; total: number | null }[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchReports(workspaceId, preset);
+    const data = await fetchReports(workspaceId, preset, skipCache);
     setSummary(data.summary);
     setExpenseRows(data.expenseBreakdown?.rows ?? []);
     setIncomeRows(data.incomeBreakdown?.rows ?? []);
@@ -49,7 +51,7 @@ export default function ReportsScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -59,7 +61,7 @@ export default function ReportsScreen() {
   const incomeTotal = incomeRows.reduce((sum, row) => sum + (row.total ?? 0), 0);
 
   return (
-    <Screen title="التقارير المالية" showBack>
+    <Screen title={t.reports.title} showBack>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
@@ -68,11 +70,11 @@ export default function ReportsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Preset Selector */}
-        <View style={{ flexDirection: "row-reverse", gap: 8 }}>
+        <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 8 }}>
           {[
-            { key: "thisMonth", label: "هذا الشهر" },
-            { key: "lastMonth", label: "الشهر السابق" },
-            { key: "thisYear", label: "هذا العام" },
+            { key: "thisMonth", label: t.reports.thisMonth },
+            { key: "lastMonth", label: t.reports.lastMonth },
+            { key: "thisYear", label: t.reports.thisYear },
           ].map((p) => {
             const active = preset === p.key;
             return (
@@ -85,7 +87,12 @@ export default function ReportsScreen() {
                   active && { backgroundColor: colors.primary, borderColor: colors.primary },
                 ]}
               >
-                <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+                <Text
+                  style={[
+                    shared.chipText,
+                    active && { color: "#FFFFFF", fontWeight: "700" },
+                  ]}
+                >
                   {p.label}
                 </Text>
               </Pressable>
@@ -94,23 +101,43 @@ export default function ReportsScreen() {
         </View>
 
         {/* Financial Summary Cards */}
-        <View style={shared.row}>
+        <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
           <View style={[shared.card, { flex: 1 }]}>
-            <View style={shared.row}>
-              <Text style={shared.label}>الإيرادات</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={shared.label}>{t.common.income}</Text>
               <AppIcon name="trending-up" size={18} color={colors.income} />
             </View>
-            <Text style={[shared.value, { color: colors.income, fontSize: 18, marginTop: 4 }]}>
+            <Text
+              style={[
+                shared.value,
+                {
+                  color: colors.income,
+                  fontSize: 18,
+                  marginTop: 4,
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
               {formatMoney(summary?.income, currency)}
             </Text>
           </View>
 
           <View style={[shared.card, { flex: 1 }]}>
-            <View style={shared.row}>
-              <Text style={shared.label}>المصروفات</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={shared.label}>{t.common.expense}</Text>
               <AppIcon name="trending-down" size={18} color={colors.expense} />
             </View>
-            <Text style={[shared.value, { color: colors.expense, fontSize: 18, marginTop: 4 }]}>
+            <Text
+              style={[
+                shared.value,
+                {
+                  color: colors.expense,
+                  fontSize: 18,
+                  marginTop: 4,
+                  textAlign: isRTL ? "right" : "left",
+                },
+              ]}
+            >
               {formatMoney(summary?.expense, currency)}
             </Text>
           </View>
@@ -118,8 +145,8 @@ export default function ReportsScreen() {
 
         {/* Net Savings Card */}
         <View style={shared.cardHighlighted}>
-          <View style={shared.row}>
-            <Text style={shared.label}>صافي الوفر للفترة</Text>
+          <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+            <Text style={shared.label}>{t.dashboard.netSavings}</Text>
             <AppIcon name="wallet" size={20} color={colors.primary} />
           </View>
           <Text
@@ -129,6 +156,7 @@ export default function ReportsScreen() {
                 fontSize: 24,
                 color: (summary?.net ?? 0) >= 0 ? colors.income : colors.expense,
                 fontWeight: "800",
+                textAlign: isRTL ? "right" : "left",
               },
             ]}
           >
@@ -139,10 +167,12 @@ export default function ReportsScreen() {
 
         {/* Expense Breakdown */}
         <View style={{ gap: 8 }}>
-          <Text style={[shared.label, { fontWeight: "700" }]}>توزيع المصروفات حسب التصنيف</Text>
+          <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
+            {t.reports.expenseBreakdown}
+          </Text>
           {expenseRows.length === 0 ? (
             <View style={[shared.card, { alignItems: "center", paddingVertical: 14 }]}>
-              <Text style={shared.label}>لا توجد مصروفات مسجلة لهذه الفترة</Text>
+              <Text style={shared.label}>{t.reports.noReports}</Text>
             </View>
           ) : (
             expenseRows.map((row) => {
@@ -152,7 +182,7 @@ export default function ReportsScreen() {
                   : 0;
               return (
                 <View key={row.name} style={shared.card}>
-                  <View style={shared.row}>
+                  <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                     <Text style={[shared.value, { fontSize: 15 }]}>{row.name}</Text>
                     <Text style={[shared.value, { fontSize: 15, color: colors.expense }]}>
                       {formatMoney(row.total, currency)} ({pct}%)
@@ -175,7 +205,9 @@ export default function ReportsScreen() {
         {/* Income Breakdown */}
         {incomeRows.length > 0 && (
           <View style={{ gap: 8 }}>
-            <Text style={[shared.label, { fontWeight: "700" }]}>توزيع الإيرادات حسب التصنيف</Text>
+            <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
+              {t.reports.incomeBreakdown}
+            </Text>
             {incomeRows.map((row) => {
               const pct =
                 incomeTotal > 0 && row.total != null
@@ -183,7 +215,7 @@ export default function ReportsScreen() {
                   : 0;
               return (
                 <View key={row.name} style={shared.card}>
-                  <View style={shared.row}>
+                  <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                     <Text style={[shared.value, { fontSize: 15 }]}>{row.name}</Text>
                     <Text style={[shared.value, { fontSize: 15, color: colors.income }]}>
                       {formatMoney(row.total, currency)} ({pct}%)

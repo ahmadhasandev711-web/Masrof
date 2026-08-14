@@ -74,18 +74,25 @@ async function fetchPublishedPosts(options: {
   }
 }
 
-export const listPublishedPosts = cache(async (locale: AppLocale, category?: string, tag?: string) =>
-  fetchPublishedPosts({ locale, category, tag }),
+import { unstable_cache } from "next/cache";
+
+export const BLOG_POSTS_TAG = "blog-posts";
+
+export const listPublishedPosts = unstable_cache(
+  async (locale: AppLocale, category?: string, tag?: string) =>
+    fetchPublishedPosts({ locale, category, tag }),
+  ["blog-published-posts"],
+  { revalidate: 300, tags: [BLOG_POSTS_TAG] },
 );
 
-export const listLatestPublishedPosts = cache(async (locale: AppLocale, limit = 3) =>
-  fetchPublishedPosts({ locale, limit }),
+export const listLatestPublishedPosts = unstable_cache(
+  async (locale: AppLocale, limit = 3) =>
+    fetchPublishedPosts({ locale, limit }),
+  ["blog-latest-posts"],
+  { revalidate: 300, tags: [BLOG_POSTS_TAG] },
 );
 
-export async function getPublishedPostBySlug(
-  slug: string,
-  locale: AppLocale,
-): Promise<PublicPostDetail | null> {
+async function fetchPostBySlug(slug: string, locale: AppLocale): Promise<PublicPostDetail | null> {
   try {
     await connectToDatabase();
     const post = await PostModel.findOne({ slug, locale, isPublished: true })
@@ -99,6 +106,12 @@ export async function getPublishedPostBySlug(
     return null;
   }
 }
+
+export const getPublishedPostBySlug = unstable_cache(
+  fetchPostBySlug,
+  ["blog-post-by-slug"],
+  { revalidate: 300, tags: [BLOG_POSTS_TAG] },
+);
 
 /** If `slug` is published in another locale, returns that locale (for language-fallback UI). */
 export async function findAlternatePublishedLocale(
@@ -116,7 +129,7 @@ export async function findAlternatePublishedLocale(
   }
 }
 
-export const listPublishedCategories = cache(async (locale: AppLocale) => {
+async function fetchPublishedCategories(locale: AppLocale): Promise<string[]> {
   try {
     await connectToDatabase();
     const categories = await PostModel.distinct("category", {
@@ -129,9 +142,15 @@ export const listPublishedCategories = cache(async (locale: AppLocale) => {
     console.error("[blog] failed to load categories:", error);
     return [];
   }
-});
+}
 
-export async function listRelatedPosts(
+export const listPublishedCategories = unstable_cache(
+  fetchPublishedCategories,
+  ["blog-categories"],
+  { revalidate: 300, tags: [BLOG_POSTS_TAG] },
+);
+
+async function fetchRelatedPosts(
   slug: string,
   locale: AppLocale,
   category: string | null,
@@ -158,6 +177,12 @@ export async function listRelatedPosts(
     return [];
   }
 }
+
+export const listRelatedPosts = unstable_cache(
+  fetchRelatedPosts,
+  ["blog-related-posts"],
+  { revalidate: 300, tags: [BLOG_POSTS_TAG] },
+);
 
 /** All published posts across locales — used by sitemap (no cookie context). */
 export async function listAllPublishedPostsForSitemap(): Promise<PublicPostSummary[]> {

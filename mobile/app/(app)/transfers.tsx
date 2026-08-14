@@ -17,8 +17,10 @@ import { createTransfer, fetchAccounts, fetchTransfers, type AccountItem } from 
 import { formatDate, formatMoney, todayISO } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 export default function TransfersScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<
     {
@@ -40,9 +42,9 @@ export default function TransfersScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchTransfers(workspaceId);
+    const data = await fetchTransfers(workspaceId, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -55,7 +57,7 @@ export default function TransfersScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -75,16 +77,16 @@ export default function TransfersScreen() {
   async function onCreate() {
     if (!workspaceId) return;
     if (!fromAccountId || !toAccountId) {
-      setError("يرجى اختيار حسابي التحويل");
+      setError(isRTL ? "يرجى اختيار حسابي التحويل" : "Please select source and destination accounts");
       return;
     }
     if (fromAccountId === toAccountId) {
-      setError("لا يمكن التحويل لنفس الحساب");
+      setError(isRTL ? "لا يمكن التحويل لنفس الحساب" : "Source and destination cannot be the same");
       return;
     }
     const value = Number(amount);
     if (!Number.isFinite(value) || value <= 0) {
-      setError("أدخل مبلغاً صحيحاً أكبر من صفر");
+      setError(isRTL ? "أدخل مبلغاً صحيحاً أكبر من صفر" : "Enter a valid amount");
       return;
     }
 
@@ -100,9 +102,9 @@ export default function TransfersScreen() {
       });
       setOpen(false);
       setAmount("");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر تنفيذ التحويل. تأكد من توفر الرصيد الكافي.");
+      setError(isRTL ? "تعذر تنفيذ التحويل. تأكد من توفر الرصيد الكافي." : "Failed to transfer. Ensure sufficient balance.");
     } finally {
       setBusy(false);
     }
@@ -110,9 +112,9 @@ export default function TransfersScreen() {
 
   return (
     <Screen
-      title="التحويلات المالية"
+      title={t.transfers.title}
       showBack
-      actionLabel="+ تحويل"
+      actionLabel={t.transfers.add}
       actionIcon="swap-horizontal"
       onAction={() => {
         setError(null);
@@ -131,20 +133,20 @@ export default function TransfersScreen() {
           <View style={shared.center}>
             <AppIcon name="swap-horizontal" size={44} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              لا توجد عمليات تحويل مسجلة بعد
+              {t.transfers.noTransfers}
             </Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={shared.card}>
-            <View style={shared.row}>
-              <View style={shared.rowStart}>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <View style={[shared.iconCircle, { backgroundColor: colors.warningSoft }]}>
                   <AppIcon name="swap-horizontal" size={18} color={colors.warning} />
                 </View>
-                <View style={{ alignItems: "flex-end" }}>
+                <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
                   <Text style={[shared.value, { fontSize: 15 }]}>
-                    من: {item.fromAccountName} ⬅ إلى: {item.toAccountName}
+                    {item.fromAccountName} ➔ {item.toAccountName}
                   </Text>
                   <Text style={[shared.label, { fontSize: 12 }]}>
                     {formatDate(item.transferDate)}
@@ -178,15 +180,21 @@ export default function TransfersScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>تحويل بين الحسابات</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>{t.transfers.newTitle}</Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>من الحساب (المصدر)</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.transfers.fromAccount}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+            >
               {accounts.map((account) => {
                 const active = fromAccountId === account.id;
                 return (
@@ -198,7 +206,12 @@ export default function TransfersScreen() {
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
-                    <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+                    <Text
+                      style={[
+                        shared.chipText,
+                        active && { color: "#FFFFFF", fontWeight: "700" },
+                      ]}
+                    >
                       💳 {account.name}
                     </Text>
                   </Pressable>
@@ -206,8 +219,14 @@ export default function TransfersScreen() {
               })}
             </ScrollView>
 
-            <Text style={shared.label}>إلى الحساب (المستلم)</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.transfers.toAccount}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+            >
               {accounts.map((account) => {
                 const active = toAccountId === account.id;
                 return (
@@ -219,7 +238,12 @@ export default function TransfersScreen() {
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
-                    <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+                    <Text
+                      style={[
+                        shared.chipText,
+                        active && { color: "#FFFFFF", fontWeight: "700" },
+                      ]}
+                    >
                       💳 {account.name}
                     </Text>
                   </Pressable>
@@ -227,19 +251,23 @@ export default function TransfersScreen() {
               })}
             </ScrollView>
 
-            <Text style={shared.label}>مبلغ التحويل ({currency})</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.common.amount} ({currency})
+            </Text>
             <TextInput
-              style={[shared.input, { fontSize: 20, fontWeight: "700", color: colors.warningText }]}
-              keyboardType="decimal-pad"
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              keyboardType="numeric"
               value={amount}
               onChangeText={setAmount}
               placeholder="0.00"
               placeholderTextColor={colors.faint}
             />
 
-            <Text style={shared.label}>تاريخ التحويل</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "تاريخ التحويل" : "Transfer Date"} (YYYY-MM-DD)
+            </Text>
             <TextInput
-              style={shared.input}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               value={date}
               onChangeText={setDate}
               placeholder="YYYY-MM-DD"
@@ -255,10 +283,7 @@ export default function TransfersScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="swap-horizontal" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>تأكيد وتنفيذ التحويل</Text>
-                </>
+                <Text style={shared.buttonText}>{t.transfers.confirmTransfer}</Text>
               )}
             </Pressable>
           </Pressable>

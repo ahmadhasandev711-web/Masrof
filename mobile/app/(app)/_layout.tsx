@@ -1,10 +1,14 @@
 import { Tabs, Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { authClient } from "@/lib/auth-client";
+import { useI18n } from "@/lib/i18n";
 import { colors } from "@/lib/styles";
 import { AppIcon } from "@/components/icon";
 
 export default function AppLayout() {
+  const insets = useSafeAreaInsets();
+  const { t } = useI18n();
   const { data: session, isPending } = authClient.useSession();
 
   if (isPending) {
@@ -19,6 +23,9 @@ export default function AppLayout() {
     return <Redirect href="/login" />;
   }
 
+  const bottomPadding = Math.max(insets.bottom, 10);
+  const tabHeight = 54 + bottomPadding;
+
   return (
     <Tabs
       screenOptions={{
@@ -29,8 +36,8 @@ export default function AppLayout() {
           backgroundColor: "#FFFFFF",
           borderTopColor: colors.border,
           borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
+          height: tabHeight,
+          paddingBottom: bottomPadding,
           paddingTop: 6,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
@@ -39,7 +46,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "الرئيسية",
+          title: t.tabs.home,
           tabBarIcon: ({ color, focused }) => (
             <AppIcon name={focused ? "home" : "home-outline"} size={22} color={color} />
           ),
@@ -48,7 +55,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="transactions"
         options={{
-          title: "العمليات",
+          title: t.tabs.transactions,
           tabBarIcon: ({ color }) => (
             <AppIcon name="list" size={22} color={color} />
           ),
@@ -57,7 +64,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="clients"
         options={{
-          title: "العملاء",
+          title: t.tabs.clients,
           tabBarIcon: ({ color, focused }) => (
             <AppIcon name={focused ? "people" : "people-outline"} size={22} color={color} />
           ),
@@ -66,7 +73,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="projects"
         options={{
-          title: "المشاريع",
+          title: t.tabs.projects,
           tabBarIcon: ({ color, focused }) => (
             <AppIcon name={focused ? "briefcase" : "briefcase-outline"} size={22} color={color} />
           ),
@@ -75,7 +82,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="more"
         options={{
-          title: "المزيد",
+          title: t.tabs.more,
           tabBarIcon: ({ color }) => (
             <AppIcon name="menu" size={22} color={color} />
           ),

@@ -16,16 +16,10 @@ import { createAccount, fetchAccounts, type AccountItem } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
-
-const ACCOUNT_TYPES: { value: string; label: string; icon: IconName }[] = [
-  { value: "cash", label: "كاش / نقدي", icon: "wallet" },
-  { value: "bank", label: "حساب بنكي", icon: "card" },
-  { value: "mobile_wallet", label: "محفظة إلكترونية", icon: "wallet" },
-  { value: "savings", label: "حساب توفير", icon: "star" },
-  { value: "other", label: "أخرى", icon: "list" },
-];
+import { useI18n } from "@/lib/i18n";
 
 export default function AccountsScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<AccountItem[]>([]);
   const [open, setOpen] = useState(false);
@@ -36,9 +30,17 @@ export default function AccountsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const ACCOUNT_TYPES: { value: string; label: string; icon: IconName }[] = [
+    { value: "cash", label: t.accounts.cash, icon: "wallet" },
+    { value: "bank", label: t.accounts.bank, icon: "card" },
+    { value: "mobile_wallet", label: t.accounts.wallet, icon: "wallet" },
+    { value: "savings", label: t.accounts.savings, icon: "star" },
+    { value: "other", label: isRTL ? "أخرى" : "Other", icon: "list" },
+  ];
+
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchAccounts(workspaceId);
+    const data = await fetchAccounts(workspaceId, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -51,7 +53,7 @@ export default function AccountsScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -59,7 +61,7 @@ export default function AccountsScreen() {
 
   async function onCreate() {
     if (!workspaceId || name.trim().length < 2) {
-      setError("يرجى إدخال اسم الحساب (حرفين على الأقل)");
+      setError(isRTL ? "يرجى إدخال اسم الحساب (حرفين على الأقل)" : "Please enter account name (min 2 characters)");
       return;
     }
     setBusy(true);
@@ -74,9 +76,9 @@ export default function AccountsScreen() {
       setOpen(false);
       setName("");
       setBalance("0");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر إنشاء الحساب");
+      setError(isRTL ? "تعذر إنشاء الحساب" : "Failed to create account");
     } finally {
       setBusy(false);
     }
@@ -86,9 +88,9 @@ export default function AccountsScreen() {
 
   return (
     <Screen
-      title="الحسابات والمحافظ"
+      title={t.accounts.title}
       showBack
-      actionLabel="+ حساب"
+      actionLabel={t.accounts.add}
       actionIcon="add"
       onAction={() => {
         setError(null);
@@ -97,17 +99,30 @@ export default function AccountsScreen() {
     >
       {/* Total Accounts Balance Header */}
       <View style={[shared.cardHighlighted, { marginBottom: 6 }]}>
-        <View style={shared.row}>
-          <Text style={shared.label}>إجمالي الأرصدة</Text>
+        <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+          <Text style={shared.label}>{t.accounts.totalBalances}</Text>
           <Pressable
-            style={[shared.buttonSecondary, { paddingVertical: 6, paddingHorizontal: 10 }]}
+            style={[
+              shared.buttonSecondary,
+              { paddingVertical: 6, paddingHorizontal: 10, flexDirection: isRTL ? "row-reverse" : "row" },
+            ]}
             onPress={() => router.push("/(app)/transfers")}
           >
             <AppIcon name="swap-horizontal" size={14} color={colors.primary} />
-            <Text style={[shared.buttonSecondaryText, { fontSize: 12 }]}>تحويل بين الحسابات</Text>
+            <Text style={[shared.buttonSecondaryText, { fontSize: 12 }]}>{t.accounts.transfer}</Text>
           </Pressable>
         </View>
-        <Text style={[shared.value, { fontSize: 24, color: colors.primary, fontWeight: "800" }]}>
+        <Text
+          style={[
+            shared.value,
+            {
+              fontSize: 24,
+              color: colors.primary,
+              fontWeight: "800",
+              textAlign: isRTL ? "right" : "left",
+            },
+          ]}
+        >
           {formatMoney(totalBalance, currency)}
         </Text>
       </View>
@@ -123,22 +138,22 @@ export default function AccountsScreen() {
         ListEmptyComponent={
           <View style={shared.center}>
             <AppIcon name="wallet-outline" size={44} color={colors.faint} />
-            <Text style={[shared.empty, { paddingVertical: 12 }]}>لا توجد حسابات مسجلة بعد</Text>
+            <Text style={[shared.empty, { paddingVertical: 12 }]}>{t.accounts.noAccounts}</Text>
           </View>
         }
         renderItem={({ item }) => {
-          const typeObj = ACCOUNT_TYPES.find((t) => t.value === item.type) ?? {
+          const typeObj = ACCOUNT_TYPES.find((typeItem) => typeItem.value === item.type) ?? {
             label: item.type,
             icon: "wallet" as IconName,
           };
           return (
             <View style={shared.card}>
-              <View style={shared.row}>
-                <View style={shared.rowStart}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                   <View style={shared.iconCircle}>
                     <AppIcon name={typeObj.icon} size={20} color={colors.primary} />
                   </View>
-                  <View style={{ alignItems: "flex-end" }}>
+                  <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
                     <Text style={[shared.value, { fontSize: 16 }]}>{item.name}</Text>
                     <Text style={[shared.label, { fontSize: 12 }]}>{typeObj.label}</Text>
                   </View>
@@ -180,51 +195,59 @@ export default function AccountsScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>إضافة حساب جديد</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>{t.accounts.newTitle}</Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>اسم الحساب</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.accounts.accountName}
+            </Text>
             <TextInput
-              style={shared.input}
-              placeholder="مثال: البنك الأهلي، محفظة كاش، الخزينة..."
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={isRTL ? "مثال: البنك الأهلي، كاش، فودافون كاش" : "e.g. Bank Account, Cash, Wallet"}
               placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={shared.label}>نوع الحساب</Text>
-            <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: 8 }}>
-              {ACCOUNT_TYPES.map((t) => {
-                const active = type === t.value;
-                return (
-                  <Pressable
-                    key={t.value}
-                    onPress={() => setType(t.value)}
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.accounts.accountType}
+            </Text>
+            <View style={{ flexDirection: isRTL ? "row-reverse" : "row", flexWrap: "wrap", gap: 8 }}>
+              {ACCOUNT_TYPES.map((typeItem) => (
+                <Pressable
+                  key={typeItem.value}
+                  onPress={() => setType(typeItem.value)}
+                  style={[
+                    shared.chip,
+                    type === typeItem.value && { backgroundColor: colors.primary, borderColor: colors.primary },
+                  ]}
+                >
+                  <Text
                     style={[
-                      shared.chip,
-                      active && { backgroundColor: colors.primary, borderColor: colors.primary },
+                      shared.chipText,
+                      type === typeItem.value && { color: "#FFFFFF", fontWeight: "700" },
                     ]}
                   >
-                    <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
-                      {t.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+                    {typeItem.label}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
 
-            <Text style={shared.label}>الرصيد الافتتاحي</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.accounts.openingBalance} ({currency})
+            </Text>
             <TextInput
-              style={shared.input}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               placeholder="0.00"
               placeholderTextColor={colors.faint}
-              keyboardType="decimal-pad"
               value={balance}
               onChangeText={setBalance}
+              keyboardType="numeric"
             />
 
             {error ? <Text style={shared.error}>{error}</Text> : null}
@@ -237,10 +260,7 @@ export default function AccountsScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>حفظ الحساب</Text>
-                </>
+                <Text style={shared.buttonText}>{t.common.save}</Text>
               )}
             </Pressable>
           </Pressable>

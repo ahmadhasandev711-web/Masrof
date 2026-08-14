@@ -20,8 +20,10 @@ import {
 import { todayISO } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 export default function NewTransactionScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
@@ -54,16 +56,16 @@ export default function NewTransactionScreen() {
   async function onSubmit() {
     if (!workspaceId) return;
     if (!accountId) {
-      setError("يرجى اختيار الحساب");
+      setError(isRTL ? "يرجى اختيار الحساب" : "Please select an account");
       return;
     }
     if (!categoryId) {
-      setError("يرجى اختيار التصنيف");
+      setError(isRTL ? "يرجى اختيار التصنيف" : "Please select a category");
       return;
     }
     const value = Number(amount);
     if (!Number.isFinite(value) || value <= 0) {
-      setError("أدخل مبلغاً صحيحاً أكبر من صفر");
+      setError(isRTL ? "أدخل مبلغاً صحيحاً أكبر من صفر" : "Enter a valid amount");
       return;
     }
 
@@ -81,25 +83,25 @@ export default function NewTransactionScreen() {
       });
       router.back();
     } catch {
-      setError("تعذر حفظ العملية. تأكد من صحة البيانات والاتصال.");
+      setError(isRTL ? "تعذر حفظ العملية. تأكد من صحة البيانات والاتصال." : "Failed to create transaction.");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <Screen title="عملية جديدة" showBack>
+    <Screen title={t.dashboard.newTransaction} showBack>
       <ScrollView
         contentContainerStyle={{ gap: 14, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Type Selector (Expense vs Income) */}
-        <View style={shared.row}>
+        <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 10 }}>
           <Pressable
             onPress={() => setType("expense")}
             style={[
               shared.buttonSecondary,
-              { flex: 1, paddingVertical: 12 },
+              { flex: 1, paddingVertical: 12, flexDirection: isRTL ? "row-reverse" : "row" },
               type === "expense" && {
                 backgroundColor: colors.expense,
                 borderColor: colors.expense,
@@ -117,7 +119,7 @@ export default function NewTransactionScreen() {
                 { color: type === "expense" ? "#FFFFFF" : colors.expense },
               ]}
             >
-              مصروف
+              {t.common.expense}
             </Text>
           </Pressable>
 
@@ -125,7 +127,7 @@ export default function NewTransactionScreen() {
             onPress={() => setType("income")}
             style={[
               shared.buttonSecondary,
-              { flex: 1, paddingVertical: 12 },
+              { flex: 1, paddingVertical: 12, flexDirection: isRTL ? "row-reverse" : "row" },
               type === "income" && {
                 backgroundColor: colors.income,
                 borderColor: colors.income,
@@ -143,16 +145,18 @@ export default function NewTransactionScreen() {
                 { color: type === "income" ? "#FFFFFF" : colors.income },
               ]}
             >
-              دخل
+              {t.common.income}
             </Text>
           </Pressable>
         </View>
 
         {/* Amount Input */}
         <View style={{ gap: 6 }}>
-          <Text style={shared.label}>المبلغ ({currency})</Text>
+          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+            {t.common.amount} ({currency})
+          </Text>
           <TextInput
-            keyboardType="decimal-pad"
+            keyboardType="numeric"
             value={amount}
             onChangeText={setAmount}
             style={[
@@ -161,6 +165,7 @@ export default function NewTransactionScreen() {
                 fontSize: 22,
                 fontWeight: "700",
                 color: type === "expense" ? colors.expense : colors.income,
+                textAlign: isRTL ? "right" : "left",
               },
             ]}
             placeholder="0.00"
@@ -171,23 +176,27 @@ export default function NewTransactionScreen() {
 
         {/* Description Input */}
         <View style={{ gap: 6 }}>
-          <Text style={shared.label}>الوصف أو البيان (اختياري)</Text>
+          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+            {isRTL ? "الوصف أو البيان (اختياري)" : "Description (optional)"}
+          </Text>
           <TextInput
             value={description}
             onChangeText={setDescription}
-            style={shared.input}
-            placeholder="مثال: مشتريات سوبرماركت، فاتورة إنترنت..."
+            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            placeholder={isRTL ? "مثال: مشتريات سوبرماركت، فاتورة إنترنت..." : "e.g. Groceries, Internet bill..."}
             placeholderTextColor={colors.faint}
           />
         </View>
 
         {/* Date Input */}
         <View style={{ gap: 6 }}>
-          <Text style={shared.label}>التاريخ (YYYY-MM-DD)</Text>
+          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+            {t.common.date} (YYYY-MM-DD)
+          </Text>
           <TextInput
             value={date}
             onChangeText={setDate}
-            style={shared.input}
+            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
             placeholder="2026-08-14"
             placeholderTextColor={colors.faint}
           />
@@ -195,11 +204,17 @@ export default function NewTransactionScreen() {
 
         {/* Account Selector */}
         <View style={{ gap: 8 }}>
-          <Text style={shared.label}>الحساب المسحوب منه / المودع فيه</Text>
+          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+            {isRTL ? "الحساب المسحوب منه / المودع فيه" : "Account"}
+          </Text>
           {accounts.length === 0 ? (
-            <Text style={[shared.label, { color: colors.warning }]}>لا توجد حسابات متاحة</Text>
+            <Text style={[shared.label, { color: colors.warning }]}>{t.accounts.noAccounts}</Text>
           ) : (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+            >
               {accounts.map((account) => {
                 const active = accountId === account.id;
                 return (
@@ -211,7 +226,12 @@ export default function NewTransactionScreen() {
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
-                    <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+                    <Text
+                      style={[
+                        shared.chipText,
+                        active && { color: "#FFFFFF", fontWeight: "700" },
+                      ]}
+                    >
                       💳 {account.name}
                     </Text>
                   </Pressable>
@@ -223,11 +243,15 @@ export default function NewTransactionScreen() {
 
         {/* Category Selector */}
         <View style={{ gap: 8 }}>
-          <Text style={shared.label}>التصنيف</Text>
+          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+            {isRTL ? "التصنيف" : "Category"}
+          </Text>
           {categories.length === 0 ? (
-            <Text style={[shared.label, { color: colors.warning }]}>لا توجد تصنيفات متاحة</Text>
+            <Text style={[shared.label, { color: colors.warning }]}>
+              {isRTL ? "لا توجد تصنيفات متاحة" : "No categories available"}
+            </Text>
           ) : (
-            <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: 8 }}>
+            <View style={{ flexDirection: isRTL ? "row-reverse" : "row", flexWrap: "wrap", gap: 8 }}>
               {categories.map((category) => {
                 const active = categoryId === category.id;
                 return (
@@ -239,7 +263,12 @@ export default function NewTransactionScreen() {
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
-                    <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
+                    <Text
+                      style={[
+                        shared.chipText,
+                        active && { color: "#FFFFFF", fontWeight: "700" },
+                      ]}
+                    >
                       🏷️ {category.name}
                     </Text>
                   </Pressable>
@@ -253,7 +282,7 @@ export default function NewTransactionScreen() {
 
         {/* Submit Button */}
         <Pressable
-          style={[shared.button, busy && { opacity: 0.7 }]}
+          style={[shared.button, busy && { opacity: 0.7 }, { flexDirection: isRTL ? "row-reverse" : "row" }]}
           onPress={onSubmit}
           disabled={busy}
         >
@@ -262,7 +291,7 @@ export default function NewTransactionScreen() {
           ) : (
             <>
               <AppIcon name="checkmark" size={20} color="#FFFFFF" />
-              <Text style={shared.buttonText}>حفظ العملية</Text>
+              <Text style={shared.buttonText}>{t.common.save}</Text>
             </>
           )}
         </Pressable>

@@ -16,6 +16,7 @@ import { AppIcon } from "@/components/icon";
 import { createClient, fetchClients } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
+import { useI18n } from "@/lib/i18n";
 
 type ClientRow = {
   _id: string;
@@ -26,6 +27,7 @@ type ClientRow = {
 };
 
 export default function ClientsScreen() {
+  const { t, isRTL } = useI18n();
   const { workspaceId } = useWorkspace();
   const [items, setItems] = useState<ClientRow[]>([]);
   const [search, setSearch] = useState("");
@@ -37,9 +39,9 @@ export default function ClientsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchClients(workspaceId);
+    const data = await fetchClients(workspaceId, skipCache);
     setItems(data.items);
   }, [workspaceId]);
 
@@ -52,7 +54,7 @@ export default function ClientsScreen() {
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load();
+      await load(true);
     } finally {
       setRefreshing(false);
     }
@@ -60,7 +62,7 @@ export default function ClientsScreen() {
 
   async function onCreate() {
     if (!workspaceId || name.trim().length < 2) {
-      setError("يرجى إدخال اسم العميل (حرفين على الأقل)");
+      setError(isRTL ? "يرجى إدخال اسم العميل (حرفين على الأقل)" : "Enter client name (min 2 chars)");
       return;
     }
     setBusy(true);
@@ -76,9 +78,9 @@ export default function ClientsScreen() {
       setName("");
       setPhone("");
       setEmail("");
-      await load();
+      await load(true);
     } catch {
-      setError("تعذر إضافة العميل");
+      setError(isRTL ? "تعذر إضافة العميل" : "Failed to add client");
     } finally {
       setBusy(false);
     }
@@ -96,8 +98,8 @@ export default function ClientsScreen() {
 
   return (
     <Screen
-      title="العملاء"
-      actionLabel="+ عميل"
+      title={t.clients.title}
+      actionLabel={t.clients.add}
       actionIcon="add"
       onAction={() => {
         setError(null);
@@ -107,8 +109,8 @@ export default function ClientsScreen() {
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>
         <TextInput
-          style={shared.input}
-          placeholder="بحث باسم العميل، الهاتف، أو البريد..."
+          style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          placeholder={t.clients.searchPlaceholder}
           placeholderTextColor={colors.faint}
           value={search}
           onChangeText={setSearch}
@@ -127,28 +129,28 @@ export default function ClientsScreen() {
           <View style={shared.center}>
             <AppIcon name="people-outline" size={44} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              {search ? "لا توجد نتائج مطابقة للبحث" : "لا يوجد عملاء مضافين بعد"}
+              {search ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching clients found") : t.clients.noClients}
             </Text>
           </View>
         }
         renderItem={({ item }) => (
           <View style={shared.card}>
-            <View style={shared.row}>
-              <View style={shared.rowStart}>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <View style={shared.iconCircle}>
                   <AppIcon name="people" size={18} color={colors.primary} />
                 </View>
-                <View style={{ alignItems: "flex-end" }}>
+                <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
                   <Text style={[shared.value, { fontSize: 16 }]}>{item.name}</Text>
                   <Text style={[shared.label, { fontSize: 12 }]}>
-                    {[item.phone, item.email].filter(Boolean).join(" · ") || "بدون بيانات اتصال"}
+                    {[item.phone, item.email].filter(Boolean).join(" · ") || (isRTL ? "بدون بيانات اتصال" : "No contact info")}
                   </Text>
                 </View>
               </View>
 
               <View style={[shared.badge, { backgroundColor: colors.primarySoft }]}>
                 <Text style={[shared.badgeText, { color: colors.primary }]}>
-                  {item.projectCount} مشاريع
+                  {item.projectCount} {isRTL ? "مشاريع" : "projects"}
                 </Text>
               </View>
             </View>
@@ -157,7 +159,7 @@ export default function ClientsScreen() {
             {(item.phone || item.email) && (
               <View
                 style={{
-                  flexDirection: "row-reverse",
+                  flexDirection: isRTL ? "row-reverse" : "row",
                   gap: 8,
                   marginTop: 6,
                   borderTopWidth: 1,
@@ -168,14 +170,14 @@ export default function ClientsScreen() {
                 {item.phone ? (
                   <>
                     <Pressable
-                      style={shared.buttonSecondary}
+                      style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
                       onPress={() => Linking.openURL(`tel:${item.phone}`)}
                     >
                       <AppIcon name="call" size={14} color={colors.primary} />
-                      <Text style={shared.buttonSecondaryText}>اتصال</Text>
+                      <Text style={shared.buttonSecondaryText}>{t.clients.call}</Text>
                     </Pressable>
                     <Pressable
-                      style={[shared.buttonSecondary, { backgroundColor: colors.incomeSoft, borderColor: "#A7F3D0" }]}
+                      style={[shared.buttonSecondary, { backgroundColor: colors.incomeSoft, borderColor: "#A7F3D0", flexDirection: isRTL ? "row-reverse" : "row" }]}
                       onPress={() =>
                         Linking.openURL(
                           `https://wa.me/${item.phone?.replace(/[^0-9]/g, "")}`
@@ -183,7 +185,7 @@ export default function ClientsScreen() {
                       }
                     >
                       <Text style={[shared.buttonSecondaryText, { color: colors.incomeText }]}>
-                        واتساب
+                        {t.clients.whatsapp}
                       </Text>
                     </Pressable>
                   </>
@@ -191,11 +193,11 @@ export default function ClientsScreen() {
 
                 {item.email ? (
                   <Pressable
-                    style={shared.buttonSecondary}
+                    style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
                     onPress={() => Linking.openURL(`mailto:${item.email}`)}
                   >
                     <AppIcon name="mail" size={14} color={colors.primary} />
-                    <Text style={shared.buttonSecondaryText}>إيميل</Text>
+                    <Text style={shared.buttonSecondaryText}>{t.clients.email}</Text>
                   </Pressable>
                 ) : null}
               </View>
@@ -222,25 +224,29 @@ export default function ClientsScreen() {
             ]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={shared.row}>
-              <Text style={shared.title}>إضافة عميل جديد</Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+              <Text style={[shared.value, { fontSize: 18 }]}>{t.clients.newTitle}</Text>
               <Pressable onPress={() => setOpen(false)}>
-                <AppIcon name="close" size={22} color={colors.muted} />
+                <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
 
-            <Text style={shared.label}>اسم العميل / الشركة</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.clients.namePlaceholder}
+            </Text>
             <TextInput
-              style={shared.input}
-              placeholder="مثال: شركة النور، أحمد علي..."
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              placeholder={isRTL ? "مثال: شركة النور، أحمد علي..." : "e.g. Acme Corp, John Doe..."}
               placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={shared.label}>رقم الهاتف / الواتساب (اختياري)</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.clients.phonePlaceholder}
+            </Text>
             <TextInput
-              style={shared.input}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               placeholder="01000000000"
               placeholderTextColor={colors.faint}
               keyboardType="phone-pad"
@@ -248,9 +254,11 @@ export default function ClientsScreen() {
               onChangeText={setPhone}
             />
 
-            <Text style={shared.label}>البريد الإلكتروني (اختياري)</Text>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {t.clients.emailPlaceholder}
+            </Text>
             <TextInput
-              style={shared.input}
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               placeholder="client@example.com"
               placeholderTextColor={colors.faint}
               keyboardType="email-address"
@@ -269,10 +277,7 @@ export default function ClientsScreen() {
               {busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <>
-                  <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                  <Text style={shared.buttonText}>حفظ العميل</Text>
-                </>
+                <Text style={shared.buttonText}>{t.common.save}</Text>
               )}
             </Pressable>
           </Pressable>
