@@ -1,9 +1,11 @@
 import "server-only";
 
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { toPlain } from "@/lib/db/plain";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ClientModel } from "@/models/client";
 import { ProjectModel } from "@/models/project";
 import { TransactionModel } from "@/models/transaction";
@@ -29,13 +31,19 @@ export async function createProject(input: CreateProjectInput) {
   return project.toObject();
 }
 
-export const listProjectsForWorkspace = cache(async (workspaceId: string) => {
-  await connectToDatabase();
+export const listProjectsForWorkspace = unstable_cache(
+  async (workspaceId: string) => {
+    await connectToDatabase();
 
-  return ProjectModel.find({ workspaceId, isArchived: false })
-    .sort({ createdAt: -1 })
-    .lean();
-});
+    const docs = await ProjectModel.find({ workspaceId, isArchived: false })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return docs.map((doc) => toPlain(doc));
+  },
+  ["projects-for-workspace"],
+  { revalidate: 30, tags: [CACHE_TAGS.projects] },
+);
 
 export const listProjectsWithTotals = cache(async (workspaceId: string) => {
   await connectToDatabase();

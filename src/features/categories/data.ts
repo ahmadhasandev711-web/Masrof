@@ -1,8 +1,10 @@
 import "server-only";
 
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { toPlain } from "@/lib/db/plain";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { CategoryModel, type CategoryKind } from "@/models/category";
 import type { CreateCategoryInput } from "@/features/categories/schemas";
 
@@ -12,17 +14,23 @@ import type { CreateCategoryInput } from "@/features/categories/schemas";
  * Nothing is copied into the workspace at creation time — see the
  * architecture note in models/category.ts.
  */
-export const listCategoriesForWorkspace = cache(async (workspaceId: string, kind?: CategoryKind) => {
-  await connectToDatabase();
+export const listCategoriesForWorkspace = unstable_cache(
+  async (workspaceId: string, kind?: CategoryKind) => {
+    await connectToDatabase();
 
-  return CategoryModel.find({
-    $or: [{ workspaceId: null }, { workspaceId: new mongoose.Types.ObjectId(workspaceId) }],
-    isArchived: false,
-    ...(kind ? { kind } : {}),
-  })
-    .sort({ isSystem: -1, name: 1 })
-    .lean();
-});
+    const docs = await CategoryModel.find({
+      $or: [{ workspaceId: null }, { workspaceId: new mongoose.Types.ObjectId(workspaceId) }],
+      isArchived: false,
+      ...(kind ? { kind } : {}),
+    })
+      .sort({ isSystem: -1, name: 1 })
+      .lean();
+
+    return docs.map((doc) => toPlain(doc));
+  },
+  ["categories-for-workspace"],
+  { revalidate: 30, tags: [CACHE_TAGS.categories] },
+);
 
 export async function createCustomCategory(input: CreateCategoryInput) {
   await connectToDatabase();

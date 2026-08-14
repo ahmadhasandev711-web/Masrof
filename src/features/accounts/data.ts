@@ -1,8 +1,10 @@
 import "server-only";
 
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import mongoose, { type ClientSession } from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { toPlain } from "@/lib/db/plain";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { AccountModel } from "@/models/account";
 import { TransactionModel } from "@/models/transaction";
 import { toMinorUnits } from "@/lib/money";
@@ -47,14 +49,23 @@ export async function createAccount(
   return account.toObject();
 }
 
-/** Lists every non-archived account in a workspace. Caller must have already verified access. */
-export const listAccountsForWorkspace = cache(async (workspaceId: string) => {
-  await connectToDatabase();
+/**
+ * Lists every non-archived account in a workspace. Caller must have already
+ * verified access. Cached so the dashboard doesn't re-query MongoDB on every
+ * navigation; invalidated via `CACHE_TAGS.accounts` on account mutations.
+ */
+export const listAccountsForWorkspace = unstable_cache(
+  async (workspaceId: string) => {
+    await connectToDatabase();
 
-  return AccountModel.find({ workspaceId, isArchived: false })
-    .sort({ createdAt: 1 })
-    .lean();
-});
+    const docs = await AccountModel.find({ workspaceId, isArchived: false })
+      .sort({ createdAt: 1 })
+      .lean();
+    return docs.map((doc) => toPlain(doc));
+  },
+  ["accounts-for-workspace"],
+  { revalidate: 30, tags: [CACHE_TAGS.accounts] },
+);
 
 /** Sum of every account's cached balance — only valid for single-currency workspaces. */
 export async function getWorkspaceTotalBalance(workspaceId: string): Promise<number> {
