@@ -1,0 +1,61 @@
+import { NextResponse } from "next/server";
+import { listAccountsForWorkspace, createAccount } from "@/features/accounts/data";
+import { createAccountSchema } from "@/features/accounts/schemas";
+import type { SupportedCurrency } from "@/models/workspace";
+import {
+  mobileErrorResponse,
+  requireMobileSession,
+  requireMobileWorkspace,
+  serializeId,
+} from "@/lib/mobile/session";
+
+export async function GET(request: Request) {
+  const session = await requireMobileSession(request);
+  if (session instanceof NextResponse) return session;
+
+  const workspaceId = new URL(request.url).searchParams.get("workspaceId");
+  const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
+  if (access instanceof NextResponse) return access;
+
+  const accounts = await listAccountsForWorkspace(access.workspaceId);
+  return NextResponse.json({
+    items: accounts.map((account) => ({
+      id: serializeId(account._id),
+      name: account.name,
+      type: account.type,
+      currency: account.currency,
+      balance: account.cachedBalance,
+    })),
+  });
+}
+
+export async function POST(request: Request) {
+  const session = await requireMobileSession(request);
+  if (session instanceof NextResponse) return session;
+
+  try {
+    const body = await request.json();
+    const parsed = createAccountSchema(() => "invalid").safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "invalidData" }, { status: 400 });
+    }
+
+    const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
+    if (access instanceof NextResponse) return access;
+
+    const account = await createAccount(
+      parsed.data,
+      access.workspace.currency as SupportedCurrency,
+    );
+
+    return NextResponse.json({
+      id: serializeId(account._id),
+      name: account.name,
+      type: account.type,
+      currency: account.currency,
+      balance: account.cachedBalance,
+    });
+  } catch (error) {
+    return mobileErrorResponse(error);
+  }
+}

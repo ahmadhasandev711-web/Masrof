@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -12,6 +13,8 @@ import {
 import { Redirect, router } from "expo-router";
 import { authClient } from "@/lib/auth-client";
 import { API_URL } from "@/lib/config";
+import { colors, shared } from "@/lib/styles";
+import { AppIcon } from "@/components/icon";
 
 export default function LoginScreen() {
   const { data: session, isPending } = authClient.useSession();
@@ -23,13 +26,13 @@ export default function LoginScreen() {
   if (isPending) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color="#065F46" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (session) {
-    return <Redirect href="/" />;
+    return <Redirect href="/(app)" />;
   }
 
   async function onSubmit() {
@@ -41,10 +44,10 @@ export default function LoginScreen() {
     });
     setBusy(false);
     if (signInError) {
-      setError(signInError.message ?? "تعذر تسجيل الدخول. تأكد من البريد وكلمة المرور.");
+      setError(signInError.message ?? "تعذر تسجيل الدخول. تأكد من صحة البريد وكلمة المرور.");
       return;
     }
-    router.replace("/");
+    router.replace("/(app)");
   }
 
   return (
@@ -52,52 +55,77 @@ export default function LoginScreen() {
       style={styles.screen}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={styles.card}>
-        <Text style={styles.brand}>مصروفاتي</Text>
-        <Text style={styles.subtitle}>سجّل بنفس حساب الويب</Text>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.card}>
+          {/* Logo / Brand Header */}
+          <View style={{ alignItems: "center", gap: 6, marginBottom: 8 }}>
+            <View
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                backgroundColor: colors.primarySoft,
+                alignItems: "center",
+                justifyContent: "center",
+                borderWidth: 1,
+                borderColor: colors.primaryBorder,
+              }}
+            >
+              <AppIcon name="wallet" size={28} color={colors.primary} />
+            </View>
+            <Text style={styles.brand}>مصروفاتي</Text>
+            <Text style={styles.subtitle}>سجّل بنفس بيانات حساب الويب</Text>
+          </View>
 
-        <TextInput
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          placeholder="البريد الإلكتروني"
-          placeholderTextColor="#8A8578"
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          secureTextEntry
-          autoComplete="password"
-          placeholder="كلمة المرور"
-          placeholderTextColor="#8A8578"
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-        />
+          <Text style={shared.label}>البريد الإلكتروني</Text>
+          <TextInput
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            placeholder="name@example.com"
+            placeholderTextColor={colors.faint}
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+          />
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+          <Text style={shared.label}>كلمة المرور</Text>
+          <TextInput
+            secureTextEntry
+            autoComplete="password"
+            placeholder="••••••••"
+            placeholderTextColor={colors.faint}
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+          />
 
-        <Pressable
-          disabled={busy || !email.trim() || password.length < 8}
-          onPress={onSubmit}
-          style={({ pressed }) => [
-            styles.button,
-            (busy || !email.trim() || password.length < 8) && styles.buttonDisabled,
-            pressed && styles.buttonPressed,
-          ]}
-        >
-          {busy ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>دخول</Text>
-          )}
-        </Pressable>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Text style={styles.hint}>
-          حساب جديد من الموقع: {API_URL.replace(/^https?:\/\//, "")}
-        </Text>
-      </View>
+          <Pressable
+            disabled={busy || !email.trim() || password.length < 6}
+            onPress={onSubmit}
+            style={({ pressed }) => [
+              styles.button,
+              (busy || !email.trim() || password.length < 6) && styles.buttonDisabled,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            {busy ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>تسجيل الدخول</Text>
+            )}
+          </Pressable>
+
+          <Text style={styles.hint}>
+            حساب جديد أو استعادة كلمة المرور من الموقع: {API_URL.replace(/^https?:\/\//, "")}
+          </Text>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -105,58 +133,62 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F3F0E8",
-    justifyContent: "center",
-    padding: 24,
+    backgroundColor: colors.bg,
+    padding: 20,
   },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F3F0E8",
+    backgroundColor: colors.bg,
   },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 22,
     padding: 24,
     gap: 12,
     borderWidth: 1,
-    borderColor: "#E4DFD3",
+    borderColor: colors.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   brand: {
     fontSize: 28,
-    fontWeight: "700",
-    color: "#065F46",
+    fontWeight: "800",
+    color: colors.primary,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 15,
-    color: "#5C574C",
+    fontSize: 14,
+    color: colors.muted,
     textAlign: "center",
-    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#E4DFD3",
+    borderColor: colors.border,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
-    color: "#1C1B1A",
+    fontSize: 15,
+    color: colors.text,
     backgroundColor: "#FBF9F4",
     textAlign: "right",
   },
   error: {
-    color: "#9A3412",
+    color: colors.danger,
     fontSize: 13,
     textAlign: "center",
+    fontWeight: "500",
   },
   button: {
-    backgroundColor: "#065F46",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
-    marginTop: 4,
+    marginTop: 6,
   },
   buttonDisabled: {
     opacity: 0.5,
@@ -165,14 +197,14 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   buttonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
   },
   hint: {
     fontSize: 12,
-    color: "#8A8578",
+    color: colors.faint,
     textAlign: "center",
-    marginTop: 4,
+    marginTop: 6,
   },
 });

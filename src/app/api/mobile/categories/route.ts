@@ -1,0 +1,61 @@
+import { NextResponse } from "next/server";
+import { listCategoriesForWorkspace, createCustomCategory } from "@/features/categories/data";
+import { createCategorySchema } from "@/features/categories/schemas";
+import type { CategoryKind } from "@/models/category";
+import {
+  mobileErrorResponse,
+  requireMobileSession,
+  requireMobileWorkspace,
+  serializeId,
+} from "@/lib/mobile/session";
+
+export async function GET(request: Request) {
+  const session = await requireMobileSession(request);
+  if (session instanceof NextResponse) return session;
+
+  const url = new URL(request.url);
+  const workspaceId = url.searchParams.get("workspaceId");
+  const kind = url.searchParams.get("kind") as CategoryKind | null;
+  const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
+  if (access instanceof NextResponse) return access;
+
+  const categories = await listCategoriesForWorkspace(
+    access.workspaceId,
+    kind === "income" || kind === "expense" ? kind : undefined,
+  );
+
+  return NextResponse.json({
+    items: categories.map((category) => ({
+      id: serializeId(category._id),
+      name: category.name,
+      kind: category.kind,
+      icon: category.icon ?? null,
+      isSystem: Boolean(category.isSystem),
+    })),
+  });
+}
+
+export async function POST(request: Request) {
+  const session = await requireMobileSession(request);
+  if (session instanceof NextResponse) return session;
+
+  try {
+    const body = await request.json();
+    const parsed = createCategorySchema(() => "invalid").safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "invalidData" }, { status: 400 });
+    }
+
+    const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
+    if (access instanceof NextResponse) return access;
+
+    const category = await createCustomCategory(parsed.data);
+    return NextResponse.json({
+      id: serializeId(category._id),
+      name: category.name,
+      kind: category.kind,
+    });
+  } catch (error) {
+    return mobileErrorResponse(error);
+  }
+}
