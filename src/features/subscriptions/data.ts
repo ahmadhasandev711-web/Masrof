@@ -13,7 +13,6 @@ import {
 } from "@/features/subscriptions/plan-config-data";
 import type { PlanQuantityLimitKey } from "@/features/subscriptions/default-plans";
 import { isUnlimitedQuantity } from "@/features/subscriptions/default-plans";
-import { listWorkspacesForUser } from "@/features/workspaces/data";
 import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
 import { countOwnedWorkspacesForUser } from "@/features/workspaces/members-data";
 import {

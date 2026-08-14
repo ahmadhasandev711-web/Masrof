@@ -4,17 +4,10 @@ import { getTranslations } from "next-intl/server";
 import { getReportRangeLabel, type ReportRangePreset } from "@/features/reports/date-ranges";
 import { fetchReportExportPayload } from "@/features/reports/export-data";
 import { fromMinorUnits } from "@/lib/money";
+import { csvEscape } from "@/lib/export/spreadsheet-safe";
 
 function exportAmount(value: number | null): string | number {
   return value == null ? "N/A" : fromMinorUnits(value);
-}
-
-function csvEscape(value: string | number) {
-  const str = String(value);
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
 }
 
 export async function exportReportCsvAction(input: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useSyncExternalStore, useTransition } from "react";
 import {
   sendTestPushAction,
   subscribeToPushAction,
@@ -25,6 +25,11 @@ function isSupported() {
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
+/** Push support never changes for the lifetime of the page, so there is nothing to subscribe to. */
+function subscribeToNothing() {
+  return () => {};
+}
+
 export function PushNotificationSettings({
   canUsePush,
   vapidPublicKey,
@@ -36,7 +41,11 @@ export function PushNotificationSettings({
 }) {
   const tPush = useTranslations("dashboard.push");
   const tErrors = useTranslations("errors");
-  const [supported, setSupported] = useState(false);
+  const supported = useSyncExternalStore(
+    subscribeToNothing,
+    isSupported,
+    () => false,
+  );
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +53,6 @@ export function PushNotificationSettings({
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    setSupported(isSupported());
     if (!isSupported()) return;
 
     navigator.serviceWorker.ready

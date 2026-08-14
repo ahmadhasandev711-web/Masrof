@@ -4,7 +4,7 @@ import { getCurrentSession } from "@/features/auth/session";
 import { verifyWorkspaceAccess } from "@/features/workspaces/access";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { suggestCategoryForTransaction } from "@/features/transactions/suggest-category";
-import { checkMemoryRateLimit, clientKeyFromRequest } from "@/lib/rate-limit/memory";
+import { checkRateLimit, clientKeyFromRequest } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const tErrors = await getTranslations("errors");
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: tErrors("unauthorized") }, { status: 401 });
   }
 
-  const rate = checkMemoryRateLimit(
+  const rate = await checkRateLimit(
     `suggest:${clientKeyFromRequest(request, session.user.id)}`,
     30,
     60_000,

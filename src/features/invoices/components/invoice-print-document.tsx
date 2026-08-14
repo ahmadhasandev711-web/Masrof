@@ -41,7 +41,6 @@ export async function InvoicePrintDocument({
     <InvoiceA4Layout
       invoice={invoice}
       tForm={tForm}
-      tCommon={tCommon}
       tDashboard={tDashboard}
       tBrand={tBrand}
     />
@@ -92,13 +91,11 @@ function BrandBlock({
 function InvoiceA4Layout({
   invoice,
   tForm,
-  tCommon,
   tDashboard,
   tBrand,
 }: {
   invoice: InvoicePrintView;
   tForm: TFn;
-  tCommon: TFn;
   tDashboard: TFn;
   tBrand: TFn;
 }) {

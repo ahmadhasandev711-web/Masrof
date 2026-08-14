@@ -5,7 +5,7 @@ import sharp from "sharp";
 import { getCurrentSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { storePublicObject } from "@/lib/storage";
-import { checkMemoryRateLimit, clientKeyFromRequest } from "@/lib/rate-limit/memory";
+import { checkRateLimit, clientKeyFromRequest } from "@/lib/rate-limit";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: tErrors("unauthorized") }, { status: 401 });
   }
 
-  const rate = checkMemoryRateLimit(
+  const rate = await checkRateLimit(
     `upload-receipt:${clientKeyFromRequest(request, session.user.id)}`,
     20,
     60_000,

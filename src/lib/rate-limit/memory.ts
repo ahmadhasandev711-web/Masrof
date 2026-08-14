@@ -1,7 +1,8 @@
 /**
- * Process-local sliding window rate limiter.
- * Good enough on a single Node process (Hostinger / one Vercel instance).
- * Not a distributed limiter — fine for soft-launch abuse protection.
+ * Process-local rate limiter, used as the fallback when the shared
+ * MongoDB-backed limiter in `@/lib/rate-limit` cannot reach the database.
+ * It only counts requests seen by one Node process, so callers should always
+ * go through `checkRateLimit` rather than using this directly.
  */
 type Bucket = { count: number; resetAt: number };
 
