@@ -8,7 +8,9 @@ import { WorkspaceProvider } from "@/lib/workspace";
 import { LanguageProvider } from "@/lib/i18n";
 import { colors } from "@/lib/styles";
 
-I18nManager.allowRTL(true);
+// Prevent native system language from flipping coordinate spaces unexpectedly
+I18nManager.allowRTL(false);
+I18nManager.forceRTL(false);
 
 export default function RootLayout() {
   return (

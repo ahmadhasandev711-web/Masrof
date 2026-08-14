@@ -58,13 +58,13 @@ export default async function TransactionsPage({
     listProjectsForWorkspace(workspaceId),
   ]);
 
-  const accountOptions = accounts.map((a: any) => ({
+  const accountOptions = accounts.map((a) => ({
     id: String(a._id),
     name: a.name,
     currency: resolveAccountCurrency(a.currency, activeWorkspace.currency as SupportedCurrency),
   }));
-  const accountCurrencies = Object.fromEntries(accountOptions.map((a: any) => [a.id, a.currency]));
-  const categoryOptions = categories.map((c: any) => ({
+  const accountCurrencies = Object.fromEntries(accountOptions.map((a) => [a.id, a.currency]));
+  const categoryOptions = categories.map((c) => ({
     id: String(c._id),
     name: c.name,
     kind: c.kind,
@@ -99,8 +99,8 @@ export default async function TransactionsPage({
             workspaceId={workspaceId}
             accounts={accountOptions}
             categories={categoryOptions}
-            clients={clients.map((c: any) => ({ id: String(c._id), name: c.name }))}
-            projects={projects.map((p: any) => ({ id: String(p._id), name: p.name }))}
+            clients={clients.map((c) => ({ id: String(c._id), name: c.name }))}
+            projects={projects.map((p) => ({ id: String(p._id), name: p.name }))}
             ocrReceipts={plan.ocrReceipts}
             aiCategory={plan.aiCategory}
           />
@@ -123,7 +123,7 @@ export default async function TransactionsPage({
         transactions={transactionsResult.items}
         workspaceId={workspaceId}
         accountCurrencies={accountCurrencies}
-        accounts={accountOptions.map((opt: { id: string; name: string }) => ({ id: opt.id, name: opt.name }))}
+        accounts={accountOptions.map(({ id, name }) => ({ id, name }))}
         categories={categoryOptions}
       />
 

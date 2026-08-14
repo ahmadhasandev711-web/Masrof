@@ -46,7 +46,7 @@ export async function createAccountAction(
     }
   }
 
-  const account = await createAccount({ ...parsed.data, currency: requestedCurrency }, workspaceCurrency);
+  await createAccount({ ...parsed.data, currency: requestedCurrency }, workspaceCurrency);
 
   revalidatePath("/dashboard/accounts");
   revalidateTag(CACHE_TAGS.accounts, "max");

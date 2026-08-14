@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
+import { setFormatLocale } from "@/lib/format";
 
 export type AppLocale = "ar" | "en";
 
@@ -559,12 +560,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     SecureStore.getItemAsync(LOCALE_KEY).then((saved) => {
       if (saved === "en" || saved === "ar") {
         setLocaleState(saved);
+        setFormatLocale(saved);
       }
     });
   }, []);
 
   const setLocale = async (newLocale: AppLocale) => {
     setLocaleState(newLocale);
+    setFormatLocale(newLocale);
     await SecureStore.setItemAsync(LOCALE_KEY, newLocale);
   };
 

@@ -50,12 +50,10 @@ export const shared = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     color: colors.text,
-    textAlign: "right",
   },
   subtitle: {
     fontSize: 14,
     color: colors.muted,
-    textAlign: "right",
   },
   card: {
     backgroundColor: colors.card,
@@ -84,26 +82,24 @@ export const shared = StyleSheet.create({
     elevation: 2,
   },
   row: {
-    flexDirection: "row-reverse",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
   },
   rowStart: {
-    flexDirection: "row-reverse",
+    flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
   label: {
     fontSize: 13,
     color: colors.faint,
-    textAlign: "right",
   },
   value: {
     fontSize: 16,
     fontWeight: "700",
     color: colors.text,
-    textAlign: "right",
   },
   input: {
     borderWidth: 1,
@@ -114,7 +110,6 @@ export const shared = StyleSheet.create({
     fontSize: 15,
     color: colors.text,
     backgroundColor: "#FBF9F4",
-    textAlign: "right",
   },
   button: {
     backgroundColor: colors.primary,
@@ -123,7 +118,7 @@ export const shared = StyleSheet.create({
     paddingHorizontal: 18,
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: "row-reverse",
+    flexDirection: "row",
     gap: 8,
   },
   buttonText: {
@@ -140,7 +135,7 @@ export const shared = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: colors.primaryBorder,
-    flexDirection: "row-reverse",
+    flexDirection: "row",
     gap: 6,
   },
   buttonSecondaryText: {
@@ -166,7 +161,6 @@ export const shared = StyleSheet.create({
   error: {
     color: colors.danger,
     fontSize: 13,
-    textAlign: "right",
     fontWeight: "500",
   },
   empty: {
