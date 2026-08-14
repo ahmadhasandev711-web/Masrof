@@ -8,7 +8,7 @@ import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { scanReceiptImage } from "@/features/receipts/extract-receipt-text";
 import { suggestCategoryForTransaction } from "@/features/transactions/suggest-category";
 import { storePublicObject } from "@/lib/storage";
-import { checkMemoryRateLimit, clientKeyFromRequest } from "@/lib/rate-limit/memory";
+import { checkRateLimit, clientKeyFromRequest } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: tErrors("unauthorized") }, { status: 401 });
   }
 
-  const rate = checkMemoryRateLimit(
+  const rate = await checkRateLimit(
     `ocr:${clientKeyFromRequest(request, session.user.id)}`,
     10,
     60_000,

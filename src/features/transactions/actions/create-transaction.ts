@@ -9,10 +9,12 @@ import { createTransaction, InvalidTransactionReferenceError } from "@/features/
 
 export type CreateTransactionState = {
   error: string | null;
+  /** Incremented on every successful save so the form can remount and clear itself. */
+  submissionId: number;
 };
 
 export async function createTransactionAction(
-  _prevState: CreateTransactionState,
+  prevState: CreateTransactionState,
   formData: FormData,
 ): Promise<CreateTransactionState> {
   const session = await requireSession();
@@ -35,7 +37,10 @@ export async function createTransactionAction(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
+    return {
+      error: parsed.error.issues[0]?.message ?? tErrors("invalidData"),
+      submissionId: prevState.submissionId,
+    };
   }
 
   await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
@@ -44,7 +49,10 @@ export async function createTransactionAction(
     await createTransaction(parsed.data, session.user.id);
   } catch (error) {
     if (error instanceof InvalidTransactionReferenceError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };
+      return {
+        error: tErrors(error.code as Parameters<typeof tErrors>[0]),
+        submissionId: prevState.submissionId,
+      };
     }
     throw error;
   }
@@ -52,5 +60,5 @@ export async function createTransactionAction(
   revalidatePath("/dashboard/transactions");
   revalidatePath("/dashboard/accounts");
   revalidatePath("/dashboard");
-  return { error: null };
+  return { error: null, submissionId: prevState.submissionId + 1 };
 }

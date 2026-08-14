@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState, useEffect } from "react";
+import { useActionState, useMemo, useState } from "react";
 import {
   createTransactionAction,
   type CreateTransactionState,
@@ -11,21 +11,13 @@ type AccountOption = { id: string; name: string };
 type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
 type LinkOption = { id: string; name: string };
 
-const initialState: CreateTransactionState = { error: null };
+const initialState: CreateTransactionState = { error: null, submissionId: 0 };
 
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function CreateTransactionForm({
-  workspaceId,
-  accounts,
-  categories,
-  clients = [],
-  projects = [],
-  ocrReceipts = false,
-  aiCategory = false,
-}: {
+type FormProps = {
   workspaceId: string;
   accounts: AccountOption[];
   categories: CategoryOption[];
@@ -33,49 +25,67 @@ export function CreateTransactionForm({
   projects?: LinkOption[];
   ocrReceipts?: boolean;
   aiCategory?: boolean;
+};
+
+export function CreateTransactionForm(props: FormProps) {
+  const [state, formAction, isPending] = useActionState(createTransactionAction, initialState);
+
+  // Remounting on every successful save clears the inputs and their state,
+  // instead of resetting a dozen fields from an effect.
+  return (
+    <TransactionFields
+      key={state.submissionId}
+      {...props}
+      state={state}
+      formAction={formAction}
+      isPending={isPending}
+    />
+  );
+}
+
+function TransactionFields({
+  workspaceId,
+  accounts,
+  categories,
+  clients = [],
+  projects = [],
+  ocrReceipts = false,
+  aiCategory = false,
+  state,
+  formAction,
+  isPending,
+}: FormProps & {
+  state: CreateTransactionState;
+  formAction: (formData: FormData) => void;
+  isPending: boolean;
 }) {
   const tForm = useTranslations("forms.transaction");
   const tShared = useTranslations("forms.shared");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
   const tAi = useTranslations("forms.transactionAi");
-  const [state, formAction, isPending] = useActionState(createTransactionAction, initialState);
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
   const [transactionDate, setTransactionDate] = useState(todayIsoDate());
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [attachmentName, setAttachmentName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [scanHint, setScanHint] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [suggesting, setSuggesting] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.kind === type),
     [categories, type],
   );
 
-  useEffect(() => {
-    if (!categoryId && filteredCategories.length > 0) {
-      setCategoryId(filteredCategories[0]!.id);
-    }
-  }, [filteredCategories, categoryId]);
-
-  useEffect(() => {
-    if (!isPending && state.error === null) {
-      formRef.current?.reset();
-      setAmount("");
-      setTransactionDate(todayIsoDate());
-      setDescription("");
-      setCategoryId(filteredCategories[0]?.id ?? "");
-      setAttachmentUrl("");
-      setAttachmentName("");
-      setScanHint(null);
-    }
-  }, [isPending, state.error, filteredCategories]);
+  // Falls back to the first category of the current type, so switching between
+  // income and expense can never leave a category of the wrong kind selected.
+  const categoryId = filteredCategories.some((category) => category.id === selectedCategoryId)
+    ? selectedCategoryId
+    : (filteredCategories[0]?.id ?? "");
 
   async function handleReceiptChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -132,7 +142,7 @@ export function CreateTransactionForm({
       }
 
       if (data.categorySuggestion) {
-        setCategoryId(data.categorySuggestion.categoryId);
+        setSelectedCategoryId(data.categorySuggestion.categoryId);
       }
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : tErrors("uploadFailed"));
@@ -162,7 +172,7 @@ export function CreateTransactionForm({
       if (!res.ok || !data.suggestion) {
         throw new Error(data.error ?? tAi("suggestFailed"));
       }
-      setCategoryId(data.suggestion.categoryId);
+      setSelectedCategoryId(data.suggestion.categoryId);
       setScanHint(tAi("categorySuggested", { confidence: Math.round(data.suggestion.confidence * 100) }));
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : tAi("suggestFailed"));
@@ -173,7 +183,6 @@ export function CreateTransactionForm({
 
   return (
     <form
-      ref={formRef}
       action={formAction}
       className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
     >
@@ -279,7 +288,7 @@ export function CreateTransactionForm({
             id="tx-category"
             name="categoryId"
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
+            onChange={(e) => setSelectedCategoryId(e.target.value)}
             className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
             required
           >

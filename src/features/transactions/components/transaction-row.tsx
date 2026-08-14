@@ -57,7 +57,6 @@ export function TransactionRow({
 }: TransactionRowProps) {
   const tForm = useTranslations("forms.transaction");
   const tShared = useTranslations("forms.shared");
-  const tCommon = useTranslations("common");
   const [isEditing, setIsEditing] = useState(false);
   const isIncome = transaction.type === "income";
 

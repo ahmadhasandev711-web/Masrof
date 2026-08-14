@@ -14,8 +14,6 @@ type WorkspaceValidationKey =
 type ValidationTranslator = (key: WorkspaceValidationKey) => string;
 
 export function createWorkspaceSchema(t: ValidationTranslator) {
-  const exchangeRateSchema = z.coerce.number().positive(t("exchangeRatePositive")).optional();
-
   return z.object({
     name: z.string().trim().min(2, t("workspaceNameMin2")).max(80),
     type: z.enum(WORKSPACE_TYPES, { message: t("workspaceTypeInvalid") }),
