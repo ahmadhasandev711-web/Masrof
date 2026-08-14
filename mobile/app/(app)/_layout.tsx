@@ -39,107 +39,56 @@ export default function AppLayout() {
           height: tabHeight,
           paddingBottom: bottomPadding,
           paddingTop: 6,
+          flexDirection: isRTL ? "row-reverse" : "row",
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
       }}
     >
-      {isRTL ? (
-        <>
-          <Tabs.Screen
-            name="more"
-            options={{
-              title: t.tabs.more,
-              tabBarIcon: ({ color }) => (
-                <AppIcon name="menu" size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="projects"
-            options={{
-              title: t.tabs.projects,
-              tabBarIcon: ({ color, focused }) => (
-                <AppIcon name={focused ? "briefcase" : "briefcase-outline"} size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="clients"
-            options={{
-              title: t.tabs.clients,
-              tabBarIcon: ({ color, focused }) => (
-                <AppIcon name={focused ? "people" : "people-outline"} size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="transactions"
-            options={{
-              title: t.tabs.transactions,
-              tabBarIcon: ({ color }) => (
-                <AppIcon name="list" size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: t.tabs.home,
-              tabBarIcon: ({ color, focused }) => (
-                <AppIcon name={focused ? "home" : "home-outline"} size={22} color={color} />
-              ),
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: t.tabs.home,
-              tabBarIcon: ({ color, focused }) => (
-                <AppIcon name={focused ? "home" : "home-outline"} size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="transactions"
-            options={{
-              title: t.tabs.transactions,
-              tabBarIcon: ({ color }) => (
-                <AppIcon name="list" size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="clients"
-            options={{
-              title: t.tabs.clients,
-              tabBarIcon: ({ color, focused }) => (
-                <AppIcon name={focused ? "people" : "people-outline"} size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="projects"
-            options={{
-              title: t.tabs.projects,
-              tabBarIcon: ({ color, focused }) => (
-                <AppIcon name={focused ? "briefcase" : "briefcase-outline"} size={22} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="more"
-            options={{
-              title: t.tabs.more,
-              tabBarIcon: ({ color }) => (
-                <AppIcon name="menu" size={22} color={color} />
-              ),
-            }}
-          />
-        </>
-      )}
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: t.tabs.home,
+          tabBarIcon: ({ color, focused }) => (
+            <AppIcon name={focused ? "home" : "home-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="transactions"
+        options={{
+          title: t.tabs.transactions,
+          tabBarIcon: ({ color }) => (
+            <AppIcon name="list" size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="clients"
+        options={{
+          title: t.tabs.clients,
+          tabBarIcon: ({ color, focused }) => (
+            <AppIcon name={focused ? "people" : "people-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="projects"
+        options={{
+          title: t.tabs.projects,
+          tabBarIcon: ({ color, focused }) => (
+            <AppIcon name={focused ? "briefcase" : "briefcase-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: t.tabs.more,
+          tabBarIcon: ({ color }) => (
+            <AppIcon name="menu" size={22} color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen name="accounts" options={{ href: null }} />
       <Tabs.Screen name="categories" options={{ href: null }} />
       <Tabs.Screen name="budgets" options={{ href: null }} />
