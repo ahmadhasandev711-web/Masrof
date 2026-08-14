@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
@@ -8,6 +8,7 @@ import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/feat
 import { createClientSchema } from "@/features/clients/schemas";
 import { createClient } from "@/features/clients/data";
 import { countClientsForWorkspace } from "@/features/subscriptions/plan-usage";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateClientState = {
   error: string | null;
@@ -53,5 +54,6 @@ export async function createClientAction(
   await createClient(parsed.data);
 
   revalidatePath("/dashboard/clients");
+  revalidateTag(CACHE_TAGS.clients, "max");
   return { error: null };
 }

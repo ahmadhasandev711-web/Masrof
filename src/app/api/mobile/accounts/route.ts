@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { listAccountsForWorkspace, createAccount } from "@/features/accounts/data";
 import { createAccountSchema } from "@/features/accounts/schemas";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { SupportedCurrency } from "@/models/workspace";
 import {
   mobileErrorResponse,
@@ -47,6 +49,8 @@ export async function POST(request: Request) {
       parsed.data,
       access.workspace.currency as SupportedCurrency,
     );
+
+    revalidateTag(CACHE_TAGS.accounts, "max");
 
     return NextResponse.json({
       id: serializeId(account._id),

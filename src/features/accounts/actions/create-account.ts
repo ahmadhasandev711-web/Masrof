@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
@@ -8,6 +8,7 @@ import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { createAccountSchema } from "@/features/accounts/schemas";
 import { createAccount } from "@/features/accounts/data";
 import { resolveAccountCurrency } from "@/lib/currency";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { SupportedCurrency } from "@/models/workspace";
 
 export type CreateAccountState = {
@@ -45,8 +46,9 @@ export async function createAccountAction(
     }
   }
 
-  await createAccount({ ...parsed.data, currency: requestedCurrency }, workspaceCurrency);
+  const account = await createAccount({ ...parsed.data, currency: requestedCurrency }, workspaceCurrency);
 
   revalidatePath("/dashboard/accounts");
+  revalidateTag(CACHE_TAGS.accounts, "max");
   return { error: null };
 }

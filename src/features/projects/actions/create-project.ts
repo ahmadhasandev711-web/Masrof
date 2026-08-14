@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
@@ -8,6 +8,7 @@ import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/feat
 import { createProjectSchema } from "@/features/projects/schemas";
 import { createProject } from "@/features/projects/data";
 import { countActiveProjectsForWorkspace } from "@/features/subscriptions/plan-usage";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateProjectState = {
   error: string | null;
@@ -61,5 +62,6 @@ export async function createProjectAction(
   await createProject(parsed.data);
 
   revalidatePath("/dashboard/projects");
+  revalidateTag(CACHE_TAGS.projects, "max");
   return { error: null };
 }

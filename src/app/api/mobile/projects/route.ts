@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createProject, listProjectsWithTotals } from "@/features/projects/data";
 import { createProjectSchema } from "@/features/projects/schemas";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
   mobileErrorResponse,
   requireMobileSession,
@@ -35,6 +37,7 @@ export async function POST(request: Request) {
     if (access instanceof NextResponse) return access;
 
     const project = await createProject(parsed.data);
+    revalidateTag(CACHE_TAGS.projects, "max");
     return NextResponse.json(
       {
         id: serializeId(project._id),
