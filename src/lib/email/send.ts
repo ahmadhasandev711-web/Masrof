@@ -17,24 +17,29 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
   const from = env.AUTH_EMAIL_FROM;
 
   if (env.RESEND_API_KEY && from) {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.html,
-        text: payload.text,
-      }),
-    });
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to: payload.to,
+          subject: payload.subject,
+          html: payload.html,
+          text: payload.text,
+        }),
+        signal: AbortSignal.timeout(3500),
+      });
 
-    if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`Failed to send email via Resend: ${body}`);
+      if (!response.ok) {
+        const body = await response.text();
+        console.warn(`[email] Resend send warning: ${body}`);
+      }
+    } catch (err) {
+      console.warn("[email] Resend request failed or timed out:", err);
     }
     return;
   }

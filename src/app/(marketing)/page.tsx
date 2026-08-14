@@ -8,7 +8,7 @@ import { TestimonialsSection } from "@/features/marketing/components/testimonial
 import { listLatestPublishedPosts } from "@/features/blog/data";
 import { getLocalizedHomepageContent } from "@/i18n/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function MarketingHomePage() {
   const tPages = await getTranslations("pages");

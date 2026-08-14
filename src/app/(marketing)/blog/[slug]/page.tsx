@@ -12,7 +12,7 @@ import { estimateReadingMinutes } from "@/features/blog/utils";
 import { AdSlot } from "@/features/marketing/components/ad-slot";
 import { NewsletterForm } from "@/features/marketing/components/newsletter-form";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,

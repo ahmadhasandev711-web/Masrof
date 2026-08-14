@@ -66,10 +66,23 @@ export async function storePublicObject(input: {
     return { url: publicUrlForKey(key), key };
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", input.folder);
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, input.filename), input.body);
-  return { url: `/uploads/${key}`, key };
+  if (process.env.VERCEL) {
+    // On Vercel Serverless when S3 is not yet connected, return as base64 data URI
+    // to prevent EROFS / ENOENT on read-only lambda filesystem
+    const base64 = input.body.toString("base64");
+    const dataUri = `data:${input.contentType};base64,${base64}`;
+    return { url: dataUri, key };
+  }
+
+  try {
+    const uploadDir = path.join(process.cwd(), "public", "uploads", input.folder);
+    await mkdir(uploadDir, { recursive: true });
+    await writeFile(path.join(uploadDir, input.filename), input.body);
+    return { url: `/uploads/${key}`, key };
+  } catch {
+    const base64 = input.body.toString("base64");
+    return { url: `data:${input.contentType};base64,${base64}`, key };
+  }
 }
 
 export function usesObjectStorage(): boolean {

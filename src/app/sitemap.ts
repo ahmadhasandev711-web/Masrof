@@ -3,9 +3,7 @@ import { listAllPublishedPostsForSitemap } from "@/features/blog/data";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-// Same reasoning as the blog pages: don't let `next build` depend on the
-// database being reachable at that exact moment.
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await listAllPublishedPostsForSitemap();

@@ -39,9 +39,9 @@ const isServerless = Boolean(process.env.VERCEL);
 
 const CLIENT_OPTIONS = {
   dbName: env.MONGODB_DB_NAME,
-  maxPoolSize: isServerless ? 1 : 5,
+  maxPoolSize: 10,
   minPoolSize: 0,
-  maxIdleTimeMS: isServerless ? 10_000 : 30_000,
+  maxIdleTimeMS: 30_000,
   serverSelectionTimeoutMS: isServerless ? 8_000 : 15_000,
   socketTimeoutMS: 20_000,
   family: 4 as const,
