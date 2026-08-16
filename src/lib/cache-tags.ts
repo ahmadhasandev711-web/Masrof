@@ -9,4 +9,9 @@ export const CACHE_TAGS = {
   categories: "ref:categories",
   clients: "ref:clients",
   projects: "ref:projects",
+  invoices: "list:invoices",
+  budgets: "list:budgets",
+  goals: "list:goals",
+  recurring: "list:recurring",
+  transfers: "list:transfers",
 } as const;

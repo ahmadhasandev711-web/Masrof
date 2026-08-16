@@ -183,14 +183,31 @@ export async function createCategory(body: { workspaceId: string; name: string; 
   return result;
 }
 
-export function fetchTransactions(workspaceId: string, page = 1, skipCache = false) {
+export type TransactionListResult = {
+  items: TransactionItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export type TransactionFilters = {
+  search?: string;
+  type?: "income" | "expense";
+};
+
+export function fetchTransactions(
+  workspaceId: string,
+  page = 1,
+  skipCache = false,
+  filters?: TransactionFilters,
+) {
   const qs = new URLSearchParams({ workspaceId, page: String(page), pageSize: "30" });
-  return mobileFetch<{
-    items: TransactionItem[];
-    total: number;
-    page: number;
-    totalPages: number;
-  }>(`/api/mobile/transactions?${qs}`, undefined, { skipCache });
+  if (filters?.search?.trim()) qs.set("search", filters.search.trim());
+  if (filters?.type) qs.set("type", filters.type);
+  return mobileFetch<TransactionListResult>(`/api/mobile/transactions?${qs}`, undefined, {
+    skipCache,
+  });
 }
 
 export async function createTransaction(body: Record<string, unknown>) {
@@ -238,7 +255,7 @@ export async function createProject(body: Record<string, unknown>) {
   return result;
 }
 
-export function fetchInvoices(workspaceId: string, skipCache = false) {
+export function fetchInvoices(workspaceId: string, page = 1, skipCache = false) {
   return mobileFetch<{
     items: {
       _id: string;
@@ -250,7 +267,15 @@ export function fetchInvoices(workspaceId: string, skipCache = false) {
       issueDate: string;
       dueDate: string | null;
     }[];
-  }>(`/api/mobile/invoices?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>(
+    `/api/mobile/invoices?workspaceId=${encodeURIComponent(workspaceId)}&page=${page}&pageSize=30`,
+    undefined,
+    { skipCache },
+  );
 }
 
 export async function createInvoice(body: Record<string, unknown>) {
@@ -359,9 +384,15 @@ export async function recordRecurring(body: { workspaceId: string; recurringId: 
   return result;
 }
 
-export function fetchTransfers(workspaceId: string, skipCache = false) {
-  return mobileFetch<{ items: { _id: string; amount: number; fromAccountName: string; toAccountName: string; transferDate: string; description: string }[] }>(
-    `/api/mobile/transfers?workspaceId=${encodeURIComponent(workspaceId)}`,
+export function fetchTransfers(workspaceId: string, page = 1, skipCache = false) {
+  return mobileFetch<{
+    items: { _id: string; amount: number; fromAccountName: string; toAccountName: string; transferDate: string; description: string }[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>(
+    `/api/mobile/transfers?workspaceId=${encodeURIComponent(workspaceId)}&page=${page}&pageSize=30`,
     undefined,
     { skipCache },
   );

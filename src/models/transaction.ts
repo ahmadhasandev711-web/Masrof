@@ -56,6 +56,10 @@ transactionSchema.index({ workspaceId: 1, accountId: 1, isArchived: 1 });
 transactionSchema.index({ workspaceId: 1, categoryId: 1, isArchived: 1 });
 transactionSchema.index({ workspaceId: 1, clientId: 1, isArchived: 1 });
 transactionSchema.index({ workspaceId: 1, projectId: 1, isArchived: 1 });
+// Helps prefix/anchored description search; kept as a plain index so
+// substring `$regex` behaviour is unchanged (a `$text` index would only
+// match whole words and change search UX).
+transactionSchema.index({ workspaceId: 1, description: 1 });
 
 export type TransactionDocument = InferSchemaType<typeof transactionSchema>;
 

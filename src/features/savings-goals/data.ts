@@ -1,8 +1,10 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { SavingsGoalModel } from "@/models/savings-goal";
 import { toMinorUnits } from "@/lib/money";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CreateSavingsGoalInput, UpdateGoalProgressInput } from "@/features/savings-goals/schemas";
 
 export class SavingsGoalNotFoundError extends Error {
@@ -54,21 +56,25 @@ export async function archiveSavingsGoal(goalId: string, workspaceId: string) {
   ).lean();
 }
 
-export async function listSavingsGoals(workspaceId: string) {
-  await connectToDatabase();
+export const listSavingsGoals = unstable_cache(
+  async (workspaceId: string) => {
+    await connectToDatabase();
 
-  const goals = await SavingsGoalModel.find({ workspaceId, isArchived: false })
-    .sort({ createdAt: 1 })
-    .lean();
+    const goals = await SavingsGoalModel.find({ workspaceId, isArchived: false })
+      .sort({ createdAt: 1 })
+      .lean();
 
-  return goals.map((goal) => {
-    const percentage =
-      goal.targetAmount > 0 ? Math.round((goal.currentAmount / goal.targetAmount) * 100) : 0;
+    return goals.map((goal) => {
+      const percentage =
+        goal.targetAmount > 0 ? Math.round((goal.currentAmount / goal.targetAmount) * 100) : 0;
 
-    return {
-      ...goal,
-      remaining: goal.targetAmount - goal.currentAmount,
-      percentage,
-    };
-  });
-}
+      return {
+        ...goal,
+        remaining: goal.targetAmount - goal.currentAmount,
+        percentage,
+      };
+    });
+  },
+  ["savings-goals-for-workspace"],
+  { revalidate: 30, tags: [CACHE_TAGS.goals] },
+);

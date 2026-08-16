@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { createUpdateGoalProgressSchema } from "@/features/savings-goals/schemas";
 import { updateSavingsGoalProgress, SavingsGoalNotFoundError } from "@/features/savings-goals/data";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type UpdateGoalProgressState = {
   error: string | null;
@@ -40,6 +41,7 @@ export async function updateGoalProgressAction(
     throw error;
   }
 
+  revalidateTag(CACHE_TAGS.goals, "max");
   revalidatePath("/dashboard/goals");
   return { error: null };
 }

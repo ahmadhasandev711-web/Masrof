@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Linking,
   Pressable,
@@ -33,6 +34,9 @@ export default function InvoicesScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<InvoiceRow[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -48,9 +52,30 @@ export default function InvoicesScreen() {
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchInvoices(workspaceId, skipCache);
+    const data = await fetchInvoices(workspaceId, 1, skipCache);
     setItems(data.items);
+    setPage(data.page);
+    setTotalPages(data.totalPages);
   }, [workspaceId]);
+
+  const loadMore = useCallback(async () => {
+    if (!workspaceId || loadingMore || page >= totalPages) return;
+    setLoadingMore(true);
+    try {
+      const next = page + 1;
+      const data = await fetchInvoices(workspaceId, next, false);
+      setItems((prev) => {
+        const existing = new Set(prev.map((item) => item._id));
+        return [...prev, ...data.items.filter((item) => !existing.has(item._id))];
+      });
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [workspaceId, loadingMore, page, totalPages]);
 
   useFocusEffect(
     useCallback(() => {
@@ -158,6 +183,15 @@ export default function InvoicesScreen() {
         keyExtractor={(item) => item._id}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+        }
+        onEndReached={() => void loadMore()}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          loadingMore ? (
+            <View style={{ paddingVertical: 16, alignItems: "center" }}>
+              <ActivityIndicator color={colors.primary} />
+            </View>
+          ) : null
         }
         contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}

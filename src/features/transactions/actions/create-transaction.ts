@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { createTransactionSchema } from "@/features/transactions/schemas";
 import { createTransaction, InvalidTransactionReferenceError } from "@/features/transactions/data";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateTransactionState = {
   error: string | null;
@@ -49,6 +50,7 @@ export async function createTransactionAction(
     throw error;
   }
 
+  revalidateTag(CACHE_TAGS.budgets, "max");
   revalidatePath("/dashboard/transactions");
   revalidatePath("/dashboard/accounts");
   revalidatePath("/dashboard");

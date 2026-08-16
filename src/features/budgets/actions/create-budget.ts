@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { createBudgetSchema } from "@/features/budgets/schemas";
 import { createBudget, InvalidBudgetCategoryError } from "@/features/budgets/data";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateBudgetState = {
   error: string | null;
@@ -41,6 +42,7 @@ export async function createBudgetAction(
     throw error;
   }
 
+  revalidateTag(CACHE_TAGS.budgets, "max");
   revalidatePath("/dashboard/budgets");
   return { error: null };
 }

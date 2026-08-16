@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { endOfLocalDay } from "@/lib/dates";
 import { RecurringExpenseModel } from "@/models/recurring-expense";
@@ -7,6 +8,7 @@ import { CategoryModel } from "@/models/category";
 import { AccountModel } from "@/models/account";
 import { toMinorUnits, fromMinorUnits } from "@/lib/money";
 import { createTransaction } from "@/features/transactions/data";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CreateRecurringExpenseInput } from "@/features/recurring-expenses/schemas";
 import type { RecurringFrequency } from "@/models/recurring-expense";
 
@@ -114,17 +116,30 @@ export async function createRecurringExpense(input: CreateRecurringExpenseInput)
   return recurring.toObject();
 }
 
-export async function listRecurringExpenses(workspaceId: string): Promise<RecurringExpenseListItem[]> {
-  await connectToDatabase();
+export const listRecurringExpenses = unstable_cache(
+  async (workspaceId: string, limit?: number): Promise<RecurringExpenseListItem[]> => {
+    await connectToDatabase();
 
-  const items = await RecurringExpenseModel.find({ workspaceId, isArchived: false, isActive: true })
-    .sort({ nextDueDate: 1 })
-    .populate("accountId", "name")
-    .populate("categoryId", "name icon")
-    .lean();
+    const query = RecurringExpenseModel.find({
+      workspaceId,
+      isArchived: false,
+      isActive: true,
+    })
+      .sort({ nextDueDate: 1 })
+      .populate("accountId", "name")
+      .populate("categoryId", "name icon");
 
-  return items.map((item) => mapRecurringExpenseForList(item as RecurringExpenseLean));
-}
+    if (typeof limit === "number") {
+      query.limit(limit);
+    }
+
+    const items = await query.lean();
+
+    return items.map((item) => mapRecurringExpenseForList(item as RecurringExpenseLean));
+  },
+  ["recurring-expenses-for-workspace"],
+  { revalidate: 30, tags: [CACHE_TAGS.recurring] },
+);
 
 export async function archiveRecurringExpense(recurringId: string, workspaceId: string) {
   await connectToDatabase();

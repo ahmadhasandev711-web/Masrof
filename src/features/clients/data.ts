@@ -28,6 +28,7 @@ export const listClientsForWorkspace = unstable_cache(
     await connectToDatabase();
 
     const clients = await ClientModel.find({ workspaceId, isArchived: false })
+      .select("name email phone")
       .sort({ name: 1 })
       .lean();
 

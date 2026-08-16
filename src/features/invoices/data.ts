@@ -1,9 +1,10 @@
 import "server-only";
 
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { toPlain } from "@/lib/db/plain";
 import { toMinorUnits } from "@/lib/money";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { InvoiceModel, type InvoiceStatus } from "@/models/invoice";
 import { ClientModel } from "@/models/client";
 import type { CreateInvoiceInput } from "@/features/invoices/schemas";
@@ -82,18 +83,31 @@ export async function updateInvoiceStatus(
   ).lean();
 }
 
-export const listInvoicesForWorkspace = cache(async (workspaceId: string): Promise<InvoiceListItem[]> => {
+export type InvoicesPage = {
+  items: InvoiceListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+async function queryInvoicesPage(workspaceId: string, skip: number, limit: number) {
   await connectToDatabase();
 
-  const invoices = await InvoiceModel.find({ workspaceId, isArchived: false })
-    .sort({ issueDate: -1, createdAt: -1 })
-    .populate("clientId", "name")
-    .lean();
+  const [invoices, total] = await Promise.all([
+    InvoiceModel.find({ workspaceId, isArchived: false })
+      .sort({ issueDate: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("clientId", "name")
+      .lean(),
+    InvoiceModel.countDocuments({ workspaceId, isArchived: false }),
+  ]);
 
-  return toPlain(
+  const items = toPlain(
     invoices.map((invoice): InvoiceListItem => {
       const client = invoice.clientId as { _id?: unknown; name?: string } | null;
-      const total = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+      const totalAmount = invoice.items.reduce((sum, item) => sum + item.amount, 0);
       const status = (invoice.status ?? "sent") as InvoiceStatus;
 
       return {
@@ -101,7 +115,7 @@ export const listInvoicesForWorkspace = cache(async (workspaceId: string): Promi
         invoiceNumber: invoice.invoiceNumber,
         issueDate: new Date(invoice.issueDate).toISOString(),
         dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString() : null,
-        total,
+        total: totalAmount,
         clientName: client?.name ?? "—",
         clientId: client?._id ? String(client._id) : String(invoice.clientId),
         status,
@@ -113,7 +127,34 @@ export const listInvoicesForWorkspace = cache(async (workspaceId: string): Promi
       };
     }),
   );
-});
+
+  return { items, total };
+}
+
+export const listInvoicesForWorkspace = unstable_cache(
+  async (workspaceId: string): Promise<InvoiceListItem[]> => {
+    const { items } = await queryInvoicesPage(workspaceId, 0, 1000);
+    return items;
+  },
+  ["invoices-for-workspace"],
+  { revalidate: 30, tags: [CACHE_TAGS.invoices] },
+);
+
+export async function listInvoicesPaginated(
+  workspaceId: string,
+  page = 1,
+  pageSize = 30,
+): Promise<InvoicesPage> {
+  const skip = (page - 1) * pageSize;
+  const { items, total } = await queryInvoicesPage(workspaceId, skip, pageSize);
+  return {
+    items,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  };
+}
 
 export type WorkspaceBrandingForPrint = {
   name: string;

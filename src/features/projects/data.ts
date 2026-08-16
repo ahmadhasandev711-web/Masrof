@@ -49,6 +49,7 @@ export const listProjectsWithTotals = cache(async (workspaceId: string) => {
   await connectToDatabase();
 
   const projects = await ProjectModel.find({ workspaceId, isArchived: false })
+    .select("name status expectedAmount dueDate clientId")
     .sort({ createdAt: -1 })
     .lean();
 

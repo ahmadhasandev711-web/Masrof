@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { updateInvoiceStatus } from "@/features/invoices/data";
 import { INVOICE_STATUSES, type InvoiceStatus } from "@/models/invoice";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function updateInvoiceStatusAction(
   invoiceId: string,
@@ -25,6 +26,7 @@ export async function updateInvoiceStatusAction(
     return { error: tErrors("invalidData") };
   }
 
+  revalidateTag(CACHE_TAGS.invoices, "max");
   revalidatePath("/dashboard/invoices");
   return { error: null };
 }

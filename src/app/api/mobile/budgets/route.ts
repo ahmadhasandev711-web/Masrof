@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createBudget, listBudgetsWithProgress } from "@/features/budgets/data";
 import { createBudgetSchema } from "@/features/budgets/schemas";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
   mobileErrorResponse,
   requireMobileSession,
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
     if (access instanceof NextResponse) return access;
 
     const budget = await createBudget(parsed.data);
+    revalidateTag(CACHE_TAGS.budgets, "max");
     return NextResponse.json({ id: serializeId(budget._id) }, { status: 201 });
   } catch (error) {
     return mobileErrorResponse(error);

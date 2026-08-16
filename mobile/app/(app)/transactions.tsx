@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
-import { FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
@@ -16,41 +16,75 @@ export default function TransactionsScreen() {
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<TransactionItem[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const requestSeq = useRef(0);
 
-  const load = useCallback(async (skipCache = false) => {
-    if (!workspaceId) return;
-    const data = await fetchTransactions(workspaceId, 1, skipCache);
-    setItems(data.items);
-  }, [workspaceId]);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchInput), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const reload = useCallback(
+    async (skipCache = false) => {
+      if (!workspaceId) return;
+      const seq = ++requestSeq.current;
+      try {
+        const data = await fetchTransactions(workspaceId, 1, skipCache, {
+          search: debouncedSearch,
+          type: filter === "all" ? undefined : filter,
+        });
+        if (seq !== requestSeq.current) return;
+        setItems(data.items);
+        setPage(1);
+        setTotalPages(data.totalPages);
+      } catch {
+        if (seq !== requestSeq.current) return;
+        setItems([]);
+        setTotalPages(1);
+      }
+    },
+    [workspaceId, debouncedSearch, filter],
+  );
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
-    }, [load]),
+      void reload();
+    }, [reload]),
   );
 
   async function onRefresh() {
     setRefreshing(true);
     try {
-      await load(true);
+      await reload(true);
     } finally {
       setRefreshing(false);
     }
   }
 
-  const filteredItems = items.filter((item) => {
-    if (filter !== "all" && item.type !== filter) return false;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      const desc = (item.description || "").toLowerCase();
-      const cat = (item.categoryName || "").toLowerCase();
-      const acc = (item.accountName || "").toLowerCase();
-      return desc.includes(q) || cat.includes(q) || acc.includes(q);
+  const loadMore = useCallback(async () => {
+    if (!workspaceId || loadingMore || refreshing) return;
+    if (page >= totalPages) return;
+    const seq = requestSeq.current;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const data = await fetchTransactions(workspaceId, nextPage, false, {
+        search: debouncedSearch,
+        type: filter === "all" ? undefined : filter,
+      });
+      if (seq !== requestSeq.current) return;
+      setItems((prev) => [...prev, ...data.items]);
+      setPage(nextPage);
+      setTotalPages(data.totalPages);
+    } finally {
+      setLoadingMore(false);
     }
-    return true;
-  });
+  }, [workspaceId, page, totalPages, loadingMore, refreshing, debouncedSearch, filter]);
 
   return (
     <Screen
@@ -65,8 +99,8 @@ export default function TransactionsScreen() {
           style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
           placeholder={t.transactions.searchPlaceholder}
           placeholderTextColor={colors.faint}
-          value={search}
-          onChangeText={setSearch}
+          value={searchInput}
+          onChangeText={setSearchInput}
         />
       </View>
 
@@ -106,18 +140,25 @@ export default function TransactionsScreen() {
 
       {/* Transactions List */}
       <FlatList
-        data={filteredItems}
+        data={items}
         keyExtractor={(item) => item.id}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
         }
         contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          loadingMore ? (
+            <ActivityIndicator style={{ paddingVertical: 16 }} color={colors.primary} />
+          ) : null
+        }
         ListEmptyComponent={
           <View style={shared.center}>
             <AppIcon name="document-text" size={40} color={colors.faint} />
             <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              {search ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching transactions found") : t.transactions.noTransactions}
+              {searchInput.trim() ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching transactions found") : t.transactions.noTransactions}
             </Text>
           </View>
         }

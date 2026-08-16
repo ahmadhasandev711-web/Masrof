@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import {
   createSavingsGoal,
   listSavingsGoals,
@@ -8,6 +9,7 @@ import {
   createSavingsGoalSchema,
   createUpdateGoalProgressSchema,
 } from "@/features/savings-goals/schemas";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
   mobileErrorResponse,
   requireMobileSession,
@@ -52,6 +54,7 @@ export async function POST(request: Request) {
     if (access instanceof NextResponse) return access;
 
     const goal = await createSavingsGoal(parsed.data);
+    revalidateTag(CACHE_TAGS.goals, "max");
     return NextResponse.json({ id: serializeId(goal._id) }, { status: 201 });
   } catch (error) {
     return mobileErrorResponse(error);
@@ -73,6 +76,7 @@ export async function PATCH(request: Request) {
     if (access instanceof NextResponse) return access;
 
     await updateSavingsGoalProgress(parsed.data);
+    revalidateTag(CACHE_TAGS.goals, "max");
     return NextResponse.json({ ok: true });
   } catch (error) {
     return mobileErrorResponse(error);
