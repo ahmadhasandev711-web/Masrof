@@ -7,6 +7,42 @@ import { toPlain } from "@/lib/db/plain";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { CategoryModel, type CategoryKind } from "@/models/category";
 import type { CreateCategoryInput } from "@/features/categories/schemas";
+import { SYSTEM_CATEGORIES } from "@/features/categories/seed-data";
+
+let hasCheckedSystemCategories = false;
+
+export async function ensureSystemCategories(): Promise<void> {
+  if (hasCheckedSystemCategories) return;
+  try {
+    const count = await CategoryModel.countDocuments({ isSystem: true });
+    if (count === 0) {
+      const ops = SYSTEM_CATEGORIES.map((category) => ({
+        updateOne: {
+          filter: { slug: category.slug },
+          update: {
+            $setOnInsert: {
+              slug: category.slug,
+              name: category.name,
+              kind: category.kind,
+              icon: category.icon,
+              suggestedFor: category.suggestedFor,
+              isSystem: true,
+              workspaceId: null,
+              isArchived: false,
+            },
+          },
+          upsert: true,
+        },
+      }));
+      if (ops.length > 0) {
+        await CategoryModel.bulkWrite(ops);
+      }
+    }
+    hasCheckedSystemCategories = true;
+  } catch (error) {
+    console.error("[categories] Failed to ensure system categories:", error);
+  }
+}
 
 /**
  * Every category usable by a workspace: system categories (workspaceId
@@ -17,6 +53,7 @@ import type { CreateCategoryInput } from "@/features/categories/schemas";
 export const listCategoriesForWorkspace = unstable_cache(
   async (workspaceId: string, kind?: CategoryKind) => {
     await connectToDatabase();
+    await ensureSystemCategories();
 
     const docs = await CategoryModel.find({
       $or: [{ workspaceId: null }, { workspaceId: new mongoose.Types.ObjectId(workspaceId) }],
