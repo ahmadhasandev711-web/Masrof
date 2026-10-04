@@ -21,7 +21,7 @@ export function PlanConfigForm({ config }: { config: PlanConfigDocument }) {
   const [state, formAction, isPending] = useActionState(updatePlanConfigAction, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+    <form action={formAction} className="flex flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-sm">
       <input type="hidden" name="planId" value={config.planId} />
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-4">

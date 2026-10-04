@@ -43,7 +43,7 @@ export class SubscriptionSuspendedError extends Error {
   }
 }
 
-function resolveEffectivePlan(
+export function resolveEffectivePlan(
   plan: PlanId,
   status: string,
   expiresAt: Date | null | undefined,
@@ -128,17 +128,23 @@ export async function assertUserNotSuspended(userId: string) {
   }
 }
 
-const MAX_OWNED_WORKSPACES_PER_ACCOUNT = 10;
+const MAX_FREE_WORKSPACES_PER_ACCOUNT = 3;
 
 export async function assertCanCreateWorkspace(userId: string): Promise<string | null> {
   await assertUserNotSuspended(userId);
 
+  const subscription = await getUserSubscription(userId);
+  // Pro subscribers / owners of active Pro workspaces can create unlimited workspaces
+  if (subscription.plan === "pro") {
+    return null;
+  }
+
   const ownedCount = await countOwnedWorkspacesForUser(userId);
-  if (ownedCount >= MAX_OWNED_WORKSPACES_PER_ACCOUNT) {
+  if (ownedCount >= MAX_FREE_WORKSPACES_PER_ACCOUNT) {
     const tPlans = await getTranslations("plans");
     return tPlans("limitMessage", {
-      plan: "سندات",
-      limit: MAX_OWNED_WORKSPACES_PER_ACCOUNT,
+      plan: "المجانية",
+      limit: MAX_FREE_WORKSPACES_PER_ACCOUNT,
     });
   }
 

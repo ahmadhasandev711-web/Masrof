@@ -449,7 +449,7 @@ export function DashboardShell({
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-clip bg-[#FBF9F4] pb-[calc(5.5rem+env(safe-area-inset-bottom))] text-[#1C1B1A] lg:pb-8">
       {/* Header */}
-      <header className="border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md">
+      <header className="relative z-40 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-3 lg:px-8 lg:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
@@ -503,7 +503,7 @@ export function DashboardShell({
               <SignOutButton compact />
             </div>
           </div>
-          <div className="mt-2 flex items-center gap-2 lg:hidden">
+          <div className="relative z-50 mt-2 flex items-center gap-2 lg:hidden">
             <WorkspaceSwitcher
               workspaces={workspaces}
               activeWorkspaceId={activeWorkspaceId}

@@ -11,7 +11,7 @@ import {
   isWorkspaceMemberByEmail,
   removeWorkspaceMember,
   acceptWorkspaceInvitation,
-  workspaceOwnerHasTeamFeature,
+  workspaceHasTeamFeature,
 } from "@/features/workspaces/members-data";
 import { assertInviteRateLimit } from "@/lib/rate-limit/invite";
 import { sendWorkspaceInviteEmail } from "@/features/workspaces/invite-email";
@@ -47,7 +47,7 @@ export async function inviteMemberAction(
   try {
     const { workspace } = await requireWorkspaceOwner(session.user.id, parsed.data.workspaceId);
 
-    if (!(await workspaceOwnerHasTeamFeature(workspace.ownerId))) {
+    if (!(await workspaceHasTeamFeature(parsed.data.workspaceId))) {
       return { error: t("teamFeatureRequired") };
     }
 

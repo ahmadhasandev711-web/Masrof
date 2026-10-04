@@ -9,7 +9,6 @@ import {
   adminTriggerPasswordResetAction,
   adminEditUserInfoAction,
   adminDeleteUserAction,
-  adminQuickExtendUserSubscriptionAction,
 } from "@/features/admin/actions/user-admin-ops";
 import {
   cancelUserSubscriptionAction,
@@ -17,11 +16,10 @@ import {
   reactivateUserAction,
 } from "@/features/admin/actions/user-subscriptions";
 
-type FilterType = "all" | "owners" | "pro" | "free" | "unverified" | "suspended";
+type FilterType = "owners" | "all" | "unverified" | "suspended";
 
 export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
   const t = useTranslations("admin.users");
-  const tPlans = useTranslations("plans");
   const [isPending, startTransition] = useTransition();
 
   // Search & Filter state
@@ -52,6 +50,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
       !query ||
       u.name.toLowerCase().includes(query) ||
       u.email.toLowerCase().includes(query) ||
+      (u.phone && u.phone.includes(query)) ||
       u.workspaces.some((ws) => ws.name.toLowerCase().includes(query));
 
     if (!matchesSearch) return false;
@@ -60,10 +59,6 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
     switch (activeFilter) {
       case "owners":
         return u.isOwner;
-      case "pro":
-        return u.subscription.plan === "pro";
-      case "free":
-        return u.subscription.plan === "free";
       case "unverified":
         return !u.emailVerified;
       case "suspended":
@@ -132,8 +127,6 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
             [
               { key: "owners", label: `${t("filterOwners")} (${users.filter((u) => u.isOwner).length})` },
               { key: "all", label: `${t("filterAll")} (${users.length})` },
-              { key: "pro", label: `${t("filterPro")} (${users.filter((u) => u.subscription.plan === "pro").length})` },
-              { key: "free", label: `${t("filterFree")} (${users.filter((u) => u.subscription.plan === "free").length})` },
               { key: "unverified", label: `${t("filterUnverified")} (${users.filter((u) => !u.emailVerified).length})` },
               { key: "suspended", label: `${t("filterSuspended")} (${users.filter((u) => u.subscription.isSuspended).length})` },
             ] as const
@@ -154,15 +147,204 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-xs">
+      {/* Mobile Users Cards List */}
+      <div className="block md:hidden space-y-3">
+        {filteredUsers.length === 0 ? (
+          <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center text-xs text-neutral-400">
+            {t("noWorkspaces")}
+          </div>
+        ) : (
+          filteredUsers.map((user) => {
+            return (
+              <div
+                key={user.id}
+                className="rounded-2xl border border-neutral-200/90 bg-white p-4 shadow-xs flex flex-col gap-3"
+              >
+                {/* Header: Avatar, Name, Email, Status */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800 font-bold text-sm uppercase">
+                      {user.name.charAt(0) || "U"}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-bold text-sm text-neutral-900 truncate">{user.name}</p>
+                        {user.emailVerified ? (
+                          <span
+                            className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px]"
+                            title="بريد مؤكد"
+                          >
+                            ✓
+                          </span>
+                        ) : (
+                          <span
+                            className="inline-flex shrink-0 items-center rounded-md bg-amber-50 px-1.5 py-0.2 text-[10px] font-bold text-amber-700 border border-amber-200/60"
+                            title="بريد غير مؤكد"
+                          >
+                            ⚠️
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs font-mono text-neutral-500 truncate" dir="ltr">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  {user.subscription.isSuspended ? (
+                    <span className="shrink-0 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200/60">
+                      {t("suspended")}
+                    </span>
+                  ) : (
+                    <span className="shrink-0 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-800 border border-emerald-200/60">
+                      {t("active")}
+                    </span>
+                  )}
+                </div>
+
+                {/* Phone & Workspaces */}
+                <div className="flex flex-col gap-2 rounded-xl bg-neutral-50/80 p-2.5 text-xs">
+                  {user.phone ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-500 font-medium">رقم الهاتف:</span>
+                      <a
+                        href={`https://wa.me/${user.phone.replace(/[^0-9]/g, "")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        dir="ltr"
+                        className="inline-flex items-center gap-1 font-mono text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                        title="مراسلة عبر واتساب"
+                      >
+                        <span>📱</span>
+                        <span>{user.phone}</span>
+                        <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800">واتساب</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-500 font-medium">رقم الهاتف:</span>
+                      <span className="text-neutral-400 font-mono text-[11px]">—</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-start justify-between gap-2 border-t border-neutral-200/60 pt-2">
+                    <span className="text-neutral-500 font-medium shrink-0">{t("workspacesCol")}:</span>
+                    {user.workspaces.length > 0 ? (
+                      <div className="flex flex-wrap justify-end gap-1">
+                        {user.workspaces.map((ws) => (
+                          <Link
+                            key={ws.id}
+                            href={`/admin/workspaces/${ws.id}`}
+                            className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium hover:opacity-80 transition ${
+                              ws.role === "owner"
+                                ? "bg-amber-50 text-amber-800 border border-amber-200/60"
+                                : "bg-blue-50 text-blue-700 border border-blue-200/60"
+                            }`}
+                          >
+                            <span>{ws.name}</span>
+                            <span className="text-[9px] opacity-70">
+                              ({ws.role === "owner" ? t("roleOwner") : t("roleMember")})
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-neutral-400 text-[11px]">{t("noWorkspaces")}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mobile Actions Toolbar */}
+                <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1 border-t border-neutral-100">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {!user.emailVerified && (
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => run(() => adminVerifyUserEmailAction(user.id))}
+                        className="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition disabled:opacity-50"
+                        title={t("verifyEmail")}
+                      >
+                        ✓ {t("verifyEmail")}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => handleOpenEdit(user)}
+                      className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 shadow-2xs transition disabled:opacity-50"
+                    >
+                      {t("editUser")}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => {
+                        if (window.confirm(t("confirmResetPassword"))) {
+                          run(() => adminTriggerPasswordResetAction(user.id));
+                        }
+                      }}
+                      className="rounded-lg border border-neutral-200 bg-white px-2 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 shadow-2xs transition disabled:opacity-50"
+                      title={t("sendPasswordReset")}
+                    >
+                      🔑
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {!user.subscription.isSuspended ? (
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => {
+                          if (window.confirm(t("confirmSuspend"))) {
+                            run(() => suspendUserAction(user.id));
+                          }
+                        }}
+                        className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-100 shadow-2xs transition disabled:opacity-50"
+                      >
+                        {t("suspend")}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => run(() => reactivateUserAction(user.id, "free"))}
+                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-100 shadow-2xs transition disabled:opacity-50"
+                      >
+                        {t("reactivate")}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => {
+                        if (window.confirm(t("confirmDeleteUser", { name: user.name }))) {
+                          run(() => adminDeleteUserAction(user.id));
+                        }
+                      }}
+                      className="rounded-lg p-1 text-xs text-neutral-400 hover:text-rose-600 transition disabled:opacity-50"
+                      title={t("deleteUser")}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Users Desktop Table */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-xs">
         <table className="w-full min-w-[950px] text-right text-xs">
           <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500 font-semibold">
             <tr>
               <th className="px-4 py-3">{t("name")}</th>
               <th className="px-4 py-3">{t("email")}</th>
               <th className="px-4 py-3">{t("workspacesCol")}</th>
-              <th className="px-4 py-3">{t("plan")}</th>
+              <th className="px-4 py-3">رقم الهاتف</th>
               <th className="px-4 py-3">{t("status")}</th>
               <th className="px-4 py-3">{t("registeredAt")}</th>
               <th className="px-4 py-3 text-left">{t("actions")}</th>
@@ -178,7 +360,6 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
             ) : (
               filteredUsers.map((user) => {
                 const ownedWorkspaces = user.workspaces.filter((w) => w.role === "owner");
-                const daysLeft = getDaysRemaining(user.subscription.expiresAt);
 
                 return (
                   <tr key={user.id} className="hover:bg-neutral-50/70 transition">
@@ -240,30 +421,23 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                       )}
                     </td>
 
-                    {/* Plan & Expiration details */}
+                    {/* Phone / WhatsApp */}
                     <td className="px-4 py-3">
-                      <div className="flex flex-col gap-0.5">
-                        <span
-                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold w-fit ${
-                            user.subscription.plan === "pro"
-                              ? "bg-violet-50 text-violet-800 border border-violet-200/70"
-                              : "bg-neutral-100 text-neutral-700"
-                          }`}
+                      {user.phone ? (
+                        <a
+                          href={`https://wa.me/${user.phone.replace(/[^0-9]/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          dir="ltr"
+                          className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 hover:text-emerald-800 hover:underline font-semibold"
+                          title="مراسلة عبر واتساب"
                         >
-                          {tPlans(user.subscription.plan)}
-                        </span>
-                        {user.subscription.plan === "pro" && user.subscription.expiresAt && (
-                          <span className="text-[10px] text-neutral-500">
-                            {daysLeft !== null && daysLeft > 0 ? (
-                              <span className={daysLeft <= 7 ? "text-amber-600 font-bold" : "text-neutral-500"}>
-                                {t("daysRemaining", { days: daysLeft })}
-                              </span>
-                            ) : (
-                              <span className="text-rose-600 font-bold">{t("expired")}</span>
-                            )}
-                          </span>
-                        )}
-                      </div>
+                          <span>📱</span>
+                          <span>{user.phone}</span>
+                        </a>
+                      ) : (
+                        <span className="text-neutral-400 font-mono text-[11px]">—</span>
+                      )}
                     </td>
 
                     {/* Status */}
@@ -321,43 +495,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                           🔑
                         </button>
 
-                        {/* 3. Quick Extension Buttons (if owner/pro) */}
-                        {ownedWorkspaces.length > 0 && !user.subscription.isSuspended && (
-                          <>
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              onClick={() => {
-                                run(() =>
-                                  adminQuickExtendUserSubscriptionAction(user.id, {
-                                    extendDays: 7,
-                                  }),
-                                );
-                              }}
-                              className="rounded-md border border-amber-200 bg-amber-50 px-1.5 py-1 text-[10px] font-bold text-amber-800 hover:bg-amber-100 shadow-2xs transition disabled:opacity-50"
-                              title="منح 7 أيام سماح"
-                            >
-                              +7ي
-                            </button>
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              onClick={() => {
-                                run(() =>
-                                  adminQuickExtendUserSubscriptionAction(user.id, {
-                                    durationMonths: 1,
-                                  }),
-                                );
-                              }}
-                              className="rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-1 text-[10px] font-bold text-emerald-800 hover:bg-emerald-100 shadow-2xs transition disabled:opacity-50"
-                              title="تمديد شهر كامل"
-                            >
-                              +1ش
-                            </button>
-                          </>
-                        )}
-
-                        {/* 4. Edit User Modal Button */}
+                        {/* 3. Edit User Modal Button */}
                         <button
                           type="button"
                           disabled={isPending}

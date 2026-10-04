@@ -69,14 +69,14 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
       </div>
 
       {/* Workspace Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 font-bold text-xl shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-xs">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 font-bold text-lg sm:text-xl shadow-xs">
             {workspace.name.slice(0, 2).toUpperCase()}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-neutral-900">{workspace.name}</h1>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 truncate">{workspace.name}</h1>
               <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700">
                 {getTypeLabel(workspace.type)}
               </span>
@@ -90,7 +90,7 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
                 </span>
               )}
             </div>
-            <p className="mt-1 text-xs text-neutral-400">
+            <p className="mt-1 text-xs text-neutral-400 truncate">
               {t("currency")}: {workspace.currency} • {t("createdAt")}:{" "}
               {format.dateTime(new Date(workspace.createdAt), {
                 day: "numeric",
@@ -125,7 +125,7 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
       </div>
 
       {/* Grid: Plan Management & Workspace Settings */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Workspace Plan Controls Card */}
         <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col justify-between">
           <div>
@@ -153,7 +153,7 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
       </div>
 
       {/* Row: Owner Details Card & Financial Metrics */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Owner Information Card */}
         <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col justify-between">
           <div>

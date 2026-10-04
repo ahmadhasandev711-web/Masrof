@@ -8,7 +8,7 @@ const plans = {
       periodDisplay: "Forever",
       description: "Track your money for free — with ads and simple limits for getting started.",
       features: [
-        "One workspace",
+        "Up to 3 workspaces",
         "Unlimited accounts, categories & budgets",
         "Up to 10 invoices / month",
         "Up to 20 clients & 5 active projects",
@@ -24,7 +24,7 @@ const plans = {
       description: "Ad-free and unlimited — built for studios, agencies, and businesses demanding complete financial control.",
       features: [
         "Ad-free experience",
-        "Team up to 5 members",
+        "Unlimited workspaces & team up to 5 members",
         "Debts & liabilities management",
         "Unlimited invoices, clients & projects",
         "Advanced reports & statements",
@@ -63,7 +63,7 @@ const plans = {
       maxRecurringExpenses:
         "You reached the Free limit of {limit} recurring expenses. Upgrade to Pro to add more.",
     },
-    limitMessage: "Your plan ({plan}) allows {limit} workspace(s). Upgrade to add more.",
+    limitMessage: "Your ({plan}) plan allows up to {limit} workspaces. Upgrade to Pro to add more.",
     viaTeam: "team",
     viaTeamHint: "Pro features from the workspace owner's subscription",
     yourPlan: "your account: {plan}",

@@ -10,8 +10,9 @@ import { WorkspaceInvitationModel } from "@/models/workspace-invitation";
 import { WorkspaceModel } from "@/models/workspace";
 import { planHasFeature } from "@/features/subscriptions/plan-config-data";
 import { sanitizeDisplayName } from "@/lib/user-display-name";
-import { getUserSubscription } from "@/features/subscriptions/data";
+import { getUserSubscription, resolveEffectivePlan } from "@/features/subscriptions/data";
 import { getMaxMembersForPlan } from "@/features/subscriptions/plan-config-data";
+import type { PlanId } from "@/features/subscriptions/plans";
 import type { WorkspaceRole, InvitableWorkspaceRole } from "@/models/workspace-membership";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -35,6 +36,27 @@ export type WorkspaceInvitationRow = {
 export async function countOwnedWorkspacesForUser(userId: string): Promise<number> {
   await connectToDatabase();
   return WorkspaceMembershipModel.countDocuments({ userId, role: "owner" });
+}
+
+export async function getWorkspaceEffectivePlan(workspaceId: string): Promise<PlanId> {
+  await connectToDatabase();
+  const ws = await WorkspaceModel.findById(workspaceId).lean();
+  if (!ws) return "free";
+  if (ws.plan && ws.plan !== "free") {
+    return resolveEffectivePlan(
+      ws.plan as PlanId,
+      ws.planStatus ?? "active",
+      ws.planExpiresAt ?? null,
+    );
+  }
+  if (ws.plan === "free") return "free";
+  const subscription = await getUserSubscription(ws.ownerId);
+  return subscription.plan;
+}
+
+export async function workspaceHasTeamFeature(workspaceId: string): Promise<boolean> {
+  const plan = await getWorkspaceEffectivePlan(workspaceId);
+  return planHasFeature(plan, "teamWorkspace");
 }
 
 export async function workspaceOwnerHasTeamFeature(ownerId: string): Promise<boolean> {
@@ -150,9 +172,14 @@ export async function countWorkspaceSeats(workspaceId: string): Promise<number> 
   return members + pending;
 }
 
-export async function assertWorkspaceMemberCapacity(ownerId: string, workspaceId: string): Promise<void> {
-  const subscription = await getUserSubscription(ownerId);
-  const maxMembers = await getMaxMembersForPlan(subscription.plan);
+export async function assertWorkspaceMemberCapacity(workspaceId: string, _ownerId?: string): Promise<void> {
+  const plan = await getWorkspaceEffectivePlan(workspaceId);
+  const hasTeam = await planHasFeature(plan, "teamWorkspace");
+  if (!hasTeam) {
+    throw new Error("teamFeatureRequired");
+  }
+
+  const maxMembers = await getMaxMembersForPlan(plan);
   if (maxMembers === -1) return;
 
   const seats = await countWorkspaceSeats(workspaceId);
@@ -172,7 +199,7 @@ export async function createWorkspaceInvitation(input: {
   const workspace = await WorkspaceModel.findOne({ _id: input.workspaceId, isArchived: false }).lean();
   if (!workspace) throw new Error("workspaceNotFound");
 
-  await assertWorkspaceMemberCapacity(workspace.ownerId, input.workspaceId);
+  await assertWorkspaceMemberCapacity(input.workspaceId);
 
   const token = crypto.randomBytes(24).toString("hex");
   const expiresAt = new Date(Date.now() + INVITE_TTL_MS);

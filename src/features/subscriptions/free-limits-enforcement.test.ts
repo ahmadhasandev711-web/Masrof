@@ -7,24 +7,29 @@ import {
 import { toQuantityUsage } from "@/features/subscriptions/quantity-usage";
 
 describe("Strict Free Plan Limits Enforcement", () => {
-  describe("1. Workspaces Limit (1 workspace max on Free)", () => {
-    it("Free plan config specifies exactly 1 workspace", () => {
-      expect(DEFAULT_PLAN_CONFIGS.free.maxWorkspaces).toBe(1);
+  describe("1. Workspaces Limit (3 workspaces max on Free, Unlimited on Pro)", () => {
+    it("Free plan config specifies exactly 3 workspaces", () => {
+      expect(DEFAULT_PLAN_CONFIGS.free.maxWorkspaces).toBe(3);
     });
 
-    it("allows a Free user with 0 workspaces to create their 1st workspace", () => {
+    it("allows a Free user with fewer than 3 workspaces to create a workspace", () => {
       const limit = DEFAULT_PLAN_CONFIGS.free.maxWorkspaces;
-      const allowsFirst = 0 < limit;
-      expect(allowsFirst).toBe(true);
+      expect(0 < limit).toBe(true);
+      expect(2 < limit).toBe(true);
       expect(toQuantityUsage(0, limit).atLimit).toBe(false);
+      expect(toQuantityUsage(2, limit).atLimit).toBe(false);
     });
 
-    it("strictly blocks a Free user with 1 workspace from creating a 2nd workspace", () => {
+    it("strictly blocks a Free user with 3 workspaces from creating a 4th workspace", () => {
       const limit = DEFAULT_PLAN_CONFIGS.free.maxWorkspaces;
-      const allowsSecond = 1 < limit;
-      expect(allowsSecond).toBe(false);
-      expect(toQuantityUsage(1, limit).atLimit).toBe(true);
-      expect(toQuantityUsage(2, limit).atLimit).toBe(true);
+      const allowsFourth = 3 < limit;
+      expect(allowsFourth).toBe(false);
+      expect(toQuantityUsage(3, limit).atLimit).toBe(true);
+      expect(toQuantityUsage(4, limit).atLimit).toBe(true);
+    });
+
+    it("Pro plan allows unlimited workspaces", () => {
+      expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxWorkspaces)).toBe(true);
     });
   });
 

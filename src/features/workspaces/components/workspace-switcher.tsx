@@ -65,7 +65,7 @@ export function WorkspaceSwitcher({
   const active = workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0];
 
   return (
-    <div ref={dropdownRef} className={`relative inline-block ${className ?? ""}`}>
+    <div ref={dropdownRef} className={`relative z-50 inline-block ${className ?? ""}`}>
       {/* Trigger Button */}
       <button
         type="button"
@@ -115,7 +115,7 @@ export function WorkspaceSwitcher({
       {isOpen && (
         <div
           role="menu"
-          className="absolute end-0 top-full mt-1.5 w-64 sm:w-72 rounded-2xl border border-neutral-200/90 bg-white p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100"
+          className="absolute end-0 top-full mt-1.5 w-64 sm:w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-neutral-200/90 bg-white p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-2.5 py-1.5 text-xs text-neutral-400 font-semibold border-b border-neutral-100 mb-1">

@@ -60,7 +60,7 @@ export type PlanConfigDocument = {
 };
 
 /** Current freemium model: Free + ads (capped) / Pro 300 EGP/mo. */
-export const PLAN_LIMITS_VERSION = 6;
+export const PLAN_LIMITS_VERSION = 7;
 
 export const PLAN_FLAG_KEYS = [
   "csvExport",
@@ -142,7 +142,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
   free: {
     planId: "free",
     priceYearly: 0,
-    maxWorkspaces: 1,
+    maxWorkspaces: 3,
     maxMembers: 1,
     maxInvoicesPerMonth: 10,
     maxClients: 20,
@@ -162,7 +162,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     descriptionAr: "ابدأ بتنظيم وتتبع أموالك وفواتيرك مجانًا وبأعلى معايير الأمان والخصوصية.",
     descriptionEn: "Start organizing and tracking your finances for free with bank-grade security and privacy.",
     featuresAr: [
-      "مساحة عمل واحدة",
+      "حتى ٣ مساحات عمل",
       "حسابات وتصنيفات وميزانيات غير محدودة",
       "حتى ١٠ فواتير / شهر",
       "حتى ٢٠ عميل و٥ مشاريع نشطة",
@@ -170,7 +170,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
       "يشمل إعلانات",
     ],
     featuresEn: [
-      "One workspace",
+      "Up to 3 workspaces",
       "Unlimited accounts, categories & budgets",
       "Up to 10 invoices / month",
       "Up to 20 clients & 5 active projects",
@@ -184,7 +184,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
   pro: {
     planId: "pro",
     priceYearly: 3000,
-    maxWorkspaces: 1,
+    maxWorkspaces: UNLIMITED,
     maxMembers: 5,
     maxInvoicesPerMonth: UNLIMITED,
     maxClients: UNLIMITED,
@@ -205,7 +205,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     descriptionEn: "Complete, ad-free financial system with no limits — built for freelancers, agencies, and growing businesses.",
     featuresAr: [
       "بدون إعلانات نهائياً",
-      "مساحة عمل احترافية + فريق حتى ٥ أعضاء",
+      "مساحات عمل غير محدودة + فريق حتى ٥ أعضاء",
       "فواتير وعملاء ومشاريع بلا حدود",
       "تقارير متقدمة وتوقعات التدفق النقدي",
       "OCR قراءة الإيصالات الذكية والتصنيف الآلي",

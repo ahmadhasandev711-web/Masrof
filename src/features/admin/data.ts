@@ -160,6 +160,7 @@ export type AppUserWithWorkspaces = {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   emailVerified: boolean;
   createdAt?: Date;
   image?: string;
@@ -175,6 +176,7 @@ export type AppUserWithWorkspaces = {
     name: string;
     role: "owner" | "member" | "viewer";
     plan: PlanId;
+    planExpiresAt?: string | null;
   }>;
 };
 
@@ -184,7 +186,7 @@ export async function listAppUsers(limit = 100): Promise<AppUserWithWorkspaces[]
   const users = await mongoDb
     .collection("user")
     .find({})
-    .project({ name: 1, email: 1, emailVerified: 1, createdAt: 1, image: 1 })
+    .project({ name: 1, email: 1, emailVerified: 1, createdAt: 1, image: 1, phoneNumber: 1, phone: 1 })
     .sort({ createdAt: -1 })
     .limit(limit)
     .toArray();
@@ -193,6 +195,7 @@ export async function listAppUsers(limit = 100): Promise<AppUserWithWorkspaces[]
     id: String(user._id),
     name: (user.name as string | undefined) ?? "—",
     email: user.email as string,
+    phone: (user.phoneNumber as string | undefined) || (user.phone as string | undefined) || null,
     emailVerified: Boolean(user.emailVerified),
     createdAt: user.createdAt as Date | undefined,
     image: user.image as string | undefined,
@@ -203,19 +206,30 @@ export async function listAppUsers(limit = 100): Promise<AppUserWithWorkspaces[]
   const { getSubscriptionsForUsers } = await import("@/features/subscriptions/data");
   const { WorkspaceMembershipModel } = await import("@/models/workspace-membership");
   const { WorkspaceModel } = await import("@/models/workspace");
+  const { UserSettingsModel } = await import("@/models/user-settings");
 
-  const [subscriptions, memberships] = await Promise.all([
+  const [subscriptions, memberships, userSettingsList] = await Promise.all([
     getSubscriptionsForUsers(userIds),
     WorkspaceMembershipModel.find({
       userId: { $in: userIds },
     }).lean(),
+    UserSettingsModel.find({
+      userId: { $in: userIds },
+    }).lean(),
   ]);
+
+  const userSettingsMap = new Map<string, string>();
+  for (const s of userSettingsList) {
+    if (s.whatsappPhone) {
+      userSettingsMap.set(s.userId, s.whatsappPhone);
+    }
+  }
 
   const workspaceIds = Array.from(new Set(memberships.map((m) => m.workspaceId)));
   const workspaces = await WorkspaceModel.find({
     _id: { $in: workspaceIds },
   })
-    .select("_id name plan")
+    .select("_id name plan planExpiresAt businessPhone")
     .lean();
 
   const workspaceMap = new Map(
@@ -225,6 +239,7 @@ export async function listAppUsers(limit = 100): Promise<AppUserWithWorkspaces[]
         name: w.name,
         plan: (((w as any).plan === "pro" || (w as any).plan === "plus" ? "pro" : "free") as PlanId),
         planExpiresAt: (w as any).planExpiresAt ? new Date((w as any).planExpiresAt).toISOString() : null,
+        businessPhone: (w as any).businessPhone || null,
       },
     ]),
   );
@@ -253,17 +268,20 @@ export async function listAppUsers(limit = 100): Promise<AppUserWithWorkspaces[]
     const isOwner = userWorkspaces.some((ws) => ws.role === "owner");
     const userSub = subscriptions.get(user.id);
     const ownedWs = userWorkspaces.find((ws) => ws.role === "owner");
+    const wsObj = ownedWs ? workspaceMap.get(ownedWs.id) : null;
 
-    // Subscription plan must strictly match owned workspace's plan
-    const effectivePlan: PlanId =
-      ownedWs?.plan === "pro" || userSub?.plan === "pro" || (userSub?.plan as any) === "plus"
-        ? "pro"
-        : "free";
+    const resolvedPhone =
+      userSettingsMap.get(user.id) ||
+      user.phone ||
+      wsObj?.businessPhone ||
+      null;
 
-    const effectiveExpiresAt = ownedWs?.planExpiresAt || userSub?.expiresAt || null;
+    const effectivePlan: PlanId = (ownedWs?.plan === "pro" ? "pro" : "free");
+    const effectiveExpiresAt = ownedWs?.planExpiresAt || null;
 
     return {
       ...user,
+      phone: resolvedPhone,
       isOwner,
       subscription: {
         plan: effectivePlan,
@@ -345,12 +363,11 @@ export async function listAllWorkspaces(limit = 100): Promise<PlatformWorkspaceI
 
   return workspaces.map((w) => {
     const owner = ownerMap.get(w.ownerId);
-    const ownerSub = ownerSubs.get(w.ownerId);
     const rawWs = w as any;
-    const plan = (rawWs.plan && rawWs.plan !== "free" ? rawWs.plan : ownerSub?.plan) ?? rawWs.plan ?? "free";
+    const plan = ((rawWs.plan === "pro" || rawWs.plan === "plus") ? "pro" : "free") as PlanId;
     const planExpiresAt = rawWs.planExpiresAt
       ? new Date(rawWs.planExpiresAt).toISOString()
-      : (ownerSub?.expiresAt ?? null);
+      : null;
 
     return {
       id: w._id.toString(),

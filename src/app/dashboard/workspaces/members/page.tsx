@@ -4,14 +4,14 @@ import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspaceAccess, isWorkspaceOwner } from "@/features/workspaces/access";
 import {
   countWorkspaceSeats,
+  getWorkspaceEffectivePlan,
   listPendingInvitations,
   listWorkspaceMembers,
-  workspaceOwnerHasTeamFeature,
+  workspaceHasTeamFeature,
 } from "@/features/workspaces/members-data";
 import { InviteMemberForm } from "@/features/workspaces/components/invite-member-form";
 import { WorkspaceMembersPanel } from "@/features/workspaces/components/workspace-members-panel";
 import { getLocalizedPlanFeatureMessage } from "@/i18n/plans-localized";
-import { getUserSubscription } from "@/features/subscriptions/data";
 import { getMaxMembersForPlan } from "@/features/subscriptions/plan-config-data";
 import { toQuantityUsage } from "@/features/subscriptions/quantity-usage";
 import { PlanUsageMeter } from "@/features/subscriptions/components/plan-usage-meter";
@@ -29,14 +29,14 @@ export default async function WorkspaceMembersPage() {
   const access = await getWorkspaceAccess(session.user.id, workspaceId);
   const isOwner = isWorkspaceOwner(access.membership.role);
 
-  const [members, invitations, teamEnabled, ownerSubscription, seats] = await Promise.all([
+  const [members, invitations, teamEnabled, seats, effectivePlan] = await Promise.all([
     listWorkspaceMembers(workspaceId),
     isOwner ? listPendingInvitations(workspaceId) : Promise.resolve([]),
-    workspaceOwnerHasTeamFeature(activeWorkspace.ownerId),
-    getUserSubscription(activeWorkspace.ownerId),
+    workspaceHasTeamFeature(workspaceId),
     countWorkspaceSeats(workspaceId),
+    getWorkspaceEffectivePlan(workspaceId),
   ]);
-  const memberLimit = await getMaxMembersForPlan(ownerSubscription.plan);
+  const memberLimit = await getMaxMembersForPlan(effectivePlan);
   const usage = toQuantityUsage(seats, memberLimit);
 
   const upgradeMessage = await getLocalizedPlanFeatureMessage("teamWorkspace");

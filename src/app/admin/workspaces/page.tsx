@@ -71,7 +71,88 @@ export default async function AdminWorkspacesPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-xs">
+      {/* Mobile Workspace Cards List */}
+      <div className="block md:hidden space-y-3">
+        {workspaces.length === 0 ? (
+          <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center text-xs text-neutral-400">
+            {t("empty")}
+          </div>
+        ) : (
+          workspaces.map((ws) => (
+            <div
+              key={ws.id}
+              className="rounded-2xl border border-neutral-200/90 bg-white p-4 shadow-xs flex flex-col gap-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <Link
+                  href={`/admin/workspaces/${ws.id}`}
+                  className="flex items-center gap-2.5 min-w-0"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm">
+                    {ws.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm text-neutral-900 truncate">{ws.name}</p>
+                    <p className="text-[11px] text-neutral-500 truncate" dir="ltr">
+                      {ws.ownerEmail}
+                    </p>
+                  </div>
+                </Link>
+
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                    ws.plan === "pro"
+                      ? "bg-violet-50 text-violet-800 border border-violet-200/70"
+                      : "bg-neutral-100 text-neutral-600"
+                  }`}
+                >
+                  {tPlans(ws.plan)}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 rounded-xl bg-neutral-50/80 p-2 text-center text-xs">
+                <div>
+                  <p className="text-[10px] text-neutral-400 font-medium">{t("type")}</p>
+                  <p className="font-semibold text-neutral-700 mt-0.5">{getTypeLabel(ws.type)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-neutral-400 font-medium">{t("membersCount")}</p>
+                  <p className="font-semibold text-neutral-700 mt-0.5">{ws.membersCount}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-neutral-400 font-medium">{t("invoicesCount")}</p>
+                  <p className="font-semibold text-neutral-700 mt-0.5">{ws.invoicesCount}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-neutral-400">{ws.currency}</span>
+                  {ws.isArchived ? (
+                    <span className="rounded-full bg-neutral-100 px-2 py-0.2 text-[10px] font-medium text-neutral-500">
+                      {t("archived")}
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.2 text-[10px] font-medium text-emerald-700">
+                      {t("active")}
+                    </span>
+                  )}
+                </div>
+
+                <Link
+                  href={`/admin/workspaces/${ws.id}`}
+                  className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition"
+                >
+                  {t("viewDetails")} ⚙️
+                </Link>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Workspaces Table */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-xs">
         <table className="w-full min-w-[980px] text-right text-sm">
           <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
             <tr>

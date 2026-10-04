@@ -37,6 +37,17 @@ export async function createWorkspaceAction(
     return { error: limitError };
   }
 
+  const trimmedName = parsed.data.name.trim();
+  const { WorkspaceModel } = await import("@/models/workspace");
+  const existingWs = await WorkspaceModel.findOne({
+    name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+    isArchived: false,
+  }).lean();
+
+  if (existingWs) {
+    return { error: "اسم مساحة العمل مستخدم بالفعل. يرجى اختيار اسم فريد لمساحتك." };
+  }
+
   const workspaceId = await createWorkspaceForUser(session.user.id, parsed.data);
   await setActiveWorkspaceId(workspaceId);
 

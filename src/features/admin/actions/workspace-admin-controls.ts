@@ -45,6 +45,17 @@ export async function updateAdminWorkspaceInfoAction(
 
   try {
     await connectToDatabase();
+
+    const existingWs = await WorkspaceModel.findOne({
+      _id: { $ne: workspaceId },
+      name: { $regex: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+      isArchived: false,
+    }).lean();
+
+    if (existingWs) {
+      return { error: "اسم مساحة العمل مستخدم بالفعل. يرجى اختيار اسم فريد لمساحتك.", success: false };
+    }
+
     await WorkspaceModel.findByIdAndUpdate(workspaceId, {
       name,
       type: data.type,

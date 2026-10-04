@@ -40,7 +40,7 @@ describe("plan feature gates (freemium v2)", () => {
 
     expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxInvoicesPerMonth)).toBe(true);
     expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxClients)).toBe(true);
-    expect(DEFAULT_PLAN_CONFIGS.pro.maxWorkspaces).toBe(1);
+    expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxWorkspaces)).toBe(true);
     expect(DEFAULT_PLAN_CONFIGS.pro.maxMembers).toBe(5);
     expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(3000);
   });
