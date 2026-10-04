@@ -236,13 +236,20 @@ export async function recordDebtPayment(
     throw new DebtOverpaymentError(remainingMinor);
   }
 
-  const expenseCategory = await CategoryModel.findOne({
-    kind: "expense",
+  let expenseCategory = await CategoryModel.findOne({
+    slug: "expense-debt-payment",
     isArchived: false,
-    $or: [{ workspaceId: input.workspaceId }, { workspaceId: null }],
-  })
-    .sort({ workspaceId: -1, isSystem: 1 })
-    .lean();
+  }).lean();
+
+  if (!expenseCategory) {
+    expenseCategory = await CategoryModel.findOne({
+      kind: "expense",
+      isArchived: false,
+      $or: [{ workspaceId: input.workspaceId }, { workspaceId: null }],
+    })
+      .sort({ workspaceId: -1, isSystem: 1 })
+      .lean();
+  }
 
   return await runInTransaction(mongoose, async (session) => {
     // 1. Create expense transaction in the selected account

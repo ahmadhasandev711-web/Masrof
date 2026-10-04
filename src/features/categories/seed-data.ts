@@ -120,6 +120,13 @@ export const SYSTEM_CATEGORIES: SystemCategorySeed[] = [
     suggestedFor: ["business"],
   },
   {
+    slug: "expense-debt-payment",
+    name: "سداد ديون وأقساط",
+    kind: "expense",
+    icon: "💳",
+    suggestedFor: ["personal", "freelance", "business"],
+  },
+  {
     slug: "expense-other",
     name: "مصروفات أخرى",
     kind: "expense",
