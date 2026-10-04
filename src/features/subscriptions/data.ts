@@ -128,20 +128,17 @@ export async function assertUserNotSuspended(userId: string) {
   }
 }
 
+const MAX_OWNED_WORKSPACES_PER_ACCOUNT = 10;
+
 export async function assertCanCreateWorkspace(userId: string): Promise<string | null> {
   await assertUserNotSuspended(userId);
 
-  const subscription = await getUserSubscription(userId);
   const ownedCount = await countOwnedWorkspacesForUser(userId);
-
-  const allowed = await planAllowsWorkspaces(subscription.plan, ownedCount);
-  if (!allowed) {
-    const config = await getPlanConfig(subscription.plan);
+  if (ownedCount >= MAX_OWNED_WORKSPACES_PER_ACCOUNT) {
     const tPlans = await getTranslations("plans");
-    const planName = subscription.plan === "pro" ? "برو" : tPlans("free");
     return tPlans("limitMessage", {
-      plan: planName,
-      limit: config.maxWorkspaces,
+      plan: "سندات",
+      limit: MAX_OWNED_WORKSPACES_PER_ACCOUNT,
     });
   }
 
