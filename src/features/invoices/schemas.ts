@@ -18,6 +18,7 @@ export function createInvoiceSchema(t: ValidationTranslator) {
   return z.object({
     workspaceId: z.string().min(1),
     clientId: z.string().min(1, t("invoiceClientRequired")),
+    projectId: z.string().trim().optional().nullable(),
     issueDate: z.coerce.date({ message: t("invoiceIssueDateInvalid") }),
     dueDate: z.coerce.date().optional().nullable(),
     notes: z.string().trim().max(500).optional().default(""),

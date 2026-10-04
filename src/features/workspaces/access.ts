@@ -41,19 +41,20 @@ const loadWorkspaceAccess = cache(async function loadWorkspaceAccess(
 ): Promise<WorkspaceAccessContext> {
   await connectToDatabase();
 
-  const membership = await WorkspaceMembershipModel.findOne({
-    workspaceId,
-    userId,
-  }).lean();
+  const [membership, workspace] = await Promise.all([
+    WorkspaceMembershipModel.findOne({
+      workspaceId,
+      userId,
+    }).lean(),
+    WorkspaceModel.findOne({
+      _id: workspaceId,
+      isArchived: false,
+    }).lean(),
+  ]);
 
   if (!membership) {
     throw new WorkspaceAccessDeniedError(workspaceId);
   }
-
-  const workspace = await WorkspaceModel.findOne({
-    _id: workspaceId,
-    isArchived: false,
-  }).lean();
 
   if (!workspace) {
     throw new WorkspaceAccessDeniedError(workspaceId);

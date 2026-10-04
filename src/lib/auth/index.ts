@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { expo } from "@better-auth/expo";
+import { phoneNumber } from "better-auth/plugins";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { mongoDb } from "@/lib/db/mongo-client";
 import { env } from "@/lib/env";
@@ -26,6 +27,8 @@ const trustedOrigins = Array.from(
       ...(process.env.TRUSTED_ORIGINS
         ? process.env.TRUSTED_ORIGINS.split(",").map((s) => s.trim())
         : []),
+      "sanadat://",
+      "sanadat://*",
       "masrofaty://",
       "masrofaty://*",
       "exp://",
@@ -47,14 +50,34 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins,
-  plugins: [expo()],
+  plugins: [expo(), phoneNumber()],
 
   database: mongodbAdapter(mongoDb),
 
   databaseHooks: {
     user: {
       create: {
+        before: async (user) => {
+          if (user.phoneNumber) {
+            const existing = await mongoDb.collection("user").findOne({ phoneNumber: user.phoneNumber });
+            if (existing) {
+              throw new Error("PHONE_NUMBER_ALREADY_EXISTS");
+            }
+          }
+        },
         after: async (user) => {
+          if (user.phoneNumber) {
+            try {
+              const { UserSettingsModel } = await import("@/models/user-settings");
+              await UserSettingsModel.updateOne(
+                { userId: user.id },
+                { $set: { whatsappPhone: user.phoneNumber } },
+                { upsert: true },
+              );
+            } catch (err) {
+              console.error("Failed to sync user settings phone:", err);
+            }
+          }
           if (!user.email) return;
           await sendWelcomeNotification({
             userId: user.id,
@@ -88,7 +111,7 @@ export const auth = betterAuth({
       ? async ({ user, url }) => {
           await sendAuthEmail({
             to: user.email,
-            subject: "إعادة تعيين كلمة المرور — مصروفاتي",
+            subject: "إعادة تعيين كلمة المرور — سندات",
             text: `اضغط الرابط التالي لإعادة تعيين كلمة المرور:\n\n${url}\n\nلو ماطلبتش ده، تجاهل الرسالة.`,
             html: `<p>اضغط الرابط التالي لإعادة تعيين كلمة المرور:</p><p><a href="${url}">${url}</a></p><p>لو ماطلبتش ده، تجاهل الرسالة.</p>`,
           });
@@ -104,7 +127,7 @@ export const auth = betterAuth({
         sendVerificationEmail: async ({ user, url }) => {
           await sendAuthEmail({
             to: user.email,
-            subject: "تأكيد بريدك الإلكتروني — مصروفاتي",
+            subject: "تأكيد بريدك الإلكتروني — سندات",
             text: `أهلاً ${user.name ?? ""},\n\nاضغط الرابط لتأكيد بريدك:\n\n${url}`,
             html: `<p>أهلاً ${user.name ?? ""},</p><p>اضغط الرابط لتأكيد بريدك:</p><p><a href="${url}">${url}</a></p>`,
           });

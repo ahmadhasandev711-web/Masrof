@@ -32,33 +32,35 @@ export function UserSubscriptionControls({ userId, currentPlan, isSuspended }: P
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <select
-        defaultValue={currentPlan}
-        disabled={isPending || isSuspended}
-        onChange={(e) => run(() => updateUserPlanAction(userId, e.target.value))}
-        className="rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-xs text-neutral-800"
-      >
-        {PLAN_IDS.map((plan) => (
-          <option key={plan} value={plan}>
-            {tPlans(plan)}
-          </option>
-        ))}
-      </select>
-
       {!isSuspended ? (
         <>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => {
-              if (window.confirm(t("confirmCancelSubscription"))) {
-                run(() => cancelUserSubscriptionAction(userId));
-              }
-            }}
-            className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-800 hover:bg-amber-100 disabled:opacity-60"
-          >
-            {t("cancelSubscription")}
-          </button>
+          {currentPlan === "free" ? (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                if (window.confirm(t("confirmUpgrade"))) {
+                  run(() => updateUserPlanAction(userId, "pro"));
+                }
+              }}
+              className="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-60 transition"
+            >
+              {t("upgrade")}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                if (window.confirm(t("confirmCancelSubscription"))) {
+                  run(() => cancelUserSubscriptionAction(userId));
+                }
+              }}
+              className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-60 transition"
+            >
+              {t("cancelSubscription")}
+            </button>
+          )}
           <button
             type="button"
             disabled={isPending}

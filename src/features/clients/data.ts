@@ -23,6 +23,20 @@ export async function createClient(input: CreateClientInput) {
   return client.toObject();
 }
 
+export async function updateClient(
+  clientId: string,
+  workspaceId: string,
+  input: { name: string; email: string | null; phone: string | null },
+) {
+  await connectToDatabase();
+
+  return ClientModel.findOneAndUpdate(
+    { _id: clientId, workspaceId, isArchived: false },
+    { name: input.name, email: input.email, phone: input.phone },
+    { returnDocument: "after" },
+  ).lean();
+}
+
 export const listClientsForWorkspace = unstable_cache(
   async (workspaceId: string) => {
     await connectToDatabase();

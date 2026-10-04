@@ -52,9 +52,9 @@ const workspaceTeam = {
   },
   emails: {
     workspaceInvite: {
-      subject: "دعوة للانضمام إلى {workspace} — مصروفاتي",
-      text: "{inviter} دعاك للانضمام إلى مساحة العمل «{workspace}» على مصروفاتي.\n\nافتح الرابط:\n{url}",
-      htmlIntro: "{inviter} دعاك للانضمام إلى «{workspace}» على مصروفاتي.",
+      subject: "دعوة للانضمام إلى {workspace} — سندات",
+      text: "{inviter} دعاك للانضمام إلى مساحة العمل «{workspace}» على سندات.\n\nافتح الرابط:\n{url}",
+      htmlIntro: "{inviter} دعاك للانضمام إلى «{workspace}» على سندات.",
     },
   },
 } as const;

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
+import { getWorkspaceAccess } from "@/features/workspaces/access";
 import {
   DashboardHome,
   DashboardHomeSkeleton,
@@ -13,6 +14,9 @@ export default async function DashboardPage() {
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
 
+  const access = await getWorkspaceAccess(session.user.id, activeWorkspace._id.toString());
+  const isOwner = access.membership.role === "owner";
+
   return (
     <Suspense fallback={<DashboardHomeSkeleton />}>
       <DashboardHome
@@ -21,6 +25,7 @@ export default async function DashboardPage() {
         workspaceId={activeWorkspace._id.toString()}
         workspaceName={activeWorkspace.name}
         currency={activeWorkspace.currency}
+        isOwner={isOwner}
       />
     </Suspense>
   );

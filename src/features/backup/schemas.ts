@@ -9,7 +9,7 @@ const backupRecordSchema = z.record(z.string(), z.unknown());
 export const workspaceBackupSchema = z.object({
   version: z.literal(BACKUP_VERSION),
   exportedAt: z.string(),
-  app: z.literal("masrofaty"),
+  app: z.enum(["masrofaty", "sanadat"]).default("sanadat"),
   workspace: z.object({
     name: z.string().min(1).max(120),
     type: z.enum(WORKSPACE_TYPES),

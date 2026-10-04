@@ -43,7 +43,6 @@ export function MarketingMobileNav({
   }, [open]);
 
   const links = [
-    { href: "/blog", label: blog },
     { href: "/pricing", label: pricing },
     { href: "/faq", label: faq },
     { href: "/support", label: support },
@@ -53,9 +52,6 @@ export function MarketingMobileNav({
   return (
     <>
       <nav className="hidden items-center gap-3 text-sm sm:flex sm:gap-5">
-        <Link href="/blog" className="text-[#1C1B1A]/70 transition hover:text-[#065F46]">
-          {blog}
-        </Link>
         <Link href="/pricing" className="text-[#1C1B1A]/70 transition hover:text-[#065F46]">
           {pricing}
         </Link>

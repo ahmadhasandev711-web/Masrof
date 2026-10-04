@@ -7,11 +7,9 @@ import { SignOutButton } from "@/features/auth/components/sign-out-button";
 
 const NAV = [
   { href: "/admin", labelKey: "overview", exact: true },
-  { href: "/admin/posts", labelKey: "posts" },
-  { href: "/admin/plans", labelKey: "plans" },
-  { href: "/admin/site", labelKey: "site" },
+  { href: "/admin/workspaces", labelKey: "workspaces" },
   { href: "/admin/users", labelKey: "users" },
-  { href: "/admin/subscribers", labelKey: "subscribers" },
+  { href: "/admin/plans", labelKey: "plans" },
 ] as const;
 
 function NavLink({
@@ -20,7 +18,7 @@ function NavLink({
   exact,
 }: {
   href: string;
-  labelKey: "overview" | "posts" | "plans" | "site" | "users" | "subscribers";
+  labelKey: "overview" | "workspaces" | "users" | "plans";
   exact?: boolean;
 }) {
   const t = useTranslations("admin.nav");

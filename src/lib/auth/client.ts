@@ -1,4 +1,5 @@
 import { createAuthClient } from "better-auth/react";
+import { phoneNumberClient } from "better-auth/client/plugins";
 
 /**
  * Client-side auth client. Use this inside "use client" components only
@@ -15,6 +16,7 @@ export const authClient = createAuthClient({
     typeof window !== "undefined"
       ? window.location.origin
       : (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  plugins: [phoneNumberClient()],
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;

@@ -91,7 +91,7 @@ self.addEventListener("push", (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title ?? "مصروفاتي", {
+    self.registration.showNotification(data.title ?? "سندات", {
       body: data.body,
       icon: data.icon ?? "/icons/icon-192.png",
       badge: data.badge ?? "/icons/icon-192.png",

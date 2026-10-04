@@ -26,10 +26,6 @@ export default async function PrintInvoicePage({
   if (onboardingRedirect) return onboardingRedirect;
   const workspaceId = activeWorkspace._id.toString();
 
-  const pdfError = await assertWorkspacePlanFeature(session.user.id, workspaceId, "pdfExport");
-  if (pdfError) {
-    return <ClientRedirect href="/dashboard/invoices?upgrade=pdf" />;
-  }
 
   const clientsError = await assertWorkspacePlanFeature(
     session.user.id,

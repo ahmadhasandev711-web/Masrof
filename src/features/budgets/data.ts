@@ -75,34 +75,35 @@ export const listBudgetsWithProgress = unstable_cache(
 
     const { baseCurrency, exchangeRates } = await getWorkspaceExchangeContext(workspaceId);
 
-    const budgets = await BudgetModel.find({ workspaceId, isArchived: false })
-      .populate("categoryId", "name icon")
-      .sort({ createdAt: 1 })
-      .lean();
-
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const perCategoryTotals = await TransactionModel.aggregate<{
-      _id: { categoryId: mongoose.Types.ObjectId; currency: string | null };
-      total: number;
-    }>([
-      {
-        $match: {
-          workspaceId: new mongoose.Types.ObjectId(workspaceId),
-          type: "expense",
-          isArchived: false,
-          transactionDate: { $gte: startOfMonth, $lt: startOfNextMonth },
+    const [budgets, perCategoryTotals] = await Promise.all([
+      BudgetModel.find({ workspaceId, isArchived: false })
+        .populate("categoryId", "name icon")
+        .sort({ createdAt: 1 })
+        .lean(),
+      TransactionModel.aggregate<{
+        _id: { categoryId: mongoose.Types.ObjectId; currency: string | null };
+        total: number;
+      }>([
+        {
+          $match: {
+            workspaceId: new mongoose.Types.ObjectId(workspaceId),
+            type: "expense",
+            isArchived: false,
+            transactionDate: { $gte: startOfMonth, $lt: startOfNextMonth },
+          },
         },
-      },
-      ...transactionAccountCurrencyStages(baseCurrency),
-      {
-        $group: {
-          _id: { categoryId: "$categoryId", currency: "$currency" },
-          total: { $sum: "$amount" },
+        ...transactionAccountCurrencyStages(baseCurrency),
+        {
+          $group: {
+            _id: { categoryId: "$categoryId", currency: "$currency" },
+            total: { $sum: "$amount" },
+          },
         },
-      },
+      ]),
     ]);
 
     const { totals: spentByCategoryConverted, canConvertAll } = sumByKeyInBase(

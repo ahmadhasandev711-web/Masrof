@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { MarketingMobileNav } from "@/features/marketing/components/marketing-mobile-nav";
@@ -12,9 +13,16 @@ export async function MarketingHeader() {
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <Link
           href="/"
-          className="min-w-0 truncate font-[family-name:var(--font-marketing-display)] text-xl font-semibold text-[#065F46] sm:text-2xl"
+          className="flex items-center gap-2.5 min-w-0 truncate font-[family-name:var(--font-marketing-display)] text-xl font-semibold text-[#065F46] sm:text-2xl"
         >
-          {common("appName")}
+          <Image
+            src="/icons/brand-logo.png"
+            alt={common("appName")}
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain shrink-0 drop-shadow-sm"
+          />
+          <span>{common("appName")}</span>
         </Link>
         <MarketingMobileNav
           appName={common("appName")}

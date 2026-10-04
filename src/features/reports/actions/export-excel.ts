@@ -66,6 +66,6 @@ export async function exportReportExcelAction(input: {
 
   return {
     base64: workbookToBase64(workbook),
-    filename: `masrofaty-report-${fromLabel}.xlsx`,
+    filename: `sanadat-report-${fromLabel}.xlsx`,
   };
 }

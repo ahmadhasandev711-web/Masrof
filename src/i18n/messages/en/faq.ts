@@ -1,48 +1,48 @@
 const faq = {
   faq: {
-    metaTitle: "FAQ — Masrofaty",
-    metaDescription: "Answers to common questions about Masrofaty — sign-up, plans, and security.",
-    eyebrow: "Help",
-    title: "Frequently asked questions",
-    contactHint: "Quick answers — if you need more help, contact us",
+    metaTitle: "FAQ — Sanadat",
+    metaDescription: "Comprehensive answers to questions about Sanadat — pricing, security, invoicing, and project tracking.",
+    eyebrow: "Help Center",
+    title: "Frequently Asked Questions",
+    contactHint: "Quick answers — if you need further assistance, our team is happy to help",
     items: [
       {
-        question: "Is Masrofaty free?",
+        question: "How does Sanadat pricing work?",
         answer:
-          "Yes — Free includes one workspace, tracking, and limited invoices/clients with ads. Pro is $5/month: no ads, higher limits, and advanced tools.",
+          "Sanadat offers a free forever plan that includes one workspace and up to 10 invoices per month. The Pro plan gives you unlimited invoices, clients, projects, team members, and cash flow reports for 300 EGP/month (or 3,000 EGP/year with 2 months free).",
       },
       {
-        question: "Is my data secure?",
+        question: "How does Sanadat protect my financial data?",
         answer:
-          "Your data is stored on MongoDB Atlas with encrypted connections. No one can see your finances except you — each workspace is isolated to your account.",
+          "All your financial records are secured with bank-grade 256-bit encryption. Each workspace is fully isolated in the cloud and accessible only by you and your authorized team members, with on-demand encrypted data backups.",
       },
       {
-        question: "Can I track freelance work separately from my personal finances?",
+        question: "Can I manage freelance work separately from my personal finances?",
         answer:
-          "Absolutely. Create a “Freelance” workspace and a “Personal” workspace — each with its own accounts and categories. On Pro, you get more workspaces plus unlimited clients and projects.",
+          "Yes. Sanadat allows you to maintain independent workspaces (Personal, Freelance, Agency), each having its own dedicated bank accounts, cash vaults, and invoices with zero overlap.",
       },
       {
         question: "How do I upgrade to Pro?",
         answer:
-          "Upgrades are handled manually for now after you contact us — online payment is coming soon. Reach out from the Support page or via WhatsApp.",
+          "You can upgrade instantly by contacting our support team via WhatsApp or upgrading inside your dashboard, with full support for InstaPay, mobile wallets, and credit/debit cards.",
       },
       {
-        question: "Is there a mobile app?",
+        question: "Does Sanadat work on mobile devices?",
         answer:
-          "A native mobile app is coming. For now the site works on mobile; you can also use the web dashboard.",
+          "Yes, Sanadat is engineered as a high-performance Progressive Web App (PWA) that runs smoothly on both iOS and Android browsers without consuming device storage.",
       },
       {
-        question: "Can I export my reports?",
+        question: "Can I export invoices and financial reports?",
         answer:
-          "CSV and PDF export are available on Pro from the Reports page. Free includes in-app reports and viewing.",
+          "Yes. You can print invoices in standard A4 format or thermal POS receipts, download high-resolution PDFs, and export client account statements and financial reports to Excel and CSV.",
       },
       {
-        question: "Forgot your password?",
-        answer: "On the login page, tap “Forgot password” and follow the link in your email.",
+        question: "What if I forgot my password?",
+        answer: "On the login screen, click “Forgot password” to receive an instant, secure reset link in your email.",
       },
       {
-        question: "I have a technical issue — what should I do?",
-        answer: "Message us on WhatsApp or email from the Support page — we'll respond as soon as we can.",
+        question: "How can I contact customer support?",
+        answer: "Our support specialists are available daily via WhatsApp and email (average response time is under 15 minutes).",
       },
     ],
   },

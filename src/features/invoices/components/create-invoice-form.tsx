@@ -6,9 +6,14 @@ import {
   createInvoiceAction,
   type CreateInvoiceState,
 } from "@/features/invoices/actions/create-invoice";
+import {
+  ClientCombobox,
+  type ComboboxClientItem,
+} from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
 
-type ClientOption = { _id: string; name: string };
+type ClientOption = ComboboxClientItem;
+type ProjectOption = { _id: string; name: string; clientId: string };
 
 const initialState: CreateInvoiceState = { error: null, redirectTo: null };
 
@@ -21,11 +26,15 @@ type LineRow = { id: number };
 export function CreateInvoiceForm({
   workspaceId,
   clients,
+  projects = [],
   defaultClientId,
+  defaultProjectId,
 }: {
   workspaceId: string;
   clients: ClientOption[];
+  projects?: ProjectOption[];
   defaultClientId?: string;
+  defaultProjectId?: string;
 }) {
   const tForm = useTranslations("forms.invoice");
   const tShared = useTranslations("forms.shared");
@@ -33,8 +42,16 @@ export function CreateInvoiceForm({
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(createInvoiceAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+
+  const initialProject = defaultProjectId ? projects.find((p) => p._id === defaultProjectId) : null;
+  const initialClientId = defaultClientId ?? initialProject?.clientId ?? "";
+
+  const [selectedClientId, setSelectedClientId] = useState<string>(initialClientId);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(defaultProjectId ?? "");
   const [rows, setRows] = useState<LineRow[]>([{ id: 1 }]);
   const nextRowId = useRef(2);
+
+  const availableProjects = projects.filter((p) => p.clientId === selectedClientId);
 
   useEffect(() => {
     if (!state.redirectTo) return;
@@ -67,19 +84,35 @@ export function CreateInvoiceForm({
           <label htmlFor="invoice-client" className="text-sm font-medium text-neutral-700">
             {tForm("client")}
           </label>
-          <select
+          <ClientCombobox
             id="invoice-client"
             name="clientId"
-            defaultValue={defaultClientId ?? ""}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right"
+            clients={clients}
+            value={selectedClientId}
+            onChange={(newClientId) => {
+              setSelectedClientId(newClientId);
+              setSelectedProjectId("");
+            }}
             required
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <label htmlFor="invoice-project" className="text-sm font-medium text-neutral-700">
+            {tForm("project")} ({tShared("optional")})
+          </label>
+          <select
+            id="invoice-project"
+            name="projectId"
+            value={selectedProjectId}
+            onChange={(e) => setSelectedProjectId(e.target.value)}
+            disabled={!selectedClientId || availableProjects.length === 0}
+            className="rounded-lg border border-neutral-300 px-3 py-2 text-right disabled:bg-neutral-100 disabled:text-neutral-400"
           >
-            <option value="" disabled>
-              {tForm("client")}
-            </option>
-            {clients.map((client) => (
-              <option key={client._id} value={client._id}>
-                {client.name}
+            <option value="">{tForm("noProject")}</option>
+            {availableProjects.map((project) => (
+              <option key={project._id} value={project._id}>
+                {project.name}
               </option>
             ))}
           </select>

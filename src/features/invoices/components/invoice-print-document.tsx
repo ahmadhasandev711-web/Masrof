@@ -113,6 +113,11 @@ function InvoiceA4Layout({
         </div>
         <div className="min-w-[220px] rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm">
           <p className="font-bold text-emerald-800">{invoice.invoiceNumber}</p>
+          {invoice.projectName && (
+            <p className="mt-1 font-medium text-neutral-700">
+              {tForm("project")}: {invoice.projectName}
+            </p>
+          )}
           <p className="mt-2 text-neutral-600">
             {tForm("issueDate")}: {formatDate(invoice.issueDate)}
           </p>
@@ -223,6 +228,11 @@ function InvoicePosLayout({
       <section className="border-b border-dashed border-neutral-300 py-3 text-[11px]">
         <p className="text-neutral-500">{tForm("client")}</p>
         <p className="font-semibold">{invoice.client.name}</p>
+        {invoice.projectName && (
+          <p className="text-neutral-600">
+            {tForm("project")}: {invoice.projectName}
+          </p>
+        )}
         {(invoice.client.phone || invoice.client.email) && (
           <p className="mt-1 text-[10px] text-neutral-600" dir="ltr">
             {[invoice.client.phone, invoice.client.email].filter(Boolean).join(" · ")}

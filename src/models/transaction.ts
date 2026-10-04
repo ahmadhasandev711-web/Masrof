@@ -51,7 +51,20 @@ const transactionSchema = new Schema(
 // The list/filter/report screen is the single hottest query path in the
 // whole app: "this workspace's transactions, newest first" with optional
 // filters layered on top of that same prefix.
-transactionSchema.index({ workspaceId: 1, isArchived: 1, transactionDate: -1 });
+transactionSchema.index({
+  workspaceId: 1,
+  isArchived: 1,
+  transactionDate: -1,
+  createdAt: -1,
+});
+// Dashboard summaries and reports filter by transaction kind before scanning
+// a date range, so keep that equality field ahead of the range field.
+transactionSchema.index({
+  workspaceId: 1,
+  isArchived: 1,
+  type: 1,
+  transactionDate: -1,
+});
 transactionSchema.index({ workspaceId: 1, accountId: 1, isArchived: 1 });
 transactionSchema.index({ workspaceId: 1, categoryId: 1, isArchived: 1 });
 transactionSchema.index({ workspaceId: 1, clientId: 1, isArchived: 1 });

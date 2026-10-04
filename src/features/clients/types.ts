@@ -9,4 +9,5 @@ export type ClientListItem = {
 export type ClientOption = {
   _id: string;
   name: string;
+  phone?: string | null;
 };

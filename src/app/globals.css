@@ -53,4 +53,16 @@ body {
   input[type="number"] {
     color-scheme: light;
   }
+
+  /* Mobile PWA touch feel */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  nav, button {
+    user-select: none;
+    -webkit-user-select: none;
+  }
 }
+

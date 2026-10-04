@@ -9,6 +9,7 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
 import { ClientModel } from "@/models/client";
 import { ProjectModel } from "@/models/project";
 import { TransactionModel } from "@/models/transaction";
+import { InvoiceModel } from "@/models/invoice";
 import { toMinorUnits } from "@/lib/money";
 import type { CreateProjectInput } from "@/features/projects/schemas";
 import type { ProjectListItem } from "@/features/projects/types";
@@ -45,25 +46,53 @@ export const listProjectsForWorkspace = unstable_cache(
   { revalidate: 30, tags: [CACHE_TAGS.projects] },
 );
 
-export const listProjectsWithTotals = cache(async (workspaceId: string) => {
+export const listProjectsWithTotals = cache(async (workspaceId: string): Promise<ProjectListItem[]> => {
+  if (!mongoose.Types.ObjectId.isValid(workspaceId)) {
+    return [];
+  }
+
   await connectToDatabase();
 
-  const projects = await ProjectModel.find({ workspaceId, isArchived: false })
-    .select("name status expectedAmount dueDate clientId")
-    .sort({ createdAt: -1 })
-    .lean();
+  const wsObjectId = new mongoose.Types.ObjectId(workspaceId);
 
-  const [paidByProject, clients] = await Promise.all([
-    TransactionModel.aggregate<{ _id: mongoose.Types.ObjectId; paidTotal: number }>([
+  const [projects, txTotals, invoicedByProject, clients] = await Promise.all([
+    ProjectModel.find({ workspaceId, isArchived: false })
+      .select("name status expectedAmount dueDate clientId")
+      .sort({ createdAt: -1 })
+      .lean(),
+    TransactionModel.aggregate<{
+      _id: { projectId: mongoose.Types.ObjectId; type: "income" | "expense" };
+      total: number;
+    }>([
       {
         $match: {
-          workspaceId: new mongoose.Types.ObjectId(workspaceId),
+          workspaceId: wsObjectId,
           projectId: { $ne: null },
-          type: "income",
           isArchived: false,
         },
       },
-      { $group: { _id: "$projectId", paidTotal: { $sum: "$amount" } } },
+      {
+        $group: {
+          _id: { projectId: "$projectId", type: "$type" },
+          total: { $sum: "$amount" },
+        },
+      },
+    ]),
+    InvoiceModel.aggregate<{ _id: mongoose.Types.ObjectId; invoicedTotal: number }>([
+      {
+        $match: {
+          workspaceId: wsObjectId,
+          projectId: { $ne: null },
+          isArchived: false,
+          status: { $ne: "cancelled" },
+        },
+      },
+      {
+        $group: {
+          _id: "$projectId",
+          invoicedTotal: { $sum: { $sum: "$items.amount" } },
+        },
+      },
     ]),
     ClientModel.find({
       workspaceId,
@@ -73,7 +102,23 @@ export const listProjectsWithTotals = cache(async (workspaceId: string) => {
       .lean(),
   ]);
 
-  const paidMap = new Map(paidByProject.map((row) => [String(row._id), row.paidTotal]));
+  const incomeMap = new Map<string, number>();
+  const expenseMap = new Map<string, number>();
+
+  for (const row of txTotals) {
+    if (!row._id?.projectId) continue;
+    const pId = String(row._id.projectId);
+    if (row._id.type === "income") {
+      incomeMap.set(pId, row.total);
+    } else if (row._id.type === "expense") {
+      expenseMap.set(pId, row.total);
+    }
+  }
+
+  const invoicedMap = new Map<string, number>(
+    invoicedByProject.map((row) => [String(row._id), row.invoicedTotal]),
+  );
+
   const clientMap = new Map(
     clients.map((client) => [
       String(client._id),
@@ -84,9 +129,20 @@ export const listProjectsWithTotals = cache(async (workspaceId: string) => {
   return toPlain(
     projects.map(
       (project): ProjectListItem => {
+        const pId = String(project._id);
         const client = project.clientId ? clientMap.get(String(project.clientId)) : null;
+        const incomeTotal = incomeMap.get(pId) ?? 0;
+        const expenseTotal = expenseMap.get(pId) ?? 0;
+        const invoicedTotal = invoicedMap.get(pId) ?? 0;
+        const netProfit = incomeTotal - expenseTotal;
+        const profitMargin = incomeTotal > 0 ? Math.round((netProfit / incomeTotal) * 100) : null;
+        const isOverBudget =
+          project.expectedAmount != null &&
+          project.expectedAmount > 0 &&
+          expenseTotal > project.expectedAmount;
+
         return {
-          _id: String(project._id),
+          _id: pId,
           name: project.name,
           status: project.status,
           expectedAmount: project.expectedAmount ?? null,
@@ -94,7 +150,13 @@ export const listProjectsWithTotals = cache(async (workspaceId: string) => {
           clientId: project.clientId ? String(project.clientId) : null,
           clientName: client?.name ?? null,
           clientPhone: client?.phone ?? null,
-          paidTotal: paidMap.get(String(project._id)) ?? 0,
+          paidTotal: incomeTotal,
+          incomeTotal,
+          expenseTotal,
+          netProfit,
+          profitMargin,
+          invoicedTotal,
+          isOverBudget,
         };
       },
     ),

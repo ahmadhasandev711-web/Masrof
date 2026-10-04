@@ -1,17 +1,17 @@
 const notifications = {
   notifications: {
-    footer: "مصروفاتي — <a href=\"{appUrl}\">{appUrl}</a>",
+    footer: "سندات — <a href=\"{appUrl}\">{appUrl}</a>",
     welcome: {
       greeting: "أهلاً {name}",
       greetingDefault: "أهلاً",
-      subject: "أهلاً بيك في مصروفاتي",
-      body: "حسابك جاهز. ابدأ تتابع دخلك ومصروفاتك من هنا:",
+      subject: "مرحباً بك في منصة سندات",
+      body: "حسابك جاهز. ابدأ بإدارة فواتيرك وأرباحك من هنا:",
       dashboardLink: "لوحة التحكم",
     },
     newsletter: {
-      subject: "اشتركت في نشرة مصروفاتي",
-      thanks: "شكراً لاشتراكك في نشرة مصروفاتي.",
-      promise: "هنبعتلك مقالات ونصائح عن إدارة الفلوس — من غير سبام.",
+      subject: "اشتركت في نشرة سندات",
+      thanks: "شكراً لاشتراكك في نشرة سندات البريدية.",
+      promise: "سنرسل لك نصائح ورؤى عملية في إدارة الأعمال والمالية — بدون أي إزعاج.",
     },
     budget: {
       exceededTitle: "تجاوزت ميزانية",

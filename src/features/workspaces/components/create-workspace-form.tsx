@@ -26,9 +26,8 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
 
   useEffect(() => {
     if (!state.redirectTo) return;
-    router.replace(state.redirectTo);
-    router.refresh();
-  }, [state.redirectTo, router]);
+    window.location.href = state.redirectTo;
+  }, [state.redirectTo]);
 
   const suggestedCategories = getSuggestedCategoriesForType(workspaceType);
   const suggestedIncome = suggestedCategories.filter((c) => c.kind === "income");

@@ -16,6 +16,7 @@ export type PlanFlags = {
   teamWorkspace: boolean;
   ocrReceipts: boolean;
   aiCategory: boolean;
+  debts: boolean;
 };
 
 /** Quantity caps. Use -1 for unlimited. */
@@ -58,8 +59,8 @@ export type PlanConfigDocument = {
   updatedBy?: string | null;
 };
 
-/** Current freemium model: Free + ads (capped) / Pro $5 (unlimited + no ads). */
-export const PLAN_LIMITS_VERSION = 2;
+/** Current freemium model: Free + ads (capped) / Pro 300 EGP/mo. */
+export const PLAN_LIMITS_VERSION = 6;
 
 export const PLAN_FLAG_KEYS = [
   "csvExport",
@@ -77,6 +78,7 @@ export const PLAN_FLAG_KEYS = [
   "teamWorkspace",
   "ocrReceipts",
   "aiCategory",
+  "debts",
 ] as const satisfies readonly (keyof PlanFlags)[];
 
 export const PLAN_QUANTITY_LIMIT_KEYS = [
@@ -106,6 +108,7 @@ const FREE_FLAGS: PlanFlags = {
   teamWorkspace: false,
   ocrReceipts: false,
   aiCategory: false,
+  debts: false,
 };
 
 /** Pro absorbs former Plus features. */
@@ -125,13 +128,12 @@ const PRO_FLAGS: PlanFlags = {
   teamWorkspace: true,
   ocrReceipts: true,
   aiCategory: true,
+  debts: true,
 };
 
 export const DEFAULT_PLAN_FLAGS: Record<PlanId, PlanFlags> = {
   free: FREE_FLAGS,
   pro: PRO_FLAGS,
-  /** Legacy id — same entitlements as Pro; hidden from pricing. */
-  plus: PRO_FLAGS,
 };
 
 const UNLIMITED = -1;
@@ -157,8 +159,8 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     priceDisplayEn: "0",
     periodDisplayAr: "للأبد",
     periodDisplayEn: "forever",
-    descriptionAr: "تابع فلوسك مجانًا — مع إعلانات وحدود بسيطة تناسب البداية.",
-    descriptionEn: "Track your money for free — with ads and simple limits for getting started.",
+    descriptionAr: "ابدأ بتنظيم وتتبع أموالك وفواتيرك مجانًا وبأعلى معايير الأمان والخصوصية.",
+    descriptionEn: "Start organizing and tracking your finances for free with bank-grade security and privacy.",
     featuresAr: [
       "مساحة عمل واحدة",
       "حسابات وتصنيفات وميزانيات غير محدودة",
@@ -181,8 +183,8 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
   },
   pro: {
     planId: "pro",
-    priceYearly: 48,
-    maxWorkspaces: 3,
+    priceYearly: 3000,
+    maxWorkspaces: 1,
     maxMembers: 5,
     maxInvoicesPerMonth: UNLIMITED,
     maxClients: UNLIMITED,
@@ -193,65 +195,37 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     highlighted: true,
     available: true,
     sortOrder: 1,
-    nameAr: "باقة برو",
+    nameAr: "سندات برو",
     nameEn: "Pro",
-    priceDisplayAr: "٥",
-    priceDisplayEn: "5",
-    periodDisplayAr: "دولار / شهر",
-    periodDisplayEn: "USD / month",
-    descriptionAr: "بدون إعلانات، بلا حدود تقريبًا — للفيري لانسر اللي بيشتغل بجد.",
-    descriptionEn: "Ad-free and nearly unlimited — for freelancers who work seriously.",
+    priceDisplayAr: "٣٠٠",
+    priceDisplayEn: "300",
+    periodDisplayAr: "ج.م / شهر",
+    periodDisplayEn: "EGP / month",
+    descriptionAr: "منظومة مالية متكاملة بدون إعلانات وبلا حدود — للمستقلين، المكاتب، والشركات النشطة.",
+    descriptionEn: "Complete, ad-free financial system with no limits — built for freelancers, agencies, and growing businesses.",
     featuresAr: [
-      "بدون إعلانات",
-      "٣ مساحات عمل + فريق حتى ٥",
+      "بدون إعلانات نهائياً",
+      "مساحة عمل احترافية + فريق حتى ٥ أعضاء",
       "فواتير وعملاء ومشاريع بلا حدود",
-      "تقارير متقدمة + استيراد بنك",
-      "OCR إيصالات + تصنيف ذكي",
-      "تصدير CSV و Excel و PDF",
-      "نسخ احتياطي وتذكيرات واتساب",
-      "أو ٤٨ دولار / سنة",
+      "تقارير متقدمة وتوقعات التدفق النقدي",
+      "OCR قراءة الإيصالات الذكية والتصنيف الآلي",
+      "تصدير البيانات المتقدم (CSV, Excel, PDF)",
+      "تذكيرات واتساب الذكية وروابط دفع فورية",
+      "٣٠٠ ج.م شهرياً (أو ٣٠٠٠ ج.م سنوياً)",
     ],
     featuresEn: [
-      "Ad-free experience",
-      "3 workspaces + team up to 5",
+      "100% Ad-free experience",
+      "1 professional workspace + team up to 5 members",
       "Unlimited invoices, clients & projects",
-      "Advanced reports + bank import",
-      "Receipt OCR + smart categories",
-      "CSV, Excel & PDF export",
-      "Backup & WhatsApp reminders",
-      "Or $48 / year",
+      "Advanced financial reports & cash flow forecasts",
+      "Smart receipt OCR & automated AI categorization",
+      "Complete export suite (CSV, Excel & PDF)",
+      "Smart WhatsApp reminders & instant payment links",
+      "300 EGP / month (or 3,000 EGP / year)",
     ],
-    ctaAr: "ترقّى لبرو",
+    ctaAr: "الترقية إلى برو",
     ctaEn: "Upgrade to Pro",
     flags: DEFAULT_PLAN_FLAGS.pro,
-  },
-  plus: {
-    planId: "plus",
-    priceYearly: 48,
-    maxWorkspaces: 3,
-    maxMembers: 5,
-    maxInvoicesPerMonth: UNLIMITED,
-    maxClients: UNLIMITED,
-    maxActiveProjects: UNLIMITED,
-    maxSavingsGoals: UNLIMITED,
-    maxRecurringExpenses: UNLIMITED,
-    limitsVersion: PLAN_LIMITS_VERSION,
-    highlighted: false,
-    available: false,
-    sortOrder: 2,
-    nameAr: "بلس (قديم)",
-    nameEn: "Plus (legacy)",
-    priceDisplayAr: "٥",
-    priceDisplayEn: "5",
-    periodDisplayAr: "دولار / شهر",
-    periodDisplayEn: "USD / month",
-    descriptionAr: "باقة قديمة — نفس مميزات برو. مخفية من صفحة الأسعار.",
-    descriptionEn: "Legacy plan — same as Pro. Hidden from pricing.",
-    featuresAr: ["نفس مميزات برو"],
-    featuresEn: ["Same as Pro"],
-    ctaAr: "تواصل معنا",
-    ctaEn: "Contact us",
-    flags: DEFAULT_PLAN_FLAGS.plus,
   },
 };
 

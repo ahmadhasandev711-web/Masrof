@@ -5,10 +5,18 @@ import { connectToDatabase } from "@/lib/db/mongoose";
 import { toPlain } from "@/lib/db/plain";
 import { toMinorUnits } from "@/lib/money";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import mongoose from "mongoose";
+import crypto from "crypto";
 import { InvoiceModel, type InvoiceStatus } from "@/models/invoice";
+import { InvoicePaymentModel } from "@/models/invoice-payment";
 import { ClientModel } from "@/models/client";
+import { ProjectModel } from "@/models/project";
 import type { CreateInvoiceInput } from "@/features/invoices/schemas";
-import type { InvoiceListItem, InvoicePrintView } from "@/features/invoices/types";
+import type {
+  InvoiceFinancialStatus,
+  InvoiceListItem,
+  InvoicePrintView,
+} from "@/features/invoices/types";
 import { resolveInvoiceDisplayStatus } from "@/features/invoices/status";
 
 export class InvalidInvoiceReferenceError extends Error {
@@ -43,6 +51,21 @@ export async function createInvoice(input: CreateInvoiceInput) {
     throw new InvalidInvoiceReferenceError("clientNotFoundShort");
   }
 
+  let validatedProjectId: string | null = null;
+  if (input.projectId) {
+    const project = await ProjectModel.findOne({
+      _id: input.projectId,
+      workspaceId: input.workspaceId,
+      clientId: input.clientId,
+      isArchived: false,
+    }).lean();
+
+    if (!project) {
+      throw new InvalidInvoiceReferenceError("projectNotFoundShort");
+    }
+    validatedProjectId = String(project._id);
+  }
+
   const invoiceNumber = await nextInvoiceNumber(input.workspaceId, input.issueDate);
   const items = input.items.map((item) => ({
     description: item.description,
@@ -52,6 +75,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
   const invoice = await InvoiceModel.create({
     workspaceId: input.workspaceId,
     clientId: input.clientId,
+    projectId: validatedProjectId,
     invoiceNumber,
     issueDate: input.issueDate,
     dueDate: input.dueDate ?? null,
@@ -59,6 +83,8 @@ export async function createInvoice(input: CreateInvoiceInput) {
     notes: input.notes ?? "",
     status: "sent",
     paidAt: null,
+    shareToken: crypto.randomBytes(16).toString("hex"),
+    isShareable: true,
   });
 
   return invoice.toObject();
@@ -99,16 +125,55 @@ async function queryInvoicesPage(workspaceId: string, skip: number, limit: numbe
       .sort({ issueDate: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("clientId", "name")
+      .populate("clientId", "name phone")
+      .populate("projectId", "name")
       .lean(),
     InvoiceModel.countDocuments({ workspaceId, isArchived: false }),
   ]);
 
+  const invoiceIds = invoices.map((inv) => inv._id);
+
+  const paymentAggregates = invoiceIds.length > 0
+    ? await InvoicePaymentModel.aggregate<{ _id: mongoose.Types.ObjectId; paidTotal: number }>([
+        {
+          $match: {
+            workspaceId: new mongoose.Types.ObjectId(workspaceId),
+            invoiceId: { $in: invoiceIds },
+            isArchived: false,
+          },
+        },
+        {
+          $group: {
+            _id: "$invoiceId",
+            paidTotal: { $sum: "$amount" },
+          },
+        },
+      ])
+    : [];
+
+  const paidMap = new Map<string, number>(
+    paymentAggregates.map((agg) => [String(agg._id), agg.paidTotal]),
+  );
+
   const items = toPlain(
     invoices.map((invoice): InvoiceListItem => {
-      const client = invoice.clientId as { _id?: unknown; name?: string } | null;
+      const client = invoice.clientId as { _id?: unknown; name?: string; phone?: string | null } | null;
+      const project = invoice.projectId as { _id?: unknown; name?: string } | null;
       const totalAmount = invoice.items.reduce((sum, item) => sum + item.amount, 0);
       const status = (invoice.status ?? "sent") as InvoiceStatus;
+      const paidAmount = paidMap.get(String(invoice._id)) ?? 0;
+      const remainingAmount = Math.max(0, totalAmount - paidAmount);
+
+      let financialStatus: InvoiceFinancialStatus;
+      if (paidAmount >= totalAmount && totalAmount > 0) {
+        financialStatus = "paid";
+      } else if (paidAmount > 0) {
+        financialStatus = "partially_paid";
+      } else if (status === "paid") {
+        financialStatus = "legacy_paid";
+      } else {
+        financialStatus = "unpaid";
+      }
 
       return {
         _id: String(invoice._id),
@@ -116,14 +181,23 @@ async function queryInvoicesPage(workspaceId: string, skip: number, limit: numbe
         issueDate: new Date(invoice.issueDate).toISOString(),
         dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString() : null,
         total: totalAmount,
+        paidAmount,
+        remainingAmount,
         clientName: client?.name ?? "—",
         clientId: client?._id ? String(client._id) : String(invoice.clientId),
+        projectId: project?._id ? String(project._id) : (invoice.projectId ? String(invoice.projectId) : null),
+        projectName: project?.name ?? null,
         status,
         displayStatus: resolveInvoiceDisplayStatus({
           status,
           dueDate: invoice.dueDate,
         }),
+        financialStatus,
         paidAt: invoice.paidAt ? new Date(invoice.paidAt).toISOString() : null,
+        clientPhone: client?.phone ?? null,
+        shareToken: invoice.shareToken ?? null,
+        isShareable: invoice.isShareable ?? true,
+        viewedAt: invoice.viewedAt ? new Date(invoice.viewedAt).toISOString() : null,
       };
     }),
   );
@@ -179,6 +253,7 @@ export async function getInvoiceForPrint(
     isArchived: false,
   })
     .populate("clientId", "name email phone")
+    .populate("projectId", "name")
     .lean();
 
   if (!invoice) return null;
@@ -187,6 +262,11 @@ export async function getInvoiceForPrint(
     name?: string;
     email?: string | null;
     phone?: string | null;
+  } | null;
+
+  const project = invoice.projectId as {
+    _id?: unknown;
+    name?: string;
   } | null;
 
   const items = invoice.items.map((item) => ({
@@ -210,6 +290,8 @@ export async function getInvoiceForPrint(
       email: client?.email ?? null,
       phone: client?.phone ?? null,
     },
+    projectId: project?._id ? String(project._id) : (invoice.projectId ? String(invoice.projectId) : null),
+    projectName: project?.name ?? null,
     workspaceName: branding.name,
     businessName: displayName,
     logoUrl: branding.logoUrl || null,

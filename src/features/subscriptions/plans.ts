@@ -1,4 +1,4 @@
-export const PLAN_IDS = ["free", "pro", "plus"] as const;
+export const PLAN_IDS = ["free", "pro"] as const;
 
 export type PlanId = (typeof PLAN_IDS)[number];
 
@@ -26,12 +26,13 @@ export type PlanDefinition = {
   teamWorkspace: boolean;
   ocrReceipts: boolean;
   aiCategory: boolean;
+  debts: boolean;
   highlighted: boolean;
   cta: string;
   available: boolean;
 };
 
-export const PRICING_PLANS_ORDER: PlanId[] = ["free", "pro", "plus"];
+export const PRICING_PLANS_ORDER: PlanId[] = ["free", "pro"];
 
 export type PlanFeature =
   | "csvExport"
@@ -48,7 +49,8 @@ export type PlanFeature =
   | "noAds"
   | "teamWorkspace"
   | "ocrReceipts"
-  | "aiCategory";
+  | "aiCategory"
+  | "debts";
 
 export function isPlanId(value: string): value is PlanId {
   return PLAN_IDS.includes(value as PlanId);

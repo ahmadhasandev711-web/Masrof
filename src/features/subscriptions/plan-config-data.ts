@@ -195,7 +195,6 @@ export async function getAllPlanConfigs(): Promise<Record<PlanId, PlanConfigDocu
     return {
       free: mergeWithDefaults(null, "free"),
       pro: mergeWithDefaults(null, "pro"),
-      plus: mergeWithDefaults(null, "plus"),
     };
   }
 }

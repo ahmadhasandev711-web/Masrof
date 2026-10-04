@@ -3,6 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { runInTransaction } from "@/lib/db/transaction";
 import { toPlain } from "@/lib/db/plain";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { TransferModel } from "@/models/transfer";
@@ -25,7 +26,7 @@ async function assertAccountsInWorkspace(
   workspaceId: string,
   fromAccountId: string,
   toAccountId: string,
-  session: mongoose.ClientSession,
+  session: mongoose.ClientSession | null = null,
 ) {
   // MongoDB sessions are not concurrent — one operation at a time per session.
   const fromAccount = await AccountModel.findOne({
@@ -58,78 +59,64 @@ async function assertAccountsInWorkspace(
 
 export async function createTransfer(input: CreateTransferInput, userId: string) {
   const mongooseInstance = await connectToDatabase();
-  const session = await mongooseInstance.startSession();
 
-  try {
-    let createdId: string | undefined;
+  return runInTransaction(mongooseInstance, async (session) => {
+    const { fromAccount } = await assertAccountsInWorkspace(
+      input.workspaceId,
+      input.fromAccountId,
+      input.toAccountId,
+      session,
+    );
 
-    await session.withTransaction(async () => {
-      const { fromAccount } = await assertAccountsInWorkspace(
-        input.workspaceId,
-        input.fromAccountId,
-        input.toAccountId,
-        session,
-      );
+    const amountMinor = toMinorUnits(input.amount);
 
-      const amountMinor = toMinorUnits(input.amount);
+    if (fromAccount.cachedBalance < amountMinor) {
+      throw new InvalidTransferError("insufficientBalance");
+    }
 
-      if (fromAccount.cachedBalance < amountMinor) {
-        throw new InvalidTransferError("insufficientBalance");
-      }
+    const [transfer] = await TransferModel.create(
+      [
+        {
+          workspaceId: input.workspaceId,
+          fromAccountId: input.fromAccountId,
+          toAccountId: input.toAccountId,
+          amount: amountMinor,
+          transferDate: input.transferDate,
+          description: input.description,
+          notes: input.notes,
+          createdBy: userId,
+        },
+      ],
+      { session },
+    );
 
-      const [transfer] = await TransferModel.create(
-        [
-          {
-            workspaceId: input.workspaceId,
-            fromAccountId: input.fromAccountId,
-            toAccountId: input.toAccountId,
-            amount: amountMinor,
-            transferDate: input.transferDate,
-            description: input.description,
-            notes: input.notes,
-            createdBy: userId,
-          },
-        ],
-        { session },
-      );
+    await adjustAccountBalance(input.fromAccountId, -amountMinor, session);
+    await adjustAccountBalance(input.toAccountId, amountMinor, session);
 
-      await adjustAccountBalance(input.fromAccountId, -amountMinor, session);
-      await adjustAccountBalance(input.toAccountId, amountMinor, session);
-
-      createdId = transfer._id.toString();
-    });
-
-    return createdId!;
-  } finally {
-    await session.endSession();
-  }
+    return transfer._id.toString();
+  });
 }
 
 export async function archiveTransfer(transferId: string, workspaceId: string) {
   const mongooseInstance = await connectToDatabase();
-  const session = await mongooseInstance.startSession();
 
-  try {
-    await session.withTransaction(async () => {
-      const existing = await TransferModel.findOne({
-        _id: transferId,
-        workspaceId,
-        isArchived: false,
-      }).session(session);
+  return runInTransaction(mongooseInstance, async (session) => {
+    const existing = await TransferModel.findOne({
+      _id: transferId,
+      workspaceId,
+      isArchived: false,
+    }).session(session);
 
-      if (!existing) {
-        throw new InvalidTransferError("transferNotFound");
-      }
+    if (!existing) {
+      throw new InvalidTransferError("transferNotFound");
+    }
 
-      await adjustAccountBalance(String(existing.fromAccountId), existing.amount, session);
-      await adjustAccountBalance(String(existing.toAccountId), -existing.amount, session);
+    await adjustAccountBalance(String(existing.fromAccountId), existing.amount, session);
+    await adjustAccountBalance(String(existing.toAccountId), -existing.amount, session);
 
-      existing.isArchived = true;
-      await existing.save({ session });
-    });
-  } finally {
-    await session.endSession();
-  }
+    existing.isArchived = true;
+    await existing.save({ session });
+  });
 }
 
 export type TransfersPage = {

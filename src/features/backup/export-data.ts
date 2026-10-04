@@ -94,7 +94,7 @@ export async function fetchWorkspaceBackupPayload(
   return {
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
-    app: "masrofaty",
+    app: "sanadat",
     workspace: {
       name: workspace.name,
       type: workspace.type,
@@ -123,7 +123,7 @@ export async function fetchWorkspaceBackupPayload(
 export function backupFilename(workspaceName: string) {
   const safeName = workspaceName.replace(/[^\p{L}\p{N}]+/gu, "-").slice(0, 40) || "workspace";
   const date = new Date().toISOString().slice(0, 10);
-  return `masrofaty-backup-${safeName}-${date}.json`;
+  return `sanadat-backup-${safeName}-${date}.json`;
 }
 
 export const BACKUP_MAX_BYTES = 12 * 1024 * 1024;

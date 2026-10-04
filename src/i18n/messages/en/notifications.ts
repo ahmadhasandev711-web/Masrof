@@ -1,17 +1,17 @@
 const notifications = {
   notifications: {
-    footer: "Masrofaty — <a href=\"{appUrl}\">{appUrl}</a>",
+    footer: "Sanadat — <a href=\"{appUrl}\">{appUrl}</a>",
     welcome: {
       greeting: "Hello {name}",
       greetingDefault: "Hello",
-      subject: "Welcome to Masrofaty",
-      body: "Your account is ready. Start tracking your income and expenses here:",
+      subject: "Welcome to Sanadat",
+      body: "Your account is ready. Start managing your invoices and profits here:",
       dashboardLink: "Dashboard",
     },
     newsletter: {
-      subject: "You subscribed to the Masrofaty newsletter",
-      thanks: "Thanks for subscribing to the Masrofaty newsletter.",
-      promise: "We'll send you articles and tips on managing money — no spam.",
+      subject: "You subscribed to the Sanadat newsletter",
+      thanks: "Thanks for subscribing to the Sanadat newsletter.",
+      promise: "We'll send you practical articles and tips on business finance — no spam.",
     },
     budget: {
       exceededTitle: "Budget exceeded",

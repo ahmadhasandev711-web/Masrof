@@ -30,10 +30,6 @@ describe("plan feature gates (freemium v2)", () => {
     expect(DEFAULT_PLAN_FLAGS.pro.aiCategory).toBe(true);
   });
 
-  it("keeps legacy Plus aligned with Pro entitlements", () => {
-    expect(DEFAULT_PLAN_FLAGS.plus).toEqual(DEFAULT_PLAN_FLAGS.pro);
-    expect(DEFAULT_PLAN_CONFIGS.plus.available).toBe(false);
-  });
 
   it("caps Free quantities and leaves Pro unlimited", () => {
     expect(DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth).toBe(10);
@@ -44,8 +40,8 @@ describe("plan feature gates (freemium v2)", () => {
 
     expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxInvoicesPerMonth)).toBe(true);
     expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxClients)).toBe(true);
-    expect(DEFAULT_PLAN_CONFIGS.pro.maxWorkspaces).toBe(3);
+    expect(DEFAULT_PLAN_CONFIGS.pro.maxWorkspaces).toBe(1);
     expect(DEFAULT_PLAN_CONFIGS.pro.maxMembers).toBe(5);
-    expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(48);
+    expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(3000);
   });
 });

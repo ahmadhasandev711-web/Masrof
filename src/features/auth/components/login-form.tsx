@@ -9,8 +9,10 @@ import { createLoginSchema } from "@/features/auth/schemas";
 import { safeRedirectPath, withRedirectQuery } from "@/features/auth/redirect";
 import { Alert } from "@/components/ui/alert";
 import { Field, Input, Label } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { AuthDivider, GoogleSignInButton } from "@/features/auth/components/google-sign-in-button";
 import { getOAuthErrorMessage } from "@/features/auth/oauth-errors";
+import { normalizePhoneNumber } from "@/lib/phone";
 
 export function LoginForm({ googleAuthEnabled = false }: { googleAuthEnabled?: boolean }) {
   const router = useRouter();
@@ -20,7 +22,7 @@ export function LoginForm({ googleAuthEnabled = false }: { googleAuthEnabled?: b
   const loginSchema = createLoginSchema(tValidation);
   const redirectTo = safeRedirectPath(searchParams.get("redirectTo"));
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,17 +39,38 @@ export function LoginForm({ googleAuthEnabled = false }: { googleAuthEnabled?: b
     event.preventDefault();
     setError(null);
 
-    const parsed = loginSchema.safeParse({ email, password });
+    const parsed = loginSchema.safeParse({ identifier, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? tValidation("invalidData"));
       return;
     }
 
     setIsSubmitting(true);
-    const { error: authError } = await authClient.signIn.email({
-      email: parsed.data.email,
-      password: parsed.data.password,
-    });
+    const trimmedId = parsed.data.identifier.trim();
+    const isEmail = trimmedId.includes("@");
+
+    let authError: { message?: string } | null = null;
+
+    if (isEmail) {
+      const res = await authClient.signIn.email({
+        email: trimmedId.toLowerCase(),
+        password: parsed.data.password,
+      });
+      authError = res.error;
+    } else {
+      const normalizedPhone = normalizePhoneNumber(trimmedId);
+      if (!normalizedPhone) {
+        setError(t("errors.phoneInvalid"));
+        setIsSubmitting(false);
+        return;
+      }
+      const res = await authClient.signIn.phoneNumber({
+        phoneNumber: normalizedPhone,
+        password: parsed.data.password,
+      });
+      authError = res.error;
+    }
+
     setIsSubmitting(false);
 
     if (authError) {
@@ -58,7 +81,9 @@ export function LoginForm({ googleAuthEnabled = false }: { googleAuthEnabled?: b
         lowerMessage.includes("not verified") ||
         lowerMessage.includes("unverified");
       const isUnknownUser =
-        lowerMessage.includes("not found") || lowerMessage.includes("user not found");
+        lowerMessage.includes("not found") ||
+        lowerMessage.includes("user not found") ||
+        lowerMessage.includes("invalid_phone_number_or_password");
       const message = isUnverified
         ? t("errors.emailNotVerified")
         : isUnknownUser
@@ -90,22 +115,23 @@ export function LoginForm({ googleAuthEnabled = false }: { googleAuthEnabled?: b
       )}
 
       <Field>
-        <Label htmlFor="email">{t("fields.email")}</Label>
+        <Label htmlFor="identifier">{t("fields.identifier")}</Label>
         <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          id="identifier"
+          type="text"
+          autoComplete="username"
+          dir="ltr"
+          placeholder={t("fields.identifierPlaceholder")}
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
           required
         />
       </Field>
 
       <Field>
         <Label htmlFor="password">{t("fields.password")}</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

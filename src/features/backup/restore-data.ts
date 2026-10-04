@@ -2,6 +2,7 @@ import "server-only";
 
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { runInTransaction } from "@/lib/db/transaction";
 import { WorkspaceModel } from "@/models/workspace";
 import { WorkspaceMembershipModel } from "@/models/workspace-membership";
 import { CategoryModel } from "@/models/category";
@@ -41,13 +42,9 @@ export async function restoreWorkspaceFromBackup(
   restoredSuffix = "(restored)",
 ): Promise<{ workspaceId: string }> {
   const mongooseInstance = await connectToDatabase();
-  const session = await mongooseInstance.startSession();
 
-  let createdWorkspaceId: string | undefined;
-
-  try {
-    await session.withTransaction(async () => {
-      const customCategoryMap = new Map<string, string>();
+  const createdWorkspaceId = await runInTransaction(mongooseInstance, async (session) => {
+    const customCategoryMap = new Map<string, string>();
       const accountMap = new Map<string, string>();
       const clientMap = new Map<string, string>();
       const projectMap = new Map<string, string>();
@@ -236,11 +233,8 @@ export async function restoreWorkspaceFromBackup(
         );
       }
 
-      createdWorkspaceId = String(newWorkspaceId);
+      return String(newWorkspaceId);
     });
-  } finally {
-    await session.endSession();
-  }
 
   if (!createdWorkspaceId) {
     throw new Error("backupRestoreWorkspaceFailed");

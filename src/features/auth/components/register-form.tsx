@@ -7,7 +7,10 @@ import { authClient } from "@/lib/auth/client";
 import { createRegisterSchema } from "@/features/auth/schemas";
 import { safeRedirectPath } from "@/features/auth/redirect";
 import { Field, Input, Label } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { AuthDivider, GoogleSignInButton } from "@/features/auth/components/google-sign-in-button";
+import { normalizePhoneNumber } from "@/lib/phone";
+import { checkAccountAvailability } from "@/features/auth/actions/check-availability";
 
 export function RegisterForm({
   requiresEmailVerification = false,
@@ -24,7 +27,9 @@ export function RegisterForm({
   const tValidation = useTranslations("validation");
   const registerSchema = createRegisterSchema(tValidation);
   const redirectTo = safeRedirectPath(searchParams.get("redirectTo"), "");
+
   const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState(defaultEmail || searchParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -42,27 +47,65 @@ export function RegisterForm({
     event.preventDefault();
     setError(null);
 
-    const parsed = registerSchema.safeParse({ name, email, password });
+    const parsed = registerSchema.safeParse({ name, email, phoneNumber, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? tValidation("invalidData"));
       return;
     }
 
-    setIsSubmitting(true);
-    const { error: authError } = await authClient.signUp.email({
-      name: parsed.data.name,
-      email: parsed.data.email,
-      password: parsed.data.password,
-    });
-    setIsSubmitting(false);
-
-    if (authError) {
-      setError(authError.message ?? t("errors.registerFailed"));
+    const normalizedPhone = normalizePhoneNumber(parsed.data.phoneNumber);
+    if (!normalizedPhone) {
+      setError(t("errors.phoneInvalid"));
       return;
     }
 
-    router.push(callbackURL);
-    router.refresh();
+    setIsSubmitting(true);
+    try {
+      // 1. Check uniqueness of email and phone before calling signup
+      const availability = await checkAccountAvailability({
+        email: parsed.data.email,
+        phoneNumber: normalizedPhone,
+      });
+
+      if (availability.emailTaken) {
+        setError(t("errors.emailAlreadyInUse"));
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (availability.phoneTaken) {
+        setError(t("errors.phoneAlreadyInUse"));
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 2. Call better-auth signUp
+      const { error: authError } = await authClient.signUp.email({
+        name: parsed.data.name,
+        email: parsed.data.email,
+        password: parsed.data.password,
+        phoneNumber: normalizedPhone,
+      } as Parameters<typeof authClient.signUp.email>[0]);
+
+      if (authError) {
+        const rawMessage = authError.message ?? "";
+        if (rawMessage.includes("PHONE_NUMBER_ALREADY_EXISTS")) {
+          setError(t("errors.phoneAlreadyInUse"));
+        } else if (rawMessage.toLowerCase().includes("email") && rawMessage.toLowerCase().includes("exist")) {
+          setError(t("errors.emailAlreadyInUse"));
+        } else {
+          setError(rawMessage || t("errors.registerFailed"));
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      router.push(callbackURL);
+      router.refresh();
+    } catch {
+      setError(t("errors.registerFailed"));
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -91,11 +134,26 @@ export function RegisterForm({
       </Field>
 
       <Field>
+        <Label htmlFor="phoneNumber">{t("fields.phoneNumber")}</Label>
+        <Input
+          id="phoneNumber"
+          type="tel"
+          autoComplete="tel"
+          dir="ltr"
+          placeholder={t("fields.phoneNumberPlaceholder")}
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          required
+        />
+      </Field>
+
+      <Field>
         <Label htmlFor="email">{t("fields.email")}</Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
+          dir="ltr"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -104,9 +162,8 @@ export function RegisterForm({
 
       <Field>
         <Label htmlFor="password">{t("fields.password")}</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -115,7 +172,7 @@ export function RegisterForm({
       </Field>
 
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm font-medium text-red-600">
           {error}
         </p>
       )}

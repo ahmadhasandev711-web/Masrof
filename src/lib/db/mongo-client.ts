@@ -16,14 +16,12 @@ configureDnsForWindows();
  *   - Mongoose: application data (accounts, transactions, budgets...)
  *   - MongoClient: better-auth's internal collections (users, sessions...)
  *
- * Note: we intentionally do NOT await `client.connect()` here. The
- * MongoDB Node.js driver queues operations internally and connects
- * lazily on first use, which lets us export a plain, synchronous `Db`
- * instance — exactly what better-auth's adapter expects to receive.
+ * The client connects lazily on the first auth operation. Eagerly connecting
+ * here makes every Next.js build worker and every route that merely imports
+ * auth open a socket, even when that route never reads a session.
  */
 
 declare global {
-  // eslint-disable-next-line no-var
   var __mongoClient: MongoClient | undefined;
 }
 
@@ -38,11 +36,6 @@ function createClient(): MongoClient {
     serverSelectionTimeoutMS: isServerless ? 8_000 : 15_000,
     family: 4,
   });
-  if (!isServerless) {
-    client.connect().catch((error: unknown) => {
-      console.error("[mongo-client] initial connection attempt failed:", error);
-    });
-  }
   return client;
 }
 

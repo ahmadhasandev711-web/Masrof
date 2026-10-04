@@ -23,4 +23,11 @@ export function createClientSchema(t: ValidationTranslator) {
   });
 }
 
+export function updateClientSchema(t: ValidationTranslator) {
+  return createClientSchema(t).extend({
+    clientId: z.string().min(1),
+  });
+}
+
 export type CreateClientInput = z.infer<ReturnType<typeof createClientSchema>>;
+export type UpdateClientInput = z.infer<ReturnType<typeof updateClientSchema>>;

@@ -74,21 +74,46 @@ export const getUserSubscription = cache(async (userId: string): Promise<UserSub
   try {
     await connectToDatabase();
     const record = await UserSubscriptionModel.findOne({ userId }).lean();
-    if (!record) {
-      return fallback;
+    let effectivePlan: PlanId = "free";
+    let status = record?.status ?? "active";
+    let expiresAt = record?.expiresAt ?? null;
+
+    if (record) {
+      effectivePlan = resolveEffectivePlan(
+        record.plan as PlanId,
+        record.status,
+        record.expiresAt ?? null,
+      );
     }
 
-    const effectivePlan = resolveEffectivePlan(
-      record.plan as PlanId,
-      record.status,
-      record.expiresAt ?? null,
-    );
+    if (effectivePlan !== "pro") {
+      const { WorkspaceModel } = await import("@/models/workspace");
+      const activeProWs = await WorkspaceModel.findOne({
+        ownerId: userId,
+        plan: "pro",
+        planStatus: "active",
+        isArchived: false,
+      }).lean();
+
+      if (activeProWs) {
+        const wsEffective = resolveEffectivePlan(
+          "pro",
+          activeProWs.planStatus ?? "active",
+          activeProWs.planExpiresAt ?? null,
+        );
+        if (wsEffective === "pro") {
+          effectivePlan = "pro";
+          status = (activeProWs.planStatus ?? "active") as UserSubscriptionView["status"];
+          expiresAt = activeProWs.planExpiresAt ?? null;
+        }
+      }
+    }
 
     return {
       plan: effectivePlan,
-      status: record.status as UserSubscriptionView["status"],
-      expiresAt: record.expiresAt ? new Date(record.expiresAt).toISOString() : null,
-      isSuspended: record.status === "suspended",
+      status: status as UserSubscriptionView["status"],
+      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+      isSuspended: status === "suspended",
     };
   } catch (error) {
     console.error("[subscription] failed to load plan, using free:", error);
@@ -106,21 +131,17 @@ export async function assertUserNotSuspended(userId: string) {
 export async function assertCanCreateWorkspace(userId: string): Promise<string | null> {
   await assertUserNotSuspended(userId);
 
-  const [subscription, ownedCount] = await Promise.all([
-    getUserSubscription(userId),
-    countOwnedWorkspacesForUser(userId),
-  ]);
+  const subscription = await getUserSubscription(userId);
+  const ownedCount = await countOwnedWorkspacesForUser(userId);
 
-  if (!(await planAllowsWorkspaces(subscription.plan, ownedCount))) {
+  const allowed = await planAllowsWorkspaces(subscription.plan, ownedCount);
+  if (!allowed) {
     const config = await getPlanConfig(subscription.plan);
-    const limit = config.maxWorkspaces === -1 ? "∞" : String(config.maxWorkspaces);
-    const [localizedPlan, tPlans] = await Promise.all([
-      getLocalizedPlan(subscription.plan),
-      getTranslations("plans"),
-    ]);
+    const tPlans = await getTranslations("plans");
+    const planName = subscription.plan === "pro" ? "برو" : tPlans("free");
     return tPlans("limitMessage", {
-      plan: localizedPlan.name,
-      limit,
+      plan: planName,
+      limit: config.maxWorkspaces,
     });
   }
 
@@ -143,8 +164,7 @@ export async function assertPlanFeature(
 
 /**
  * Workspace-scoped features (reports, OCR, import, team data…) inherit the
- * workspace owner's plan — so a Free member in a Plus workspace gets Plus tools
- * inside that workspace only.
+ * workspace's dedicated plan, or fallback to the workspace owner's plan for legacy workspaces.
  */
 export const getEffectiveSubscriptionForWorkspace = cache(
   async function getEffectiveSubscriptionForWorkspace(
@@ -153,6 +173,35 @@ export const getEffectiveSubscriptionForWorkspace = cache(
   ): Promise<WorkspaceSubscriptionContext> {
     const { getWorkspaceAccess } = await import("@/features/workspaces/access");
     const access = await getWorkspaceAccess(userId, workspaceId);
+    const ws = access.workspace as any;
+
+    if (ws.plan && ws.plan !== "free") {
+      const effectivePlan = resolveEffectivePlan(
+        ws.plan as PlanId,
+        ws.planStatus ?? "active",
+        ws.planExpiresAt ?? null,
+      );
+      return {
+        plan: effectivePlan,
+        status: (ws.planStatus ?? "active") as UserSubscriptionView["status"],
+        expiresAt: ws.planExpiresAt ? new Date(ws.planExpiresAt).toISOString() : null,
+        isSuspended: ws.planStatus === "suspended",
+        isTeamMember: access.workspace.ownerId !== userId,
+        ownerId: access.workspace.ownerId,
+      };
+    }
+
+    if (ws.plan === "free") {
+      return {
+        plan: "free",
+        status: "active",
+        expiresAt: null,
+        isSuspended: false,
+        isTeamMember: access.workspace.ownerId !== userId,
+        ownerId: access.workspace.ownerId,
+      };
+    }
+
     return getEffectiveSubscriptionForOwner(userId, access.workspace.ownerId);
   },
 );
@@ -214,15 +263,57 @@ export async function userHasWorkspacePlanFeature(
 }
 
 export async function getWorkspacePlanContext(userId: string, workspaceId: string) {
-  const { workspaces, activeWorkspace } = await getCurrentWorkspaceContext(userId);
-  const workspace =
-    workspaces.find((item) => item._id.toString() === workspaceId) ?? activeWorkspace;
-  const subscription = await getEffectiveSubscriptionForOwner(
-    userId,
-    workspace?.ownerId ?? userId,
-  );
+  const subscription = await getEffectiveSubscriptionForWorkspace(userId, workspaceId);
   const plan = await getLocalizedPlan(subscription.plan);
   return { subscription, plan };
+}
+
+export async function setWorkspacePlan(
+  workspaceId: string,
+  plan: PlanId,
+  options: {
+    adminEmail?: string;
+    expiresAt?: Date | null;
+    status?: "active" | "cancelled" | "suspended";
+    notes?: string;
+  } = {},
+) {
+  await connectToDatabase();
+  const { WorkspaceModel } = await import("@/models/workspace");
+
+  const status = options.status ?? "active";
+  const expiresAt =
+    plan === "free"
+      ? null
+      : options.expiresAt ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  const updatedWs = await WorkspaceModel.findByIdAndUpdate(
+    workspaceId,
+    {
+      plan,
+      planStatus: status,
+      planExpiresAt: expiresAt,
+    },
+    { returnDocument: "after" },
+  );
+
+  // Synchronize owner's user subscription so it matches the workspace plan
+  if (updatedWs?.ownerId) {
+    await UserSubscriptionModel.findOneAndUpdate(
+      { userId: updatedWs.ownerId },
+      {
+        userId: updatedWs.ownerId,
+        plan,
+        status,
+        expiresAt,
+        updatedBy: options.adminEmail ?? "system",
+        notes: options.notes ?? `Synced from workspace ${workspaceId}`,
+      },
+      { upsert: true },
+    );
+  }
+
+  return updatedWs;
 }
 
 export async function userHasPlanFeature(userId: string, feature: PlanFeature): Promise<boolean> {
@@ -241,12 +332,13 @@ export async function setUserPlan(
   },
 ) {
   await connectToDatabase();
+  const { WorkspaceModel } = await import("@/models/workspace");
 
   const status = options.status ?? "active";
   const expiresAt =
     plan === "free"
       ? null
-      : options.expiresAt ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+      : options.expiresAt ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
   await UserSubscriptionModel.findOneAndUpdate(
     { userId },
@@ -259,6 +351,16 @@ export async function setUserPlan(
       notes: options.notes ?? null,
     },
     { upsert: true, returnDocument: "after" },
+  );
+
+  // Synchronize all workspaces owned by this user
+  await WorkspaceModel.updateMany(
+    { ownerId: userId, isArchived: false },
+    {
+      plan,
+      planStatus: status,
+      planExpiresAt: expiresAt,
+    },
   );
 }
 
@@ -273,6 +375,8 @@ export async function cancelUserSubscription(userId: string, adminEmail: string)
 
 export async function suspendUserAccount(userId: string, adminEmail: string) {
   await connectToDatabase();
+  const { WorkspaceModel } = await import("@/models/workspace");
+
   await UserSubscriptionModel.findOneAndUpdate(
     { userId },
     {
@@ -284,6 +388,13 @@ export async function suspendUserAccount(userId: string, adminEmail: string) {
       notes: "حساب معلّق من الأدمن",
     },
     { upsert: true, returnDocument: "after" },
+  );
+
+  await WorkspaceModel.updateMany(
+    { ownerId: userId },
+    {
+      planStatus: "suspended",
+    },
   );
 }
 

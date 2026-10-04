@@ -61,7 +61,7 @@ const reports = {
       gateMessage: "Advanced reports are available on the Pro plan.",
     },
     exportLabels: {
-      reportTitle: "Masrofaty report",
+      reportTitle: "Sanadat report",
       workspace: "Workspace",
       currency: "Currency",
       period: "Period",
@@ -80,7 +80,7 @@ const reports = {
       expensesSheet: "Expenses",
       incomeSheet: "Income",
       summarySheet: "Summary",
-      transactionsExport: "Masrofaty transactions export",
+      transactionsExport: "Sanadat transactions export",
       rowCount: "Row count",
       note: "Note",
       truncatedNote: "Only the first {count} transactions were exported",

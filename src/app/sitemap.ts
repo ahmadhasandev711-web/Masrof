@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { listAllPublishedPostsForSitemap } from "@/features/blog/data";
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sanadat.site";
 
 export const revalidate = 3600;
 

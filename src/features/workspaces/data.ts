@@ -1,8 +1,10 @@
 import "server-only";
 
 import { cache } from "react";
+import type { Types } from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
-import { WorkspaceModel } from "@/models/workspace";
+import { runInTransaction } from "@/lib/db/transaction";
+import { WorkspaceModel, type WorkspaceDocument } from "@/models/workspace";
 import { WorkspaceMembershipModel } from "@/models/workspace-membership";
 import { AccountModel } from "@/models/account";
 import { toMinorUnits } from "@/lib/money";
@@ -16,77 +18,75 @@ import type { CreateWorkspaceInput } from "@/features/workspaces/schemas";
  */
 export async function createWorkspaceForUser(userId: string, input: CreateWorkspaceInput) {
   const mongoose = await connectToDatabase();
-  const session = await mongoose.startSession();
 
-  try {
-    let createdWorkspaceId: string | undefined;
+  return runInTransaction(mongoose, async (session) => {
+    const [workspace] = await WorkspaceModel.create(
+      [
+        {
+          name: input.name,
+          type: input.type,
+          currency: input.currency,
+          ownerId: userId,
+          plan: "free",
+          planStatus: "active",
+          planExpiresAt: null,
+        },
+      ],
+      { session },
+    );
 
-    await session.withTransaction(async () => {
-      const [workspace] = await WorkspaceModel.create(
-        [
-          {
-            name: input.name,
-            type: input.type,
-            currency: input.currency,
-            ownerId: userId,
-          },
-        ],
-        { session },
-      );
+    await WorkspaceMembershipModel.create(
+      [
+        {
+          workspaceId: workspace._id,
+          userId,
+          role: "owner",
+        },
+      ],
+      { session },
+    );
 
-      await WorkspaceMembershipModel.create(
-        [
-          {
-            workspaceId: workspace._id,
-            userId,
-            role: "owner",
-          },
-        ],
-        { session },
-      );
+    const openingBalanceMinor = toMinorUnits(input.initialAccountBalance);
 
-      const openingBalanceMinor = toMinorUnits(input.initialAccountBalance);
+    await AccountModel.create(
+      [
+        {
+          workspaceId: workspace._id,
+          name: input.initialAccountName,
+          type: input.initialAccountType,
+          currency: input.currency,
+          openingBalance: openingBalanceMinor,
+          cachedBalance: openingBalanceMinor,
+        },
+      ],
+      { session },
+    );
 
-      await AccountModel.create(
-        [
-          {
-            workspaceId: workspace._id,
-            name: input.initialAccountName,
-            type: input.initialAccountType,
-            currency: input.currency,
-            openingBalance: openingBalanceMinor,
-            cachedBalance: openingBalanceMinor,
-          },
-        ],
-        { session },
-      );
-
-      createdWorkspaceId = workspace._id.toString();
-    });
-
-    return createdWorkspaceId!;
-  } finally {
-    await session.endSession();
-  }
+    return workspace._id.toString();
+  });
 }
 
 /** Lists every non-archived workspace the given user belongs to, newest first. */
 export const listWorkspacesForUser = cache(async (userId: string) => {
   await connectToDatabase();
 
-  const memberships = await WorkspaceMembershipModel.find({ userId }).lean();
-  const workspaceIds = memberships.map((m) => m.workspaceId);
-
-  if (workspaceIds.length === 0) {
-    return [];
-  }
-
-  return WorkspaceModel.find({
-    _id: { $in: workspaceIds },
-    isArchived: false,
-  })
-    .sort({ createdAt: -1 })
-    .lean();
+  // Keep membership as the source of truth, but join workspaces on the
+  // database server so this hot path costs one network round trip, not two.
+  return WorkspaceMembershipModel.aggregate<WorkspaceDocument & { _id: Types.ObjectId }>([
+    { $match: { userId } },
+    {
+      $lookup: {
+        from: WorkspaceModel.collection.name,
+        localField: "workspaceId",
+        foreignField: "_id",
+        as: "workspace",
+      },
+    },
+    { $unwind: "$workspace" },
+    { $match: { "workspace.isArchived": false } },
+    { $replaceRoot: { newRoot: "$workspace" } },
+    { $sort: { createdAt: -1 } },
+  ]);
 });
 
 /** Returns true if the user has at least one workspace (used to gate onboarding). */

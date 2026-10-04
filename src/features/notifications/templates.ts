@@ -53,7 +53,7 @@ function fmt(template: string, values: Record<string, string | number>) {
 }
 
 function emailFooter(locale: AppLocale) {
-  const label = locale === "en" ? "Masrofaty" : "مصروفاتي";
+  const label = locale === "en" ? "Sanadat" : "سندات";
   return `${label} — <a href="${appUrl}">${appUrl}</a>`;
 }
 

@@ -1,7 +1,7 @@
 const auth = {
   auth: {
     loginTitle: "Log in",
-    loginSubtitle: "Welcome back to Masrofaty",
+    loginSubtitle: "Welcome back to Sanadat",
     loading: "Loading...",
     forgotPassword: "Forgot password?",
     noAccount: "Don't have an account?",
@@ -14,6 +14,10 @@ const auth = {
     signOutShort: "Out",
     fields: {
       email: "Email",
+      identifier: "Email or Phone Number",
+      identifierPlaceholder: "name@example.com or 01012345678",
+      phoneNumber: "Phone Number",
+      phoneNumberPlaceholder: "e.g. 01012345678 or +201...",
       password: "Password",
       name: "Name",
       newPassword: "New password",
@@ -41,9 +45,13 @@ const auth = {
       verifyEmailLink: "Verify email",
     },
     errors: {
-      invalidCredentials: "Invalid email or password",
+      invalidCredentials: "Invalid credentials or password",
       emailNotVerified: "Please verify your email before signing in.",
-      userNotFound: "No account found with this email.",
+      userNotFound: "No account found with these credentials.",
+      emailAlreadyInUse: "Email is already registered with another account.",
+      phoneAlreadyInUse: "Phone number is already registered with another account.",
+      phoneInvalid: "Please enter a valid phone number.",
+      identifierInvalid: "Please enter a valid email or phone number.",
       createAccountInstead: "Create an account instead",
       registerFailed: "Could not create account, please try again",
       resetSendFailed: "Could not send reset link",

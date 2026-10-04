@@ -3,6 +3,8 @@ import { revalidateTag } from "next/cache";
 import { createClient, listClientsForWorkspace } from "@/features/clients/data";
 import { createClientSchema } from "@/features/clients/schemas";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { countClientsForWorkspace } from "@/features/subscriptions/plan-usage";
+import { assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import {
   mobileErrorResponse,
   requireMobileSession,
@@ -35,6 +37,17 @@ export async function POST(request: Request) {
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
+
+    const clientCount = await countClientsForWorkspace(parsed.data.workspaceId);
+    const limitError = await assertWorkspaceQuantityLimit(
+      session.user.id,
+      parsed.data.workspaceId,
+      "maxClients",
+      clientCount,
+    );
+    if (limitError) {
+      return NextResponse.json({ error: "planLimitReached", message: limitError }, { status: 403 });
+    }
 
     const client = await createClient(parsed.data);
     revalidateTag(CACHE_TAGS.clients, "max");

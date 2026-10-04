@@ -15,6 +15,7 @@ const invoiceSchema = new Schema(
   {
     workspaceId: { type: Schema.Types.ObjectId, ref: "Workspace", required: true, index: true },
     clientId: { type: Schema.Types.ObjectId, ref: "Client", required: true, index: true },
+    projectId: { type: Schema.Types.ObjectId, ref: "Project", default: null },
     invoiceNumber: { type: String, required: true, trim: true, maxlength: 40 },
     issueDate: { type: Date, required: true },
     dueDate: { type: Date, default: null },
@@ -27,6 +28,9 @@ const invoiceSchema = new Schema(
       default: "sent",
     },
     paidAt: { type: Date, default: null },
+    shareToken: { type: String, trim: true, default: null },
+    isShareable: { type: Boolean, required: true, default: true },
+    viewedAt: { type: Date, default: null },
     isArchived: { type: Boolean, required: true, default: false },
   },
   { timestamps: true },
@@ -34,6 +38,8 @@ const invoiceSchema = new Schema(
 
 invoiceSchema.index({ workspaceId: 1, isArchived: 1, issueDate: -1 });
 invoiceSchema.index({ workspaceId: 1, invoiceNumber: 1 }, { unique: true });
+invoiceSchema.index({ workspaceId: 1, projectId: 1 });
+invoiceSchema.index({ shareToken: 1 }, { unique: true, sparse: true });
 
 export type InvoiceDocument = InferSchemaType<typeof invoiceSchema>;
 

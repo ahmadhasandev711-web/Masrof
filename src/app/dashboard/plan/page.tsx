@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
-import { getUserSubscription } from "@/features/subscriptions/data";
+import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
+import { getWorkspacePlanContext, getUserSubscription } from "@/features/subscriptions/data";
 import { PRICING_PLANS_ORDER, type PlanId } from "@/features/subscriptions/plans";
 import { getSupportConfig } from "@/lib/support";
 import { getUserWhatsAppPhone } from "@/features/whatsapp/data";
@@ -20,7 +21,10 @@ function statusLabel(status: string, isSuspended: boolean, tCore: (key: "active"
 
 export default async function MyPlanPage() {
   const session = await requireSession();
-  const subscription = await getUserSubscription(session.user.id);
+  const { activeWorkspace } = await getCurrentWorkspaceContext(session.user.id);
+  const subscription = activeWorkspace
+    ? (await getWorkspacePlanContext(session.user.id, activeWorkspace._id.toString())).subscription
+    : await getUserSubscription(session.user.id);
   const locale = (await getLocale()) as AppLocale;
   const dateLocale = getDateLocale(locale);
   const tPage = await getTranslations("pages.plan");
@@ -28,20 +32,22 @@ export default async function MyPlanPage() {
   const tPlansPage = await getTranslations("plans.page");
   const tPlans = await getTranslations("plans");
   const tCoreStatus = await getTranslations("status");
-  const plan = await getLocalizedPlan(subscription.plan);
+  const displayPlanId: PlanId = subscription.plan;
+  const plan = await getLocalizedPlan(displayPlanId);
   const status = statusLabel(
     subscription.status,
     subscription.isSuspended,
     (key) => tCoreStatus(key),
   );
   const support = getSupportConfig();
-  const localizedPlans = await Promise.all(PRICING_PLANS_ORDER.map((id) => getLocalizedPlan(id)));
-  const localizedPlanLabels = await Promise.all(PRICING_PLANS_ORDER.map((id) => getLocalizedPlanLabel(id)));
+  const DISPLAY_PLANS: PlanId[] = ["free", "pro"];
+  const localizedPlans = await Promise.all(DISPLAY_PLANS.map((id) => getLocalizedPlan(id)));
+  const localizedPlanLabels = await Promise.all(DISPLAY_PLANS.map((id) => getLocalizedPlanLabel(id)));
   const localizedPlanLabelById = Object.fromEntries(
-    PRICING_PLANS_ORDER.map((id, index) => [id, localizedPlanLabels[index]]),
+    DISPLAY_PLANS.map((id, index) => [id, localizedPlanLabels[index]]),
   ) as Record<PlanId, string>;
   const localizedPlanById = Object.fromEntries(
-    PRICING_PLANS_ORDER.map((id, index) => [id, localizedPlans[index]]),
+    DISPLAY_PLANS.map((id, index) => [id, localizedPlans[index]]),
   ) as Record<PlanId, Awaited<ReturnType<typeof getLocalizedPlan>>>;
   const [userWhatsAppPhone, pushSubscriptionCount] = await Promise.all([
     getUserWhatsAppPhone(session.user.id),
@@ -58,7 +64,10 @@ export default async function MyPlanPage() {
       <section className="rounded-2xl border border-[#E4DFD3] bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-neutral-500">{tPlansPage("currentPlan")}</p>
+            <p className="text-sm text-neutral-500">
+              {activeWorkspace ? `${activeWorkspace.name} — ` : ""}
+              {tPlansPage("currentPlan")}
+            </p>
             <p className="mt-1 text-2xl font-bold text-[#065F46]">{plan.name}</p>
             <p className={`mt-1 text-sm font-medium ${status.className}`}>{tPlansPage("status")} {status.text}</p>
           </div>
@@ -134,31 +143,47 @@ export default async function MyPlanPage() {
         </section>
       )}
 
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-neutral-800">{tPlansPage("comparePlans")}</h2>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[400px] text-right text-sm">
+          <table className="w-full min-w-[500px] text-right text-sm">
             <thead>
-              <tr className="border-b text-neutral-500">
-                <th className="py-2 font-medium">{tPlansPage("planColumn")}</th>
-                <th className="py-2 font-medium">{tPlansPage("priceColumn")}</th>
-                <th className="py-2 font-medium">{tPlansPage("youAreHere")}</th>
+              <tr className="border-b border-neutral-200 text-xs text-neutral-500">
+                <th className="py-2.5 font-medium">{tPlansPage("planColumn")}</th>
+                <th className="py-2.5 font-medium">{tPlansPage("priceColumn")}</th>
+                <th className="py-2.5 font-medium">المميزات الرئيسية</th>
+                <th className="py-2.5 text-center font-medium">{tPlansPage("youAreHere")}</th>
               </tr>
             </thead>
-            <tbody>
-              {PRICING_PLANS_ORDER.map((id: PlanId) => (
-                <tr key={id} className="border-b border-neutral-100">
-                  <td className="py-2 font-medium">{localizedPlanLabelById[id]}</td>
-                  <td className="py-2 text-neutral-600">
+            <tbody className="divide-y divide-neutral-100">
+              {DISPLAY_PLANS.map((id: PlanId) => (
+                <tr
+                  key={id}
+                  className={`transition ${displayPlanId === id ? "bg-[#ECFDF5]/50 font-medium" : ""}`}
+                >
+                  <td className="py-3.5 font-bold text-neutral-900">{localizedPlanLabelById[id]}</td>
+                  <td className="py-3.5 font-semibold text-emerald-800">
                     {localizedPlanById[id].priceYearly === 0
                       ? tPlans("free")
                       : `${localizedPlanById[id].priceDisplay} ${localizedPlanById[id].periodDisplay}`}
                   </td>
-                  <td className="py-2">
-                    {subscription.plan === id ? (
-                      <span className="text-emerald-700">✓</span>
+                  <td className="py-3.5">
+                    <ul className="flex flex-col gap-1 text-xs text-neutral-600">
+                      {localizedPlanById[id].features.slice(0, 4).map((f) => (
+                        <li key={f} className="flex items-center gap-1.5">
+                          <span className="font-bold text-emerald-700">✓</span>
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+                  <td className="py-3.5 text-center">
+                    {displayPlanId === id ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">
+                        ✓ {tPlansPage("youAreHere")}
+                      </span>
                     ) : (
-                      "—"
+                      <span className="text-neutral-300">—</span>
                     )}
                   </td>
                 </tr>

@@ -2,6 +2,7 @@ import "server-only";
 
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { runInTransaction } from "@/lib/db/transaction";
 import { TransactionModel } from "@/models/transaction";
 import { AccountModel } from "@/models/account";
 import { CategoryModel } from "@/models/category";
@@ -47,17 +48,24 @@ async function validateReferencesBelongToWorkspace(
   clientId?: string,
   projectId?: string,
 ) {
-  const account = await AccountModel.findOne({
-    _id: accountId,
-    workspaceId,
-    isArchived: false,
-  });
-
-  const category = await CategoryModel.findOne({
-    _id: categoryId,
-    isArchived: false,
-    $or: [{ workspaceId: null }, { workspaceId }],
-  });
+  const [account, category, client, project] = await Promise.all([
+    AccountModel.findOne({
+      _id: accountId,
+      workspaceId,
+      isArchived: false,
+    }),
+    CategoryModel.findOne({
+      _id: categoryId,
+      isArchived: false,
+      $or: [{ workspaceId: null }, { workspaceId }],
+    }),
+    clientId
+      ? ClientModel.findOne({ _id: clientId, workspaceId, isArchived: false })
+      : Promise.resolve(null),
+    projectId
+      ? ProjectModel.findOne({ _id: projectId, workspaceId, isArchived: false })
+      : Promise.resolve(null),
+  ]);
 
   if (!account) {
     throw new InvalidTransactionReferenceError("accountNotFound");
@@ -66,27 +74,41 @@ async function validateReferencesBelongToWorkspace(
     throw new InvalidTransactionReferenceError("categoryNotFound");
   }
 
-  if (clientId) {
-    const client = await ClientModel.findOne({
-      _id: clientId,
-      workspaceId,
-      isArchived: false,
-    });
-    if (!client) {
-      throw new InvalidTransactionReferenceError("clientNotFound");
-    }
+  if (clientId && !client) {
+    throw new InvalidTransactionReferenceError("clientNotFound");
   }
 
-  if (projectId) {
-    const project = await ProjectModel.findOne({
-      _id: projectId,
-      workspaceId,
-      isArchived: false,
-    });
-    if (!project) {
-      throw new InvalidTransactionReferenceError("projectNotFound");
-    }
+  if (projectId && !project) {
+    throw new InvalidTransactionReferenceError("projectNotFound");
   }
+}
+
+function transactionReferenceLookupStages(): mongoose.PipelineStage[] {
+  const references = [
+    { field: "accountId", collection: AccountModel.collection.name },
+    { field: "categoryId", collection: CategoryModel.collection.name },
+    { field: "clientId", collection: ClientModel.collection.name },
+    { field: "projectId", collection: ProjectModel.collection.name },
+  ];
+
+  return references.flatMap(({ field, collection }) => {
+    const resultField = `${field}Ref`;
+    return [
+      {
+        $lookup: {
+          from: collection,
+          let: { referenceId: `$${field}` },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$referenceId"] } } },
+            { $project: { name: 1, ...(field === "categoryId" ? { icon: 1 } : {}) } },
+          ],
+          as: resultField,
+        },
+      },
+      { $set: { [field]: { $arrayElemAt: [`$${resultField}`, 0] } } },
+      { $unset: resultField },
+    ] as mongoose.PipelineStage[];
+  });
 }
 
 /**
@@ -97,7 +119,7 @@ async function assertReferencesBelongToWorkspace(
   workspaceId: string,
   accountId: string,
   categoryId: string,
-  session: mongoose.ClientSession,
+  session: mongoose.ClientSession | null = null,
 ) {
   const account = await AccountModel.findOne({
     _id: accountId,
@@ -141,48 +163,39 @@ export async function createTransaction(input: CreateTransactionInput, userId: s
   );
 
   const mongooseInstance = await connectToDatabase();
-  const session = await mongooseInstance.startSession();
 
-  try {
-    let createdId: string | undefined;
+  return runInTransaction(mongooseInstance, async (session) => {
+    const amountMinorUnits = toMinorUnits(input.amount);
 
-    await session.withTransaction(async () => {
-      const amountMinorUnits = toMinorUnits(input.amount);
+    const [transaction] = await TransactionModel.create(
+      [
+        {
+          workspaceId: input.workspaceId,
+          accountId: input.accountId,
+          categoryId: input.categoryId,
+          type: input.type,
+          amount: amountMinorUnits,
+          transactionDate: input.transactionDate,
+          description: input.description,
+          notes: input.notes,
+          clientId: input.clientId || null,
+          projectId: input.projectId || null,
+          attachmentUrl: input.attachmentUrl || null,
+          attachmentName: input.attachmentName || null,
+          createdBy: userId,
+        },
+      ],
+      { session },
+    );
 
-      const [transaction] = await TransactionModel.create(
-        [
-          {
-            workspaceId: input.workspaceId,
-            accountId: input.accountId,
-            categoryId: input.categoryId,
-            type: input.type,
-            amount: amountMinorUnits,
-            transactionDate: input.transactionDate,
-            description: input.description,
-            notes: input.notes,
-            clientId: input.clientId || null,
-            projectId: input.projectId || null,
-            attachmentUrl: input.attachmentUrl || null,
-            attachmentName: input.attachmentName || null,
-            createdBy: userId,
-          },
-        ],
-        { session },
-      );
+    await AccountModel.findByIdAndUpdate(
+      input.accountId,
+      { $inc: { cachedBalance: balanceDelta(input.type, amountMinorUnits) } },
+      { session },
+    );
 
-      await AccountModel.findByIdAndUpdate(
-        input.accountId,
-        { $inc: { cachedBalance: balanceDelta(input.type, amountMinorUnits) } },
-        { session },
-      );
-
-      createdId = transaction._id.toString();
-    });
-
-    return createdId!;
-  } finally {
-    await session.endSession();
-  }
+    return transaction._id.toString();
+  });
 }
 
 /**
@@ -194,56 +207,51 @@ export async function createTransaction(input: CreateTransactionInput, userId: s
  */
 export async function updateTransaction(input: UpdateTransactionInput, workspaceId: string) {
   const mongooseInstance = await connectToDatabase();
-  const session = await mongooseInstance.startSession();
 
-  try {
-    await session.withTransaction(async () => {
-      const existing = await TransactionModel.findOne({
-        _id: input.transactionId,
-        workspaceId,
-        isArchived: false,
-      }).session(session);
+  return runInTransaction(mongooseInstance, async (session) => {
+    const existing = await TransactionModel.findOne({
+      _id: input.transactionId,
+      workspaceId,
+      isArchived: false,
+    }).session(session);
 
-      if (!existing) {
-        throw new InvalidTransactionReferenceError("transactionNotFound");
-      }
+    if (!existing) {
+      throw new InvalidTransactionReferenceError("transactionNotFound");
+    }
 
-      await assertReferencesBelongToWorkspace(
-        workspaceId,
-        input.accountId,
-        input.categoryId,
-        session,
-      );
+    await assertReferencesBelongToWorkspace(
+      workspaceId,
+      input.accountId,
+      input.categoryId,
+      session,
+    );
 
-      const newAmountMinorUnits = toMinorUnits(input.amount);
+    const newAmountMinorUnits = toMinorUnits(input.amount);
 
-      // Reverse the old effect on the old account.
-      await AccountModel.findByIdAndUpdate(
-        existing.accountId,
-        { $inc: { cachedBalance: -balanceDelta(existing.type, existing.amount) } },
-        { session },
-      );
+    // Reverse the old effect on the old account.
+    await AccountModel.findByIdAndUpdate(
+      existing.accountId,
+      { $inc: { cachedBalance: -balanceDelta(existing.type, existing.amount) } },
+      { session },
+    );
 
-      // Apply the new effect on the (possibly different) new account.
-      await AccountModel.findByIdAndUpdate(
-        input.accountId,
-        { $inc: { cachedBalance: balanceDelta(input.type, newAmountMinorUnits) } },
-        { session },
-      );
+    // Apply the new effect on the (possibly different) new account.
+    await AccountModel.findByIdAndUpdate(
+      input.accountId,
+      { $inc: { cachedBalance: balanceDelta(input.type, newAmountMinorUnits) } },
+      { session },
+    );
 
-      existing.accountId = new mongoose.Types.ObjectId(input.accountId);
-      existing.categoryId = new mongoose.Types.ObjectId(input.categoryId);
-      existing.type = input.type;
-      existing.amount = newAmountMinorUnits;
-      existing.transactionDate = input.transactionDate;
-      existing.description = input.description ?? "";
-      existing.notes = input.notes ?? "";
+    existing.accountId = new mongoose.Types.ObjectId(input.accountId);
+    existing.categoryId = new mongoose.Types.ObjectId(input.categoryId);
+    existing.type = input.type;
+    existing.amount = newAmountMinorUnits;
+    existing.transactionDate = input.transactionDate;
+    existing.description = input.description ?? "";
+    existing.notes = input.notes ?? "";
 
-      await existing.save({ session });
-    });
-  } finally {
-    await session.endSession();
-  }
+    await existing.save({ session });
+  });
 }
 
 /**
@@ -252,32 +260,27 @@ export async function updateTransaction(input: UpdateTransactionInput, workspace
  */
 export async function archiveTransaction(transactionId: string, workspaceId: string) {
   const mongooseInstance = await connectToDatabase();
-  const session = await mongooseInstance.startSession();
 
-  try {
-    await session.withTransaction(async () => {
-      const existing = await TransactionModel.findOne({
-        _id: transactionId,
-        workspaceId,
-        isArchived: false,
-      }).session(session);
+  return runInTransaction(mongooseInstance, async (session) => {
+    const existing = await TransactionModel.findOne({
+      _id: transactionId,
+      workspaceId,
+      isArchived: false,
+    }).session(session);
 
-      if (!existing) {
-        throw new InvalidTransactionReferenceError("transactionNotFound");
-      }
+    if (!existing) {
+      throw new InvalidTransactionReferenceError("transactionNotFound");
+    }
 
-      await AccountModel.findByIdAndUpdate(
-        existing.accountId,
-        { $inc: { cachedBalance: -balanceDelta(existing.type, existing.amount) } },
-        { session },
-      );
+    await AccountModel.findByIdAndUpdate(
+      existing.accountId,
+      { $inc: { cachedBalance: -balanceDelta(existing.type, existing.amount) } },
+      { session },
+    );
 
-      existing.isArchived = true;
-      await existing.save({ session });
-    });
-  } finally {
-    await session.endSession();
-  }
+    existing.isArchived = true;
+    await existing.save({ session });
+  });
 }
 
 /** Filtered, sorted, paginated transaction list — the main /transactions screen query. */
@@ -305,17 +308,21 @@ export async function listTransactions(filters: TransactionFilters) {
   }
 
   const skip = (filters.page - 1) * filters.pageSize;
+  const aggregationQuery = {
+    ...query,
+    workspaceId: new mongoose.Types.ObjectId(filters.workspaceId),
+    ...(filters.accountId ? { accountId: new mongoose.Types.ObjectId(filters.accountId) } : {}),
+    ...(filters.categoryId ? { categoryId: new mongoose.Types.ObjectId(filters.categoryId) } : {}),
+  };
 
   const [items, total] = await Promise.all([
-    TransactionModel.find(query)
-      .sort({ transactionDate: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(filters.pageSize)
-      .populate("accountId", "name")
-      .populate("categoryId", "name icon")
-      .populate("clientId", "name")
-      .populate("projectId", "name")
-      .lean(),
+    TransactionModel.aggregate([
+      { $match: aggregationQuery },
+      { $sort: { transactionDate: -1, createdAt: -1 } },
+      { $skip: skip },
+      { $limit: filters.pageSize },
+      ...transactionReferenceLookupStages(),
+    ]),
     TransactionModel.countDocuments(query),
   ]);
 
@@ -437,3 +444,43 @@ export async function getWorkspaceSummary(
 
   return { income, expense, net, ...conversion };
 }
+
+export type RecentTransactionItem = {
+  _id: string;
+  type: "income" | "expense";
+  amount: number;
+  description?: string;
+  transactionDate: Date;
+  accountName?: string;
+  categoryName?: string;
+  categoryIcon?: string;
+};
+
+/** Retrieves the newest active transactions for workspace home feed. */
+export async function getRecentTransactions(
+  workspaceId: string,
+  limit = 5,
+): Promise<RecentTransactionItem[]> {
+  await connectToDatabase();
+  const items = await TransactionModel.find({
+    workspaceId,
+    isArchived: false,
+  })
+    .sort({ transactionDate: -1, createdAt: -1 })
+    .limit(limit)
+    .populate("accountId", "name")
+    .populate("categoryId", "name icon")
+    .lean();
+
+  return items.map((item) => ({
+    _id: item._id.toString(),
+    type: item.type as "income" | "expense",
+    amount: item.amount,
+    description: item.description || undefined,
+    transactionDate: item.transactionDate,
+    accountName: (item.accountId as { name?: string } | null)?.name,
+    categoryName: (item.categoryId as { name?: string } | null)?.name,
+    categoryIcon: (item.categoryId as { icon?: string } | null)?.icon,
+  }));
+}
+

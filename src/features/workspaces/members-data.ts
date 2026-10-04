@@ -3,6 +3,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { runInTransaction } from "@/lib/db/transaction";
 import { mongoDb } from "@/lib/db/mongo-client";
 import { WorkspaceMembershipModel } from "@/models/workspace-membership";
 import { WorkspaceInvitationModel } from "@/models/workspace-invitation";
@@ -223,72 +224,61 @@ export async function acceptWorkspaceInvitation(input: {
   userId: string;
   userEmail: string;
 }) {
-  await connectToDatabase();
   const mongooseConn = await connectToDatabase();
-  const session = await mongooseConn.startSession();
 
-  try {
-    let workspaceId: string | undefined;
+  return runInTransaction(mongooseConn, async (session) => {
+    const invitation = await WorkspaceInvitationModel.findOne({ token: input.token }).session(
+      session,
+    );
+    if (!invitation || invitation.cancelledAt || invitation.acceptedAt) {
+      throw new Error("invitationInvalid");
+    }
+    if (invitation.expiresAt.getTime() < Date.now()) {
+      throw new Error("invitationExpired");
+    }
+    if (invitation.email !== input.userEmail.toLowerCase()) {
+      throw new Error("invitationEmailMismatch");
+    }
 
-    await session.withTransaction(async () => {
-      const invitation = await WorkspaceInvitationModel.findOne({ token: input.token }).session(
-        session,
-      );
-      if (!invitation || invitation.cancelledAt || invitation.acceptedAt) {
-        throw new Error("invitationInvalid");
-      }
-      if (invitation.expiresAt.getTime() < Date.now()) {
-        throw new Error("invitationExpired");
-      }
-      if (invitation.email !== input.userEmail.toLowerCase()) {
-        throw new Error("invitationEmailMismatch");
-      }
-
-      const existing = await WorkspaceMembershipModel.findOne({
-        workspaceId: invitation.workspaceId,
-        userId: input.userId,
-      }).session(session);
-      if (existing) {
-        invitation.acceptedAt = new Date();
-        await invitation.save({ session });
-        workspaceId = String(invitation.workspaceId);
-        return;
-      }
-
-      const workspace = await WorkspaceModel.findOne({ _id: invitation.workspaceId }).session(session);
-      if (!workspace) throw new Error("invitationInvalid");
-
-      const subscription = await getUserSubscription(workspace.ownerId);
-      const maxMembers = await getMaxMembersForPlan(subscription.plan);
-      if (maxMembers !== -1) {
-        const memberCount = await WorkspaceMembershipModel.countDocuments({
-          workspaceId: invitation.workspaceId,
-        }).session(session);
-        if (memberCount >= maxMembers) {
-          throw new Error("memberLimitReached");
-        }
-      }
-
-      await WorkspaceMembershipModel.create(
-        [
-          {
-            workspaceId: invitation.workspaceId,
-            userId: input.userId,
-            role: invitation.role,
-          },
-        ],
-        { session },
-      );
-
+    const existing = await WorkspaceMembershipModel.findOne({
+      workspaceId: invitation.workspaceId,
+      userId: input.userId,
+    }).session(session);
+    if (existing) {
       invitation.acceptedAt = new Date();
       await invitation.save({ session });
-      workspaceId = String(invitation.workspaceId);
-    });
+      return String(invitation.workspaceId);
+    }
 
-    return workspaceId!;
-  } finally {
-    await session.endSession();
-  }
+    const workspace = await WorkspaceModel.findOne({ _id: invitation.workspaceId }).session(session);
+    if (!workspace) throw new Error("invitationInvalid");
+
+    const subscription = await getUserSubscription(workspace.ownerId);
+    const maxMembers = await getMaxMembersForPlan(subscription.plan);
+    if (maxMembers !== -1) {
+      const memberCount = await WorkspaceMembershipModel.countDocuments({
+        workspaceId: invitation.workspaceId,
+      }).session(session);
+      if (memberCount >= maxMembers) {
+        throw new Error("memberLimitReached");
+      }
+    }
+
+    await WorkspaceMembershipModel.create(
+      [
+        {
+          workspaceId: invitation.workspaceId,
+          userId: input.userId,
+          role: invitation.role,
+        },
+      ],
+      { session },
+    );
+
+    invitation.acceptedAt = new Date();
+    await invitation.save({ session });
+    return String(invitation.workspaceId);
+  });
 }
 
 export async function cancelWorkspaceInvitation(invitationId: string, workspaceId: string) {

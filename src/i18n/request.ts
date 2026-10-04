@@ -11,5 +11,13 @@ export default getRequestConfig(async () => {
   return {
     locale,
     messages: await loadMessages(locale),
+    onError(error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`[i18n]: ${error.message}`);
+      }
+    },
+    getMessageFallback({ namespace, key }) {
+      return [namespace, key].filter(Boolean).join(".");
+    },
   };
 });

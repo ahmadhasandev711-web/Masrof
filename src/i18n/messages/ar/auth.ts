@@ -1,7 +1,7 @@
 const auth = {
   auth: {
     loginTitle: "تسجيل الدخول",
-    loginSubtitle: "أهلاً بيك تاني في مصروفاتي",
+    loginSubtitle: "أهلاً بيك في سندات",
     loading: "جارِ التحميل...",
     forgotPassword: "نسيت كلمة المرور؟",
     noAccount: "لسه معملتش حساب؟",
@@ -14,6 +14,10 @@ const auth = {
     signOutShort: "خروج",
     fields: {
       email: "البريد الإلكتروني",
+      identifier: "البريد الإلكتروني أو رقم الموبايل",
+      identifierPlaceholder: "name@example.com أو 01xxxxxxxxx",
+      phoneNumber: "رقم الموبايل",
+      phoneNumberPlaceholder: "01012345678 أو +201...",
       password: "كلمة المرور",
       name: "الاسم",
       newPassword: "كلمة المرور الجديدة",
@@ -41,9 +45,13 @@ const auth = {
       verifyEmailLink: "تأكيد البريد الإلكتروني",
     },
     errors: {
-      invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+      invalidCredentials: "البيانات المدخلة أو كلمة المرور غير صحيحة",
       emailNotVerified: "لازم تؤكد بريدك الإلكتروني قبل تسجيل الدخول.",
-      userNotFound: "لا يوجد حساب بهذا البريد الإلكتروني.",
+      userNotFound: "لا يوجد حساب بهذه البيانات.",
+      emailAlreadyInUse: "البريد الإلكتروني مسجل بالفعل بحساب آخر.",
+      phoneAlreadyInUse: "رقم الموبايل مسجل بالفعل بحساب آخر.",
+      phoneInvalid: "يرجى إدخال رقم موبايل صحيح.",
+      identifierInvalid: "يرجى إدخال بريد إلكتروني أو رقم موبايل صالح.",
       createAccountInstead: "أنشئ حساباً جديداً",
       registerFailed: "تعذر إنشاء الحساب، حاول مرة أخرى",
       resetSendFailed: "تعذر إرسال رابط إعادة التعيين",

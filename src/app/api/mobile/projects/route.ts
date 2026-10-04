@@ -3,6 +3,8 @@ import { revalidateTag } from "next/cache";
 import { createProject, listProjectsWithTotals } from "@/features/projects/data";
 import { createProjectSchema } from "@/features/projects/schemas";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { countActiveProjectsForWorkspace } from "@/features/subscriptions/plan-usage";
+import { assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import {
   mobileErrorResponse,
   requireMobileSession,
@@ -35,6 +37,19 @@ export async function POST(request: Request) {
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
+
+    if (parsed.data.status === "active") {
+      const activeCount = await countActiveProjectsForWorkspace(parsed.data.workspaceId);
+      const limitError = await assertWorkspaceQuantityLimit(
+        session.user.id,
+        parsed.data.workspaceId,
+        "maxActiveProjects",
+        activeCount,
+      );
+      if (limitError) {
+        return NextResponse.json({ error: "planLimitReached", message: limitError }, { status: 403 });
+      }
+    }
 
     const project = await createProject(parsed.data);
     revalidateTag(CACHE_TAGS.projects, "max");

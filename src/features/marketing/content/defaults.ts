@@ -55,7 +55,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   finalCtaTitle: "مستعد تعرف وضعك المالي الحقيقي؟",
   finalCtaSubtitle: "التسجيل مجاني، وأول مساحة جاهزة في أقل من دقيقتين.",
   finalCtaButton: "إنشاء حساب مجاني",
-  footerNewsletterTitle: "نشرة مصروفاتي",
+  footerNewsletterTitle: "نشرة سندات",
   footerNewsletterSubtitle: "مقالات عملية عن الفلوس والفريلانس — مرة كل أسبوعين تقريباً.",
 };
 

@@ -61,7 +61,7 @@ const reports = {
       gateMessage: "التقارير المتقدمة متاحة في باقة برو.",
     },
     exportLabels: {
-      reportTitle: "تقرير مصروفاتي",
+      reportTitle: "تقرير منصة سندات",
       workspace: "مساحة العمل",
       currency: "العملة",
       period: "الفترة",
@@ -80,7 +80,7 @@ const reports = {
       expensesSheet: "المصروفات",
       incomeSheet: "الدخل",
       summarySheet: "ملخص",
-      transactionsExport: "تصدير عمليات مصروفاتي",
+      transactionsExport: "تصدير عمليات منصة سندات",
       rowCount: "عدد الصفوف",
       note: "ملاحظة",
       truncatedNote: "تم تصدير أول {count} عملية فقط من الإجمالي",

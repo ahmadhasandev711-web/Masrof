@@ -9,16 +9,15 @@ import { AccountModel } from "@/models/account";
 import { TransactionModel } from "@/models/transaction";
 import { toMinorUnits } from "@/lib/money";
 import {
-  parseExchangeRates,
   resolveAccountCurrency,
   summarizeBalances,
   type CurrencyBalanceRow,
 } from "@/lib/currency";
 import type { SupportedCurrency } from "@/models/workspace";
-import { WorkspaceModel } from "@/models/workspace";
 import { TransferModel } from "@/models/transfer";
 import { computeAccountBalanceMinor } from "@/features/accounts/balance-math";
 import type { CreateAccountInput } from "@/features/accounts/schemas";
+import { getWorkspaceExchangeContext } from "@/features/workspaces/exchange-context";
 
 /**
  * Creates an account. `openingBalance` arrives as a decimal (e.g. 500.75)
@@ -79,23 +78,22 @@ export async function getWorkspaceTotalBalance(workspaceId: string): Promise<num
 export async function getWorkspaceBalanceSummary(workspaceId: string) {
   await connectToDatabase();
 
-  const workspace = await WorkspaceModel.findById(workspaceId).select("currency exchangeRates").lean();
-  const baseCurrency = (workspace?.currency ?? "EGP") as SupportedCurrency;
-  const exchangeRates = parseExchangeRates(workspace?.exchangeRates);
-
-  const rows = await AccountModel.aggregate<{ _id: string | null; total: number }>([
-    {
-      $match: {
-        workspaceId: new mongoose.Types.ObjectId(workspaceId),
-        isArchived: false,
+  const [{ baseCurrency, exchangeRates }, rows] = await Promise.all([
+    getWorkspaceExchangeContext(workspaceId),
+    AccountModel.aggregate<{ _id: string | null; total: number }>([
+      {
+        $match: {
+          workspaceId: new mongoose.Types.ObjectId(workspaceId),
+          isArchived: false,
+        },
       },
-    },
-    {
-      $group: {
-        _id: { $ifNull: ["$currency", baseCurrency] },
-        total: { $sum: "$cachedBalance" },
+      {
+        $group: {
+          _id: "$currency",
+          total: { $sum: "$cachedBalance" },
+        },
       },
-    },
+    ]),
   ]);
 
   const byCurrency: CurrencyBalanceRow[] = rows.map((row) => ({
@@ -139,7 +137,7 @@ export async function archiveAccount(accountId: string, workspaceId: string) {
 export async function adjustAccountBalance(
   accountId: string,
   deltaMinorUnits: number,
-  session?: ClientSession,
+  session?: ClientSession | null,
 ) {
   await connectToDatabase();
   return AccountModel.findByIdAndUpdate(

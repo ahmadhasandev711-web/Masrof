@@ -58,6 +58,6 @@ export async function exportReportCsvAction(input: {
     ...payload.incomeBreakdown.map((row) => `${csvEscape(row.name)},${exportAmount(row.total)}`),
   ];
 
-  const filename = `masrofaty-report-${payload.range.from.toISOString().slice(0, 10)}.csv`;
+  const filename = `sanadat-report-${payload.range.from.toISOString().slice(0, 10)}.csv`;
   return { csv: "\uFEFF" + lines.join("\n"), filename };
 }

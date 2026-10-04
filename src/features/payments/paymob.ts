@@ -27,7 +27,7 @@ export type PaymobCheckoutResult =
 export async function createPaymobCheckoutIntention(_input: {
   userId: string;
   email: string;
-  planId: "pro" | "plus";
+  planId: "pro";
   amountCentsEgp: number;
 }): Promise<PaymobCheckoutResult> {
   if (!isPaymobConfigured()) {

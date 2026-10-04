@@ -1,60 +1,60 @@
 const legal = {
   legal: {
     privacy: {
-      metaTitle: "Privacy policy — Masrofaty",
-      title: "Privacy policy",
+      metaTitle: "Privacy Policy — Sanadat",
+      title: "Privacy Policy",
       subtitle: "Last updated: July 2026",
       sections: [
         {
           heading: "Data we collect",
-          body: "When you sign up, we store your name, email address, and account details. Financial data (transactions, accounts, budgets) is stored linked to your workspaces.",
+          body: "When you sign up, we store your name, email address, and account details. Financial data (invoices, transactions, accounts, budgets) is stored securely and isolated to your workspaces only.",
         },
         {
           heading: "How we use data",
-          body: "We use your data only to operate the service — showing your reports, saving your transactions, and managing your subscription. We do not sell your data to third parties.",
+          body: "We use your data strictly to operate and deliver the service — issuing invoices, displaying reports, and managing your account. We never sell or share your data with third parties.",
         },
         {
           heading: "Storage and security",
-          body: "Data is hosted on MongoDB Atlas with encrypted connections (TLS). Passwords are hashed via better-auth and are not stored in plain text.",
+          body: "Data is secured in encrypted cloud infrastructure with TLS/256-bit encryption. Passwords and credentials are cryptographically hashed and never stored in plain text.",
         },
         {
           heading: "Your rights",
-          body: "You can request deletion of your account and data by contacting us from the Support page. After deletion, we remove your data from our systems as soon as practicable.",
+          body: "You can request full export or deletion of your account and records at any time by reaching out to our Support team.",
         },
         {
           heading: "Cookies",
-          body: "We use cookies for session management (sign-in), active workspace, and UI language. On the blog and public marketing pages we may show Google AdSense ads — Google may use cookies to personalize ads per Google's privacy policy.",
+          body: "We use essential cookies to maintain secure authenticated sessions, active workspace context, and language preferences.",
         },
         {
           heading: "Contact",
-          body: "For any privacy questions, contact us from the Support page.",
+          body: "For any privacy-related inquiries, please reach out via our Support page.",
         },
       ],
     },
     terms: {
-      metaTitle: "Terms of use — Masrofaty",
-      title: "Terms of use",
+      metaTitle: "Terms of Service — Sanadat",
+      title: "Terms of Service",
       subtitle: "Last updated: July 2026",
       sections: [
         {
           heading: "The service",
-          body: "Masrofaty is a tool for managing personal and professional income and expenses. The service is provided “as is” — we improve it continuously but do not provide financial or tax advice.",
+          body: "Sanadat is an enterprise-grade platform for managing invoices, receivables, and project profitability for agencies, studios, and modern businesses.",
         },
         {
           heading: "Your account",
-          body: "You are responsible for keeping your password secure and for the accuracy of the data you enter. Using the service for illegal purposes is prohibited.",
+          body: "You are responsible for keeping your login credentials confidential and ensuring the accuracy of data in your invoices and records.",
         },
         {
           heading: "Paid plans",
-          body: "Free and paid plans are described on the Pricing page. Annual subscriptions (Pro / Plus) renew according to the terms agreed at payment. Online payment will be enabled later through an approved payment gateway.",
+          body: "Free and paid plans are described transparently on the Pricing page. Pro plan subscriptions provide enhanced features based on the selected billing interval.",
         },
         {
           heading: "Account suspension",
-          body: "We reserve the right to suspend accounts that violate these terms or misuse the platform. You can cancel your account by contacting us.",
+          body: "We reserve the right to suspend accounts that violate these terms or misuse the platform. You may cancel your subscription at any time.",
         },
         {
           heading: "Limitation of liability",
-          body: "Financial decisions are yours. Masrofaty is a tracking tool — we do not guarantee profits or tax accuracy. Consult your accountant for important decisions.",
+          body: "Business and financial decisions are solely yours. Sanadat provides management tools and does not provide legal accounting or certified tax advisory.",
         },
         {
           heading: "Changes",

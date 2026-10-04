@@ -8,6 +8,8 @@ import {
 import { createInvoiceSchema } from "@/features/invoices/schemas";
 import { INVOICE_STATUSES } from "@/models/invoice";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { countInvoicesCreatedThisMonth } from "@/features/subscriptions/plan-usage";
+import { assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import {
   mobileErrorResponse,
   requireMobileSession,
@@ -44,6 +46,17 @@ export async function POST(request: Request) {
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
+
+    const invoiceCount = await countInvoicesCreatedThisMonth(parsed.data.workspaceId);
+    const limitError = await assertWorkspaceQuantityLimit(
+      session.user.id,
+      parsed.data.workspaceId,
+      "maxInvoicesPerMonth",
+      invoiceCount,
+    );
+    if (limitError) {
+      return NextResponse.json({ error: "planLimitReached", message: limitError }, { status: 403 });
+    }
 
     const invoice = await createInvoice(parsed.data);
     revalidateTag(CACHE_TAGS.invoices, "max");

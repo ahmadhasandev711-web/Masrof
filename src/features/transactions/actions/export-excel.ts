@@ -103,7 +103,7 @@ export async function exportTransactionsExcelAction(input: {
 
   return {
     base64: workbookToBase64(workbook),
-    filename: `masrofaty-transactions-${generatedAt}.xlsx`,
+    filename: `sanadat-transactions-${generatedAt}.xlsx`,
     truncated,
   };
 }

@@ -1,7 +1,7 @@
 const whatsapp = {
   whatsapp: {
     recurringReminder: {
-      title: "Reminder from Masrofaty 💰",
+      title: "Reminder from Sanadat 💰",
       workspace: "Workspace: {name}",
       expense: "Expense: {description}",
       amount: "Amount: {amount}",
@@ -13,6 +13,14 @@ const whatsapp = {
       remaining: "Remaining: {amount}",
       dueDate: "Due date: {date}",
       thanks: "Thank you for your cooperation.",
+    },
+    invoiceShare: {
+      greeting: "Hello {name},",
+      body: "Here is invoice #{invoice} from {workspace}.",
+      amount: "Amount due: {amount}",
+      dueDate: "Due date: {date}",
+      viewLink: "View invoice online:\n{url}",
+      thanks: "Thank you for your business.",
     },
   },
 } as const;

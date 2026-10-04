@@ -32,8 +32,10 @@ export default async function TransactionsPage({
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
-  const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
-  const access = await getWorkspaceAccess(session.user.id, workspaceId);
+  const [{ plan }, access] = await Promise.all([
+    getWorkspacePlanContext(session.user.id, workspaceId),
+    getWorkspaceAccess(session.user.id, workspaceId),
+  ]);
   const canWrite = canWorkspaceWrite(access.membership.role);
 
   const rawParams = await searchParams;
@@ -99,8 +101,9 @@ export default async function TransactionsPage({
             workspaceId={workspaceId}
             accounts={accountOptions}
             categories={categoryOptions}
-            clients={clients.map((c) => ({ id: String(c._id), name: c.name }))}
+            clients={clients.map((c) => ({ id: String(c._id), name: c.name, phone: c.phone }))}
             projects={projects.map((p) => ({ id: String(p._id), name: p.name }))}
+            defaultProjectId={rawParams.projectId}
             ocrReceipts={plan.ocrReceipts}
             aiCategory={plan.aiCategory}
           />

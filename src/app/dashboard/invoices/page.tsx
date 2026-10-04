@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listClientsForWorkspace } from "@/features/clients/data";
+import { listProjectsForWorkspace } from "@/features/projects/data";
+import { listAccountsForWorkspace } from "@/features/accounts/data";
 import { listInvoicesForWorkspace } from "@/features/invoices/data";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
@@ -31,15 +33,30 @@ export default async function InvoicesPage({
   const workspaceId = activeWorkspace._id.toString();
   const rawParams = await searchParams;
   const defaultClientId = rawParams.clientId;
+  const defaultProjectId = rawParams.projectId;
 
-  const [{ plan, subscription }, clients, invoices, invoiceCount] = await Promise.all([
+  const [{ plan, subscription }, clients, projects, accounts, invoices, invoiceCount] = await Promise.all([
     getWorkspacePlanContext(session.user.id, workspaceId),
     listClientsForWorkspace(workspaceId),
+    listProjectsForWorkspace(workspaceId),
+    listAccountsForWorkspace(workspaceId),
     listInvoicesForWorkspace(workspaceId),
     countInvoicesCreatedThisMonth(workspaceId),
   ]);
   const invoiceLimit = await getPlanQuantityLimit(subscription.plan, "maxInvoicesPerMonth");
   const usage = toQuantityUsage(invoiceCount, invoiceLimit);
+
+  const projectOptions = projects.map((p) => ({
+    _id: String(p._id),
+    name: p.name,
+    clientId: String(p.clientId),
+  }));
+
+  const accountOptions = accounts.map((acc) => ({
+    _id: String(acc._id),
+    name: acc.name,
+    currency: acc.currency,
+  }));
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -55,13 +72,18 @@ export default async function InvoicesPage({
             <CreateInvoiceForm
               workspaceId={workspaceId}
               clients={clients}
+              projects={projectOptions}
               defaultClientId={defaultClientId}
+              defaultProjectId={defaultProjectId}
             />
           )}
           <InvoiceList
             invoices={invoices}
             currency={activeWorkspace.currency}
             workspaceId={workspaceId}
+            workspaceName={activeWorkspace.name}
+            canUseWhatsApp={Boolean(plan.whatsappReminders)}
+            accounts={accountOptions}
           />
         </>
       ) : (

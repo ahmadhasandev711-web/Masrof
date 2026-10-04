@@ -31,7 +31,18 @@ const serverEnvSchema = z.object({
 
   // --- Email (optional — console fallback in development) ---
   RESEND_API_KEY: z.string().optional(),
-  // Format: "مصروفاتي <noreply@yourdomain.com>"
+  // Hostinger / custom SMTP
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional().default(465),
+  SMTP_SECURE: z
+    .preprocess(
+      (val) => (val === "true" || val === true || val === "1" ? true : val === "false" || val === false || val === "0" ? false : undefined),
+      z.boolean().optional(),
+    )
+    .optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  // Format: "سندات <info@sanadat.site>"
   AUTH_EMAIL_FROM: z.string().min(3).optional(),
 
   // --- OAuth providers (optional at this stage) ---

@@ -1,8 +1,8 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 import { SUPPORTED_CURRENCIES } from "@/lib/currency/constants";
 
-export const WORKSPACE_TYPES = ["personal", "freelance", "business"] as const;
-export type WorkspaceType = (typeof WORKSPACE_TYPES)[number];
+import { WORKSPACE_TYPES, type WorkspaceType } from "@/features/workspaces/constants";
+export { WORKSPACE_TYPES, type WorkspaceType };
 
 export { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@/lib/currency/constants";
 
@@ -44,6 +44,25 @@ const workspaceSchema = new Schema(
     // truth for access control since it's what supports future multi-member
     // workspaces without a schema change.
     ownerId: { type: String, required: true, index: true },
+
+    // Per-workspace subscription fields
+    plan: {
+      type: String,
+      enum: ["free", "pro"],
+      default: "free",
+      index: true,
+    },
+    planStatus: {
+      type: String,
+      enum: ["active", "cancelled", "suspended"],
+      default: "active",
+    },
+    planExpiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    adminNotes: { type: String, trim: true, maxlength: 2000, default: "" },
 
     isArchived: { type: Boolean, required: true, default: false },
   },

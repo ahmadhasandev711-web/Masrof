@@ -8,6 +8,15 @@ const userSettingsSchema = new Schema(
   { timestamps: true },
 );
 
+userSettingsSchema.index(
+  { whatsappPhone: 1 },
+  {
+    unique: true,
+    sparse: true,
+    partialFilterExpression: { whatsappPhone: { $type: "string", $gt: "" } },
+  },
+);
+
 export type UserSettingsDocument = InferSchemaType<typeof userSettingsSchema>;
 
 export const UserSettingsModel: Model<UserSettingsDocument> =

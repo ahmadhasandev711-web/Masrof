@@ -7,6 +7,7 @@ import { requireSession } from "@/features/auth/session";
 import { assertPlanFeature } from "@/features/subscriptions/data";
 import { setUserWhatsAppPhone } from "@/features/whatsapp/data";
 import { normalizeWhatsAppPhone } from "@/lib/whatsapp";
+import { UserSettingsModel } from "@/models/user-settings";
 
 export type UpdateWhatsAppPhoneState = { error: string | null; success: boolean };
 
@@ -47,7 +48,17 @@ export async function updateWhatsAppPhoneAction(
     return { error: tErrors("whatsappInvalid"), success: false };
   }
 
-  await setUserWhatsAppPhone(session.user.id, raw.trim());
+  const phoneToSave = raw.trim();
+  const existing = await UserSettingsModel.findOne({
+    userId: { $ne: session.user.id },
+    $or: [{ whatsappPhone: phoneToSave }, { whatsappPhone: normalized }],
+  }).lean();
+
+  if (existing) {
+    return { error: tValidation("phoneAlreadyUsed"), success: false };
+  }
+
+  await setUserWhatsAppPhone(session.user.id, phoneToSave);
   revalidatePath("/dashboard/plan");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/budgets");

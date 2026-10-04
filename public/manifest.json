@@ -1,13 +1,14 @@
 {
-  "name": "مصروفاتي",
-  "short_name": "مصروفاتي",
-  "description": "تطبيق عربي لإدارة الدخل والمصروفات للأفراد والفريلانسرز وأصحاب المشاريع الصغيرة",
+  "name": "سندات | Sanadat",
+  "short_name": "سندات",
+  "description": "نظام مالي احترافي لإدارة الفواتير، المعاملات، والمصروفات والديون للشركات والمستقلين",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
-  "background_color": "#f5f5f4",
+  "background_color": "#FBF9F4",
   "theme_color": "#065F46",
   "icons": [
     {
@@ -27,6 +28,26 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الفواتير",
+      "short_name": "الفواتير",
+      "url": "/invoices",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "المعاملات",
+      "short_name": "المعاملات",
+      "url": "/transactions",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "الديون والالتزامات",
+      "short_name": "الديون",
+      "url": "/debts",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

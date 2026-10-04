@@ -45,3 +45,34 @@ export function projectReceivableReminderMessage(
     t("receivableReminder.thanks"),
   ].join("\n");
 }
+
+export function invoiceShareWhatsAppMessage(
+  t: WhatsAppTranslator,
+  input: {
+    clientName: string;
+    invoiceNumber: string;
+    remainingLabel: string;
+    dueDateLabel?: string | null;
+    workspaceName: string;
+    shareUrl: string;
+  },
+) {
+  const lines = [
+    t("invoiceShare.greeting", { name: input.clientName }),
+    "",
+    t("invoiceShare.body", {
+      invoice: input.invoiceNumber,
+      workspace: input.workspaceName,
+    }),
+    t("invoiceShare.amount", { amount: input.remainingLabel }),
+  ];
+
+  if (input.dueDateLabel) {
+    lines.push(t("invoiceShare.dueDate", { date: input.dueDateLabel }));
+  }
+
+  lines.push("", t("invoiceShare.viewLink", { url: input.shareUrl }));
+  lines.push("", t("invoiceShare.thanks"));
+
+  return lines.join("\n");
+}

@@ -5,11 +5,12 @@ import {
   createTransactionAction,
   type CreateTransactionState,
 } from "@/features/transactions/actions/create-transaction";
+import { ClientCombobox } from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
 
 type AccountOption = { id: string; name: string };
 type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
-type LinkOption = { id: string; name: string };
+type LinkOption = { id: string; name: string; phone?: string | null };
 
 const initialState: CreateTransactionState = { error: null };
 
@@ -23,6 +24,7 @@ export function CreateTransactionForm({
   categories,
   clients = [],
   projects = [],
+  defaultProjectId,
   ocrReceipts = false,
   aiCategory = false,
 }: {
@@ -31,6 +33,7 @@ export function CreateTransactionForm({
   categories: CategoryOption[];
   clients?: LinkOption[];
   projects?: LinkOption[];
+  defaultProjectId?: string;
   ocrReceipts?: boolean;
   aiCategory?: boolean;
 }) {
@@ -45,6 +48,7 @@ export function CreateTransactionForm({
   const [transactionDate, setTransactionDate] = useState(todayIsoDate());
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [selectedClientId, setSelectedClientId] = useState("");
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [attachmentName, setAttachmentName] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -52,6 +56,11 @@ export function CreateTransactionForm({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [suggesting, setSuggesting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+
+  const comboboxClients = useMemo(
+    () => clients.map((c) => ({ _id: c.id, name: c.name, phone: c.phone })),
+    [clients],
+  );
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.kind === type),
@@ -74,6 +83,7 @@ export function CreateTransactionForm({
       setAttachmentUrl("");
       setAttachmentName("");
       setScanHint(null);
+      setSelectedClientId("");
     }
   }, [isPending, state.error, filteredCategories]);
 
@@ -296,19 +306,13 @@ export function CreateTransactionForm({
             <label htmlFor="tx-client" className="text-sm font-medium text-neutral-700">
               {tForm("clientOptional")}
             </label>
-            <select
+            <ClientCombobox
               id="tx-client"
               name="clientId"
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right"
-              defaultValue=""
-            >
-              <option value="">{tShared("none")}</option>
-              {clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name}
-                </option>
-              ))}
-            </select>
+              clients={comboboxClients}
+              value={selectedClientId}
+              onChange={setSelectedClientId}
+            />
           </div>
         )}
 
@@ -321,7 +325,7 @@ export function CreateTransactionForm({
               id="tx-project"
               name="projectId"
               className="rounded-lg border border-neutral-300 px-3 py-2 text-right"
-              defaultValue=""
+              defaultValue={defaultProjectId ?? ""}
             >
               <option value="">{tShared("none")}</option>
               {projects.map((project) => (

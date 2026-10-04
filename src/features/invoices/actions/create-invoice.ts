@@ -39,10 +39,12 @@ export async function createInvoiceAction(
   const tErrors = await getTranslations("errors");
 
   const dueDateRaw = String(formData.get("dueDate") ?? "").trim();
+  const projectIdRaw = String(formData.get("projectId") ?? "").trim();
 
   const parsed = createInvoiceSchema(tValidation).safeParse({
     workspaceId: formData.get("workspaceId"),
     clientId: formData.get("clientId"),
+    projectId: projectIdRaw || null,
     issueDate: formData.get("issueDate"),
     dueDate: dueDateRaw || null,
     notes: formData.get("notes") || "",

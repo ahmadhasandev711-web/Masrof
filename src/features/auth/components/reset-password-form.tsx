@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth/client";
 import { Button } from "@/components/ui/button";
-import { Field, Input, Label } from "@/components/ui/input";
+import { Field, Label } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Alert } from "@/components/ui/alert";
 
 export function ResetPasswordForm({ token }: { token: string | null }) {
@@ -52,9 +53,8 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Field>
         <Label htmlFor="password">{t("fields.newPassword")}</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           autoComplete="new-password"
           minLength={8}
           value={password}

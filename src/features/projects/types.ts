@@ -10,4 +10,10 @@ export type ProjectListItem = {
   clientName: string | null;
   clientPhone: string | null;
   paidTotal: number;
+  incomeTotal: number;
+  expenseTotal: number;
+  netProfit: number;
+  profitMargin: number | null;
+  invoicedTotal: number;
+  isOverBudget: boolean;
 };

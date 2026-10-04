@@ -27,13 +27,13 @@ export async function updateUserPlanAction(
     return { error: t("invalidPlan"), success: false };
   }
 
-  if (userId === session.user.id && plan !== "plus") {
-    // Admin can downgrade themselves but warn - actually allow it
-  }
+
 
   try {
     await setUserPlan(userId, plan as PlanId, { adminEmail: session.user.email });
     revalidatePath("/admin/users");
+    revalidatePath("/admin/workspaces");
+    revalidatePath("/dashboard");
     return { error: null, success: true };
   } catch {
     return { error: t("updatePlanFailed"), success: false };
@@ -49,6 +49,8 @@ export async function cancelUserSubscriptionAction(
   try {
     await cancelUserSubscription(userId, session.user.email);
     revalidatePath("/admin/users");
+    revalidatePath("/admin/workspaces");
+    revalidatePath("/dashboard");
     return { error: null, success: true };
   } catch {
     return { error: t("cancelFailed"), success: false };
@@ -66,6 +68,8 @@ export async function suspendUserAction(userId: string): Promise<UserSubscriptio
   try {
     await suspendUserAccount(userId, session.user.email);
     revalidatePath("/admin/users");
+    revalidatePath("/admin/workspaces");
+    revalidatePath("/dashboard");
     return { error: null, success: true };
   } catch {
     return { error: t("suspendFailed"), success: false };
@@ -86,6 +90,8 @@ export async function reactivateUserAction(
   try {
     await reactivateUserAccount(userId, session.user.email, plan as PlanId);
     revalidatePath("/admin/users");
+    revalidatePath("/admin/workspaces");
+    revalidatePath("/dashboard");
     return { error: null, success: true };
   } catch {
     return { error: t("reactivateFailed"), success: false };

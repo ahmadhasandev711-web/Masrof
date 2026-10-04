@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useRef, useEffect } from "react";
+import { useActionState, useRef, useEffect, useState } from "react";
 import {
   createProjectAction,
   type CreateProjectState,
 } from "@/features/projects/actions/create-project";
 import { PROJECT_STATUSES } from "@/features/projects/constants";
 import type { ClientOption } from "@/features/clients/types";
+import { ClientCombobox } from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
 
 const initialState: CreateProjectState = { error: null };
@@ -24,10 +25,12 @@ export function CreateProjectForm({
   const tStatus = useTranslations("status");
   const [state, formAction, isPending] = useActionState(createProjectAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
 
   useEffect(() => {
     if (!isPending && state.error === null) {
       formRef.current?.reset();
+      setSelectedClientId("");
     }
   }, [isPending, state.error]);
 
@@ -58,21 +61,15 @@ export function CreateProjectForm({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="project-client" className="text-sm font-medium text-neutral-700">
-            {tForm("client")}
+            {tForm("client")} ({tShared("optional")})
           </label>
-          <select
+          <ClientCombobox
             id="project-client"
             name="clientId"
-            defaultValue=""
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-          >
-            <option value="">{tShared("none")}</option>
-            {clients.map((client) => (
-              <option key={client._id} value={client._id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
+            clients={clients}
+            value={selectedClientId}
+            onChange={setSelectedClientId}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
