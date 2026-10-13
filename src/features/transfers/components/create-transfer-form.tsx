@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useEffect } from "react";
+import { useActionState, useRef, useEffect, useState } from "react";
 import {
   createTransferAction,
   type CreateTransferState,
@@ -18,20 +18,27 @@ function todayIsoDate() {
 export function CreateTransferForm({
   workspaceId,
   accounts,
+  onSuccess,
+  onCancel,
 }: {
   workspaceId: string;
   accounts: AccountOption[];
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const tForm = useTranslations("forms.transfer");
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createTransferAction, initialState);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (!isPending && state.error === null) {
+    if (!isPending && state.error === null && hasSubmitted) {
       formRef.current?.reset();
+      setHasSubmitted(false);
+      onSuccess?.();
     }
-  }, [isPending, state.error]);
+  }, [isPending, state.error, hasSubmitted, onSuccess]);
 
   const canTransfer = accounts.length >= 2;
 
@@ -39,6 +46,7 @@ export function CreateTransferForm({
     <form
       ref={formRef}
       action={formAction}
+      onSubmit={() => setHasSubmitted(true)}
       className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
@@ -143,13 +151,25 @@ export function CreateTransferForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending || !canTransfer}
-        className="self-start rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white transition hover:bg-blue-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("saving") : tForm("submit")}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={isPending || !canTransfer}
+          className="rounded-xl bg-blue-700 px-5 py-2.5 font-medium text-white shadow-xs transition hover:bg-blue-800 disabled:opacity-60"
+        >
+          {isPending ? tCommon("saving") : tForm("submit")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-xl border border-neutral-300 px-4 py-2.5 font-medium text-neutral-700 transition hover:bg-neutral-100 disabled:opacity-60"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+      </div>
     </form>
   );
 }

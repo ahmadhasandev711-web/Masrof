@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
+import { canWorkspaceWrite, getWorkspaceAccess } from "@/features/workspaces/access";
 import { listClientsForWorkspace } from "@/features/clients/data";
 import { listProjectsForWorkspace } from "@/features/projects/data";
 import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { listInvoicesForWorkspace } from "@/features/invoices/data";
+import { listInvoicesWithFilters } from "@/features/invoices/data";
+import { invoiceFiltersSchema } from "@/features/invoices/schemas";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
 import {
@@ -12,8 +14,11 @@ import {
   toQuantityUsage,
 } from "@/features/subscriptions/plan-usage";
 import { PlanUsageMeter } from "@/features/subscriptions/components/plan-usage-meter";
-import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
+import { InvoiceCreationManager } from "@/features/invoices/components/invoice-creation-manager";
+import { InvoiceSummaryCards } from "@/features/invoices/components/invoice-summary-cards";
+import { InvoiceFiltersForm } from "@/features/invoices/components/invoice-filters";
 import { InvoiceList } from "@/features/invoices/components/invoice-list";
+import { InvoicePagination } from "@/features/invoices/components/invoice-pagination";
 import { getTranslations } from "next-intl/server";
 
 type SearchParams = Record<string, string | undefined>;
@@ -31,20 +36,44 @@ export default async function InvoicesPage({
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
-  const rawParams = await searchParams;
-  const defaultClientId = rawParams.clientId;
-  const defaultProjectId = rawParams.projectId;
 
-  const [{ plan, subscription }, clients, projects, accounts, invoices, invoiceCount] = await Promise.all([
+  const [planCtx, access] = await Promise.all([
     getWorkspacePlanContext(session.user.id, workspaceId),
+    getWorkspaceAccess(session.user.id, workspaceId),
+  ]);
+  const { plan, subscription } = planCtx;
+  const canWrite = canWorkspaceWrite(access.membership.role);
+
+  const rawParams = await searchParams;
+
+  const filters = invoiceFiltersSchema.parse({
+    workspaceId,
+    status: rawParams.status || undefined,
+    clientId: rawParams.clientId || undefined,
+    projectId: rawParams.projectId || undefined,
+    search: rawParams.search || undefined,
+    dateFrom: rawParams.dateFrom || undefined,
+    dateTo: rawParams.dateTo || undefined,
+    page: rawParams.page || 1,
+    pageSize: rawParams.pageSize || 20,
+  });
+
+  const [clients, projects, accounts, invoicesResult, invoiceCount, invoiceLimit] = await Promise.all([
     listClientsForWorkspace(workspaceId),
     listProjectsForWorkspace(workspaceId),
     listAccountsForWorkspace(workspaceId),
-    listInvoicesForWorkspace(workspaceId),
+    listInvoicesWithFilters(filters),
     countInvoicesCreatedThisMonth(workspaceId),
+    getPlanQuantityLimit(subscription.plan, "maxInvoicesPerMonth"),
   ]);
-  const invoiceLimit = await getPlanQuantityLimit(subscription.plan, "maxInvoicesPerMonth");
+
   const usage = toQuantityUsage(invoiceCount, invoiceLimit);
+
+  const clientComboboxItems = clients.map((c) => ({
+    _id: String(c._id),
+    name: c.name,
+    phone: c.phone ?? null,
+  }));
 
   const projectOptions = projects.map((p) => ({
     _id: String(p._id),
@@ -59,31 +88,79 @@ export default async function InvoicesPage({
   }));
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-        <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
+    <div className="flex w-full max-w-5xl flex-col gap-5">
+      {/* 1. Header with Title & Quick Action Modals */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
+          <p className="text-xs text-neutral-500 mt-0.5">{activeWorkspace.name}</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {canWrite && !usage.atLimit && plan.clientsAndProjects && (
+            <InvoiceCreationManager
+              workspaceId={workspaceId}
+              clients={clientComboboxItems}
+              projects={projectOptions}
+              defaultClientId={rawParams.clientId}
+              defaultProjectId={rawParams.projectId}
+              canWrite={canWrite}
+            />
+          )}
+        </div>
       </div>
 
       {plan.clientsAndProjects ? (
         <>
-          <PlanUsageMeter usage={usage} label={tUsage("invoicesThisMonth")} />
-          {usage.atLimit ? null : (
-            <CreateInvoiceForm
-              workspaceId={workspaceId}
-              clients={clients}
-              projects={projectOptions}
-              defaultClientId={defaultClientId}
-              defaultProjectId={defaultProjectId}
-            />
+          {/* Plan Usage Meter if near or at limit */}
+          {!usage.unlimited && (
+            <PlanUsageMeter usage={usage} label={tUsage("invoicesThisMonth")} />
           )}
+
+          {/* 2. Top Summary Metric Cards */}
+          <InvoiceSummaryCards
+            totalInvoiced={invoicesResult.summary.totalInvoiced}
+            totalPaid={invoicesResult.summary.totalPaid}
+            totalRemaining={invoicesResult.summary.totalRemaining}
+            totalOverdue={invoicesResult.summary.totalOverdue}
+            totalCount={invoicesResult.total}
+            currency={activeWorkspace.currency}
+          />
+
+          {/* 3. Filter Bar */}
+          <InvoiceFiltersForm
+            clients={clientComboboxItems}
+            projects={projectOptions}
+            currentFilters={{
+              status: rawParams.status,
+              clientId: rawParams.clientId,
+              projectId: rawParams.projectId,
+              search: rawParams.search,
+              dateFrom: rawParams.dateFrom,
+              dateTo: rawParams.dateTo,
+            }}
+          />
+
+          {/* 4. Invoices List with actions */}
           <InvoiceList
-            invoices={invoices}
+            invoices={invoicesResult.items}
             currency={activeWorkspace.currency}
             workspaceId={workspaceId}
             workspaceName={activeWorkspace.name}
             canUseWhatsApp={Boolean(plan.whatsappReminders)}
             accounts={accountOptions}
+            clients={clientComboboxItems}
+            projects={projectOptions}
+            canWrite={canWrite}
+          />
+
+          {/* 5. Pagination */}
+          <InvoicePagination
+            page={invoicesResult.page}
+            totalPages={invoicesResult.totalPages}
+            totalItems={invoicesResult.total}
+            pageSize={invoicesResult.pageSize}
+            searchParams={rawParams}
           />
         </>
       ) : (

@@ -297,9 +297,13 @@ export async function listTransactions(filters: TransactionFilters) {
   if (filters.categoryId) query.categoryId = filters.categoryId;
 
   if (filters.dateFrom || filters.dateTo) {
+    const dateToAdjusted = filters.dateTo ? new Date(filters.dateTo) : undefined;
+    if (dateToAdjusted && !isNaN(dateToAdjusted.getTime())) {
+      dateToAdjusted.setHours(23, 59, 59, 999);
+    }
     query.transactionDate = {
       ...(filters.dateFrom ? { $gte: filters.dateFrom } : {}),
-      ...(filters.dateTo ? { $lte: filters.dateTo } : {}),
+      ...(dateToAdjusted ? { $lte: dateToAdjusted } : {}),
     };
   }
 
@@ -315,7 +319,7 @@ export async function listTransactions(filters: TransactionFilters) {
     ...(filters.categoryId ? { categoryId: new mongoose.Types.ObjectId(filters.categoryId) } : {}),
   };
 
-  const [items, total] = await Promise.all([
+  const [items, total, summaryGroups] = await Promise.all([
     TransactionModel.aggregate([
       { $match: aggregationQuery },
       { $sort: { transactionDate: -1, createdAt: -1 } },
@@ -324,7 +328,19 @@ export async function listTransactions(filters: TransactionFilters) {
       ...transactionReferenceLookupStages(),
     ]),
     TransactionModel.countDocuments(query),
+    TransactionModel.aggregate<{ _id: "income" | "expense"; sum: number }>([
+      { $match: aggregationQuery },
+      { $group: { _id: "$type", sum: { $sum: "$amount" } } },
+    ]),
   ]);
+
+  let totalIncome = 0;
+  let totalExpense = 0;
+  for (const group of summaryGroups) {
+    if (group._id === "income") totalIncome = group.sum;
+    if (group._id === "expense") totalExpense = group.sum;
+  }
+  const net = totalIncome - totalExpense;
 
   return {
     items,
@@ -332,6 +348,11 @@ export async function listTransactions(filters: TransactionFilters) {
     page: filters.page,
     pageSize: filters.pageSize,
     totalPages: Math.max(1, Math.ceil(total / filters.pageSize)),
+    summary: {
+      totalIncome,
+      totalExpense,
+      net,
+    },
   };
 }
 

@@ -10,8 +10,9 @@ import { listTransfersForWorkspace } from "@/features/transfers/data";
 import { listClientsForWorkspace } from "@/features/clients/data";
 import { listProjectsForWorkspace } from "@/features/projects/data";
 import { transactionFiltersSchema } from "@/features/transactions/schemas";
-import { CreateTransferForm } from "@/features/transfers/components/create-transfer-form";
-import { CreateTransactionForm } from "@/features/transactions/components/create-transaction-form";
+import { TransactionCreationManager } from "@/features/transactions/components/transaction-creation-manager";
+import { TransactionSummaryCards } from "@/features/transactions/components/transaction-summary-cards";
+import { TransactionTabs } from "@/features/transactions/components/transaction-tabs";
 import { TransactionFiltersForm } from "@/features/transactions/components/transaction-filters";
 import { TransactionList } from "@/features/transactions/components/transaction-list";
 import { TransactionPagination } from "@/features/transactions/components/pagination";
@@ -39,6 +40,7 @@ export default async function TransactionsPage({
   const canWrite = canWorkspaceWrite(access.membership.role);
 
   const rawParams = await searchParams;
+  const activeTab = rawParams.tab === "transfers" ? "transfers" : "transactions";
 
   const filters = transactionFiltersSchema.parse({
     workspaceId,
@@ -49,6 +51,7 @@ export default async function TransactionsPage({
     dateTo: rawParams.dateTo || undefined,
     search: rawParams.search || undefined,
     page: rawParams.page || 1,
+    pageSize: rawParams.pageSize || 20,
   });
 
   const [accounts, categories, transactionsResult, transfers, clients, projects] = await Promise.all([
@@ -73,74 +76,113 @@ export default async function TransactionsPage({
     icon: c.icon,
   }));
 
+  const clientOptions = clients.map((c) => ({
+    id: String(c._id),
+    name: c.name,
+    phone: c.phone,
+  }));
+
+  const projectOptions = projects.map((p) => ({
+    id: String(p._id),
+    name: p.name,
+  }));
+
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
+    <div className="flex w-full max-w-5xl flex-col gap-5">
+      {/* 1. Header with Title & Quick Action Modals */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-          <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
+          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
+          <p className="text-xs text-neutral-500 mt-0.5">{activeWorkspace.name}</p>
         </div>
-        {plan.csvExport ? (
-          <ExportTransactionsExcelButton
-            workspaceId={workspaceId}
-            filters={{
-              type: rawParams.type,
-              accountId: rawParams.accountId,
-              categoryId: rawParams.categoryId,
-              dateFrom: rawParams.dateFrom,
-              dateTo: rawParams.dateTo,
-              search: rawParams.search,
-            }}
-          />
-        ) : null}
+
+        <div className="flex flex-wrap items-center gap-2">
+          {plan.csvExport ? (
+            <ExportTransactionsExcelButton
+              workspaceId={workspaceId}
+              filters={{
+                type: rawParams.type,
+                accountId: rawParams.accountId,
+                categoryId: rawParams.categoryId,
+                dateFrom: rawParams.dateFrom,
+                dateTo: rawParams.dateTo,
+                search: rawParams.search,
+              }}
+            />
+          ) : null}
+
+          {canWrite ? (
+            <TransactionCreationManager
+              workspaceId={workspaceId}
+              accounts={accountOptions}
+              categories={categoryOptions}
+              clients={clientOptions}
+              projects={projectOptions}
+              defaultProjectId={rawParams.projectId}
+              ocrReceipts={plan.ocrReceipts}
+              aiCategory={plan.aiCategory}
+              canWrite={canWrite}
+            />
+          ) : (
+            <span className="rounded-lg bg-neutral-100 px-3 py-1.5 text-xs text-neutral-600">
+              {t("viewerReadOnly")}
+            </span>
+          )}
+        </div>
       </div>
 
-      {canWrite ? (
-        <>
-          <CreateTransactionForm
-            workspaceId={workspaceId}
-            accounts={accountOptions}
-            categories={categoryOptions}
-            clients={clients.map((c) => ({ id: String(c._id), name: c.name, phone: c.phone }))}
-            projects={projects.map((p) => ({ id: String(p._id), name: p.name }))}
-            defaultProjectId={rawParams.projectId}
-            ocrReceipts={plan.ocrReceipts}
-            aiCategory={plan.aiCategory}
-          />
-
-          <CreateTransferForm workspaceId={workspaceId} accounts={accountOptions} />
-        </>
-      ) : (
-        <p className="rounded-xl border border-[#E4DFD3] bg-[#F3F0E8]/50 px-4 py-3 text-sm text-neutral-600">
-          {t("viewerReadOnly")}
-        </p>
-      )}
-
-      <TransactionFiltersForm
-        accounts={accountOptions}
-        categories={categoryOptions}
-        currentFilters={rawParams}
-      />
-
-      <TransactionList
-        transactions={transactionsResult.items}
-        workspaceId={workspaceId}
-        accountCurrencies={accountCurrencies}
-        accounts={accountOptions.map(({ id, name }) => ({ id, name }))}
-        categories={categoryOptions}
-      />
-
-      <TransferList
-        transfers={transfers}
-        workspaceId={workspaceId}
+      {/* 2. Top Summary Metric Cards */}
+      <TransactionSummaryCards
+        totalIncome={transactionsResult.summary.totalIncome}
+        totalExpense={transactionsResult.summary.totalExpense}
+        net={transactionsResult.summary.net}
+        totalCount={transactionsResult.total}
         currency={activeWorkspace.currency}
       />
 
-      <TransactionPagination
-        page={transactionsResult.page}
-        totalPages={transactionsResult.totalPages}
+      {/* 3. Ledger vs Transfers Tabs */}
+      <TransactionTabs
+        activeTab={activeTab}
+        transactionsCount={transactionsResult.total}
+        transfersCount={transfers.length}
         searchParams={rawParams}
       />
+
+      {/* 4. Tab Content */}
+      {activeTab === "transfers" ? (
+        <TransferList
+          transfers={transfers}
+          workspaceId={workspaceId}
+          currency={activeWorkspace.currency}
+        />
+      ) : (
+        <>
+          {/* Smart Filter Bar */}
+          <TransactionFiltersForm
+            accounts={accountOptions}
+            categories={categoryOptions}
+            currentFilters={rawParams}
+          />
+
+          {/* Transactions List */}
+          <TransactionList
+            transactions={transactionsResult.items}
+            workspaceId={workspaceId}
+            accountCurrencies={accountCurrencies}
+            accounts={accountOptions.map(({ id, name }) => ({ id, name }))}
+            categories={categoryOptions}
+          />
+
+          {/* Pagination Bar */}
+          <TransactionPagination
+            page={transactionsResult.page}
+            totalPages={transactionsResult.totalPages}
+            totalItems={transactionsResult.total}
+            pageSize={transactionsResult.pageSize}
+            searchParams={rawParams}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -13,10 +13,14 @@ function isIos() {
 }
 
 function isStandalone() {
+  if (typeof window === "undefined") return false;
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     // iOS Safari
-    ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone))
+    ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone)) ||
+    // Capacitor Native Mobile App
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Boolean((window as any).Capacitor?.isNativePlatform?.())
   );
 }
 

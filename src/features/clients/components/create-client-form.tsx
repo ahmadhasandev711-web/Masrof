@@ -9,18 +9,31 @@ import { useTranslations } from "next-intl";
 
 const initialState: CreateClientState = { error: null };
 
-export function CreateClientForm({ workspaceId }: { workspaceId: string }) {
+export function CreateClientForm({
+  workspaceId,
+  onCancel,
+  onSuccess,
+}: {
+  workspaceId: string;
+  onCancel?: () => void;
+  onSuccess?: () => void;
+}) {
   const tForm = useTranslations("forms.client");
   const tShared = useTranslations("forms.shared");
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createClientAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const hasSubmittedRef = useRef(false);
 
   useEffect(() => {
-    if (!isPending && state.error === null) {
+    if (isPending) {
+      hasSubmittedRef.current = true;
+    } else if (hasSubmittedRef.current && state.error === null) {
       formRef.current?.reset();
+      hasSubmittedRef.current = false;
+      onSuccess?.();
     }
-  }, [isPending, state.error]);
+  }, [isPending, state.error, onSuccess]);
 
   return (
     <form
@@ -80,13 +93,25 @@ export function CreateClientForm({ workspaceId }: { workspaceId: string }) {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="self-start rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("adding") : tForm("submit")}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded-lg bg-emerald-700 px-5 py-2 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
+        >
+          {isPending ? tCommon("adding") : tForm("submit")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-lg border border-neutral-300 px-4 py-2 font-medium text-neutral-700 transition hover:bg-neutral-100 disabled:opacity-60"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+      </div>
     </form>
   );
 }

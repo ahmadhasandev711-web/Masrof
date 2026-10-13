@@ -27,6 +27,8 @@ export function CreateTransactionForm({
   defaultProjectId,
   ocrReceipts = false,
   aiCategory = false,
+  onSuccess,
+  onCancel,
 }: {
   workspaceId: string;
   accounts: AccountOption[];
@@ -36,6 +38,8 @@ export function CreateTransactionForm({
   defaultProjectId?: string;
   ocrReceipts?: boolean;
   aiCategory?: boolean;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const tForm = useTranslations("forms.transaction");
   const tShared = useTranslations("forms.shared");
@@ -43,6 +47,7 @@ export function CreateTransactionForm({
   const tErrors = useTranslations("errors");
   const tAi = useTranslations("forms.transactionAi");
   const [state, formAction, isPending] = useActionState(createTransactionAction, initialState);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
   const [transactionDate, setTransactionDate] = useState(todayIsoDate());
@@ -74,7 +79,7 @@ export function CreateTransactionForm({
   }, [filteredCategories, categoryId]);
 
   useEffect(() => {
-    if (!isPending && state.error === null) {
+    if (!isPending && state.error === null && hasSubmitted) {
       formRef.current?.reset();
       setAmount("");
       setTransactionDate(todayIsoDate());
@@ -84,8 +89,10 @@ export function CreateTransactionForm({
       setAttachmentName("");
       setScanHint(null);
       setSelectedClientId("");
+      setHasSubmitted(false);
+      onSuccess?.();
     }
-  }, [isPending, state.error, filteredCategories]);
+  }, [isPending, state.error, hasSubmitted, filteredCategories, onSuccess]);
 
   async function handleReceiptChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -185,6 +192,7 @@ export function CreateTransactionForm({
     <form
       ref={formRef}
       action={formAction}
+      onSubmit={() => setHasSubmitted(true)}
       className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
@@ -390,13 +398,25 @@ export function CreateTransactionForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending || accounts.length === 0 || filteredCategories.length === 0}
-        className="self-start rounded-lg bg-emerald-700 px-5 py-2.5 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("saving") : tForm("submit")}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={isPending || accounts.length === 0 || filteredCategories.length === 0}
+          className="rounded-xl bg-[#065F46] px-5 py-2.5 font-medium text-white shadow-xs transition hover:bg-[#054E3A] disabled:opacity-60"
+        >
+          {isPending ? tCommon("saving") : tForm("submit")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-xl border border-neutral-300 px-4 py-2.5 font-medium text-neutral-700 transition hover:bg-neutral-100 disabled:opacity-60"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+      </div>
 
       {accounts.length === 0 && (
         <p className="text-sm text-amber-600">{tForm("needsAccount")}</p>

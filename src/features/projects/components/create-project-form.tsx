@@ -15,9 +15,13 @@ const initialState: CreateProjectState = { error: null };
 export function CreateProjectForm({
   workspaceId,
   clients,
+  onCancel,
+  onSuccess,
 }: {
   workspaceId: string;
   clients: ClientOption[];
+  onCancel?: () => void;
+  onSuccess?: () => void;
 }) {
   const tForm = useTranslations("forms.project");
   const tShared = useTranslations("forms.shared");
@@ -26,13 +30,18 @@ export function CreateProjectForm({
   const [state, formAction, isPending] = useActionState(createProjectAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const hasSubmittedRef = useRef(false);
 
   useEffect(() => {
-    if (!isPending && state.error === null) {
+    if (isPending) {
+      hasSubmittedRef.current = true;
+    } else if (hasSubmittedRef.current && state.error === null) {
       formRef.current?.reset();
       setSelectedClientId("");
+      hasSubmittedRef.current = false;
+      onSuccess?.();
     }
-  }, [isPending, state.error]);
+  }, [isPending, state.error, onSuccess]);
 
   return (
     <form
@@ -124,13 +133,25 @@ export function CreateProjectForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="self-start rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("adding") : tForm("submit")}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded-lg bg-emerald-700 px-5 py-2 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
+        >
+          {isPending ? tCommon("adding") : tForm("submit")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-lg border border-neutral-300 px-4 py-2 font-medium text-neutral-700 transition hover:bg-neutral-100 disabled:opacity-60"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+      </div>
     </form>
   );
 }

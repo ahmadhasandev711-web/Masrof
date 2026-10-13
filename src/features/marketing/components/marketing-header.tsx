@@ -9,7 +9,7 @@ export async function MarketingHeader() {
   const nav = await getTranslations("nav");
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-20 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <Link
           href="/"

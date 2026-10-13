@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import type { InvoiceListItem, InvoiceFinancialStatus } from "@/features/invoices/types";
@@ -8,6 +8,10 @@ import type { InvoiceDisplayStatus } from "@/features/invoices/status";
 import { RecordPaymentDialog } from "@/features/invoices/components/record-payment-dialog";
 import { InvoicePaymentsHistoryDialog } from "@/features/invoices/components/invoice-payments-history-dialog";
 import { InvoiceShareDialog } from "@/features/invoices/components/invoice-share-dialog";
+import { EditInvoiceDialog } from "@/features/invoices/components/edit-invoice-dialog";
+import { cancelInvoiceAction } from "@/features/invoices/actions/cancel-invoice";
+import { archiveInvoiceAction } from "@/features/invoices/actions/archive-invoice";
+import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
 
 function formatDate(isoDate: string) {
@@ -46,6 +50,8 @@ function financialStatusClass(status: InvoiceFinancialStatus) {
   }
 }
 
+type ProjectOption = { _id: string; name: string; clientId: string };
+
 export function InvoiceList({
   invoices,
   currency,
@@ -53,6 +59,9 @@ export function InvoiceList({
   workspaceName = "",
   canUseWhatsApp = false,
   accounts = [],
+  clients = [],
+  projects = [],
+  canWrite = true,
 }: {
   invoices: InvoiceListItem[];
   currency: string;
@@ -60,6 +69,9 @@ export function InvoiceList({
   workspaceName?: string;
   canUseWhatsApp?: boolean;
   accounts?: { _id: string; name: string; currency?: string | null }[];
+  clients?: ComboboxClientItem[];
+  projects?: ProjectOption[];
+  canWrite?: boolean;
 }) {
   const tEmpty = useTranslations("empty");
   const tStatus = useTranslations("forms.invoiceStatus");
@@ -84,6 +96,9 @@ export function InvoiceList({
           workspaceName={workspaceName}
           canUseWhatsApp={canUseWhatsApp}
           accounts={accounts}
+          clients={clients}
+          projects={projects}
+          canWrite={canWrite}
           tStatus={tStatus}
           tForm={tForm}
         />
@@ -99,6 +114,9 @@ function InvoiceRow({
   workspaceName,
   canUseWhatsApp,
   accounts,
+  clients,
+  projects,
+  canWrite,
   tStatus,
   tForm,
 }: {
@@ -108,12 +126,22 @@ function InvoiceRow({
   workspaceName: string;
   canUseWhatsApp: boolean;
   accounts: { _id: string; name: string; currency?: string | null }[];
+  clients: ComboboxClientItem[];
+  projects: ProjectOption[];
+  canWrite: boolean;
   tStatus: ReturnType<typeof useTranslations>;
   tForm: ReturnType<typeof useTranslations>;
 }) {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const [isCancelling, startCancelTransition] = useTransition();
+  const [isArchiving, startArchiveTransition] = useTransition();
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [archiveConfirm, setArchiveConfirm] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   return (
     <>
@@ -191,19 +219,106 @@ function InvoiceRow({
           )}
         </div>
 
+        {/* Action Error Message */}
+        {actionError && (
+          <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">
+            <span>⚠️ {actionError}</span>
+            <button
+              type="button"
+              onClick={() => setActionError(null)}
+              className="px-1 font-bold text-red-500 hover:text-red-700"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Cancel Confirmation Banner */}
+        {cancelConfirm && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+            <span>
+              هل أنت متأكد من إلغاء الفاتورة <strong>#{invoice.invoiceNumber}</strong>؟ ستتغير حالتها إلى ملغاة.
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={isCancelling}
+                onClick={() => {
+                  startCancelTransition(async () => {
+                    const res = await cancelInvoiceAction(invoice._id, workspaceId);
+                    if (res?.error) {
+                      setActionError(res.error);
+                    } else {
+                      setCancelConfirm(false);
+                    }
+                  });
+                }}
+                className="rounded-lg bg-amber-700 px-3 py-1 font-semibold text-white hover:bg-amber-800 disabled:opacity-50"
+              >
+                {isCancelling ? "جارِ الإلغاء..." : "تأكيد الإلغاء"}
+              </button>
+              <button
+                type="button"
+                disabled={isCancelling}
+                onClick={() => setCancelConfirm(false)}
+                className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 font-medium text-neutral-700 hover:bg-neutral-50"
+              >
+                تراجع
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Archive / Delete Confirmation Banner */}
+        {archiveConfirm && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900">
+            <span>
+              هل أنت متأكد من حذف الفاتورة <strong>#{invoice.invoiceNumber}</strong>؟ لن تظهر في قائمة الفواتير.
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={isArchiving}
+                onClick={() => {
+                  startArchiveTransition(async () => {
+                    const res = await archiveInvoiceAction(invoice._id, workspaceId);
+                    if (res?.error) {
+                      setActionError(res.error);
+                    } else {
+                      setArchiveConfirm(false);
+                    }
+                  });
+                }}
+                className="rounded-lg bg-red-700 px-3 py-1 font-semibold text-white hover:bg-red-800 disabled:opacity-50"
+              >
+                {isArchiving ? "جارِ الحذف..." : "تأكيد الحذف"}
+              </button>
+              <button
+                type="button"
+                disabled={isArchiving}
+                onClick={() => setArchiveConfirm(false)}
+                className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 font-medium text-neutral-700 hover:bg-neutral-50"
+              >
+                تراجع
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Action Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-neutral-100">
-          <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
+          <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-[200px]">
             {invoice.status !== "cancelled" && invoice.financialStatus !== "paid" && (
               <button
                 type="button"
                 onClick={() => setIsPaymentOpen(true)}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3B] active:scale-95"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3B] active:scale-95"
               >
                 <span>💳</span>
                 <span>{tForm("recordPayment")}</span>
               </button>
             )}
+
             {invoice.status !== "cancelled" && (
               <button
                 type="button"
@@ -215,6 +330,54 @@ function InvoiceRow({
                 </svg>
                 <span>{tForm("shareInvoice")}</span>
               </button>
+            )}
+
+            {canWrite && (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(true)}
+                  title="تعديل الفاتورة"
+                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-white px-2.5 py-2 text-center text-xs font-medium text-neutral-700 hover:bg-neutral-50 active:scale-95 transition"
+                >
+                  <span>✏️</span>
+                  <span className="hidden sm:inline">تعديل</span>
+                </button>
+
+                {invoice.status !== "cancelled" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (invoice.paidAmount > 0) {
+                        setActionError("لا يمكن إلغاء الفاتورة لوجود دفعات مالية مسجلة عليها");
+                      } else {
+                        setCancelConfirm(true);
+                      }
+                    }}
+                    title="إلغاء الفاتورة"
+                    className="inline-flex items-center gap-1 rounded-xl border border-amber-200 bg-amber-50/60 px-2.5 py-2 text-center text-xs font-medium text-amber-800 hover:bg-amber-100 active:scale-95 transition"
+                  >
+                    <span>🚫</span>
+                    <span className="hidden sm:inline">إلغاء</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (invoice.paidAmount > 0) {
+                      setActionError("لا يمكن حذف الفاتورة لوجود دفعات مالية مسجلة عليها");
+                    } else {
+                      setArchiveConfirm(true);
+                    }
+                  }}
+                  title="حذف الفاتورة"
+                  className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50/50 px-2.5 py-2 text-center text-xs font-medium text-red-700 hover:bg-red-100 active:scale-95 transition"
+                >
+                  <span>🗑️</span>
+                  <span className="hidden sm:inline">حذف</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -278,6 +441,17 @@ function InvoiceRow({
           workspaceName={workspaceName}
           currency={currency}
           canUseWhatsApp={canUseWhatsApp}
+        />
+      )}
+
+      {isEditOpen && (
+        <EditInvoiceDialog
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          invoice={invoice}
+          workspaceId={workspaceId}
+          clients={clients}
+          projects={projects}
         />
       )}
     </>

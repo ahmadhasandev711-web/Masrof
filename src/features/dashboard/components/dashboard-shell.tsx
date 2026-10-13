@@ -302,7 +302,7 @@ function QuickAddActionSheet({
         aria-label="إغلاق"
         onClick={onClose}
       />
-      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl animate-in slide-in-from-bottom duration-200">
+      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] shadow-2xl animate-in slide-in-from-bottom duration-200">
         <div className="mx-auto my-2.5 h-1.5 w-12 rounded-full bg-neutral-300" />
         <div className="flex items-center justify-between border-b border-[#E4DFD3] px-5 py-3">
           <p className="font-bold text-[#065F46] text-base">إجراء سريع</p>
@@ -370,7 +370,7 @@ function MobileMoreSheet({
         aria-label={tNav("closeMenu")}
         onClick={onClose}
       />
-      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl animate-in slide-in-from-bottom duration-200">
+      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] shadow-2xl animate-in slide-in-from-bottom duration-200">
         <div className="mx-auto my-2.5 h-1.5 w-12 rounded-full bg-neutral-300" />
         <div className="sticky top-0 flex items-center justify-between border-b border-[#E4DFD3] bg-[#FBF9F4]/95 backdrop-blur-md px-5 py-3 z-10">
           <p className="font-bold text-[#065F46] text-base">{tNav("more")}</p>
@@ -447,9 +447,9 @@ export function DashboardShell({
       : null;
 
   return (
-    <div className="min-h-screen w-full max-w-[100vw] overflow-x-clip bg-[#FBF9F4] pb-[calc(5.5rem+env(safe-area-inset-bottom))] text-[#1C1B1A] lg:pb-8">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-clip bg-[#FBF9F4] pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] text-[#1C1B1A] lg:pb-8">
       {/* Header */}
-      <header className="relative z-40 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md">
+      <header className="relative z-40 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
         <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-3 lg:px-8 lg:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
@@ -541,8 +541,8 @@ export function DashboardShell({
       </div>
 
       {/* Native-Grade Mobile Bottom Navigation Bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#E4DFD3] bg-[#FBF9F4]/98 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.04)] backdrop-blur-md lg:hidden">
-        <div className="mx-auto flex max-w-md items-center justify-around px-2 pt-1.5 pb-1">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#E4DFD3] bg-[#FBF9F4]/98 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))] shadow-[0_-4px_16px_rgba(0,0,0,0.04)] backdrop-blur-md lg:hidden">
+        <div className="mx-auto flex max-w-md items-center justify-around px-2 pt-2 pb-0.5">
           {/* 1. Home */}
           <Link
             href="/dashboard"

@@ -26,4 +26,24 @@ export function createInvoiceSchema(t: ValidationTranslator) {
   });
 }
 
+export function updateInvoiceSchema(t: ValidationTranslator) {
+  return createInvoiceSchema(t).extend({
+    invoiceId: z.string().min(1),
+  });
+}
+
+export const invoiceFiltersSchema = z.object({
+  workspaceId: z.string().min(1),
+  status: z.enum(["all", "unpaid", "partially_paid", "paid", "overdue", "cancelled"]).optional(),
+  clientId: z.string().optional(),
+  projectId: z.string().optional(),
+  search: z.string().trim().optional(),
+  dateFrom: z.coerce.date().optional(),
+  dateTo: z.coerce.date().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
 export type CreateInvoiceInput = z.infer<ReturnType<typeof createInvoiceSchema>>;
+export type UpdateInvoiceInput = z.infer<ReturnType<typeof updateInvoiceSchema>>;
+export type InvoiceFilters = z.infer<typeof invoiceFiltersSchema>;

@@ -29,12 +29,14 @@ export function CreateInvoiceForm({
   projects = [],
   defaultClientId,
   defaultProjectId,
+  onCancel,
 }: {
   workspaceId: string;
   clients: ClientOption[];
   projects?: ProjectOption[];
   defaultClientId?: string;
   defaultProjectId?: string;
+  onCancel?: () => void;
 }) {
   const tForm = useTranslations("forms.invoice");
   const tShared = useTranslations("forms.shared");
@@ -206,13 +208,25 @@ export function CreateInvoiceForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending || clients.length === 0}
-        className="self-start rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("saving") : tForm("submit")}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          disabled={isPending || clients.length === 0}
+          className="rounded-lg bg-emerald-700 px-5 py-2.5 font-medium text-white hover:bg-emerald-800 disabled:opacity-60"
+        >
+          {isPending ? tCommon("saving") : tForm("submit")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-2.5 font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-850"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+      </div>
     </form>
   );
 }

@@ -13,6 +13,7 @@ export type InvoiceListItem = {
   invoiceNumber: string;
   issueDate: string;
   dueDate: string | null;
+  items: InvoiceLineItem[];
   total: number;
   paidAmount: number;
   remainingAmount: number;
@@ -20,6 +21,7 @@ export type InvoiceListItem = {
   clientId: string;
   projectId?: string | null;
   projectName?: string | null;
+  notes?: string;
   status: InvoiceStatus;
   displayStatus: InvoiceDisplayStatus;
   financialStatus: InvoiceFinancialStatus;
@@ -28,6 +30,14 @@ export type InvoiceListItem = {
   shareToken?: string | null;
   isShareable?: boolean;
   viewedAt?: string | null;
+};
+
+export type InvoiceSummary = {
+  totalInvoiced: number;
+  totalPaid: number;
+  totalRemaining: number;
+  totalOverdue: number;
+  count: number;
 };
 
 export type PublicInvoiceView = {

@@ -49,8 +49,8 @@ export function AdminShell({
   const tShell = useTranslations("admin.shell");
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-neutral-900">
-      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur-md">
+    <div className="min-h-screen bg-neutral-100 text-neutral-900 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
+      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
           <div className="min-w-0">
             <Link href="/admin" className="text-base sm:text-lg font-bold text-violet-800 truncate block">
