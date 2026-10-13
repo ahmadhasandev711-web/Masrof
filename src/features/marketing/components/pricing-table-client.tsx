@@ -32,6 +32,9 @@ export interface PricingTableProps {
     clients: string;
     clientsFree: string;
     clientsPro: string;
+    budgets: string;
+    budgetsFree: string;
+    budgetsPro: string;
     printing: string;
     statements: string;
     whatsappShare: string;
@@ -71,9 +74,6 @@ export function PricingTableClient({
   upgradeNote,
   isArabic,
 }: PricingTableProps) {
-  const [cycle, setCycle] = useState<"monthly" | "yearly">("monthly");
-  const isYearly = cycle === "yearly";
-
   const matrixRows = [
     {
       feature: matrix.workspaces,
@@ -97,6 +97,12 @@ export function PricingTableClient({
       feature: matrix.clients,
       free: matrix.clientsFree,
       pro: matrix.clientsPro,
+      proHighlight: true,
+    },
+    {
+      feature: matrix.budgets,
+      free: matrix.budgetsFree,
+      pro: matrix.budgetsPro,
       proHighlight: true,
     },
     {
@@ -164,45 +170,13 @@ export function PricingTableClient({
   return (
     <div className="space-y-16">
       {/* ========================================================= */}
-      {/* 1. BILLING CYCLE TOGGLE                                   */}
+      {/* 1. ANNUAL BILLING BADGE                                   */}
       {/* ========================================================= */}
-      <div className="flex flex-col items-center justify-center gap-3">
-        <div className="inline-flex items-center rounded-2xl bg-neutral-100 p-1.5 border border-neutral-200">
-          <button
-            type="button"
-            onClick={() => setCycle("monthly")}
-            className={`rounded-xl px-5 py-2 text-sm font-semibold transition ${
-              !isYearly
-                ? "bg-white text-neutral-900 shadow-sm"
-                : "text-neutral-600 hover:text-neutral-900"
-            }`}
-          >
-            {billingMonthly}
-          </button>
-          <button
-            type="button"
-            onClick={() => setCycle("yearly")}
-            className={`flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold transition ${
-              isYearly
-                ? "bg-emerald-800 text-white shadow-sm"
-                : "text-neutral-600 hover:text-neutral-900"
-            }`}
-          >
-            <span>{billingYearly}</span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                isYearly
-                  ? "bg-emerald-700 text-emerald-100"
-                  : "bg-emerald-100 text-emerald-800"
-              }`}
-            >
-              -17%
-            </span>
-          </button>
+      <div className="flex flex-col items-center justify-center gap-2">
+        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-4 py-1.5 text-xs sm:text-sm font-bold text-emerald-900 shadow-2xs">
+          <span>✨</span>
+          <span>{yearlyDiscountBadge}</span>
         </div>
-        <p className="text-xs font-medium text-emerald-700 animate-pulse">
-          {yearlyDiscountBadge}
-        </p>
       </div>
 
       {/* ========================================================= */}
@@ -264,13 +238,7 @@ export function PricingTableClient({
           <div>
             <div className="flex items-center justify-between">
               <span className="inline-block rounded-md bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-900">
-                {isYearly
-                  ? isArabic
-                    ? "اشتراك سنوي اقتصادي"
-                    : "Annual Plan"
-                  : isArabic
-                  ? "اشتراك شهري مرن"
-                  : "Monthly Plan"}
+                {isArabic ? "اشتراك سنوي شامل" : "Annual Plan"}
               </span>
             </div>
 
@@ -280,20 +248,18 @@ export function PricingTableClient({
 
             <div className="mt-4 flex items-baseline gap-2">
               <span className="text-4xl font-black text-emerald-950 font-mono">
-                {isYearly ? yearlyPriceDisplay : proPlan.priceDisplay}
+                {proPlan.priceDisplay}
               </span>
               <span className="text-sm font-medium text-emerald-900/70">
-                {isYearly ? yearlyPeriodDisplay : proPlan.periodDisplay}
+                {proPlan.periodDisplay}
               </span>
             </div>
 
-            {isYearly && (
-              <p className="mt-1 text-xs font-semibold text-emerald-700">
-                {isArabic
-                  ? "ما يعادل ٢٥٠ ج.م شهرياً فقط (وفرت ٦٠٠ ج.م سنوياً)"
-                  : "Equivalent to 250 EGP / month (save 600 EGP / year)"}
-              </p>
-            )}
+            <p className="mt-1 text-xs font-semibold text-emerald-700">
+              {isArabic
+                ? "٢٥٠ ج.م سنوياً فقط لكل ميزات النظام والفريق"
+                : "250 EGP / year for all system & team features"}
+            </p>
 
             <p className="mt-4 text-sm text-neutral-700 leading-relaxed">
               {proPlan.description}

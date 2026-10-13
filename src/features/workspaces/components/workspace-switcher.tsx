@@ -64,6 +64,29 @@ export function WorkspaceSwitcher({
 
   const active = workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0];
 
+  if (workspaces.length <= 1) {
+    return (
+      <div className={`inline-flex items-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-2xs sm:text-sm ${className ?? ""}`}>
+        <svg
+          className="h-4 w-4 shrink-0 text-emerald-700"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          />
+        </svg>
+        <span className="truncate max-w-[150px] sm:max-w-[200px] text-neutral-900">
+          {active?.name ?? "..."}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div ref={dropdownRef} className={`relative z-50 inline-block ${className ?? ""}`}>
       {/* Trigger Button */}
@@ -165,28 +188,6 @@ export function WorkspaceSwitcher({
               );
             })}
           </div>
-
-          {/* Divider */}
-          <div className="border-t border-neutral-100 my-1" />
-
-          {/* New Workspace Action */}
-          <Link
-            href="/dashboard/workspaces/new"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-right transition hover:bg-emerald-50/70 group"
-          >
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 text-sm font-bold group-hover:bg-emerald-200 transition">
-              +
-            </span>
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-neutral-900 group-hover:text-emerald-900">
-                {tNav("newWorkspaceAction")}
-              </span>
-              <span className="text-[10px] text-neutral-500 truncate">
-                {tNav("newWorkspaceHint")}
-              </span>
-            </div>
-          </Link>
         </div>
       )}
     </div>

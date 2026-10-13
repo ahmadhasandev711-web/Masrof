@@ -33,6 +33,16 @@ export async function createBudgetAction(
 
   await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
 
+  const { assertWorkspacePlanFeature } = await import("@/features/subscriptions/data");
+  const featureError = await assertWorkspacePlanFeature(
+    session.user.id,
+    parsed.data.workspaceId,
+    "budgets",
+  );
+  if (featureError) {
+    return { error: featureError };
+  }
+
   try {
     await createBudget(parsed.data);
   } catch (error) {

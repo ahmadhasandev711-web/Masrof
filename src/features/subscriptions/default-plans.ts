@@ -17,6 +17,7 @@ export type PlanFlags = {
   ocrReceipts: boolean;
   aiCategory: boolean;
   debts: boolean;
+  budgets: boolean;
 };
 
 /** Quantity caps. Use -1 for unlimited. */
@@ -59,8 +60,8 @@ export type PlanConfigDocument = {
   updatedBy?: string | null;
 };
 
-/** Current freemium model: Free + ads (capped) / Pro 300 EGP/mo. */
-export const PLAN_LIMITS_VERSION = 7;
+/** Freemium model v8: Single workspace, Free (3 inv/5 cli/2 proj), Pro 250 EGP/yr (team 5, budgets/recurring/savings Pro only). */
+export const PLAN_LIMITS_VERSION = 8;
 
 export const PLAN_FLAG_KEYS = [
   "csvExport",
@@ -79,6 +80,7 @@ export const PLAN_FLAG_KEYS = [
   "ocrReceipts",
   "aiCategory",
   "debts",
+  "budgets",
 ] as const satisfies readonly (keyof PlanFlags)[];
 
 export const PLAN_QUANTITY_LIMIT_KEYS = [
@@ -95,9 +97,9 @@ export type PlanQuantityLimitKey = (typeof PLAN_QUANTITY_LIMIT_KEYS)[number];
 const FREE_FLAGS: PlanFlags = {
   csvExport: false,
   pdfExport: false,
-  recurringExpenses: true,
+  recurringExpenses: false,
   clientsAndProjects: true,
-  savingsGoals: true,
+  savingsGoals: false,
   bankImport: false,
   advancedReports: false,
   workspaceBackup: false,
@@ -109,6 +111,7 @@ const FREE_FLAGS: PlanFlags = {
   ocrReceipts: false,
   aiCategory: false,
   debts: false,
+  budgets: false,
 };
 
 /** Pro absorbs former Plus features. */
@@ -129,6 +132,7 @@ const PRO_FLAGS: PlanFlags = {
   ocrReceipts: true,
   aiCategory: true,
   debts: true,
+  budgets: true,
 };
 
 export const DEFAULT_PLAN_FLAGS: Record<PlanId, PlanFlags> = {
@@ -142,13 +146,13 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
   free: {
     planId: "free",
     priceYearly: 0,
-    maxWorkspaces: 3,
+    maxWorkspaces: 1,
     maxMembers: 1,
-    maxInvoicesPerMonth: 10,
-    maxClients: 20,
-    maxActiveProjects: 5,
-    maxSavingsGoals: 2,
-    maxRecurringExpenses: 3,
+    maxInvoicesPerMonth: 3,
+    maxClients: 5,
+    maxActiveProjects: 2,
+    maxSavingsGoals: 0,
+    maxRecurringExpenses: 0,
     limitsVersion: PLAN_LIMITS_VERSION,
     highlighted: false,
     available: true,
@@ -162,18 +166,18 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     descriptionAr: "ابدأ بتنظيم وتتبع أموالك وفواتيرك مجانًا وبأعلى معايير الأمان والخصوصية.",
     descriptionEn: "Start organizing and tracking your finances for free with bank-grade security and privacy.",
     featuresAr: [
-      "حتى ٣ مساحات عمل",
-      "حسابات وتصنيفات وميزانيات غير محدودة",
-      "حتى ١٠ فواتير / شهر",
-      "حتى ٢٠ عميل و٥ مشاريع نشطة",
+      "مساحة عمل واحدة فقط",
+      "حسابات وتصنيفات غير محدودة",
+      "حتى ٣ فواتير / شهر",
+      "حتى ٥ عملاء ومشروعان نشطان",
       "تقارير شهرية أساسية",
       "يشمل إعلانات",
     ],
     featuresEn: [
-      "Up to 3 workspaces",
-      "Unlimited accounts, categories & budgets",
-      "Up to 10 invoices / month",
-      "Up to 20 clients & 5 active projects",
+      "1 single workspace",
+      "Unlimited accounts & categories",
+      "Up to 3 invoices / month",
+      "Up to 5 clients & 2 active projects",
       "Basic monthly reports",
       "Includes ads",
     ],
@@ -183,8 +187,8 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
   },
   pro: {
     planId: "pro",
-    priceYearly: 3000,
-    maxWorkspaces: UNLIMITED,
+    priceYearly: 250,
+    maxWorkspaces: 1,
     maxMembers: 5,
     maxInvoicesPerMonth: UNLIMITED,
     maxClients: UNLIMITED,
@@ -197,31 +201,31 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     sortOrder: 1,
     nameAr: "سندات برو",
     nameEn: "Pro",
-    priceDisplayAr: "٣٠٠",
-    priceDisplayEn: "300",
-    periodDisplayAr: "ج.م / شهر",
-    periodDisplayEn: "EGP / month",
+    priceDisplayAr: "٢٥٠",
+    priceDisplayEn: "250",
+    periodDisplayAr: "ج.م / سنة",
+    periodDisplayEn: "EGP / year",
     descriptionAr: "منظومة مالية متكاملة بدون إعلانات وبلا حدود — للمستقلين، المكاتب، والشركات النشطة.",
     descriptionEn: "Complete, ad-free financial system with no limits — built for freelancers, agencies, and growing businesses.",
     featuresAr: [
       "بدون إعلانات نهائياً",
-      "مساحات عمل غير محدودة + فريق حتى ٥ أعضاء",
+      "مساحة عمل واحدة + فريق حتى ٥ أعضاء",
       "فواتير وعملاء ومشاريع بلا حدود",
-      "تقارير متقدمة وتوقعات التدفق النقدي",
+      "الميزانيات وأهداف الادخار والمصاريف المتكررة",
       "OCR قراءة الإيصالات الذكية والتصنيف الآلي",
       "تصدير البيانات المتقدم (CSV, Excel, PDF)",
-      "تذكيرات واتساب الذكية وروابط دفع فورية",
-      "٣٠٠ ج.م شهرياً (أو ٣٠٠٠ ج.م سنوياً)",
+      "إدارة الديون والأقساط والالتزامات",
+      "٢٥٠ ج.م سنوياً فقط",
     ],
     featuresEn: [
       "100% Ad-free experience",
-      "1 professional workspace + team up to 5 members",
+      "1 workspace + team up to 5 members",
       "Unlimited invoices, clients & projects",
-      "Advanced financial reports & cash flow forecasts",
+      "Budgets, savings goals & recurring expenses",
       "Smart receipt OCR & automated AI categorization",
       "Complete export suite (CSV, Excel & PDF)",
-      "Smart WhatsApp reminders & instant payment links",
-      "300 EGP / month (or 3,000 EGP / year)",
+      "Debts & loan installment tracking",
+      "250 EGP / year",
     ],
     ctaAr: "الترقية إلى برو",
     ctaEn: "Upgrade to Pro",

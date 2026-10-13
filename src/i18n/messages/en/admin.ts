@@ -351,6 +351,7 @@ const admin = {
         ocrReceipts: "Receipt OCR",
         aiCategory: "Smart categorization",
         debts: "Debts & liabilities tracking",
+        budgets: "Monthly budgets",
       },
     },
     errors: {

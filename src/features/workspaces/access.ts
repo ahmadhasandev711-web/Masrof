@@ -60,6 +60,14 @@ const loadWorkspaceAccess = cache(async function loadWorkspaceAccess(
     throw new WorkspaceAccessDeniedError(workspaceId);
   }
 
+  if (membership.role !== "owner") {
+    const { workspaceHasTeamFeature } = await import("@/features/workspaces/members-data");
+    const hasTeam = await workspaceHasTeamFeature(workspaceId);
+    if (!hasTeam) {
+      throw new WorkspaceAccessDeniedError(workspaceId);
+    }
+  }
+
   return {
     workspace: workspace as WorkspaceDocument & { _id: Types.ObjectId },
     membership: {

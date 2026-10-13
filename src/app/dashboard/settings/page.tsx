@@ -22,12 +22,6 @@ export default async function WorkspaceSettingsPage() {
           <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
           <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
         </div>
-        <Link
-          href="/dashboard/workspaces/new"
-          className="rounded-xl border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 hover:text-emerald-700 transition"
-        >
-          {t("newWorkspaceBtn")}
-        </Link>
       </div>
 
       {isOwner ? (

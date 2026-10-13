@@ -351,6 +351,7 @@ const admin = {
         ocrReceipts: "OCR إيصالات",
         aiCategory: "تصنيف ذكي",
         debts: "إدارة الديون والالتزامات",
+        budgets: "الميزانيات الشهرية",
       },
     },
     errors: {

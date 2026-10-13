@@ -16,10 +16,25 @@ export default async function OnboardingPage() {
   }
 
   const pendingInvites = await getPendingInvitationsForEmail(session.user.email);
+  const tPlans = await getTranslations("plans");
+
+  const { WorkspaceMembershipModel } = await import("@/models/workspace-membership");
+  const hadPreviousTeam = Boolean(
+    await WorkspaceMembershipModel.findOne({
+      userId: session.user.id,
+      role: { $ne: "owner" },
+    }).lean(),
+  );
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
       <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
+        {hadPreviousTeam && (
+          <div className="mb-4 rounded-xl border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-900 leading-relaxed">
+            {tPlans("teamPlanExpiredNotice")}
+          </div>
+        )}
+
         <h1 className="mb-1 text-xl font-semibold text-neutral-900">
           {t("title")}
         </h1>

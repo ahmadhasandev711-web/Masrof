@@ -64,6 +64,25 @@ export async function workspaceOwnerHasTeamFeature(ownerId: string): Promise<boo
   return planHasFeature(subscription.plan, "teamWorkspace");
 }
 
+export async function isUserActiveTeamMemberOfAnyWorkspace(userId: string): Promise<boolean> {
+  await connectToDatabase();
+  const memberships = await WorkspaceMembershipModel.find({
+    userId,
+    role: { $ne: "owner" },
+  }).lean();
+
+  if (memberships.length === 0) return false;
+
+  for (const m of memberships) {
+    const hasTeam = await workspaceHasTeamFeature(String(m.workspaceId));
+    if (hasTeam) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 async function lookupUsersByIds(userIds: string[]) {
   if (userIds.length === 0) return new Map<string, { name: string; email: string }>();
 

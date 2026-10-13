@@ -62,6 +62,9 @@ export async function createWorkspaceForUser(userId: string, input: CreateWorksp
       { session },
     );
 
+    // Clean up any previous non-owner memberships from expired teams
+    await WorkspaceMembershipModel.deleteMany({ userId, role: { $ne: "owner" } }).session(session);
+
     return workspace._id.toString();
   });
 }
@@ -70,9 +73,10 @@ export async function createWorkspaceForUser(userId: string, input: CreateWorksp
 export const listWorkspacesForUser = cache(async (userId: string) => {
   await connectToDatabase();
 
-  // Keep membership as the source of truth, but join workspaces on the
-  // database server so this hot path costs one network round trip, not two.
-  return WorkspaceMembershipModel.aggregate<WorkspaceDocument & { _id: Types.ObjectId }>([
+  const results = await WorkspaceMembershipModel.aggregate<{
+    role: string;
+    workspace: WorkspaceDocument & { _id: Types.ObjectId };
+  }>([
     { $match: { userId } },
     {
       $lookup: {
@@ -84,16 +88,38 @@ export const listWorkspacesForUser = cache(async (userId: string) => {
     },
     { $unwind: "$workspace" },
     { $match: { "workspace.isArchived": false } },
-    { $replaceRoot: { newRoot: "$workspace" } },
-    { $sort: { createdAt: -1 } },
+    {
+      $project: {
+        role: 1,
+        workspace: "$workspace",
+      },
+    },
+    { $sort: { "workspace.createdAt": -1 } },
   ]);
+
+  if (results.length === 0) return [];
+
+  const accessible: (WorkspaceDocument & { _id: Types.ObjectId })[] = [];
+  const { workspaceHasTeamFeature } = await import("@/features/workspaces/members-data");
+
+  for (const item of results) {
+    if (item.role === "owner") {
+      accessible.push(item.workspace);
+    } else {
+      const hasTeam = await workspaceHasTeamFeature(item.workspace._id.toString());
+      if (hasTeam) {
+        accessible.push(item.workspace);
+      }
+    }
+  }
+
+  return accessible;
 });
 
-/** Returns true if the user has at least one workspace (used to gate onboarding). */
+/** Returns true if the user has at least one accessible workspace. */
 export async function userHasAnyWorkspace(userId: string): Promise<boolean> {
-  await connectToDatabase();
-  const count = await WorkspaceMembershipModel.countDocuments({ userId }).limit(1);
-  return count > 0;
+  const workspaces = await listWorkspacesForUser(userId);
+  return workspaces.length > 0;
 }
 
 export async function updateWorkspace(

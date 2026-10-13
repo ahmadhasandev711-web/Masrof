@@ -14,8 +14,7 @@ import {
 import type { PlanQuantityLimitKey } from "@/features/subscriptions/default-plans";
 import { isUnlimitedQuantity } from "@/features/subscriptions/default-plans";
 import { listWorkspacesForUser } from "@/features/workspaces/data";
-import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
-import { countOwnedWorkspacesForUser } from "@/features/workspaces/members-data";
+import { countOwnedWorkspacesForUser, isUserActiveTeamMemberOfAnyWorkspace } from "@/features/workspaces/members-data";
 import {
   getLocalizedPlan,
   getLocalizedPlanFeatureMessage,
@@ -128,23 +127,26 @@ export async function assertUserNotSuspended(userId: string) {
   }
 }
 
-const MAX_FREE_WORKSPACES_PER_ACCOUNT = 3;
-
 export async function assertCanCreateWorkspace(userId: string): Promise<string | null> {
   await assertUserNotSuspended(userId);
 
-  const subscription = await getUserSubscription(userId);
-  // Pro subscribers / owners of active Pro workspaces can create unlimited workspaces
-  if (subscription.plan === "pro") {
-    return null;
+  // 1. Team members in an active team workspace cannot create a separate personal workspace
+  const isActiveTeamMember = await isUserActiveTeamMemberOfAnyWorkspace(userId);
+  if (isActiveTeamMember) {
+    const tPlans = await getTranslations("plans");
+    return tPlans("teamMemberCannotCreateWorkspace");
   }
 
+  // 2. Dynamic workspace limit (1 workspace on both Free and Pro)
+  const subscription = await getUserSubscription(userId);
+  const config = await getPlanConfig(subscription.plan);
   const ownedCount = await countOwnedWorkspacesForUser(userId);
-  if (ownedCount >= MAX_FREE_WORKSPACES_PER_ACCOUNT) {
+
+  if (config.maxWorkspaces !== -1 && ownedCount >= config.maxWorkspaces) {
     const tPlans = await getTranslations("plans");
     return tPlans("limitMessage", {
-      plan: "المجانية",
-      limit: MAX_FREE_WORKSPACES_PER_ACCOUNT,
+      plan: subscription.plan === "pro" ? "برو" : "المجانية",
+      limit: config.maxWorkspaces,
     });
   }
 

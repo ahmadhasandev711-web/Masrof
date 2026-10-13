@@ -27,6 +27,7 @@ export type PlanDefinition = {
   ocrReceipts: boolean;
   aiCategory: boolean;
   debts: boolean;
+  budgets: boolean;
   highlighted: boolean;
   cta: string;
   available: boolean;
@@ -50,7 +51,8 @@ export type PlanFeature =
   | "teamWorkspace"
   | "ocrReceipts"
   | "aiCategory"
-  | "debts";
+  | "debts"
+  | "budgets";
 
 export function isPlanId(value: string): value is PlanId {
   return PLAN_IDS.includes(value as PlanId);

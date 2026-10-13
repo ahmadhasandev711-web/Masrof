@@ -58,36 +58,48 @@ export default async function BudgetsPage() {
 
       <section className="flex flex-col gap-4">
         <h2 className="text-sm font-semibold text-neutral-700">{tDashboard("budgets.monthlySection")}</h2>
-        <CreateBudgetForm
-          workspaceId={workspaceId}
-          expenseCategories={categoryOptions}
-        />
-        <BudgetList
-          budgets={budgets.map((b) => ({
-            _id: String(b._id),
-            name: b.name,
-            amount: b.amount,
-            spent: b.spent,
-            remaining: b.remaining,
-            percentage: b.percentage,
-            categoryId: b.categoryId
-              ? (() => {
-                  const cat = b.categoryId as unknown as {
-                    _id: unknown;
-                    name: string;
-                    icon?: string | null;
-                  };
-                  return {
-                    _id: String(cat._id),
-                    name: cat.name,
-                    icon: cat.icon ?? null,
-                  };
-                })()
-              : null,
-          }))}
-          workspaceId={workspaceId}
-          currency={activeWorkspace.currency}
-        />
+        {plan.budgets ? (
+          <>
+            <CreateBudgetForm
+              workspaceId={workspaceId}
+              expenseCategories={categoryOptions}
+            />
+            <BudgetList
+              budgets={budgets.map((b) => ({
+                _id: String(b._id),
+                name: b.name,
+                amount: b.amount,
+                spent: b.spent,
+                remaining: b.remaining,
+                percentage: b.percentage,
+                categoryId: b.categoryId
+                  ? (() => {
+                      const cat = b.categoryId as unknown as {
+                        _id: unknown;
+                        name: string;
+                        icon?: string | null;
+                      };
+                      return {
+                        _id: String(cat._id),
+                        name: cat.name,
+                        icon: cat.icon ?? null,
+                      };
+                    })()
+                  : null,
+              }))}
+              workspaceId={workspaceId}
+              currency={activeWorkspace.currency}
+            />
+          </>
+        ) : (
+          <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">
+            {tDashboard("plan.featureGate.budgets")}{" "}
+            <Link href="/pricing" className="font-medium text-[#065F46] hover:underline">
+              {tPlan("viewPricing")}
+            </Link>
+            .
+          </div>
+        )}
       </section>
 
       <section id="recurring" className="flex flex-col gap-4 border-t border-neutral-200 pt-8">
