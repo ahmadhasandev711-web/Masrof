@@ -70,7 +70,6 @@ export async function DashboardHome({
     balanceSummary.convertedTotalMinor ?? balanceSummary.byCurrency[0]?.totalMinor ?? 0;
   const receivablesMinor = receivablesSummary.totalOutstanding;
   const debtsMinor = debtSummary.remainingLiabilities;
-  const netPositionMinor = availableCashMinor + receivablesMinor - debtsMinor;
 
   const topActiveProjects = isOwner
     ? projectsWithTotals.filter((p) => p.status === "active").slice(0, 3)
@@ -134,28 +133,22 @@ export async function DashboardHome({
             )}
           </div>
 
-          {/* Net Position Peek on Mobile - OWNER ONLY */}
-          {isOwner && (
+          {/* Receivables & Debts row on Mobile - OWNER ONLY */}
+          {isOwner && (receivablesMinor > 0 || debtsMinor > 0) && (
             <div className="mt-3.5 rounded-2xl bg-black/25 p-3 backdrop-blur-md">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-emerald-200/80">{t("netPosition.title")}</span>
-                <span className="font-bold text-white font-mono">
-                  {formatMoney(netPositionMinor, { currency, locale: moneyLocale })}
-                </span>
-              </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 border-t border-white/10 pt-2 text-[11px]">
-                <div>
-                  <span className="text-sky-200">+{t("netPosition.receivables")}: </span>
-                  <span className="font-bold text-white font-mono">
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <Link href="/dashboard/invoices" prefetch={true} className="flex flex-col min-w-0">
+                  <span className="text-sky-200 truncate">+{t("netPosition.receivables")}</span>
+                  <span className="font-bold text-white font-mono text-xs mt-0.5 truncate">
                     {formatMoney(receivablesMinor, { currency, locale: moneyLocale })}
                   </span>
-                </div>
-                <div>
-                  <span className="text-amber-200">−{t("netPosition.debts")}: </span>
-                  <span className="font-bold text-white font-mono">
+                </Link>
+                <Link href="/dashboard/debts" prefetch={true} className="flex flex-col min-w-0">
+                  <span className="text-amber-200 truncate">−{t("netPosition.debts")}</span>
+                  <span className="font-bold text-white font-mono text-xs mt-0.5 truncate">
                     {formatMoney(debtsMinor, { currency, locale: moneyLocale })}
                   </span>
-                </div>
+                </Link>
               </div>
             </div>
           )}
@@ -278,45 +271,47 @@ export async function DashboardHome({
         </div>
       </div>
 
-      {/* Net Financial Position Hero Banner (Desktop) - OWNER ONLY */}
+      {/* Financial Position Breakdown Banner (Desktop) - OWNER ONLY */}
       {isOwner && (
-        <div className="hidden sm:block rounded-2xl border border-[#065F46]/20 bg-gradient-to-br from-emerald-900 via-[#065F46] to-teal-800 p-5 text-white shadow-md shadow-emerald-950/10">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10">
-            <div>
-              <span className="text-[11px] font-bold text-emerald-200 uppercase tracking-wider">
-                {t("netPosition.title")}
-              </span>
-              <p className="text-3xl font-black font-mono tracking-tight text-white mt-0.5">
-                {formatMoney(netPositionMinor, { currency, locale: moneyLocale })}
-              </p>
-            </div>
-            <p className="text-xs text-emerald-100/70 font-medium">
-              {t("netPosition.subtitle")}
-            </p>
-          </div>
-
-          {/* 3 Metrics breakdown row */}
-          <div className="grid grid-cols-3 gap-3 pt-3">
-            <div className="rounded-xl bg-white/10 p-3 backdrop-blur-xs">
-              <p className="text-[11px] text-emerald-200 font-medium">{t("netPosition.cash")}</p>
-              <p className="text-base font-bold text-white font-mono mt-0.5">
+        <div className="hidden sm:block rounded-2xl border border-[#065F46]/20 bg-gradient-to-br from-emerald-900 via-[#065F46] to-teal-800 p-4 sm:p-5 text-white shadow-md shadow-emerald-950/10">
+          <div className="grid grid-cols-3 gap-3">
+            {/* 1. السيولة النقدية */}
+            <div className="rounded-xl bg-white/10 p-3.5 backdrop-blur-xs flex flex-col justify-between">
+              <span className="text-xs text-emerald-200 font-bold">{t("netPosition.cash")}</span>
+              <p className="text-xl sm:text-2xl font-black text-white font-mono mt-2">
                 {formatMoney(availableCashMinor, { currency, locale: moneyLocale })}
               </p>
             </div>
 
-            <div className="rounded-xl bg-sky-400/15 p-3 backdrop-blur-xs">
-              <p className="text-[11px] text-sky-200 font-medium">+{t("netPosition.receivables")}</p>
-              <p className="text-base font-bold text-sky-100 font-mono mt-0.5">
+            {/* 2. + مستحقات فواتير */}
+            <Link
+              href="/dashboard/invoices"
+              prefetch={true}
+              className="group rounded-xl bg-sky-400/15 p-3.5 backdrop-blur-xs flex flex-col justify-between transition hover:bg-sky-400/25"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-sky-200 font-bold">+{t("netPosition.receivables")}</span>
+                <span className="text-xs text-sky-200/80 group-hover:underline">←</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-black text-sky-100 font-mono mt-2">
                 {formatMoney(receivablesMinor, { currency, locale: moneyLocale })}
               </p>
-            </div>
+            </Link>
 
-            <div className="rounded-xl bg-amber-400/15 p-3 backdrop-blur-xs">
-              <p className="text-[11px] text-amber-200 font-medium">−{t("netPosition.debts")}</p>
-              <p className="text-base font-bold text-amber-100 font-mono mt-0.5">
+            {/* 3. − ديون والتزامات */}
+            <Link
+              href="/dashboard/debts"
+              prefetch={true}
+              className="group rounded-xl bg-amber-400/15 p-3.5 backdrop-blur-xs flex flex-col justify-between transition hover:bg-amber-400/25"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-amber-200 font-bold">−{t("netPosition.debts")}</span>
+                <span className="text-xs text-amber-200/80 group-hover:underline">←</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-black text-amber-100 font-mono mt-2">
                 {formatMoney(debtsMinor, { currency, locale: moneyLocale })}
               </p>
-            </div>
+            </Link>
           </div>
         </div>
       )}
