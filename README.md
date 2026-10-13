@@ -1,246 +1,217 @@
-# مصروفاتي (Masrofaty)
+# Sanadat (سندات)
 
-تطبيق عربي أولاً (Arabic-first) لإدارة الدخل والمصروفات — للأفراد، الفريلانسرز، وأصحاب المشاريع الصغيرة في مصر.
+<p align="center">
+  <strong>Modern Invoicing, Cash Flow, and Financial Operating System for Freelancers, Agencies, and Small Businesses.</strong>
+</p>
 
-## الستاك التقني
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16.2-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19.2-blue?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5.9-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/MongoDB-Atlas_Replica_Set-green?style=for-the-badge&logo=mongodb" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Tests-137_Passing-brightgreen?style=for-the-badge&logo=vitest" alt="Vitest" />
+  <img src="https://img.shields.io/badge/PWA-Serwist-orange?style=for-the-badge&logo=pwa" alt="PWA" />
+</p>
 
-| التقنية | الإصدار |
-|---|---|
-| Node.js | 24.x (Active LTS) |
-| Next.js | 16.2.10 (App Router) |
-| React | 19.2 |
-| TypeScript | 5.9 |
-| MongoDB | 8.x (**لازم replica set** — MongoDB Atlas مثالي) |
-| Mongoose | 9.7.x |
-| Tailwind CSS | v4 |
-| Better-Auth | مصادقة (email/password + Google OAuth اختياري) |
-| Zod v4 | Validation |
-| Serwist | PWA / Service Worker |
-| Tesseract.js | OCR للإيصالات (Plus) |
+---
 
-## التشغيل محلياً
+## 🚀 Overview
 
-```bash
-npm install
-cp .env.example .env.local   # واملأ القيم الحقيقية
-npm run seed:categories      # لازم قبل أي حاجة تانية — بيدخل التصنيفات الافتراضية
-npm run seed:posts           # اختياري — بيدخل مقالات بداية للمدونة
-npm run dev
-```
+**Sanadat** is a high-performance, bilingual (Arabic & English) financial management and invoicing platform designed to give businesses, agencies, and self-employed professionals complete mastery over their cash flow, accounts, client billing, and team collaboration.
 
-### مشاكل اتصال MongoDB؟
+Built with Next.js 16 (App Router), React 19, and MongoDB, Sanadat strictly enforces bank-grade accounting principles, strict tenant isolation, and atomic transactional operations.
 
-لو شفت `MongooseServerSelectionError` أو `ReplicaSetNoPrimary`:
+---
 
-```bash
-npm run db:ping
-```
+## ✨ Key Features
 
-**في MongoDB Atlas:**
-1. **Network Access** → أضف IP جهازك (أو `0.0.0.0/0` للتطوير فقط).
-2. **Database** → تأكد إن الـ cluster **مش Paused**.
-3. **Database Access** → المستخدم عنده صلاحية read/write على قاعدة `masrofaty`.
+- **🧾 Full Invoicing Lifecycle:**
+  - Create, customize, and issue bilingual invoices in seconds.
+  - Thermal POS (80mm) and standard A4 printing.
+  - Instant WhatsApp sharing with public view tokens (`/i/[token]`).
+  - Partial payments, balance recalculation, and payment history tracking.
 
-**على Windows:** الافتراضي `mongodb+srv` مع DNS عام (8.8.8.8). لو فشل، جرّب `MONGODB_URI_DIRECT` من Atlas، أو `MONGODB_RESOLVE_SRV=1` للتحويل اليدوي.
+- **🔒 Integer-Only Minor Units (Zero Float Math):**
+  - All monetary values are strictly stored as integers in minor units (Piastres / Cents) to eliminate floating-point rounding errors.
+  - Multi-currency support with dynamic exchange rates.
 
-**Turbopack:** لو في أخطاء غريبة في التطوير، جرّب `npx next dev --webpack`.
+- **🏢 Strict Tenant Isolation:**
+  - Robust multi-tenancy where every query and mutation is bound to an authorized workspace context (`verifyWorkspaceAccess`).
+  - Active team exclusivity preventing unauthorized cross-workspace membership abuse.
 
-### متغيرات البيئة المطلوبة (`.env.local`)
+- **⚡ Atomic Multi-Document Transactions:**
+  - Financial writes (creating transactions, transfers, payments, account balance updates) run inside MongoDB sessions/replica set transactions to ensure consistency or clean rollback.
 
-- `MONGODB_URI` — من MongoDB Atlas (يدعم transactions — لازم replica set، مش standalone mongod)
-- `MONGODB_DB_NAME`
-- `BETTER_AUTH_SECRET` — `openssl rand -base64 32`
-- `BETTER_AUTH_URL` و `NEXT_PUBLIC_APP_URL` — `http://localhost:3000` في التطوير
-- `RESEND_API_KEY` + `AUTH_EMAIL_FROM` — **اختياري للتطوير** (بدونها: الإيميلات تتطبع في التيرمنال)
+- **👥 Team Collaboration & Workspaces:**
+  - Role-Based Access Control (Owner, Member, Viewer).
+  - Centralized workspace model with invitation workflow and rate-limiting.
 
-## البناء للإنتاج
+- **🤖 Receipt OCR & AI Categorization:**
+  - Scan paper receipts using on-device/server OCR (`Tesseract.js`).
+  - Keyword extraction and intelligent category suggestions.
 
-```bash
-npm run build   # يستخدم --webpack عمداً (Serwist محتاج webpack، مش Turbopack)
-npm run start
-npm test        # Vitest — money, OCR parser, display names
-```
+- **📊 Cash Flow & Profitability Analytics:**
+  - Real-time receivables radar, overdue tracking, and project profitability margins.
+  - Full data export suite (Excel, CSV, PDF) and complete workspace backups.
 
-## البنية المعمارية (Modular Monolith)
+- **⚙️ Dynamic Admin Engine:**
+  - Manage plans, pricing, limits, and feature flags directly from `/admin/plans` without redeploying code.
+
+- **📱 Mobile App Ready (PWA + Capacitor):**
+  - Offline-capable Progressive Web App with service worker caching via Serwist.
+  - Cross-platform Android shell powered by Capacitor.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Description |
+|---|---|---|
+| **Framework** | [Next.js 16](https://nextjs.org/) | App Router, Server Actions, Route Handlers |
+| **Frontend** | [React 19](https://react.dev/) | Server Components, Suspense, Transitions |
+| **Language** | [TypeScript 5.9](https://www.typescriptlang.org/) | Strict type safety across the entire stack |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) | Modern CSS tokens and responsive layout |
+| **Database** | [MongoDB 8.x](https://www.mongodb.com/) + [Mongoose 9.x](https://mongoosejs.com/) | Replica Set with multi-document ACID transactions |
+| **Authentication** | [Better-Auth](https://better-auth.com/) | Secure session management, email/password & OAuth |
+| **i18n** | [next-intl](https://next-intl-docs.vercel.app/) | Bilingual Arabic (RTL) & English (LTR) parity |
+| **Offline / PWA** | [Serwist](https://serwist.pages.dev/) | Service worker bundling and asset caching |
+| **Validation** | [Zod v4](https://zod.dev/) | Strict schema validation for actions & APIs |
+| **Testing** | [Vitest](https://vitest.dev/) | 137 unit and integration tests |
+
+---
+
+## 🏛️ Architecture
+
+Sanadat uses a **Modular Monolith** architecture organized by domain features:
 
 ```
 src/
-  app/                  → صفحات/layouts فقط (App Router)
-  features/             → منطق كل domain مستقل (auth, workspaces, accounts, categories, transactions, budgets, reports)
-  components/           → مكونات UI مشتركة
-  lib/                  → auth, db, money, env (infrastructure)
-  models/               → Mongoose schemas المشتركة بين الـ features
+├── app/                  # Next.js App Router (pages, layouts, API routes)
+│   ├── (auth)/           # Authentication flows (login, register, reset-password)
+│   ├── (marketing)/      # Public pages (landing, pricing, FAQ, blog, legal)
+│   ├── admin/            # Platform administration (users, workspaces, plans)
+│   ├── dashboard/        # Authenticated workspace dashboard
+│   ├── api/              # Mobile APIs, webhooks, uploads, OCR
+│   └── i/[token]/        # Public invoice view
+├── features/             # Business domain logic (isolated modules)
+│   ├── accounts/         # Bank & cash accounts, balance math
+│   ├── admin/            # Admin operations & dynamic plan config
+│   ├── auth/             # Session management & user security
+│   ├── budgets/          # Monthly budget tracking & alerts
+│   ├── clients/          # Client directory & account statements
+│   ├── debts/            # Loans, debt tracking & installments
+│   ├── invoices/         # Invoice creation, printing, payments & public shares
+│   ├── projects/         # Project tracking & profitability analysis
+│   ├── subscriptions/    # Freemium limits, feature gates & usage meters
+│   ├── transactions/     # Incomes, expenses, transfers & ledger
+│   └── workspaces/       # Tenant management, members, roles & permissions
+├── components/           # Reusable UI components & layouts
+├── lib/                  # Infrastructure (db, auth, money, rate-limit, email)
+└── models/               # Centralized Mongoose models & schemas
 ```
 
-### القرارات المعمارية الأساسية
+---
 
-1. **Multi-tenancy عبر Workspace:** كل عملية على بيانات مالية بتمر أولاً على `verifyWorkspaceAccess()` — مفيش `workspaceId` من الـ client بيتصدق عليه من غير ما نتأكد إن المستخدم فعلاً عضو في المساحة دي.
+## 📦 Getting Started
 
-2. **الفلوس = Integer دايماً:** كل قيمة مالية متخزنة بالقرش (minor units) — `lib/money`. مفيش عمليات حسابية على floats.
+### Prerequisites
 
-3. **استراتيجية الـ Balance (Hybrid):** `cachedBalance` بيتحدث atomically مع كل Transaction (نفس الـ MongoDB transaction)، والمصدر الحقيقي يفضل الـ Transactions نفسها. `recalculateAccountBalance()` بتعمل إعادة حساب من الأصل كشبكة أمان.
+- **Node.js**: `22.x` or `24.x` (LTS)
+- **MongoDB**: 8.x with a **Replica Set** enabled (MongoDB Atlas is recommended for ACID transactions).
 
-4. **Categories بدون تكرار:** كوليكشن واحد لـ System Categories (`workspaceId: null`) + Custom Categories، بدل ما ننسخ تصنيفات لكل Workspace.
-
-5. **كل Transaction (إنشاء/تعديل/حذف) بتحصل جوه MongoDB Transaction واحدة** مع تحديث رصيد الحساب — ضمان إن الاتنين يحصلوا مع بعض أو يفشلوا مع بعض.
-
-## الباقات والميزات
-
-| الميزة | Free | Pro | Plus |
-|--------|------|-----|------|
-| مساحات العمل | 1 | 3 | ∞ |
-| فريق (أعضاء/مساحة) | — | — | حتى 5 |
-| OCR إيصالات | — | — | ✓ |
-| تصنيف AI | — | — | ✓ |
-| تقارير متقدمة + cash flow | — | — | ✓ |
-| استيراد CSV بنك | — | — | ✓ |
-
-- **إدارة الباقات:** `/admin/plans` — flags ديناميكية من MongoDB
-- **Paymob:** مخطط لاحقاً (غير مفعّل حالياً)
-
-## مساحة الفريق (Team Workspace)
-
-- **Plus فقط** — مالك المساحة لازم يكون على باقة Plus
-- **دعوة بالبريد** → `/invite/[token]` — قبول أو إنشاء حساب
-- **أدوار:** `owner` · `member` (تعديل) · `viewer` (قراءة فقط)
-- **حد أعضاء:** 5 في Plus (قابل للتعديل من `/admin/plans`)
-- **Rate limit:** 20 دعوة/ساعة لكل مستخدم
-
-## OCR والتصنيف الذكي
-
-- **OCR:** رفع إيصال في `/dashboard/transactions` → `POST /api/receipts/scan` (Tesseract eng+ara)
-- **AI category:** اقتراح تصنيف بالكلمات المفتاحية + زر «اقتراح تصنيف» (Plus)
-- **Cash flow:** `/dashboard/reports/advanced` — متوسط 3 شهور + جدول 6 شهور + رصيد تراكمي
-
-## الموقع العام والمدونة
-
-- **معزول تمامًا** عن `/dashboard` — route group منفصل `(marketing)`، مفيش أي وصول لبيانات الـ Workspaces من هنا
-- **المقالات:** موديل `Post` بسيط (Markdown → HTML وقت العرض بمكتبة `marked`)، بدون CMS UI — النشر عن طريق `npm run seed:posts` (idempotent بالـ slug، زي `seed:categories`)
-- **ثنائي اللغة:** `{locale, slug}` — AR + EN
-- **مكان الإعلانات:** `AdSlot` على المدونة (مقال + قائمة) — فعّل AdSense بـ `NEXT_PUBLIC_ADSENSE_CLIENT_ID` و slot IDs في `.env`؛ `/ads.txt` يتولّد تلقائياً
-- **SEO:** `sitemap.ts` و`robots.ts` جاهزين، `/dashboard` ممنوع من الفهرسة
-- **قرار معماري مهم:** صفحات المدونة `force-dynamic` (مش static ولا ISR) — عمدًا، عشان الـ build متعتمدش على اتصال قاعدة البيانات وقت البناء نفسه؛ لو الترافيك زاد كتير في المستقبل، سهل نرجع نضيف ISR وقتها
-
-## Onboarding
-
-- **دعوات معلّقة:** لو في دعوة workspace، تظهر في `/onboarding` قبل إنشاء مساحة جديدة
-- **تصنيفات مقترحة:** حسب نوع المساحة (personal / freelance / business) — badges في نموذج الإنشاء
-
-## أوامر مفيدة
-
-- `npm run seed:categories` — يضيف/يحدّث التصنيفات الافتراضية (idempotent، آمن تشغله أكتر من مرة)
-- `npm run seed:posts` — مقالات المدونة AR + EN
-- `npm run db:ping` — يختبر اتصال MongoDB Atlas من جهازك
-- `npm test` — اختبارات Vitest
-
-## النشر على Hostinger (Node.js + GitHub)
-
-**الدومين:** `https://masrofaty.qema-tech.com`
-
-### 1) GitHub
+### 1. Clone the repository
 
 ```bash
-git remote add origin https://github.com/ahmadhasandev711-web/Masrofaty.git
-git push -u origin main
+git clone https://github.com/ahmadhasandev711-web/Masrof.git
+cd Masrof
 ```
 
-### 2) Hostinger hPanel
-
-1. **Websites → Add website → Node.js Web App**
-2. **Connect GitHub** → repo `Masrofaty` → branch `main`
-3. **Build command:** `npm ci && npm run build`
-4. **Start command:** `npm start`
-5. **Node.js:** 20.x أو أحدث (يفضّل 22+)
-6. **Subdomain:** `masrofaty.qema-tech.com`
-
-### 3) Environment variables (في Hostinger — لا ترفع `.env.local` على GitHub)
-
-| Variable | Production value |
-|----------|------------------|
-| `MONGODB_URI` | Atlas connection string |
-| `MONGODB_DB_NAME` | `masrofaty` |
-| `BETTER_AUTH_SECRET` | سر قوي (`openssl rand -base64 32`) |
-| `BETTER_AUTH_URL` | `https://masrofaty.qema-tech.com` |
-| `NEXT_PUBLIC_APP_URL` | `https://masrofaty.qema-tech.com` |
-| `ADMIN_EMAILS` | بريدك للوحة `/admin` |
-| `RESEND_API_KEY` | (اختياري) لإرسال الإيميلات |
-
-### 4) MongoDB Atlas
-
-- **Network Access:** أضف IP سيرفر Hostinger (أو `0.0.0.0/0` مؤقتاً للتجربة)
-- بعد النشر: `npm run seed:categories` و `npm run seed:posts` (مرة واحدة)
-
-### 5) Google OAuth (إن استخدمته)
-
-- Origins: `https://masrofaty.qema-tech.com`
-- Redirect: `https://masrofaty.qema-tech.com/api/auth/callback/google`
-
-## النقل إلى Vercel (الخطوة الحالية)
-
-الملف [`vercel.json`](vercel.json) جاهز — region `fra1` (قريب من MongoDB Atlas أوروبا).
-
-**Repo:** `https://github.com/ahmadhasandev711-web/Masrof`
-
-### 1) ادفع آخر التغييرات على GitHub
+### 2. Install dependencies
 
 ```bash
-git add .
-git commit -m "Prepare Vercel deploy: freemium limits, plan sync, vercel.json."
-git push origin main
+npm install
 ```
 
-### 2) Vercel Dashboard
+### 3. Environment configuration
 
-1. [vercel.com/new](https://vercel.com/new) → **Import Git Repository** → `ahmadhasandev711-web/Masrof`
-2. Framework: **Next.js** (يتعرّف تلقائي)
-3. Build: `npm run build` · Install: `npm ci` · Output: default
-4. **Environment Variables** (Production) — انسخ من `.env.local` وعدّل الـ URLs:
+Copy `.env.example` to `.env.local` and configure your credentials:
 
-| Variable | Production value |
-|----------|------------------|
-| `MONGODB_URI` | نفس Atlas |
-| `MONGODB_DB_NAME` | `masrofaty` |
-| `BETTER_AUTH_SECRET` | نفس السر |
-| `BETTER_AUTH_URL` | `https://masrofaty.qema-tech.com` |
-| `NEXT_PUBLIC_APP_URL` | `https://masrofaty.qema-tech.com` |
-| `TRUSTED_ORIGINS` | `https://masrofaty.qema-tech.com,https://*.vercel.app` |
-| `ADMIN_EMAILS` | بريدك |
-| `RESEND_API_KEY` + `AUTH_EMAIL_FROM` | (اختياري) |
-| `S3_BUCKET` + `S3_*` + `S3_PUBLIC_BASE_URL` | **مطلوب** — Cloudflare R2 موصى به |
+```bash
+cp .env.example .env.local
+```
 
-5. **Deploy** — انتظر أول build (~2–3 دقائق)
+Essential variables:
 
-### 3) Custom Domain + DNS
+```env
+# Database
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB_NAME=sanadat
 
-1. Vercel → Project → **Settings → Domains** → أضف `masrofaty.qema-tech.com`
-2. Vercel يعطيك سجل DNS (CNAME أو A)
-3. في Hostinger hPanel → **DNS** للدومين `qema-tech.com`:
-   - غيّر `masrofaty` من Hostinger Node إلى **CNAME** يشير لـ `cname.vercel-dns.com` (أو اللي Vercel يطلبه)
-4. SSL يتفعّل تلقائي من Vercel (5–30 دقيقة)
+# Auth
+BETTER_AUTH_SECRET=your-32-character-random-secret
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-### 4) بعد ما الدومين يشتغل
+# Admin
+ADMIN_EMAILS=admin@sanadat.site
 
-- [ ] Google OAuth: origins + redirect → `https://masrofaty.qema-tech.com`
-- [ ] Resend: domain verified لـ `qema-tech.com`
-- [ ] Atlas Network Access: `0.0.0.0/0` أو IP ranges Vercel
-- [ ] اختبر: login · dashboard · فاتورة · رفع إيصال
-- [ ] **أوقف** Node app على Hostinger (بعد التأكد)
+# Email (Optional for local dev - emails will log to terminal if unset)
+RESEND_API_KEY=
+AUTH_EMAIL_FROM="Sanadat <notifications@sanadat.site>"
+```
 
-### 5) Object storage (R2) — مطلوب للملفات
+### 4. Seed initial database data
 
-بدون S3/R2، الرفع يشتغل مؤقتًا بس **يُمسح عند كل redeploy**.
+```bash
+npm run seed:categories    # Seeds default expense and income categories (idempotent)
+npm run seed:posts         # (Optional) Seeds marketing blog posts
+```
 
-1. Cloudflare R2 → Create bucket
-2. API token → Access Key + Secret
-3. Public access / custom domain → `S3_PUBLIC_BASE_URL`
-4. في Vercel env:
-   ```
-   S3_BUCKET=masrofaty
-   S3_ACCESS_KEY_ID=...
-   S3_SECRET_ACCESS_KEY=...
-   S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
-   S3_REGION=auto
-   S3_PUBLIC_BASE_URL=https://pub-xxxxx.r2.dev
-   ```
+### 5. Start the development server
 
-Build يبقى `npm run build` (= `next build --webpack` لـ Serwist).
+```bash
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000) to access the application.
+
+---
+
+## 🧪 Testing & Verification
+
+Run the comprehensive test suite:
+
+```bash
+npm test
+```
+
+Run test suite in watch mode:
+
+```bash
+npm run test:watch
+```
+
+Run production build check:
+
+```bash
+npm run build
+```
+
+---
+
+## 🚢 Deployment
+
+### Deploying to Vercel
+
+1. Push your repository to GitHub.
+2. Import the project into [Vercel](https://vercel.com/).
+3. In Project Settings, set the environment variables from `.env.local`.
+4. Ensure the build command is `npm run build` (uses `--webpack` for Serwist PWA support).
+5. Deploy.
+
+---
+
+## 📄 License
+
+Proprietary — All rights reserved. © Sanadat.
