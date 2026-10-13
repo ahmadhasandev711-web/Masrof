@@ -31,7 +31,7 @@ function ArchiveProjectButton({
         startTransition(() => archiveProjectAction(projectId, workspaceId));
       }}
       disabled={isPending}
-      className="text-xs text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
+      className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-60"
     >
       {tCommon("archive")}
     </button>
@@ -72,132 +72,163 @@ export function ProjectList({
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-400">
-        {tEmpty("noProjects")}
+      <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-12 text-center text-neutral-400">
+        <span className="text-3xl block mb-2">📁</span>
+        <p className="font-semibold text-neutral-700">{tEmpty("noProjects")}</p>
       </div>
     );
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3.5">
       {projects.map((project) => {
         const id = project._id;
         const expectedLabel =
           project.expectedAmount != null
-            ? formatMoney(project.expectedAmount, { currency })
+            ? formatMoney(project.expectedAmount, { currency, locale })
             : tShared("none");
         const statusLabel = project.status === "on_hold" ? tStatus("paused") : tStatus(project.status);
         const remaining = projectRemainingAmount(project);
         const showClientReminder = isReceivableReminderDue(project);
 
         return (
-          <li
+          <div
             key={id}
-            className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between"
+            className="group relative overflow-hidden rounded-2xl border border-neutral-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-[#065F46]/40 hover:shadow-sm"
           >
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
+            {/* Top Row: Title, Client, Status & Action */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <Link
                   href={`/dashboard/projects/${id}`}
-                  className="font-semibold text-neutral-900 hover:text-emerald-700 hover:underline"
+                  prefetch={true}
+                  className="font-bold text-neutral-900 text-base sm:text-lg hover:text-[#065F46] transition truncate"
                 >
                   {project.name}
                 </Link>
-                <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">
+
+                {project.clientName && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-700">
+                    <span className="text-neutral-400">👤</span>
+                    <span>{project.clientName}</span>
+                  </span>
+                )}
+
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                    project.status === "active"
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200/80"
+                      : project.status === "completed"
+                      ? "bg-blue-50 text-blue-800 border border-blue-200/80"
+                      : "bg-neutral-100 text-neutral-600 border border-neutral-200"
+                  }`}
+                >
                   {statusLabel}
                 </span>
+
                 {project.profitMargin != null && (
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium border ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold border ${
                       project.netProfit >= 0
                         ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                        : "bg-red-50 text-red-800 border-red-200"
+                        : "bg-rose-50 text-rose-800 border-rose-200"
                     }`}
                   >
                     {project.profitMargin}% {tProjects("margin")}
                   </span>
                 )}
+
                 {project.isOverBudget && (
-                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700 border border-red-200">
+                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700 border border-rose-200">
                     {tProjects("overBudgetWarning")}
                   </span>
                 )}
               </div>
 
-              <p className="mt-1 text-xs text-neutral-500">
-                {project.clientName ?? tShared("none")} · {tDashboardAlerts("dueDate")}{" "}
-                {formatDueDate(project.dueDate, locale)}
-              </p>
+              {/* Action Buttons Top Right on Desktop */}
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href={`/dashboard/projects/${id}`}
+                  prefetch={true}
+                  className="inline-flex items-center gap-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition active:scale-95"
+                >
+                  <span>{tProjects("details")}</span>
+                  <span>←</span>
+                </Link>
 
-              <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-neutral-50 p-2.5 text-xs sm:grid-cols-4">
-                <div>
-                  <span className="text-neutral-400 block">{tProjects("expected")}</span>
-                  <span className="font-semibold text-neutral-800">{expectedLabel}</span>
-                </div>
-                <div>
-                  <span className="text-neutral-400 block">{tProjects("collected")}</span>
-                  <span className="font-semibold text-emerald-700">
-                    {formatMoney(project.incomeTotal, { currency, locale })}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-neutral-400 block">{tProjects("costs")}</span>
-                  <span className="font-semibold text-rose-700">
-                    {formatMoney(project.expenseTotal, { currency })}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-neutral-400 block">{tProjects("netProfit")}</span>
-                  <span
-                    className={`font-bold ${
-                      project.netProfit >= 0 ? "text-emerald-700" : "text-rose-700"
-                    }`}
-                  >
-                    {formatMoney(project.netProfit, { currency })}
-                  </span>
-                  {project.invoicedTotal > project.incomeTotal && (
-                    <span className="block text-[10px] text-neutral-500 font-normal">
-                      ({tProjects("expected")}: {formatMoney(project.invoicedTotal - project.expenseTotal, { currency })})
-                    </span>
-                  )}
-                </div>
+                {canUseWhatsApp && showClientReminder && (
+                  <WhatsAppReminderLink
+                    phone={project.clientPhone}
+                    label={tWhatsapp("remindClient")}
+                    missingPhoneHint={tWhatsapp("missingPhoneHint")}
+                    message={projectReceivableReminderMessage(tWhatsappMessages, {
+                      clientName: project.clientName ?? tDashboardAlerts("ourClient"),
+                      projectName: project.name,
+                      remainingLabel: formatMoney(remaining, { currency }),
+                      dueDateLabel: formatDueDate(project.dueDate),
+                      workspaceName,
+                    })}
+                  />
+                )}
+
+                <ArchiveProjectButton projectId={id} workspaceId={workspaceId} />
+              </div>
+            </div>
+
+            {/* Subtitle / Due Date */}
+            <p className="mt-1 text-xs text-neutral-400">
+              {tDashboardAlerts("dueDate")}: {formatDueDate(project.dueDate, locale)}
+            </p>
+
+            {/* Financial Metrics Grid */}
+            <div className="mt-3.5 grid grid-cols-2 gap-2 sm:grid-cols-4 rounded-xl bg-[#FBF9F4] p-3 border border-neutral-100">
+              <div>
+                <span className="text-[11px] font-medium text-neutral-400 block">{tProjects("expected")}</span>
+                <span className="text-xs sm:text-sm font-bold text-neutral-800 font-mono mt-0.5 block">
+                  {expectedLabel}
+                </span>
               </div>
 
-              {remaining > 0 && (
-                <p className="mt-2 text-xs font-medium text-amber-700">
-                  {tDashboardAlerts("remaining")}: {formatMoney(remaining, { currency })}
-                </p>
-              )}
+              <div>
+                <span className="text-[11px] font-medium text-emerald-800/80 block">{tProjects("collected")}</span>
+                <span className="text-xs sm:text-sm font-bold text-emerald-700 font-mono mt-0.5 block">
+                  {formatMoney(project.incomeTotal, { currency, locale })}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[11px] font-medium text-rose-800/80 block">{tProjects("costs")}</span>
+                <span className="text-xs sm:text-sm font-bold text-rose-700 font-mono mt-0.5 block">
+                  {formatMoney(project.expenseTotal, { currency, locale })}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[11px] font-medium text-neutral-400 block">{tProjects("netProfit")}</span>
+                <span
+                  className={`text-xs sm:text-sm font-black font-mono mt-0.5 block ${
+                    project.netProfit >= 0 ? "text-emerald-700" : "text-rose-700"
+                  }`}
+                >
+                  {formatMoney(project.netProfit, { currency, locale })}
+                </span>
+              </div>
             </div>
 
-            <div className="flex shrink-0 items-center justify-between border-t border-neutral-100 pt-2 sm:border-0 sm:pt-0 sm:flex-col sm:items-end sm:justify-start gap-2">
-              <Link
-                href={`/dashboard/projects/${id}`}
-                className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50 hover:text-emerald-700"
-              >
-                {tProjects("viewDetails")}
-              </Link>
-
-              {canUseWhatsApp && showClientReminder && (
-                <WhatsAppReminderLink
-                  phone={project.clientPhone}
-                  label={tWhatsapp("remindClient")}
-                  missingPhoneHint={tWhatsapp("missingPhoneHint")}
-                  message={projectReceivableReminderMessage(tWhatsappMessages, {
-                    clientName: project.clientName ?? tDashboardAlerts("ourClient"),
-                    projectName: project.name,
-                    remainingLabel: formatMoney(remaining, { currency }),
-                    dueDateLabel: formatDueDate(project.dueDate),
-                    workspaceName,
-                  })}
-                />
-              )}
-
-              <ArchiveProjectButton projectId={id} workspaceId={workspaceId} />
-            </div>
-          </li>
+            {/* Remaining Alert Tag */}
+            {remaining > 0 && (
+              <div className="mt-2.5 flex items-center justify-between text-xs rounded-lg bg-amber-50/80 px-3 py-1.5 text-amber-900 border border-amber-200/60">
+                <span className="font-semibold">
+                  ⚠️ {tDashboardAlerts("remaining")}: {formatMoney(remaining, { currency, locale })}
+                </span>
+                <span className="text-[11px] text-amber-700">
+                  ({tProjects("expectedUponCollection")}: {formatMoney(project.invoicedTotal - project.expenseTotal, { currency, locale })})
+                </span>
+              </div>
+            )}
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
 }

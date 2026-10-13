@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { WorkspaceSwitcher } from "@/features/workspaces/components/workspace-switcher";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
@@ -244,9 +244,11 @@ function NavLink({
 function QuickAddActionSheet({
   open,
   onClose,
+  tNav,
 }: {
   open: boolean;
   onClose: () => void;
+  tNav: ReturnType<typeof useTranslations<"nav">>;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -266,29 +268,29 @@ function QuickAddActionSheet({
   const quickActions = [
     {
       href: "/dashboard/invoices",
-      title: "فاتورة جديدة",
-      desc: "إنشاء وإرسال فاتورة جديدة للعميل",
+      title: tNav("quickActions.newInvoiceTitle"),
+      desc: tNav("quickActions.newInvoiceDesc"),
       icon: "🧾",
       bgColor: "bg-emerald-50 text-emerald-800",
     },
     {
       href: "/dashboard/transactions",
-      title: "تسجيل قيد أو مصروف",
-      desc: "إضافة مصروف فوري أو إيراد للحساب",
+      title: tNav("quickActions.newTransactionTitle"),
+      desc: tNav("quickActions.newTransactionDesc"),
       icon: "💸",
       bgColor: "bg-rose-50 text-rose-800",
     },
     {
       href: "/dashboard/debts",
-      title: "تسجيل سداد أو دين جديد",
-      desc: "متابعة الالتزامات والديون وسدادها",
+      title: tNav("quickActions.newDebtTitle"),
+      desc: tNav("quickActions.newDebtDesc"),
       icon: "📑",
       bgColor: "bg-amber-50 text-amber-800",
     },
     {
       href: "/dashboard/clients",
-      title: "إضافة عميل جديد",
-      desc: "تسجيل بيانات عميل والتواصل معه",
+      title: tNav("quickActions.newClientTitle"),
+      desc: tNav("quickActions.newClientDesc"),
       icon: "👤",
       bgColor: "bg-sky-50 text-sky-800",
     },
@@ -299,19 +301,19 @@ function QuickAddActionSheet({
       <button
         type="button"
         className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-        aria-label="إغلاق"
+        aria-label={tNav("quickActions.close")}
         onClick={onClose}
       />
       <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] shadow-2xl animate-in slide-in-from-bottom duration-200">
         <div className="mx-auto my-2.5 h-1.5 w-12 rounded-full bg-neutral-300" />
         <div className="flex items-center justify-between border-b border-[#E4DFD3] px-5 py-3">
-          <p className="font-bold text-[#065F46] text-base">إجراء سريع</p>
+          <p className="font-bold text-[#065F46] text-base">{tNav("quickActions.title")}</p>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg px-3 py-1 text-xs font-semibold text-neutral-500 hover:bg-neutral-200/50"
           >
-            إغلاق
+            {tNav("quickActions.close")}
           </button>
         </div>
         <div className="flex flex-col gap-2 p-4">
@@ -342,10 +344,12 @@ function MobileMoreSheet({
   open,
   onClose,
   tNav,
+  locale,
 }: {
   open: boolean;
   onClose: () => void;
   tNav: ReturnType<typeof useTranslations<"nav">>;
+  locale: string;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -386,7 +390,9 @@ function MobileMoreSheet({
         <div className="flex flex-col gap-4 p-4">
           {MORE_GROUPS.map((group) => (
             <div key={group.titleAr} className="flex flex-col gap-1.5">
-              <p className="px-1 text-xs font-bold text-neutral-400">{group.titleAr}</p>
+              <p className="px-1 text-xs font-bold text-neutral-400">
+                {locale.startsWith("en") ? group.titleEn : group.titleAr}
+              </p>
               <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-xs divide-y divide-neutral-100">
                 {group.items.map((item) => (
                   <Link
@@ -435,6 +441,7 @@ export function DashboardShell({
   const tNav = useTranslations("nav");
   const tPlans = useTranslations("plans");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -450,10 +457,11 @@ export function DashboardShell({
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-clip bg-[#FBF9F4] pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] text-[#1C1B1A] lg:pb-8">
       {/* Header */}
       <header className="relative z-40 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
-        <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-3 lg:px-8 lg:py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold text-[#065F46]">
+        <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-3 lg:px-8 lg:py-3.5">
+          {/* Desktop & Tablet Header Row */}
+          <div className="hidden lg:flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold text-[#065F46] shrink-0">
                 <Image
                   src="/icons/brand-logo.png"
                   alt={tCommon("appName")}
@@ -463,15 +471,20 @@ export function DashboardShell({
                 />
                 <span>{tCommon("appName")}</span>
               </Link>
-              <p className="truncate text-xs text-[#1C1B1A]/50 mt-0.5">
+
+              <div className="h-4 w-px bg-neutral-200" />
+
+              <WorkspaceSwitcher workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
+
+              <p className="truncate text-xs text-[#1C1B1A]/50">
                 {tNav("greeting", { name: userName })}
                 {planLabel ? (
                   <Link
                     href="/dashboard/plan"
-                    className={`ms-1 rounded px-1.5 py-0.5 ${
+                    className={`ms-1.5 rounded px-2 py-0.5 text-[11px] font-semibold ${
                       planId !== "free"
-                        ? "bg-violet-50 text-violet-700 font-semibold"
-                        : "text-[#065F46] hover:underline"
+                        ? "bg-violet-50 text-violet-700 border border-violet-200"
+                        : "text-[#065F46] bg-emerald-50 border border-emerald-200"
                     }`}
                     title={planViaTeam ? tPlans("viaTeamHint") : undefined}
                   >
@@ -480,43 +493,62 @@ export function DashboardShell({
                   </Link>
                 ) : null}
               </p>
-              {personalPlanLabel ? (
-                <p className="truncate text-xs text-[#1C1B1A]/40">
-                  ({tPlans("yourPlan", { plan: personalPlanLabel })})
-                </p>
-              ) : null}
             </div>
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+
+            <div className="flex shrink-0 items-center justify-end gap-2">
               <LocaleSwitcher />
               <InstallPwaButton compact />
               {isAdmin ? (
                 <Link
                   href="/admin"
-                  className="hidden rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-sm text-violet-800 transition hover:bg-violet-100 sm:inline-block"
+                  className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-800 transition hover:bg-violet-100"
                 >
                   {tNav("admin")}
                 </Link>
               ) : null}
-              <div className="hidden lg:block">
-                <WorkspaceSwitcher workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
-              </div>
               <SignOutButton compact />
             </div>
           </div>
-          <div className="relative z-50 mt-2 flex items-center gap-2 lg:hidden">
-            <WorkspaceSwitcher
-              workspaces={workspaces}
-              activeWorkspaceId={activeWorkspaceId}
-              className="min-w-0 flex-1"
-            />
-            {isAdmin ? (
-              <Link
-                href="/admin"
-                className="shrink-0 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs text-violet-800"
-              >
-                {tNav("admin")}
+
+          {/* Mobile Sleek Single-Row App Bar */}
+          <div className="flex lg:hidden items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Link href="/dashboard" className="shrink-0 flex items-center">
+                <Image
+                  src="/icons/brand-logo.png"
+                  alt={tCommon("appName")}
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 object-contain shrink-0 drop-shadow-xs"
+                />
               </Link>
-            ) : null}
+              <WorkspaceSwitcher
+                workspaces={workspaces}
+                activeWorkspaceId={activeWorkspaceId}
+                className="min-w-0 flex-1 max-w-[180px] sm:max-w-xs"
+              />
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5">
+              {planLabel && planId !== "free" && (
+                <Link
+                  href="/dashboard/plan"
+                  className="rounded-md bg-violet-50 border border-violet-200 px-2 py-0.5 text-[10px] font-bold text-violet-700"
+                >
+                  {planLabel}
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-800"
+                >
+                  {tNav("admin")}
+                </Link>
+              )}
+              <LocaleSwitcher />
+              <SignOutButton compact />
+            </div>
           </div>
         </div>
       </header>
@@ -572,7 +604,7 @@ export function DashboardShell({
             <button
               type="button"
               onClick={() => setQuickAddOpen(true)}
-              aria-label="إجراء سريع"
+              aria-label={tNav("quickActions.button")}
               className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-[#064E3B] to-[#059669] text-white shadow-lg shadow-emerald-950/30 ring-4 ring-[#FBF9F4] transition active:scale-90"
             >
               <NavIcon name="plus" className="h-6 w-6" />
@@ -604,8 +636,17 @@ export function DashboardShell({
         </div>
       </nav>
 
-      <QuickAddActionSheet open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
-      <MobileMoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} tNav={tNav} />
+      <QuickAddActionSheet
+        open={quickAddOpen}
+        onClose={() => setQuickAddOpen(false)}
+        tNav={tNav}
+      />
+      <MobileMoreSheet
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        tNav={tNav}
+        locale={locale}
+      />
     </div>
   );
 }

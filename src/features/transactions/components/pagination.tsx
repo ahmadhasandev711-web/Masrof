@@ -59,6 +59,8 @@ export function TransactionPagination({
           {/* Previous Page */}
           <Link
             href={buildHref(Math.max(1, page - 1))}
+            scroll={false}
+            prefetch={true}
             aria-disabled={page <= 1}
             className={`flex h-8 items-center justify-center rounded-lg px-2.5 font-semibold transition ${
               page <= 1
@@ -74,6 +76,8 @@ export function TransactionPagination({
             <>
               <Link
                 href={buildHref(1)}
+                scroll={false}
+                prefetch={true}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 font-semibold text-neutral-700 hover:bg-neutral-100"
               >
                 1
@@ -89,6 +93,8 @@ export function TransactionPagination({
               <Link
                 key={p}
                 href={buildHref(p)}
+                scroll={false}
+                prefetch={true}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition ${
                   isActive
                     ? "bg-[#065F46] text-white shadow-2xs"
@@ -106,6 +112,8 @@ export function TransactionPagination({
               {endPage < totalPages - 1 && <span className="px-1 text-neutral-400">...</span>}
               <Link
                 href={buildHref(totalPages)}
+                scroll={false}
+                prefetch={true}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 font-semibold text-neutral-700 hover:bg-neutral-100"
               >
                 {totalPages}
@@ -116,6 +124,8 @@ export function TransactionPagination({
           {/* Next Page */}
           <Link
             href={buildHref(Math.min(totalPages, page + 1))}
+            scroll={false}
+            prefetch={true}
             aria-disabled={page >= totalPages}
             className={`flex h-8 items-center justify-center rounded-lg px-2.5 font-semibold transition ${
               page >= totalPages
@@ -133,10 +143,13 @@ export function TransactionPagination({
         <span>{tCommon("perPage")}</span>
         {[20, 50, 100].map((size) => {
           const isCurrent = size === pageSize;
+          const targetPage = Math.max(1, Math.floor(((page - 1) * pageSize) / size) + 1);
           return (
             <Link
               key={size}
-              href={buildHref(1, size)}
+              href={buildHref(targetPage, size)}
+              scroll={false}
+              prefetch={true}
               className={`rounded-lg px-2 py-1 font-bold transition ${
                 isCurrent
                   ? "bg-neutral-900 text-white"

@@ -44,7 +44,7 @@ export async function TransactionList({
   }
 
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="flex flex-col gap-2.5">
       {transactions.map((tx) => {
         const account = tx.accountId as PopulatedRef;
         const category = tx.categoryId as PopulatedRef;

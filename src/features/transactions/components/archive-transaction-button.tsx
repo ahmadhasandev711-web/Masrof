@@ -22,7 +22,7 @@ export function ArchiveTransactionButton({
         startTransition(() => archiveTransactionAction(transactionId, workspaceId));
       }}
       disabled={isPending}
-      className="text-sm text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
+      className="rounded-lg px-2 py-1 text-xs font-semibold text-neutral-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
     >
       {tCommon("delete")}
     </button>

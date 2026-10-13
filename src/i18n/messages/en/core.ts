@@ -71,6 +71,24 @@ const core = {
     switchingWorkspace: "Switching...",
     admin: "Admin",
     greeting: "Hello, {name}",
+    quickActions: {
+      button: "Quick action",
+      title: "Quick Action",
+      close: "Close",
+      newInvoiceTitle: "New Invoice",
+      newInvoiceDesc: "Create & send a new invoice to client",
+      newTransactionTitle: "Record Transaction",
+      newTransactionDesc: "Add instant expense or income entry",
+      newDebtTitle: "Record Debt or Liability",
+      newDebtDesc: "Track liabilities, debts & payments",
+      newClientTitle: "Add New Client",
+      newClientDesc: "Save client contact & project details",
+    },
+    moreGroups: {
+      finance: "Finance & Accounts",
+      clients: "Clients & Projects",
+      system: "System & Plan",
+    },
   },
   charts: {
     incomeVsExpense: "Income vs expense — last 6 months",
@@ -256,6 +274,7 @@ const core = {
   },
   confirm: {
     deleteTransaction: "Are you sure you want to delete this transaction?",
+    deleteTransfer: "Are you sure you want to delete this transfer?",
     archiveAccount: "Are you sure you want to archive this account?",
     archiveCategory: "Are you sure you want to archive this category?",
     deleteBudget: "Are you sure you want to delete this budget?",

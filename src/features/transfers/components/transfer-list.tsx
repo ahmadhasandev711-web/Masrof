@@ -57,32 +57,43 @@ function TransferRow({
 }) {
   const tTransfer = useTranslations("forms.transfer");
   const tCommon = useTranslations("common");
+  const tConfirm = useTranslations("confirm");
   const locale = useLocale();
   const [isPending, startTransition] = useTransition();
 
   return (
-    <li className="flex items-center justify-between rounded-xl border border-blue-100 bg-white px-4 py-3 shadow-sm">
-      <div>
-        <p className="font-medium text-neutral-900">
-          {transfer.description || tTransfer("title")}
-        </p>
-        <p className="text-xs text-neutral-500">
-          {transfer.fromAccountName} → {transfer.toAccountName} ·{" "}
-          {formatDate(transfer.transferDate, locale)}
-        </p>
+    <li className="flex flex-col gap-3 rounded-2xl border border-neutral-200/80 bg-white p-3.5 sm:p-4 shadow-xs transition hover:border-neutral-300 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-neutral-900">
+            {transfer.description || tTransfer("title")}
+          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-neutral-500">
+            <span className="font-medium text-neutral-700">{transfer.fromAccountName}</span>
+            <span>→</span>
+            <span className="font-medium text-neutral-700">{transfer.toAccountName}</span>
+            <span>·</span>
+            <span>{formatDate(transfer.transferDate, locale)}</span>
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="font-semibold text-blue-700">
+      <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+        <span className="font-mono text-base font-bold tabular-nums text-blue-700">
           {formatMoney(transfer.amount, { currency, locale })}
         </span>
         <button
           type="button"
           disabled={isPending}
           onClick={() => {
-            if (!confirm("Cancel this transfer?")) return;
+            if (!confirm(tConfirm("deleteTransfer"))) return;
             startTransition(() => archiveTransferAction(transfer._id, workspaceId));
           }}
-          className="text-sm text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
+          className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
         >
           {tCommon("cancel")}
         </button>

@@ -71,6 +71,24 @@ const core = {
     switchingWorkspace: "جارِ التبديل...",
     admin: "الإدارة",
     greeting: "أهلاً، {name}",
+    quickActions: {
+      button: "إجراء سريع",
+      title: "إجراء سريع",
+      close: "إغلاق",
+      newInvoiceTitle: "فاتورة جديدة",
+      newInvoiceDesc: "إنشاء وإرسال فاتورة جديدة للعميل",
+      newTransactionTitle: "تسجيل قيد أو مصروف",
+      newTransactionDesc: "إضافة مصروف فوري أو إيراد للحساب",
+      newDebtTitle: "تسجيل سداد أو دين جديد",
+      newDebtDesc: "متابعة الالتزامات والديون وسدادها",
+      newClientTitle: "إضافة عميل جديد",
+      newClientDesc: "تسجيل بيانات عميل والتواصل معه",
+    },
+    moreGroups: {
+      finance: "المالية والحسابات",
+      clients: "العملاء والمشاريع",
+      system: "النظام والاشتراك",
+    },
   },
   charts: {
     incomeVsExpense: "الدخل مقابل المصروف — آخر 6 شهور",
@@ -256,6 +274,7 @@ const core = {
   },
   confirm: {
     deleteTransaction: "متأكد إنك عايز تحذف العملية دي؟",
+    deleteTransfer: "متأكد إنك عايز تحذف هذا التحويل؟",
     archiveAccount: "متأكد إنك عايز تؤرشف الحساب ده؟",
     archiveCategory: "متأكد إنك عايز تؤرشف التصنيف ده؟",
     deleteBudget: "متأكد إنك عايز تحذف الميزانية دي؟",

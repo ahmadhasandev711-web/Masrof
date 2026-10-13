@@ -90,44 +90,89 @@ export function TransactionRow({
   }
 
   return (
-    <li className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5">
-      <div className="flex min-w-0 items-center gap-3">
-        <span className="shrink-0 text-xl">{transaction.categoryIcon ?? "🏷️"}</span>
-        <div className="min-w-0">
-          <p className="truncate font-medium text-neutral-900">
-            {transaction.description || transaction.categoryName || tShared("none")}
-          </p>
-          <p className="truncate text-xs text-neutral-500">
-            {transaction.categoryName} · {transaction.accountName} ·{" "}
-            {formatDate(transaction.transactionDate, locale)}
-            {transaction.clientName ? ` · ${transaction.clientName}` : ""}
-            {transaction.projectName ? ` · ${transaction.projectName}` : ""}
-          </p>
-          {transaction.attachmentUrl && (
-            <a
-              href={transaction.attachmentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-0.5 inline-block text-xs text-emerald-700 hover:underline"
+    <li className="flex flex-col gap-2.5 rounded-2xl border border-neutral-200/80 bg-white p-3.5 shadow-xs transition hover:border-neutral-300 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      {/* Left: Category Icon & Details */}
+      <div className="flex min-w-0 items-start gap-3 sm:items-center">
+        <div
+          className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl text-lg ${
+            isIncome
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+              : "bg-neutral-100 text-neutral-700 border border-neutral-200/60"
+          }`}
+        >
+          {transaction.categoryIcon ?? (isIncome ? "💰" : "🏷️")}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
+            <p className="truncate text-sm font-bold text-neutral-900">
+              {transaction.description || transaction.categoryName || tShared("none")}
+            </p>
+            {/* Mobile Amount: Placed at top-right of card for quick glance */}
+            <span
+              className={`sm:hidden shrink-0 font-mono text-sm font-bold tabular-nums ${
+                isIncome ? "text-emerald-700" : "text-rose-600"
+              }`}
             >
-              📎 {transaction.attachmentName ?? tForm("receipt")}
-            </a>
-          )}
+              {isIncome ? "+" : "-"}
+              {formatMoney(transaction.amountMinor, { currency, locale })}
+            </span>
+          </div>
+
+          {/* Metadata badges & details */}
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-500">
+            <span className="font-semibold text-neutral-700">{transaction.categoryName}</span>
+            <span>·</span>
+            <span className="text-neutral-600">{transaction.accountName}</span>
+            <span>·</span>
+            <span className="text-neutral-400">{formatDate(transaction.transactionDate, locale)}</span>
+            {transaction.clientName && (
+              <span className="rounded-md bg-blue-50 px-1.5 py-0.5 font-medium text-blue-700">
+                👤 {transaction.clientName}
+              </span>
+            )}
+            {transaction.projectName && (
+              <span className="rounded-md bg-purple-50 px-1.5 py-0.5 font-medium text-purple-700">
+                📁 {transaction.projectName}
+              </span>
+            )}
+            {transaction.attachmentUrl && (
+              <a
+                href={transaction.attachmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 px-1.5 py-0.5 font-medium text-amber-800 hover:underline"
+              >
+                📎 {transaction.attachmentName ?? tForm("receipt")}
+              </a>
+            )}
+          </div>
         </div>
       </div>
-      <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
-        <span className={`font-semibold ${isIncome ? "text-emerald-700" : "text-red-600"}`}>
+
+      {/* Right: Desktop Amount & Action Buttons */}
+      <div className="flex shrink-0 items-center justify-between border-t border-neutral-100 pt-2 sm:border-0 sm:pt-0 sm:justify-end gap-3">
+        {/* Desktop Amount */}
+        <span
+          className={`hidden sm:inline-block font-mono text-base font-bold tabular-nums ${
+            isIncome ? "text-emerald-700" : "text-rose-600"
+          }`}
+        >
           {isIncome ? "+" : "-"}
           {formatMoney(transaction.amountMinor, { currency, locale })}
         </span>
-        <button
-          type="button"
-          onClick={() => setIsEditing(true)}
-          className="text-sm text-neutral-400 transition hover:text-emerald-700"
-        >
-          {tForm("editTitle")}
-        </button>
-        <ArchiveTransactionButton transactionId={transaction.id} workspaceId={workspaceId} />
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1.5 ms-auto sm:ms-0">
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
+          >
+            {tForm("editTitle")}
+          </button>
+          <ArchiveTransactionButton transactionId={transaction.id} workspaceId={workspaceId} />
+        </div>
       </div>
     </li>
   );
