@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export function InvoicePagination({
   page,
@@ -13,6 +14,8 @@ export function InvoicePagination({
   pageSize?: number;
   searchParams: Record<string, string | undefined>;
 }) {
+  const tCommon = useTranslations("common");
+
   if (totalItems === 0) return null;
 
   const from = (page - 1) * pageSize + 1;
@@ -47,9 +50,7 @@ export function InvoicePagination({
     <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-neutral-200/90 bg-white px-4 py-3 shadow-xs sm:flex-row sm:px-5">
       {/* 1. Showing range */}
       <div className="text-xs font-medium text-neutral-500">
-        عرض <span className="font-bold text-neutral-800">{from}</span> -{" "}
-        <span className="font-bold text-neutral-800">{to}</span> من أصل{" "}
-        <span className="font-bold text-[#065F46]">{totalItems}</span> فاتورة
+        {tCommon("showingRange", { from, to, total: totalItems })}
       </div>
 
       {/* 2. Page Navigation Buttons (Only if totalPages > 1) */}
@@ -65,7 +66,7 @@ export function InvoicePagination({
                 : "border border-neutral-200 text-neutral-700 hover:bg-neutral-100"
             }`}
           >
-            ‹ السابق
+            {tCommon("previous")}
           </Link>
 
           {/* First page if far */}
@@ -122,14 +123,14 @@ export function InvoicePagination({
                 : "border border-neutral-200 text-neutral-700 hover:bg-neutral-100"
             }`}
           >
-            التالي ›
+            {tCommon("next")}
           </Link>
         </div>
       )}
 
       {/* 3. Page size selector */}
       <div className="flex items-center gap-2 text-xs text-neutral-500">
-        <span>لكل صفحة:</span>
+        <span>{tCommon("perPage")}</span>
         <div className="flex items-center gap-1">
           {[10, 20, 50].map((sz) => {
             const isCurrent = pageSize === sz;

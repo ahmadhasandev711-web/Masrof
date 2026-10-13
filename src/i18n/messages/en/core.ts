@@ -32,6 +32,10 @@ const core = {
     free: "Free",
     dash: "—",
     upgradePlanLink: "Pro plan",
+    previous: "‹ Prev",
+    next: "Next ›",
+    showingRange: "Showing {from} - {to} of {total}",
+    perPage: "Per page:",
   },
   locale: {
     label: "Language",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CreateClientForm } from "@/features/clients/components/create-client-form";
+import { useTranslations } from "next-intl";
 
 export function ClientCreationManager({
   workspaceId,
@@ -11,6 +12,8 @@ export function ClientCreationManager({
   canWrite: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations("pages.clients");
+  const tCommon = useTranslations("common");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -35,7 +38,7 @@ export function ClientCreationManager({
         className="flex items-center gap-2 rounded-xl bg-[#065F46] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] active:scale-98"
       >
         <span className="text-base font-bold leading-none">+</span>
-        <span>إضافة عميل جديد</span>
+        <span>{t("newClientBtn")}</span>
       </button>
 
       {isOpen && (
@@ -44,7 +47,7 @@ export function ClientCreationManager({
           <button
             type="button"
             className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-            aria-label="إغلاق"
+            aria-label={tCommon("close")}
             onClick={() => setIsOpen(false)}
           />
 
@@ -53,17 +56,17 @@ export function ClientCreationManager({
             <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
               <div>
                 <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
-                  إضافة عميل جديد
+                  {t("newClientTitle")}
                 </h2>
                 <p className="text-xs text-neutral-500">
-                  سجل بيانات العميل لإصدار الفواتير وربط المشاريع
+                  {t("newClientSubtitle")}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
-                aria-label="إغلاق"
+                aria-label={tCommon("close")}
               >
                 ✕
               </button>

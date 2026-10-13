@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export function TransactionTabs({
   activeTab,
@@ -11,6 +12,8 @@ export function TransactionTabs({
   transfersCount: number;
   searchParams: Record<string, string | undefined>;
 }) {
+  const t = useTranslations("pages.transactions");
+
   function buildHref(targetTab: "transactions" | "transfers") {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(searchParams)) {
@@ -37,7 +40,7 @@ export function TransactionTabs({
             : "text-neutral-600 hover:bg-neutral-200/60"
         }`}
       >
-        <span>العمليات والقيود</span>
+        <span>{t("ledgerTab")}</span>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
             activeTab === "transactions" ? "bg-white/20 text-white" : "bg-neutral-200 text-neutral-700"
@@ -55,7 +58,7 @@ export function TransactionTabs({
             : "text-neutral-600 hover:bg-neutral-200/60"
         }`}
       >
-        <span>التحويلات بين الحسابات</span>
+        <span>{t("transfersTab")}</span>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
             activeTab === "transfers" ? "bg-white/20 text-white" : "bg-neutral-200 text-neutral-700"

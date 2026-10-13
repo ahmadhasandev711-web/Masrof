@@ -36,6 +36,7 @@ export function EditInvoiceDialog({
   const tCommon = useTranslations("common");
   const tForm = useTranslations("forms.invoice");
   const tShared = useTranslations("forms.shared");
+  const tInvoices = useTranslations("pages.invoices");
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export function EditInvoiceDialog({
     setError(null);
 
     if (!selectedClientId) {
-      setError("الرجاء اختيار العميل");
+      setError(tInvoices("selectClientError"));
       return;
     }
 
@@ -109,11 +110,11 @@ export function EditInvoiceDialog({
 
     for (const item of parsedItems) {
       if (!item.description) {
-        setError("الرجاء إدخال وصف لجميع البنود");
+        setError(tInvoices("itemDescriptionError"));
         return;
       }
       if (isNaN(item.amount) || item.amount <= 0) {
-        setError("الرجاء إدخال مبلغ صحيح وموجب لكل بند");
+        setError(tInvoices("itemAmountError"));
         return;
       }
     }
@@ -138,7 +139,7 @@ export function EditInvoiceDialog({
           onClose();
         }
       } catch {
-        setError("حدث خطأ غير متوقع أثناء حفظ التعديلات");
+        setError(tInvoices("saveError"));
       }
     });
   }
@@ -149,7 +150,7 @@ export function EditInvoiceDialog({
       <button
         type="button"
         className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-        aria-label="إغلاق"
+        aria-label={tCommon("close")}
         onClick={onClose}
       />
 
@@ -158,17 +159,17 @@ export function EditInvoiceDialog({
         <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
           <div>
             <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
-              تعديل الفاتورة رقم #{invoice.invoiceNumber}
+              {tInvoices("editInvoiceTitle", { number: invoice.invoiceNumber })}
             </h2>
             <p className="text-xs text-neutral-500">
-              تعديل تفاصيل العميل، البنود، التواريخ، والملاحظات
+              {tInvoices("editInvoiceSubtitle")}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
-            aria-label="إغلاق"
+            aria-label={tCommon("close")}
           >
             ✕
           </button>
@@ -176,7 +177,7 @@ export function EditInvoiceDialog({
 
         {invoice.paidAmount > 0 && (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900">
-            💡 تم تسجيل مدفوعات بقيمة <strong>{formatMoney(invoice.paidAmount)}</strong> على هذه الفاتورة. لا يمكن خفض إجمالي الفاتورة لأقل من المبلغ المسدد.
+            {tInvoices("paidAmountWarning", { amount: formatMoney(invoice.paidAmount) })}
           </div>
         )}
 
@@ -249,7 +250,9 @@ export function EditInvoiceDialog({
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-neutral-700">{tForm("items")}</p>
               <span className="text-xs font-semibold text-neutral-600">
-                الإجمالي الجديد: {totalCalculatedMajor.toLocaleString("ar-EG", { minimumFractionDigits: 2 })} ج.م
+                {tInvoices("newTotalCalculated", {
+                  amount: formatMoney(Math.round(totalCalculatedMajor * 100)),
+                })}
               </span>
             </div>
 

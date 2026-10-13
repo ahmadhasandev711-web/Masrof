@@ -1,4 +1,5 @@
 import { formatMoney } from "@/lib/money";
+import { useTranslations } from "next-intl";
 
 export function TransactionSummaryCards({
   totalIncome,
@@ -13,19 +14,20 @@ export function TransactionSummaryCards({
   totalCount: number;
   currency?: string;
 }) {
+  const t = useTranslations("pages.transactions");
   const isNetPositive = net >= 0;
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {/* 1. Total Income */}
-      <div className="flex items-center justify-between rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 to-emerald-100/40 p-4 shadow-xs">
+      <div className="flex items-center justify-between rounded-xl sm:rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/70 to-emerald-100/40 p-2.5 sm:p-4 shadow-xs">
         <div className="min-w-0">
-          <p className="text-xs font-semibold text-emerald-800">إجمالي الإيرادات</p>
-          <p className="mt-1 truncate text-lg font-bold text-emerald-950 sm:text-xl">
+          <p className="text-[10px] sm:text-xs font-semibold text-emerald-800 truncate">{t("totalIncome")}</p>
+          <p className="mt-0.5 sm:mt-1 truncate text-xs sm:text-xl font-bold text-emerald-950">
             {formatMoney(totalIncome, { currency })}
           </p>
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700">
+        <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
@@ -33,14 +35,14 @@ export function TransactionSummaryCards({
       </div>
 
       {/* 2. Total Expense */}
-      <div className="flex items-center justify-between rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50/70 to-rose-100/40 p-4 shadow-xs">
+      <div className="flex items-center justify-between rounded-xl sm:rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50/70 to-rose-100/40 p-2.5 sm:p-4 shadow-xs">
         <div className="min-w-0">
-          <p className="text-xs font-semibold text-rose-800">إجمالي المصروفات</p>
-          <p className="mt-1 truncate text-lg font-bold text-rose-950 sm:text-xl">
+          <p className="text-[10px] sm:text-xs font-semibold text-rose-800 truncate">{t("totalExpense")}</p>
+          <p className="mt-0.5 sm:mt-1 truncate text-xs sm:text-xl font-bold text-rose-950">
             {formatMoney(totalExpense, { currency })}
           </p>
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-700">
+        <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-700">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
           </svg>
@@ -49,23 +51,23 @@ export function TransactionSummaryCards({
 
       {/* 3. Net Balance */}
       <div
-        className={`flex items-center justify-between rounded-2xl border p-4 shadow-xs ${
+        className={`flex items-center justify-between rounded-xl sm:rounded-2xl border p-2.5 sm:p-4 shadow-xs ${
           isNetPositive
             ? "border-teal-200/80 bg-gradient-to-br from-teal-50/70 to-teal-100/40"
             : "border-amber-200/80 bg-gradient-to-br from-amber-50/70 to-amber-100/40"
         }`}
       >
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <p className={`text-xs font-semibold ${isNetPositive ? "text-teal-800" : "text-amber-800"}`}>
-              صافي الحركة
+          <div className="flex items-center gap-1">
+            <p className={`text-[10px] sm:text-xs font-semibold truncate ${isNetPositive ? "text-teal-800" : "text-amber-800"}`}>
+              {t("net")}
             </p>
-            <span className="rounded-full bg-black/5 px-1.5 py-0.2 text-[10px] font-bold text-neutral-600">
-              {totalCount} عملية
+            <span className="hidden sm:inline-block rounded-full bg-black/5 px-1.5 py-0.2 text-[10px] font-bold text-neutral-600">
+              {totalCount} {t("operations")}
             </span>
           </div>
           <p
-            className={`mt-1 truncate text-lg font-bold sm:text-xl ${
+            className={`mt-0.5 sm:mt-1 truncate text-xs sm:text-xl font-bold ${
               isNetPositive ? "text-teal-950" : "text-amber-950"
             }`}
           >
@@ -73,7 +75,7 @@ export function TransactionSummaryCards({
           </p>
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+          className={`hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
             isNetPositive ? "bg-teal-500/10 text-teal-700" : "bg-amber-500/10 text-amber-700"
           }`}
         >

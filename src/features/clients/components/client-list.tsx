@@ -20,6 +20,7 @@ export function ClientList({
   const tEmpty = useTranslations("empty");
   const tNav = useTranslations("nav");
   const tForm = useTranslations("forms.client");
+  const tClients = useTranslations("pages.clients");
 
   const [query, setQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -108,7 +109,7 @@ export function ClientList({
                           target="_blank"
                           className="text-sm font-medium text-emerald-700 hover:underline"
                         >
-                          كشف حساب
+                          {tClients("statement")}
                         </a>
                         <span className="text-neutral-300">·</span>
                         <a

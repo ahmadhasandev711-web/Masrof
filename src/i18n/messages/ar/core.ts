@@ -32,6 +32,10 @@ const core = {
     free: "مجاني",
     dash: "—",
     upgradePlanLink: "باقة برو",
+    previous: "‹ السابق",
+    next: "التالي ›",
+    showingRange: "عرض {from} - {to} من أصل {total}",
+    perPage: "لكل صفحة:",
   },
   locale: {
     label: "اللغة",

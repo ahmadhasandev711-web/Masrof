@@ -155,7 +155,7 @@ export function ProjectList({
                   </span>
                   {project.invoicedTotal > project.incomeTotal && (
                     <span className="block text-[10px] text-neutral-500 font-normal">
-                      (متوقع: {formatMoney(project.invoicedTotal - project.expenseTotal, { currency })})
+                      ({tProjects("expected")}: {formatMoney(project.invoicedTotal - project.expenseTotal, { currency })})
                     </span>
                   )}
                 </div>

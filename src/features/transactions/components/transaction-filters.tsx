@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -37,8 +37,10 @@ export function TransactionFiltersForm({
   const searchParams = useSearchParams();
   const tFilters = useTranslations("forms.transactionFilters");
   const tTransaction = useTranslations("forms.transaction");
+  const tShared = useTranslations("forms.shared");
   const tCommon = useTranslations("common");
 
+  const [isPending, startTransition] = useTransition();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchInput, setSearchInput] = useState(currentFilters.search ?? "");
 
@@ -56,7 +58,9 @@ export function TransactionFiltersForm({
       }
     }
     const qs = next.toString();
-    router.push(`${pathname}${qs ? `?${qs}` : ""}`);
+    startTransition(() => {
+      router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+    });
   }
 
   // Quick Date Preset Handler
@@ -195,7 +199,7 @@ export function TransactionFiltersForm({
                 updateParams({ search: null });
               }}
               className="absolute inset-y-0 left-0 flex items-center pl-2.5 text-neutral-400 hover:text-neutral-600"
-              aria-label="مسح البحث"
+              aria-label={tFilters("clearSearch")}
             >
               ✕
             </button>
@@ -206,62 +210,62 @@ export function TransactionFiltersForm({
       {/* 2. Middle Row: Date Presets & Advanced Toggle */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-neutral-100 pt-3">
         {/* Date Presets */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-neutral-400 font-semibold me-1">الفترة:</span>
-          <button
-            type="button"
-            onClick={() => handleDatePreset("all")}
-            className={`rounded-lg px-2.5 py-1 font-medium transition ${
-              activeDatePreset === "all"
-                ? "bg-[#065F46] text-white"
-                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-            }`}
-          >
-            الكل
-          </button>
+        <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-0.5 scrollbar-none">
+          <span className="text-neutral-400 font-semibold me-1 shrink-0">{tFilters("period")}</span>
           <button
             type="button"
             onClick={() => handleDatePreset("today")}
-            className={`rounded-lg px-2.5 py-1 font-medium transition ${
+            className={`shrink-0 rounded-lg px-2.5 py-1 font-medium transition ${
               activeDatePreset === "today"
-                ? "bg-[#065F46] text-white"
+                ? "bg-[#065F46] text-white shadow-2xs"
                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
-            اليوم
+            {tFilters("today")}
           </button>
           <button
             type="button"
             onClick={() => handleDatePreset("thisMonth")}
-            className={`rounded-lg px-2.5 py-1 font-medium transition ${
+            className={`shrink-0 rounded-lg px-2.5 py-1 font-medium transition ${
               activeDatePreset === "thisMonth"
-                ? "bg-[#065F46] text-white"
+                ? "bg-[#065F46] text-white shadow-2xs"
                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
-            هذا الشهر
+            {tFilters("thisMonth")}
           </button>
           <button
             type="button"
             onClick={() => handleDatePreset("lastMonth")}
-            className={`rounded-lg px-2.5 py-1 font-medium transition ${
+            className={`shrink-0 rounded-lg px-2.5 py-1 font-medium transition ${
               activeDatePreset === "lastMonth"
-                ? "bg-[#065F46] text-white"
+                ? "bg-[#065F46] text-white shadow-2xs"
                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
-            الشهر السابق
+            {tFilters("lastMonth")}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDatePreset("all")}
+            className={`shrink-0 rounded-lg px-2.5 py-1 font-medium transition ${
+              activeDatePreset === "all"
+                ? "bg-[#065F46] text-white shadow-2xs"
+                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+            }`}
+          >
+            {tFilters("all")}
           </button>
           <button
             type="button"
             onClick={() => setShowAdvanced((prev) => !prev)}
-            className={`rounded-lg px-2.5 py-1 font-medium transition ${
+            className={`shrink-0 rounded-lg px-2.5 py-1 font-medium transition ${
               activeDatePreset === "custom"
                 ? "bg-emerald-800 text-white"
                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
-            تاريخ مخصص...
+            {tFilters("customDate")}
           </button>
         </div>
 
@@ -269,12 +273,16 @@ export function TransactionFiltersForm({
         <button
           type="button"
           onClick={() => setShowAdvanced((prev) => !prev)}
-          className="flex items-center gap-1.5 rounded-lg border border-neutral-200 px-2.5 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
+          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition shrink-0 ${
+            showAdvanced || Boolean(currentFilters.accountId || currentFilters.categoryId)
+              ? "border-emerald-600 bg-emerald-50/60 text-emerald-800"
+              : "border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+          }`}
         >
           <svg className="h-3.5 w-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
-          <span>تصفية إضافية</span>
+          <span>{tFilters("moreFilters")}</span>
           <span className="text-[10px] text-neutral-400">{showAdvanced ? "▲" : "▼"}</span>
         </button>
       </div>
@@ -284,7 +292,7 @@ export function TransactionFiltersForm({
         <div className="grid grid-cols-1 gap-2.5 border-t border-neutral-100 pt-3 sm:grid-cols-2 lg:grid-cols-4 animate-in fade-in-0 duration-150">
           {/* Account Filter */}
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-semibold text-neutral-500">الحساب</label>
+            <label className="text-[11px] font-semibold text-neutral-500">{tShared("account")}</label>
             <select
               value={currentFilters.accountId ?? ""}
               onChange={(e) => updateParams({ accountId: e.target.value || null })}
@@ -301,7 +309,7 @@ export function TransactionFiltersForm({
 
           {/* Category Filter */}
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-semibold text-neutral-500">التصنيف</label>
+            <label className="text-[11px] font-semibold text-neutral-500">{tShared("category")}</label>
             <select
               value={currentFilters.categoryId ?? ""}
               onChange={(e) => updateParams({ categoryId: e.target.value || null })}
@@ -343,7 +351,7 @@ export function TransactionFiltersForm({
       {/* 4. Active Filters Badges & Clear All */}
       {hasAnyFilter && (
         <div className="flex flex-wrap items-center gap-1.5 border-t border-neutral-100 pt-2.5 text-xs">
-          <span className="text-neutral-400 text-[11px]">الفلاتر المفعلة:</span>
+          <span className="text-neutral-400 text-[11px]">{tFilters("activeFilters")}</span>
 
           {currentFilters.type && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
@@ -360,7 +368,7 @@ export function TransactionFiltersForm({
 
           {activeAccount && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-              <span>حساب: {activeAccount.name}</span>
+              <span>{tFilters("accountFilter", { name: activeAccount.name })}</span>
               <button
                 type="button"
                 onClick={() => updateParams({ accountId: null })}
@@ -373,7 +381,7 @@ export function TransactionFiltersForm({
 
           {activeCategory && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-              <span>تصنيف: {activeCategory.name}</span>
+              <span>{tFilters("categoryFilter", { name: activeCategory.name })}</span>
               <button
                 type="button"
                 onClick={() => updateParams({ categoryId: null })}
@@ -386,24 +394,24 @@ export function TransactionFiltersForm({
 
           {activeDatePreset === "today" ? (
             <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-0.5 font-medium text-emerald-800">
-              <span>الفترة: اليوم ({todayStr})</span>
+              <span>{tFilters("periodToday", { date: todayStr })}</span>
               <button
                 type="button"
                 onClick={() => handleDatePreset("all")}
                 className="text-emerald-500 hover:text-emerald-800"
-                title="عرض كل الفترات"
+                title={tFilters("showAllPeriods")}
               >
                 ✕
               </button>
             </span>
           ) : activeDatePreset === "all" ? (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-              <span>الفترة: كل الأوقات</span>
+              <span>{tFilters("periodAll")}</span>
               <button
                 type="button"
                 onClick={() => handleDatePreset("today")}
                 className="text-neutral-400 hover:text-neutral-700"
-                title="الرجوع لليوم"
+                title={tFilters("backToToday")}
               >
                 ✕
               </button>
@@ -412,7 +420,7 @@ export function TransactionFiltersForm({
             <>
               {currentFilters.dateFrom && (
                 <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-                  <span>من: {currentFilters.dateFrom}</span>
+                  <span>{tFilters("from", { date: currentFilters.dateFrom })}</span>
                   <button
                     type="button"
                     onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "all" })}
@@ -424,7 +432,7 @@ export function TransactionFiltersForm({
               )}
               {currentFilters.dateTo && (
                 <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-                  <span>إلى: {currentFilters.dateTo}</span>
+                  <span>{tFilters("to", { date: currentFilters.dateTo })}</span>
                   <button
                     type="button"
                     onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "all" })}
@@ -439,7 +447,7 @@ export function TransactionFiltersForm({
 
           {currentFilters.search && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-              <span>بحث: "{currentFilters.search}"</span>
+              <span>{tFilters("searchFilter", { query: currentFilters.search })}</span>
               <button
                 type="button"
                 onClick={() => {
@@ -469,7 +477,7 @@ export function TransactionFiltersForm({
             }}
             className="ms-auto rounded-lg px-2 py-0.5 text-[11px] font-bold text-rose-600 hover:bg-rose-50"
           >
-            مسح الكل
+            {tFilters("clearAll")}
           </button>
         </div>
       )}

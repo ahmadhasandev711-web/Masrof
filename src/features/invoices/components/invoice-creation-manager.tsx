@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
+import { useTranslations } from "next-intl";
 
 type ProjectOption = { _id: string; name: string; clientId: string };
 
@@ -22,6 +23,8 @@ export function InvoiceCreationManager({
   canWrite: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations("pages.invoices");
+  const tCommon = useTranslations("common");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -47,7 +50,7 @@ export function InvoiceCreationManager({
           className="flex items-center gap-2 rounded-xl bg-[#065F46] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] active:scale-98"
         >
           <span className="text-base font-bold leading-none">+</span>
-          <span>إصدار فاتورة جديدة</span>
+          <span>{t("newInvoiceBtn")}</span>
         </button>
       </div>
 
@@ -57,7 +60,7 @@ export function InvoiceCreationManager({
           <button
             type="button"
             className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-            aria-label="إغلاق"
+            aria-label={tCommon("close")}
             onClick={() => setIsOpen(false)}
           />
 
@@ -66,17 +69,17 @@ export function InvoiceCreationManager({
             <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
               <div>
                 <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
-                  إصدار فاتورة جديدة
+                  {t("newInvoiceTitle")}
                 </h2>
                 <p className="text-xs text-neutral-500">
-                  أنشئ فاتورة لعميل محدد مع تفاصيل البنود والأسعار وتاريخ الاستحقاق
+                  {t("newInvoiceSubtitle")}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
-                aria-label="إغلاق"
+                aria-label={tCommon("close")}
               >
                 ✕
               </button>

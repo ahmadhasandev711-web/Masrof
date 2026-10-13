@@ -166,12 +166,12 @@ export function InvoiceShareDialog({
 
         {/* Link Field */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-neutral-700">رابط الفاتورة المباشر</label>
+          <label className="text-xs font-semibold text-neutral-700">{t("directInvoiceLink")}</label>
           <div className="flex gap-2">
             <input
               type="text"
               readOnly
-              value={loadingToken ? "جارِ التوليد..." : shareUrl}
+              value={loadingToken ? t("generating") : shareUrl}
               dir="ltr"
               className="flex-1 rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-xs text-neutral-700 focus:outline-none"
             />

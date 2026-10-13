@@ -12,10 +12,10 @@ import { EditInvoiceDialog } from "@/features/invoices/components/edit-invoice-d
 import { cancelInvoiceAction } from "@/features/invoices/actions/cancel-invoice";
 import { archiveInvoiceAction } from "@/features/invoices/actions/archive-invoice";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
-function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("ar-EG", {
+function formatDate(isoDate: string, locale = "ar") {
+  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "ar-EG", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -137,6 +137,9 @@ function InvoiceRow({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  const locale = useLocale();
+  const tPages = useTranslations("pages.invoices");
+
   const [isCancelling, startCancelTransition] = useTransition();
   const [isArchiving, startArchiveTransition] = useTransition();
   const [cancelConfirm, setCancelConfirm] = useState(false);
@@ -190,10 +193,10 @@ function InvoiceRow({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
-            <span>📅 {formatDate(invoice.issueDate)}</span>
+            <span>📅 {formatDate(invoice.issueDate, locale)}</span>
             {invoice.dueDate ? (
               <span className="text-neutral-600 font-medium">
-                ⏳ {tForm("dueDate")}: {formatDate(invoice.dueDate)}
+                ⏳ {tForm("dueDate")}: {formatDate(invoice.dueDate, locale)}
               </span>
             ) : null}
           </div>
@@ -202,7 +205,7 @@ function InvoiceRow({
         {/* Financial Amount Box */}
         <div className="rounded-xl bg-[#FBF9F4] p-3 border border-[#E4DFD3]/70 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-[11px] text-neutral-500">{tForm("total") || "إجمالي الفاتورة"}</p>
+            <p className="text-[11px] text-neutral-500">{tForm("total")}</p>
             <p className="text-base sm:text-lg font-bold text-neutral-900">
               {formatMoney(invoice.total, { currency })}
             </p>
@@ -237,7 +240,7 @@ function InvoiceRow({
         {cancelConfirm && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
             <span>
-              هل أنت متأكد من إلغاء الفاتورة <strong>#{invoice.invoiceNumber}</strong>؟ ستتغير حالتها إلى ملغاة.
+              {tPages("cancelConfirmQuestion", { number: invoice.invoiceNumber })}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -255,7 +258,7 @@ function InvoiceRow({
                 }}
                 className="rounded-lg bg-amber-700 px-3 py-1 font-semibold text-white hover:bg-amber-800 disabled:opacity-50"
               >
-                {isCancelling ? "جارِ الإلغاء..." : "تأكيد الإلغاء"}
+                {isCancelling ? tPages("cancelling") : tPages("confirmCancel")}
               </button>
               <button
                 type="button"
@@ -263,7 +266,7 @@ function InvoiceRow({
                 onClick={() => setCancelConfirm(false)}
                 className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 font-medium text-neutral-700 hover:bg-neutral-50"
               >
-                تراجع
+                {tPages("back")}
               </button>
             </div>
           </div>
@@ -273,7 +276,7 @@ function InvoiceRow({
         {archiveConfirm && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900">
             <span>
-              هل أنت متأكد من حذف الفاتورة <strong>#{invoice.invoiceNumber}</strong>؟ لن تظهر في قائمة الفواتير.
+              {tPages("deleteConfirmQuestion", { number: invoice.invoiceNumber })}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -291,7 +294,7 @@ function InvoiceRow({
                 }}
                 className="rounded-lg bg-red-700 px-3 py-1 font-semibold text-white hover:bg-red-800 disabled:opacity-50"
               >
-                {isArchiving ? "جارِ الحذف..." : "تأكيد الحذف"}
+                {isArchiving ? tPages("deleting") : tPages("confirmDelete")}
               </button>
               <button
                 type="button"
@@ -299,7 +302,7 @@ function InvoiceRow({
                 onClick={() => setArchiveConfirm(false)}
                 className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 font-medium text-neutral-700 hover:bg-neutral-50"
               >
-                تراجع
+                {tPages("back")}
               </button>
             </div>
           </div>
@@ -337,11 +340,11 @@ function InvoiceRow({
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(true)}
-                  title="تعديل الفاتورة"
+                  title={tPages("edit")}
                   className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-white px-2.5 py-2 text-center text-xs font-medium text-neutral-700 hover:bg-neutral-50 active:scale-95 transition"
                 >
                   <span>✏️</span>
-                  <span className="hidden sm:inline">تعديل</span>
+                  <span className="hidden sm:inline">{tPages("edit")}</span>
                 </button>
 
                 {invoice.status !== "cancelled" && (
@@ -349,16 +352,16 @@ function InvoiceRow({
                     type="button"
                     onClick={() => {
                       if (invoice.paidAmount > 0) {
-                        setActionError("لا يمكن إلغاء الفاتورة لوجود دفعات مالية مسجلة عليها");
+                        setActionError(tPages("cannotCancelPaidError"));
                       } else {
                         setCancelConfirm(true);
                       }
                     }}
-                    title="إلغاء الفاتورة"
+                    title={tPages("cancel")}
                     className="inline-flex items-center gap-1 rounded-xl border border-amber-200 bg-amber-50/60 px-2.5 py-2 text-center text-xs font-medium text-amber-800 hover:bg-amber-100 active:scale-95 transition"
                   >
                     <span>🚫</span>
-                    <span className="hidden sm:inline">إلغاء</span>
+                    <span className="hidden sm:inline">{tPages("cancel")}</span>
                   </button>
                 )}
 
@@ -366,16 +369,16 @@ function InvoiceRow({
                   type="button"
                   onClick={() => {
                     if (invoice.paidAmount > 0) {
-                      setActionError("لا يمكن حذف الفاتورة لوجود دفعات مالية مسجلة عليها");
+                      setActionError(tPages("cannotDeletePaidError"));
                     } else {
                       setArchiveConfirm(true);
                     }
                   }}
-                  title="حذف الفاتورة"
+                  title={tPages("delete")}
                   className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50/50 px-2.5 py-2 text-center text-xs font-medium text-red-700 hover:bg-red-100 active:scale-95 transition"
                 >
                   <span>🗑️</span>
-                  <span className="hidden sm:inline">حذف</span>
+                  <span className="hidden sm:inline">{tPages("delete")}</span>
                 </button>
               </div>
             )}

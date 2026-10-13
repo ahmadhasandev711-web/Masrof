@@ -163,7 +163,7 @@ export function ClientCombobox({
         >
           <div className="flex min-w-0 items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-800">
-              {selectedClient.name.trim().charAt(0) || "ع"}
+              {selectedClient.name.trim().charAt(0) || "?"}
             </span>
             <div className="min-w-0 truncate">
               <span className="font-medium text-neutral-900">
@@ -282,7 +282,7 @@ export function ClientCombobox({
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-xs text-neutral-600">
-                        {client.name.trim().charAt(0) || "ع"}
+                        {client.name.trim().charAt(0) || "?"}
                       </span>
                       <span className="truncate">{client.name}</span>
                     </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CreateTransactionForm } from "@/features/transactions/components/create-transaction-form";
 import { CreateTransferForm } from "@/features/transfers/components/create-transfer-form";
+import { useTranslations } from "next-intl";
 
 type AccountOption = { id: string; name: string; currency: string };
 type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
@@ -29,6 +30,8 @@ export function TransactionCreationManager({
   aiCategory?: boolean;
   canWrite: boolean;
 }) {
+  const t = useTranslations("pages.transactions");
+  const tCommon = useTranslations("common");
   const [modalType, setModalType] = useState<"transaction" | "transfer" | null>(null);
 
   useEffect(() => {
@@ -55,7 +58,7 @@ export function TransactionCreationManager({
           className="flex items-center gap-2 rounded-xl bg-[#065F46] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] active:scale-98"
         >
           <span className="text-base font-bold leading-none">+</span>
-          <span>إضافة قيد جديد</span>
+          <span>{t("newTransactionBtn")}</span>
         </button>
 
         <button
@@ -64,7 +67,7 @@ export function TransactionCreationManager({
           className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-2.5 text-sm font-semibold text-blue-900 shadow-2xs transition hover:bg-blue-100/70 active:scale-98"
         >
           <span className="text-sm">⇄</span>
-          <span>تحويل بين الحسابات</span>
+          <span>{t("transferBtn")}</span>
         </button>
       </div>
 
@@ -75,7 +78,7 @@ export function TransactionCreationManager({
           <button
             type="button"
             className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-            aria-label="إغلاق"
+            aria-label={tCommon("close")}
             onClick={() => setModalType(null)}
           />
 
@@ -83,13 +86,13 @@ export function TransactionCreationManager({
           <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-[#E4DFD3] bg-[#FBF9F4] p-5 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 sm:p-6">
             <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
               <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
-                {modalType === "transaction" ? "تسجيل قيد أو معاملة جديدة" : "تحويل رصيد بين الحسابات"}
+                {modalType === "transaction" ? t("modalTransactionTitle") : t("modalTransferTitle")}
               </h2>
               <button
                 type="button"
                 onClick={() => setModalType(null)}
                 className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
-                aria-label="إغلاق"
+                aria-label={tCommon("close")}
               >
                 ✕
               </button>

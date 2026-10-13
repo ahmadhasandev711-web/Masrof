@@ -71,7 +71,7 @@ export default async function TransactionsPage({
     listAccountsForWorkspace(workspaceId),
     listCategoriesForWorkspace(workspaceId),
     listTransactions(filters),
-    listTransfersForWorkspace(workspaceId),
+    activeTab === "transfers" ? listTransfersForWorkspace(workspaceId) : Promise.resolve([]),
     listClientsForWorkspace(workspaceId),
     listProjectsForWorkspace(workspaceId),
   ]);
