@@ -122,6 +122,7 @@ const plans = {
       comparePlans: "مقارنة الخطط",
       planColumn: "الخطة",
       priceColumn: "السعر",
+      featuresColumn: "المميزات الرئيسية",
       youAreHere: "أنت هنا",
       upgradeTitle: "رقّي خطتك",
       viewPricing: "شوف الأسعار",

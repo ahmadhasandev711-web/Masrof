@@ -151,7 +151,7 @@ export default async function MyPlanPage() {
               <tr className="border-b border-neutral-200 text-xs text-neutral-500">
                 <th className="py-2.5 font-medium">{tPlansPage("planColumn")}</th>
                 <th className="py-2.5 font-medium">{tPlansPage("priceColumn")}</th>
-                <th className="py-2.5 font-medium">المميزات الرئيسية</th>
+                <th className="py-2.5 font-medium">{tPlansPage("featuresColumn")}</th>
                 <th className="py-2.5 text-center font-medium">{tPlansPage("youAreHere")}</th>
               </tr>
             </thead>

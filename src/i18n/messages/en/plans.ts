@@ -124,6 +124,7 @@ const plans = {
       comparePlans: "Compare plans",
       planColumn: "Plan",
       priceColumn: "Price",
+      featuresColumn: "Key features",
       youAreHere: "You are here",
       upgradeTitle: "Upgrade your plan",
       viewPricing: "View pricing",
