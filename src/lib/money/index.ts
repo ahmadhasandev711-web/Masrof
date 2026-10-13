@@ -60,11 +60,14 @@ export function formatMoney(
   options: { currency?: string; locale?: string } = {},
 ): string {
   const { currency = "EGP", locale = "ar-EG" } = options;
+  const hasFractions = Math.abs(amount) % DEFAULT_MINOR_UNIT_FACTOR !== 0;
 
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     currencyDisplay: "symbol",
+    minimumFractionDigits: hasFractions ? 2 : 0,
+    maximumFractionDigits: 2,
   }).format(fromMinorUnits(amount));
 }
 

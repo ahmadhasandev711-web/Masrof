@@ -42,13 +42,26 @@ export default async function TransactionsPage({
   const rawParams = await searchParams;
   const activeTab = rawParams.tab === "transfers" ? "transfers" : "transactions";
 
+  const isExplicitAll = rawParams.datePreset === "all";
+  const hasExplicitDate = Boolean(rawParams.dateFrom || rawParams.dateTo);
+
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+  const effectiveDateFrom = isExplicitAll ? undefined : (rawParams.dateFrom ?? (hasExplicitDate ? undefined : todayStr));
+  const effectiveDateTo = isExplicitAll ? undefined : (rawParams.dateTo ?? (hasExplicitDate ? undefined : todayStr));
+  const effectiveDatePreset = isExplicitAll
+    ? "all"
+    : rawParams.datePreset ?? (!hasExplicitDate ? "today" : undefined);
+
   const filters = transactionFiltersSchema.parse({
     workspaceId,
     type: rawParams.type || undefined,
     accountId: rawParams.accountId || undefined,
     categoryId: rawParams.categoryId || undefined,
-    dateFrom: rawParams.dateFrom || undefined,
-    dateTo: rawParams.dateTo || undefined,
+    dateFrom: effectiveDateFrom || undefined,
+    dateTo: effectiveDateTo || undefined,
     search: rawParams.search || undefined,
     page: rawParams.page || 1,
     pageSize: rawParams.pageSize || 20,
@@ -104,8 +117,8 @@ export default async function TransactionsPage({
                 type: rawParams.type,
                 accountId: rawParams.accountId,
                 categoryId: rawParams.categoryId,
-                dateFrom: rawParams.dateFrom,
-                dateTo: rawParams.dateTo,
+                dateFrom: effectiveDateFrom,
+                dateTo: effectiveDateTo,
                 search: rawParams.search,
               }}
             />
@@ -161,7 +174,12 @@ export default async function TransactionsPage({
           <TransactionFiltersForm
             accounts={accountOptions}
             categories={categoryOptions}
-            currentFilters={rawParams}
+            currentFilters={{
+              ...rawParams,
+              dateFrom: effectiveDateFrom,
+              dateTo: effectiveDateTo,
+              datePreset: effectiveDatePreset,
+            }}
           />
 
           {/* Transactions List */}

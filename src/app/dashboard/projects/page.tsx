@@ -34,7 +34,9 @@ export default async function ProjectsPage() {
   const inProgressCount = projects.filter((p) => p.status === "active").length;
   const completedCount = projects.filter((p) => p.status === "completed").length;
   const totalInvoiced = projects.reduce((sum, p) => sum + p.invoicedTotal, 0);
+  const totalExpenses = projects.reduce((sum, p) => sum + p.expenseTotal, 0);
   const totalNetProfit = projects.reduce((sum, p) => sum + p.netProfit, 0);
+  const totalExpectedProfit = totalInvoiced - totalExpenses;
 
   return (
     <div className="flex w-full max-w-5xl flex-col gap-5">
@@ -67,6 +69,7 @@ export default async function ProjectsPage() {
         completedCount={completedCount}
         totalInvoiced={totalInvoiced}
         totalNetProfit={totalNetProfit}
+        totalExpectedProfit={totalExpectedProfit}
         currency={activeWorkspace.currency}
       />
 

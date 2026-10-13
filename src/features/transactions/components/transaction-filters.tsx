@@ -28,6 +28,7 @@ export function TransactionFiltersForm({
     categoryId?: string;
     dateFrom?: string;
     dateTo?: string;
+    datePreset?: string;
     search?: string;
   };
 }) {
@@ -62,24 +63,24 @@ export function TransactionFiltersForm({
   function handleDatePreset(preset: "all" | "today" | "thisMonth" | "lastMonth") {
     const now = new Date();
     if (preset === "all") {
-      updateParams({ dateFrom: null, dateTo: null });
+      updateParams({ datePreset: "all", dateFrom: null, dateTo: null });
       return;
     }
     if (preset === "today") {
       const today = formatDateIso(now);
-      updateParams({ dateFrom: today, dateTo: today });
+      updateParams({ datePreset: null, dateFrom: today, dateTo: today });
       return;
     }
     if (preset === "thisMonth") {
       const start = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 1));
       const end = formatDateIso(new Date(now.getFullYear(), now.getMonth() + 1, 0));
-      updateParams({ dateFrom: start, dateTo: end });
+      updateParams({ datePreset: "thisMonth", dateFrom: start, dateTo: end });
       return;
     }
     if (preset === "lastMonth") {
       const start = formatDateIso(new Date(now.getFullYear(), now.getMonth() - 1, 1));
       const end = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 0));
-      updateParams({ dateFrom: start, dateTo: end });
+      updateParams({ datePreset: "lastMonth", dateFrom: start, dateTo: end });
       return;
     }
   }
@@ -92,15 +93,20 @@ export function TransactionFiltersForm({
   const lastMonthStart = formatDateIso(new Date(now.getFullYear(), now.getMonth() - 1, 1));
   const lastMonthEnd = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 0));
 
-  let activeDatePreset: "all" | "today" | "thisMonth" | "lastMonth" | "custom" = "all";
-  if (!currentFilters.dateFrom && !currentFilters.dateTo) {
+  let activeDatePreset: "all" | "today" | "thisMonth" | "lastMonth" | "custom" = "today";
+  if (currentFilters.datePreset === "all") {
     activeDatePreset = "all";
-  } else if (currentFilters.dateFrom === todayStr && currentFilters.dateTo === todayStr) {
+  } else if (
+    currentFilters.datePreset === "today" ||
+    (currentFilters.dateFrom === todayStr && currentFilters.dateTo === todayStr)
+  ) {
     activeDatePreset = "today";
   } else if (currentFilters.dateFrom === thisMonthStart && currentFilters.dateTo === thisMonthEnd) {
     activeDatePreset = "thisMonth";
   } else if (currentFilters.dateFrom === lastMonthStart && currentFilters.dateTo === lastMonthEnd) {
     activeDatePreset = "lastMonth";
+  } else if (!currentFilters.dateFrom && !currentFilters.dateTo && !currentFilters.datePreset) {
+    activeDatePreset = "today";
   } else {
     activeDatePreset = "custom";
   }
@@ -114,6 +120,7 @@ export function TransactionFiltersForm({
       currentFilters.categoryId ||
       currentFilters.dateFrom ||
       currentFilters.dateTo ||
+      currentFilters.datePreset === "all" ||
       currentFilters.search,
   );
 
@@ -377,30 +384,57 @@ export function TransactionFiltersForm({
             </span>
           )}
 
-          {currentFilters.dateFrom && (
-            <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-              <span>من: {currentFilters.dateFrom}</span>
+          {activeDatePreset === "today" ? (
+            <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-0.5 font-medium text-emerald-800">
+              <span>الفترة: اليوم ({todayStr})</span>
               <button
                 type="button"
-                onClick={() => updateParams({ dateFrom: null })}
-                className="text-neutral-400 hover:text-neutral-700"
+                onClick={() => handleDatePreset("all")}
+                className="text-emerald-500 hover:text-emerald-800"
+                title="عرض كل الفترات"
               >
                 ✕
               </button>
             </span>
-          )}
-
-          {currentFilters.dateTo && (
+          ) : activeDatePreset === "all" ? (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-              <span>إلى: {currentFilters.dateTo}</span>
+              <span>الفترة: كل الأوقات</span>
               <button
                 type="button"
-                onClick={() => updateParams({ dateTo: null })}
+                onClick={() => handleDatePreset("today")}
                 className="text-neutral-400 hover:text-neutral-700"
+                title="الرجوع لليوم"
               >
                 ✕
               </button>
             </span>
+          ) : (
+            <>
+              {currentFilters.dateFrom && (
+                <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
+                  <span>من: {currentFilters.dateFrom}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "all" })}
+                    className="text-neutral-400 hover:text-neutral-700"
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+              {currentFilters.dateTo && (
+                <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
+                  <span>إلى: {currentFilters.dateTo}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "all" })}
+                    className="text-neutral-400 hover:text-neutral-700"
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+            </>
           )}
 
           {currentFilters.search && (
@@ -429,6 +463,7 @@ export function TransactionFiltersForm({
                 categoryId: null,
                 dateFrom: null,
                 dateTo: null,
+                datePreset: "all",
                 search: null,
               });
             }}

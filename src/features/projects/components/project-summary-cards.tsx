@@ -6,6 +6,7 @@ export function ProjectSummaryCards({
   completedCount,
   totalInvoiced,
   totalNetProfit,
+  totalExpectedProfit,
   currency = "EGP",
 }: {
   totalProjects: number;
@@ -13,6 +14,7 @@ export function ProjectSummaryCards({
   completedCount: number;
   totalInvoiced: number;
   totalNetProfit: number;
+  totalExpectedProfit?: number;
   currency?: string;
 }) {
   return (
@@ -64,9 +66,16 @@ export function ProjectSummaryCards({
             📈
           </span>
         </div>
-        <p className={`mt-2 truncate text-base font-bold sm:text-xl ${totalNetProfit >= 0 ? "text-emerald-950" : "text-red-700"}`}>
-          {formatMoney(totalNetProfit, { currency })}
-        </p>
+        <div>
+          <p className={`mt-2 truncate text-base font-bold sm:text-xl ${totalNetProfit >= 0 ? "text-emerald-950" : "text-rose-700"}`}>
+            {formatMoney(totalNetProfit, { currency })}
+          </p>
+          {totalExpectedProfit != null && totalExpectedProfit > totalNetProfit && (
+            <p className="text-[10px] text-neutral-500 mt-0.5">
+              متوقع عند سداد الفواتير: <span className="font-semibold text-emerald-700">{formatMoney(totalExpectedProfit, { currency })}</span>
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

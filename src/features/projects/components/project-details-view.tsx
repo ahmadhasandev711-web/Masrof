@@ -142,15 +142,30 @@ export function ProjectDetailsView({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-neutral-500">{tPages("netProfit")}</p>
-          <p
-            className={`mt-1 text-lg font-bold ${
-              summary.netProfit >= 0 ? "text-emerald-700" : "text-rose-700"
-            }`}
-          >
-            {formatMoney(summary.netProfit, { currency })}
-          </p>
+        <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-neutral-500">{tPages("netProfit")}</p>
+              <span className="text-[10px] text-neutral-400 font-medium">
+                {summary.incomeTotal < summary.invoicedTotal ? "نقدي محصل" : "نهائي"}
+              </span>
+            </div>
+            <p
+              className={`mt-1 text-lg font-bold ${
+                summary.netProfit >= 0 ? "text-emerald-700" : "text-rose-700"
+              }`}
+            >
+              {formatMoney(summary.netProfit, { currency })}
+            </p>
+          </div>
+          {summary.invoicedTotal > summary.incomeTotal && (
+            <div className="mt-2 pt-2 border-t border-neutral-100 text-[11px] text-neutral-600">
+              <span>متوقع عند تحصيل الفواتير: </span>
+              <strong className="text-emerald-700 font-bold">
+                {formatMoney(summary.invoicedTotal - summary.expenseTotal, { currency })}
+              </strong>
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
