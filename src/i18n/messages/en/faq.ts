@@ -9,7 +9,7 @@ const faq = {
       {
         question: "How does Sanadat pricing work?",
         answer:
-          "Sanadat offers a free forever plan that includes one workspace and up to 10 invoices per month. The Pro plan gives you unlimited invoices, clients, projects, team members, and cash flow reports for 300 EGP/month (or 3,000 EGP/year with 2 months free).",
+          "Sanadat offers a free forever plan that includes one workspace, up to 3 invoices per month, 5 clients, and 2 active projects. The Pro plan gives you unlimited invoices, clients, projects, team of up to 5 members, and advanced reports for only 250 EGP/year.",
       },
       {
         question: "How does Sanadat protect my financial data?",
@@ -17,9 +17,9 @@ const faq = {
           "All your financial records are secured with bank-grade 256-bit encryption. Each workspace is fully isolated in the cloud and accessible only by you and your authorized team members, with on-demand encrypted data backups.",
       },
       {
-        question: "Can I manage freelance work separately from my personal finances?",
+        question: "Can I organize my projects and finances efficiently?",
         answer:
-          "Yes. Sanadat allows you to maintain independent workspaces (Personal, Freelance, Agency), each having its own dedicated bank accounts, cash vaults, and invoices with zero overlap.",
+          "Yes. Sanadat allows you to organize multiple bank accounts, cash vaults, and track clients and projects independently within your workspace, with dedicated statements to keep your finances organized.",
       },
       {
         question: "How do I upgrade to Pro?",

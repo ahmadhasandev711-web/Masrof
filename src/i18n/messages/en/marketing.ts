@@ -17,10 +17,10 @@ const marketing = {
     footerSecurityBadge: "Bank-grade 256-bit encryption",
     pricingPage: {
       metaTitle: "Pricing — Sanadat",
-      metaDescription: "Sanadat plans and pricing — start free forever or upgrade to Pro for 300 EGP/month.",
+      metaDescription: "Sanadat plans and pricing — start free forever or upgrade to Pro for 250 EGP/year.",
       eyebrow: "Simple, Transparent Plans",
       title: "Choose the right plan for your business scale",
-      subtitle: "Start free forever, or upgrade to Pro for 300 EGP/month for complete, unlimited financial management.",
+      subtitle: "Start free forever, or upgrade to Pro for 250 EGP/year for complete, unlimited financial management.",
       upgradeNote: "To upgrade to Pro,",
       contactUs: "chat directly with us on WhatsApp",
       paymentNote: "for instant activation and full support for local payment methods.",

@@ -192,17 +192,17 @@ const homepage = {
           cta: "Start free",
           features: [
             "1 workspace",
-            "Up to 10 invoices/month",
-            "Up to 20 clients & 5 projects",
+            "Up to 3 invoices/month",
+            "Up to 5 clients & 2 active projects",
             "A4 & POS thermal invoice printing",
             "Client account statements",
           ],
         },
         pro: {
           name: "Pro plan",
-          price: "300",
-          period: "EGP / month",
-          yearlyOption: "or 3,000 EGP / year (save 17%)",
+          price: "250",
+          period: "EGP / year",
+          yearlyOption: "Complete annual plan (250 EGP / yr)",
           desc: "For agencies, studios, and freelancers who need complete, unlimited financial power and zero ads.",
           cta: "Upgrade to Pro now",
           features: [
