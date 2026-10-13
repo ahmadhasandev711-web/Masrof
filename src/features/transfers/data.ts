@@ -184,3 +184,12 @@ export async function listTransfersPaginated(
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
   };
 }
+
+export const countTransfersForWorkspace = unstable_cache(
+  async (workspaceId: string) => {
+    await connectToDatabase();
+    return TransferModel.countDocuments({ workspaceId, isArchived: false });
+  },
+  ["transfers-count-for-workspace"],
+  { revalidate: 30, tags: [CACHE_TAGS.transfers] },
+);

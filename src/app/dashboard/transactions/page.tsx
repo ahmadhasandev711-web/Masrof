@@ -6,7 +6,7 @@ import { listCategoriesForWorkspace } from "@/features/categories/data";
 import { listTransactions } from "@/features/transactions/data";
 import { resolveAccountCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/models/workspace";
-import { listTransfersForWorkspace } from "@/features/transfers/data";
+import { listTransfersPaginated, countTransfersForWorkspace } from "@/features/transfers/data";
 import { listClientsForWorkspace } from "@/features/clients/data";
 import { listProjectsForWorkspace } from "@/features/projects/data";
 import { transactionFiltersSchema } from "@/features/transactions/schemas";
@@ -67,11 +67,14 @@ export default async function TransactionsPage({
     pageSize: rawParams.pageSize || 20,
   });
 
-  const [accounts, categories, transactionsResult, transfers, clients, projects] = await Promise.all([
+  const [accounts, categories, transactionsResult, transfersResult, transfersCount, clients, projects] = await Promise.all([
     listAccountsForWorkspace(workspaceId),
     listCategoriesForWorkspace(workspaceId),
     listTransactions(filters),
-    activeTab === "transfers" ? listTransfersForWorkspace(workspaceId) : Promise.resolve([]),
+    activeTab === "transfers"
+      ? listTransfersPaginated(workspaceId, Number(rawParams.page || 1), Number(rawParams.pageSize || 20))
+      : Promise.resolve({ items: [], total: 0, page: 1, pageSize: 20, totalPages: 1 }),
+    countTransfersForWorkspace(workspaceId),
     listClientsForWorkspace(workspaceId),
     listProjectsForWorkspace(workspaceId),
   ]);
@@ -153,21 +156,31 @@ export default async function TransactionsPage({
         currency={activeWorkspace.currency}
       />
 
-      {/* 3. Ledger vs Transfers Tabs */}
+      {/* 3. Ledger vs Transfers Segmented Tabs */}
       <TransactionTabs
         activeTab={activeTab}
         transactionsCount={transactionsResult.total}
-        transfersCount={transfers.length}
+        transfersCount={transfersCount}
         searchParams={rawParams}
       />
 
       {/* 4. Tab Content */}
       {activeTab === "transfers" ? (
-        <TransferList
-          transfers={transfers}
-          workspaceId={workspaceId}
-          currency={activeWorkspace.currency}
-        />
+        <>
+          <TransferList
+            transfers={transfersResult.items}
+            workspaceId={workspaceId}
+            currency={activeWorkspace.currency}
+          />
+
+          <TransactionPagination
+            page={transfersResult.page}
+            totalPages={transfersResult.totalPages}
+            totalItems={transfersResult.total}
+            pageSize={transfersResult.pageSize}
+            searchParams={rawParams}
+          />
+        </>
       ) : (
         <>
           {/* Smart Filter Bar */}

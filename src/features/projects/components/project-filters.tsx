@@ -70,44 +70,35 @@ export function ProjectFilters({
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-neutral-200/80 bg-white p-3.5 sm:p-4 shadow-xs">
-      {/* 1. Search Bar & Clear */}
-      <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-neutral-400">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </span>
-          <input
-            type="text"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="w-full rounded-xl border border-neutral-200 bg-[#FBF9F4]/60 py-2 ps-9 pe-8 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#065F46] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#065F46]/10"
-          />
-          {searchValue && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              className="absolute inset-y-0 end-2.5 flex items-center text-neutral-400 hover:text-neutral-600"
-              aria-label={t("clearSearch")}
-            >
-              ✕
-            </button>
-          )}
-        </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="shrink-0 rounded-xl bg-neutral-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-50"
-        >
-          {t("searchPlaceholder").split(" ")[0] || "بحث"}
-        </button>
+      {/* 1. Integrated Search Bar (No separate external button) */}
+      <form onSubmit={handleSearchSubmit} className="relative flex-1">
+        <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-neutral-400">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </span>
+        <input
+          type="search"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          placeholder={t("searchPlaceholder")}
+          className="w-full rounded-xl border border-neutral-200 bg-[#FBF9F4]/60 py-2.5 ps-9 pe-8 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-[#065F46] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#065F46]/10"
+        />
+        {searchValue && (
+          <button
+            type="button"
+            onClick={handleClearSearch}
+            className="absolute inset-y-0 end-2.5 flex items-center text-neutral-400 hover:text-neutral-600"
+            aria-label={t("clearSearch")}
+          >
+            ✕
+          </button>
+        )}
       </form>
 
       {/* 2. Status Filter Tabs (Scrollable on mobile) */}

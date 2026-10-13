@@ -29,7 +29,7 @@ export function InvoiceSummaryCards({
             🧾
           </span>
         </div>
-        <p className="mt-2 truncate text-base font-bold text-indigo-950 sm:text-xl">
+        <p className="mt-2 truncate font-mono text-base font-bold tabular-nums text-indigo-950 sm:text-xl">
           {formatMoney(totalInvoiced, { currency, locale })}
         </p>
       </div>
@@ -42,7 +42,7 @@ export function InvoiceSummaryCards({
             ✓
           </span>
         </div>
-        <p className="mt-2 truncate text-base font-bold text-emerald-950 sm:text-xl">
+        <p className="mt-2 truncate font-mono text-base font-bold tabular-nums text-emerald-950 sm:text-xl">
           {formatMoney(totalPaid, { currency, locale })}
         </p>
       </div>
@@ -55,7 +55,7 @@ export function InvoiceSummaryCards({
             ⏳
           </span>
         </div>
-        <p className="mt-2 truncate text-base font-bold text-amber-950 sm:text-xl">
+        <p className="mt-2 truncate font-mono text-base font-bold tabular-nums text-amber-950 sm:text-xl">
           {formatMoney(totalRemaining, { currency, locale })}
         </p>
       </div>
@@ -73,7 +73,7 @@ export function InvoiceSummaryCards({
             ⚠️
           </span>
         </div>
-        <p className="mt-2 truncate text-base font-bold text-rose-950 sm:text-xl">
+        <p className="mt-2 truncate font-mono text-base font-bold tabular-nums text-rose-950 sm:text-xl">
           {formatMoney(totalOverdue, { currency, locale })}
         </p>
       </div>

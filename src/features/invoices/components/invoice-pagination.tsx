@@ -59,6 +59,8 @@ export function InvoicePagination({
           {/* Previous Page */}
           <Link
             href={buildHref(Math.max(1, page - 1))}
+            scroll={false}
+            prefetch={true}
             aria-disabled={page <= 1}
             className={`flex h-8 items-center justify-center rounded-lg px-2.5 font-semibold transition ${
               page <= 1
@@ -74,6 +76,8 @@ export function InvoicePagination({
             <>
               <Link
                 href={buildHref(1)}
+                scroll={false}
+                prefetch={true}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 font-semibold text-neutral-700 hover:bg-neutral-100"
               >
                 1
@@ -89,6 +93,8 @@ export function InvoicePagination({
               <Link
                 key={p}
                 href={buildHref(p)}
+                scroll={false}
+                prefetch={true}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition ${
                   isActive
                     ? "bg-[#065F46] text-white shadow-2xs"
@@ -106,6 +112,8 @@ export function InvoicePagination({
               {endPage < totalPages - 1 && <span className="px-1 text-neutral-400">...</span>}
               <Link
                 href={buildHref(totalPages)}
+                scroll={false}
+                prefetch={true}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 font-semibold text-neutral-700 hover:bg-neutral-100"
               >
                 {totalPages}
@@ -116,6 +124,8 @@ export function InvoicePagination({
           {/* Next Page */}
           <Link
             href={buildHref(Math.min(totalPages, page + 1))}
+            scroll={false}
+            prefetch={true}
             aria-disabled={page >= totalPages}
             className={`flex h-8 items-center justify-center rounded-lg px-2.5 font-semibold transition ${
               page >= totalPages
@@ -134,10 +144,13 @@ export function InvoicePagination({
         <div className="flex items-center gap-1">
           {[10, 20, 50].map((sz) => {
             const isCurrent = pageSize === sz;
+            const targetPage = Math.max(1, Math.floor(((page - 1) * pageSize) / sz) + 1);
             return (
               <Link
                 key={sz}
-                href={buildHref(1, sz)}
+                href={buildHref(targetPage, sz)}
+                scroll={false}
+                prefetch={true}
                 className={`rounded-md px-2 py-1 font-semibold transition ${
                   isCurrent
                     ? "bg-neutral-800 text-white"

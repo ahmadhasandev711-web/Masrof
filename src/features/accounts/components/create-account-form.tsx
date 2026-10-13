@@ -18,10 +18,14 @@ export function CreateAccountForm({
   workspaceId,
   workspaceCurrency,
   canUseMultiCurrency,
+  onSuccess,
+  onCancel,
 }: {
   workspaceId: string;
   workspaceCurrency: SupportedCurrency;
   canUseMultiCurrency: boolean;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const tForm = useTranslations("forms.account");
   const tCommon = useTranslations("common");
@@ -30,14 +34,19 @@ export function CreateAccountForm({
   const [accountType, setAccountType] = useState("cash");
   const formRef = useRef<HTMLFormElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const isSubmittedRef = useRef(false);
 
   useEffect(() => {
-    if (!isPending && state.error === null) {
+    if (isPending) {
+      isSubmittedRef.current = true;
+    } else if (isSubmittedRef.current && state.error === null) {
+      isSubmittedRef.current = false;
       formRef.current?.reset();
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sync controlled select after native form reset
       setAccountType("cash");
+      onSuccess?.();
     }
-  }, [isPending, state.error]);
+  }, [isPending, state.error, onSuccess]);
 
   function applyWalletPreset(name: string) {
     setAccountType("mobile_wallet");
@@ -54,7 +63,19 @@ export function CreateAccountForm({
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
 
-      <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+            aria-label={tCommon("cancel")}
+          >
+            ✕
+          </button>
+        )}
+      </div>
 
       {accountType === "mobile_wallet" && (
         <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
@@ -155,13 +176,25 @@ export function CreateAccountForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="self-start rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("adding") : tForm("submit")}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded-xl bg-[#065F46] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] disabled:opacity-60"
+        >
+          {isPending ? tCommon("adding") : tForm("submit")}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-xl border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+      </div>
     </form>
   );
 }

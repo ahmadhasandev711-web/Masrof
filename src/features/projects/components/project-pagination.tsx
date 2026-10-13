@@ -18,7 +18,7 @@ export function ProjectPagination({
 }) {
   const tCommon = useTranslations("common");
 
-  if (totalItems === 0 || totalPages <= 1) return null;
+  if (totalItems === 0) return null;
 
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(totalItems, page * pageSize);
@@ -55,8 +55,9 @@ export function ProjectPagination({
         {tCommon("showingRange", { from, to, total: totalItems })}
       </div>
 
-      {/* 2. Page Navigation Buttons */}
-      <div className="flex items-center gap-1.5 text-xs">
+      {/* 2. Page Navigation Buttons (Only if totalPages > 1) */}
+      {totalPages > 1 && (
+        <div className="flex items-center gap-1.5 text-xs">
         {/* Previous Page */}
         <Link
           href={buildHref(Math.max(1, page - 1))}
@@ -137,6 +138,7 @@ export function ProjectPagination({
           {tCommon("next")}
         </Link>
       </div>
+      )}
 
       {/* 3. Page Size Selector */}
       <div className="flex items-center gap-1.5 text-xs text-neutral-500">

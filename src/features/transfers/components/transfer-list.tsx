@@ -24,15 +24,28 @@ export function TransferList({
   workspaceId: string;
   currency: string;
 }) {
-  const tTransfer = useTranslations("forms.transfer");
+  const tEmpty = useTranslations("empty");
+  const locale = useLocale();
+
   if (transfers.length === 0) {
-    return null;
+    return (
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white p-8 sm:p-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 text-2xl mb-3 shadow-2xs">
+          ⇄
+        </div>
+        <p className="font-bold text-neutral-900 text-base">{tEmpty("noTransfers")}</p>
+        <p className="mt-1 text-xs text-neutral-500 max-w-sm">
+          {locale === "ar"
+            ? "يمكنك نقل الأموال بسهولة بين حساباتك البنكية والخزائن النقدية وتوثيقها هنا بنقرة واحدة."
+            : "Easily move money between bank accounts and cash vaults to track liquidity accurately."}
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-neutral-600">{tTransfer("title")}</h3>
-      <ul className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
+      <ul className="flex flex-col gap-2.5">
         {transfers.map((transfer) => (
           <TransferRow
             key={transfer._id}

@@ -146,7 +146,14 @@ export function ProjectList({
               </div>
 
               {/* Action Buttons Top Right on Desktop */}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <Link
+                  href={`/dashboard/invoices?projectId=${id}`}
+                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 px-3 py-1.5 text-xs font-semibold transition active:scale-95"
+                >
+                  <span>{tProjects("createInvoice")}</span>
+                </Link>
+
                 <Link
                   href={`/dashboard/projects/${id}`}
                   prefetch={true}
@@ -214,6 +221,37 @@ export function ProjectList({
                 </span>
               </div>
             </div>
+
+            {/* Collection Progress Bar */}
+            {(() => {
+              const baseAmount =
+                project.expectedAmount != null && project.expectedAmount > 0
+                  ? project.expectedAmount
+                  : project.invoicedTotal > 0
+                  ? project.invoicedTotal
+                  : 0;
+              if (baseAmount <= 0) return null;
+              const percent = Math.min(100, Math.round((project.incomeTotal / baseAmount) * 100));
+
+              return (
+                <div className="mt-3 flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-neutral-600">
+                    <span>{tProjects("collectionProgress")}</span>
+                    <span className="font-mono tabular-nums text-emerald-800">
+                      {percent}% ({formatMoney(project.incomeTotal, { currency, locale })} / {formatMoney(baseAmount, { currency, locale })})
+                    </span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        percent >= 100 ? "bg-emerald-600" : percent >= 50 ? "bg-emerald-500" : "bg-amber-500"
+                      }`}
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Remaining Alert Tag */}
             {remaining > 0 && (

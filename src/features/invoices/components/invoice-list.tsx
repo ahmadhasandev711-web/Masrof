@@ -150,7 +150,7 @@ function InvoiceRow({
   return (
     <>
       <li className="flex flex-col gap-3.5 rounded-2xl border border-neutral-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:shadow-sm">
-        {/* Top Header: Invoice # & Status Badges */}
+        {/* Top Header: Invoice # & Single Smart Status Badge */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 pb-3">
           <div className="flex items-center gap-2">
             <span className="font-mono text-sm sm:text-base font-bold text-[#065F46]">
@@ -166,61 +166,81 @@ function InvoiceRow({
               </span>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span
-              className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusClass(invoice.displayStatus)}`}
-            >
-              {tStatus(invoice.displayStatus)}
-            </span>
-            <span
-              className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${financialStatusClass(invoice.financialStatus)}`}
-            >
-              {tForm(`financialStatuses.${invoice.financialStatus}`)}
-            </span>
+          <div className="flex items-center gap-1.5">
+            {invoice.status === "cancelled" ? (
+              <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-500 line-through">
+                {tStatus("cancelled")}
+              </span>
+            ) : invoice.financialStatus === "paid" ? (
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                {tForm("financialStatuses.paid")}
+              </span>
+            ) : invoice.financialStatus === "partially_paid" ? (
+              <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                {tForm("financialStatuses.partially_paid")}
+              </span>
+            ) : invoice.displayStatus === "overdue" ? (
+              <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-800">
+                {tStatus("overdue")}
+              </span>
+            ) : invoice.displayStatus === "draft" ? (
+              <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
+                {tStatus("draft")}
+              </span>
+            ) : (
+              <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800">
+                {tStatus("sent")}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Client & Date Details */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-neutral-400 text-xs">👤</span>
-            <p className="font-semibold text-neutral-900 text-sm sm:text-base">
+            <p className="font-bold text-neutral-900 text-sm sm:text-base">
               {invoice.clientName}
-              {invoice.projectName ? (
-                <span className="ms-1.5 font-normal text-xs text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md">
-                  {invoice.projectName}
-                </span>
-              ) : null}
             </p>
+            {invoice.projectName && (
+              <span className="font-medium text-xs text-purple-700 bg-purple-50 border border-purple-200/60 px-2 py-0.5 rounded-md">
+                📁 {invoice.projectName}
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
             <span>📅 {formatDate(invoice.issueDate, locale)}</span>
-            {invoice.dueDate ? (
-              <span className="text-neutral-600 font-medium">
+            {invoice.dueDate && (
+              <span className={`font-medium ${invoice.displayStatus === "overdue" ? "text-rose-700 font-bold" : "text-neutral-600"}`}>
                 ⏳ {tForm("dueDate")}: {formatDate(invoice.dueDate, locale)}
               </span>
-            ) : null}
+            )}
           </div>
         </div>
 
         {/* Financial Amount Box */}
         <div className="rounded-xl bg-[#FBF9F4] p-3 border border-[#E4DFD3]/70 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-[11px] text-neutral-500">{tForm("total")}</p>
-            <p className="text-base sm:text-lg font-bold text-neutral-900">
-              {formatMoney(invoice.total, { currency })}
+            <p className="text-[11px] text-neutral-500 font-medium">{tForm("total")}</p>
+            <p className="font-mono text-base sm:text-lg font-bold tabular-nums text-neutral-900">
+              {formatMoney(invoice.total, { currency, locale })}
             </p>
           </div>
-          {invoice.financialStatus === "partially_paid" && (
+          {invoice.financialStatus === "partially_paid" ? (
             <div className="text-left rtl:text-right text-xs">
               <p className="text-neutral-500">
-                {tForm("paidAmount")}: <span className="font-semibold text-emerald-700">{formatMoney(invoice.paidAmount, { currency })}</span>
+                {tForm("paidAmount")}: <span className="font-mono font-bold tabular-nums text-emerald-700">{formatMoney(invoice.paidAmount, { currency, locale })}</span>
               </p>
               <p className="text-amber-800 font-bold">
-                {tForm("remainingAmount")}: {formatMoney(invoice.remainingAmount, { currency })}
+                {tForm("remainingAmount")}: <span className="font-mono font-bold tabular-nums">{formatMoney(invoice.remainingAmount, { currency, locale })}</span>
               </p>
             </div>
-          )}
+          ) : invoice.financialStatus === "paid" ? (
+            <div className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+              <span>✓</span>
+              <span>{tForm("financialStatuses.paid")}</span>
+            </div>
+          ) : null}
         </div>
 
         {/* Action Error Message */}
@@ -310,13 +330,14 @@ function InvoiceRow({
         )}
 
         {/* Action Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-neutral-100">
-          <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-[200px]">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-neutral-100">
+          {/* Primary Actions (Record payment & Share) */}
+          <div className="flex flex-wrap items-center gap-2">
             {invoice.status !== "cancelled" && invoice.financialStatus !== "paid" && (
               <button
                 type="button"
                 onClick={() => setIsPaymentOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-center text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3B] active:scale-95"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-center text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#054E3B] active:scale-95"
               >
                 <span>💳</span>
                 <span>{tForm("recordPayment")}</span>
@@ -327,7 +348,7 @@ function InvoiceRow({
               <button
                 type="button"
                 onClick={() => setIsShareOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-center text-xs sm:text-sm font-medium text-sky-800 transition hover:bg-sky-100 active:scale-95"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-center text-xs sm:text-sm font-semibold text-sky-800 transition hover:bg-sky-100 active:scale-95"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -335,83 +356,89 @@ function InvoiceRow({
                 <span>{tForm("shareInvoice")}</span>
               </button>
             )}
+          </div>
 
-            {canWrite && (
-              <div className="flex items-center gap-1">
+          {/* Secondary Actions (Print Segmented Pill + Square Action Buttons) */}
+          <div className="flex items-center gap-2 ms-auto">
+            {/* Compact Print Pill */}
+            <div className="inline-flex items-center rounded-xl border border-neutral-200 bg-neutral-50 p-0.5 text-xs font-semibold">
+              <Link
+                href={`/print/invoice/${invoice._id}?format=a4`}
+                target="_blank"
+                title="A4 Print"
+                className="rounded-lg px-2.5 py-1 text-neutral-700 hover:bg-white hover:shadow-2xs transition"
+              >
+                A4
+              </Link>
+              <span className="text-neutral-300">|</span>
+              <Link
+                href={`/print/invoice/${invoice._id}?format=pos`}
+                target="_blank"
+                title="POS Receipt"
+                className="rounded-lg px-2 py-1 text-neutral-700 hover:bg-white hover:shadow-2xs transition"
+              >
+                POS
+              </Link>
+            </div>
+
+            {/* Quick action buttons */}
+            <div className="flex items-center gap-1">
+              {invoice.paidAmount > 0 && (
                 <button
                   type="button"
-                  onClick={() => setIsEditOpen(true)}
-                  title={tPages("edit")}
-                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-white px-2.5 py-2 text-center text-xs font-medium text-neutral-700 hover:bg-neutral-50 active:scale-95 transition"
+                  onClick={() => setIsHistoryOpen(true)}
+                  title={tForm("paymentHistory")}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-xs text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition"
                 >
-                  <span>✏️</span>
-                  <span className="hidden sm:inline">{tPages("edit")}</span>
+                  📜
                 </button>
+              )}
 
-                {invoice.status !== "cancelled" && (
+              {canWrite && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditOpen(true)}
+                    title={tPages("edit")}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-xs text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition"
+                  >
+                    ✏️
+                  </button>
+
+                  {invoice.status !== "cancelled" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (invoice.paidAmount > 0) {
+                          setActionError(tPages("cannotCancelPaidError"));
+                        } else {
+                          setCancelConfirm(true);
+                        }
+                      }}
+                      title={tPages("cancel")}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50/60 text-xs text-amber-800 hover:bg-amber-100 transition"
+                    >
+                      🚫
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => {
                       if (invoice.paidAmount > 0) {
-                        setActionError(tPages("cannotCancelPaidError"));
+                        setActionError(tPages("cannotDeletePaidError"));
                       } else {
-                        setCancelConfirm(true);
+                        setArchiveConfirm(true);
                       }
                     }}
-                    title={tPages("cancel")}
-                    className="inline-flex items-center gap-1 rounded-xl border border-amber-200 bg-amber-50/60 px-2.5 py-2 text-center text-xs font-medium text-amber-800 hover:bg-amber-100 active:scale-95 transition"
+                    title={tPages("delete")}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50/60 text-xs text-rose-700 hover:bg-rose-100 transition"
                   >
-                    <span>🚫</span>
-                    <span className="hidden sm:inline">{tPages("cancel")}</span>
+                    🗑️
                   </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (invoice.paidAmount > 0) {
-                      setActionError(tPages("cannotDeletePaidError"));
-                    } else {
-                      setArchiveConfirm(true);
-                    }
-                  }}
-                  title={tPages("delete")}
-                  className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-red-50/50 px-2.5 py-2 text-center text-xs font-medium text-red-700 hover:bg-red-100 active:scale-95 transition"
-                >
-                  <span>🗑️</span>
-                  <span className="hidden sm:inline">{tPages("delete")}</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1.5 shrink-0">
-            {invoice.paidAmount > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsHistoryOpen(true)}
-                title={tForm("paymentHistory")}
-                className="rounded-xl border border-neutral-200 bg-white px-2.5 py-2 text-center text-xs font-medium text-neutral-700 hover:bg-neutral-50 active:scale-95 transition"
-              >
-                📜
-              </button>
-            )}
-            <Link
-              href={`/print/invoice/${invoice._id}?format=a4`}
-              target="_blank"
-              title="A4 Print"
-              className="rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-center text-xs font-semibold text-emerald-800 hover:bg-emerald-100 active:scale-95 transition"
-            >
-              A4
-            </Link>
-            <Link
-              href={`/print/invoice/${invoice._id}?format=pos`}
-              target="_blank"
-              title="POS Receipt"
-              className="rounded-xl border border-neutral-200 bg-white px-2.5 py-2 text-center text-xs font-semibold text-neutral-700 hover:bg-neutral-50 active:scale-95 transition"
-            >
-              POS
-            </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </li>
