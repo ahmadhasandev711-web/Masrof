@@ -64,6 +64,8 @@ const pages = {
       outstandingReceivables: "المديونيات المعلقة (المستحق)",
       clientsWithDebt: "عملاء عليهم مستحقات",
       debtClientsUnit: "عميل مدين",
+      totalInvoiced: "إجمالي المفوتر",
+      percentOfClients: "{percent}% من العملاء",
       invoicedAmount: "المفوتر",
       paidAmount: "المحصل",
       settledAccount: "خالص الحساب ✓",

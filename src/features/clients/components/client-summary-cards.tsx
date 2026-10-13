@@ -117,7 +117,9 @@ export function ClientSummaryCards({
           </p>
           <p className="mt-0.5 text-[11px] text-amber-700 truncate">
             {totalClients > 0
-              ? `${Math.round((clientsWithDebt / totalClients) * 100)}% من العملاء`
+              ? t("percentOfClients", {
+                  percent: Math.round((clientsWithDebt / totalClients) * 100),
+                })
               : "0%"}
           </p>
         </div>

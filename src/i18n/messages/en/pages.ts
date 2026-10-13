@@ -64,6 +64,8 @@ const pages = {
       outstandingReceivables: "Outstanding Receivables",
       clientsWithDebt: "Clients with Balance Due",
       debtClientsUnit: "owing",
+      totalInvoiced: "Total Invoiced",
+      percentOfClients: "{percent}% of clients",
       invoicedAmount: "Invoiced",
       paidAmount: "Collected",
       settledAccount: "Settled ✓",
