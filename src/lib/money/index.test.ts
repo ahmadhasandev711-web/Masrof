@@ -39,10 +39,17 @@ describe("money arithmetic", () => {
 });
 
 describe("formatMoney", () => {
-  it("formats EGP in Arabic locale", () => {
+  it("formats EGP in Arabic locale with standard Latin numerals", () => {
     const formatted = formatMoney(10050, { currency: "EGP", locale: "ar-EG" });
     expect(formatted).toMatch(/ج\.م/);
-    expect(formatted.length).toBeGreaterThan(0);
+    expect(formatted).toContain("100.5");
+    expect(formatted).not.toMatch(/[٠-٩]/);
+  });
+
+  it("formats EGP in English locale with Latin numerals", () => {
+    const formatted = formatMoney(10050, { currency: "EGP", locale: "en" });
+    expect(formatted).toContain("100.5");
+    expect(formatted).toMatch(/EGP/);
   });
 });
 

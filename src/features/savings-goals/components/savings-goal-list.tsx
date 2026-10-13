@@ -29,7 +29,7 @@ function progressBarColor(percentage: number) {
 
 function formatDeadline(deadline: Date | string | null) {
   if (!deadline) return null;
-  return new Intl.DateTimeFormat("ar-EG", { dateStyle: "medium" }).format(new Date(deadline));
+  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", { dateStyle: "medium" }).format(new Date(deadline));
 }
 
 function UpdateProgressForm({

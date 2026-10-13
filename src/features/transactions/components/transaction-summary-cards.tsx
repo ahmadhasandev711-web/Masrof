@@ -1,5 +1,5 @@
 import { formatMoney } from "@/lib/money";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export function TransactionSummaryCards({
   totalIncome,
@@ -15,6 +15,7 @@ export function TransactionSummaryCards({
   currency?: string;
 }) {
   const t = useTranslations("pages.transactions");
+  const locale = useLocale();
   const isNetPositive = net >= 0;
 
   return (
@@ -24,7 +25,7 @@ export function TransactionSummaryCards({
         <div className="min-w-0">
           <p className="text-[10px] sm:text-xs font-semibold text-emerald-800 truncate">{t("totalIncome")}</p>
           <p className="mt-0.5 sm:mt-1 truncate text-xs sm:text-xl font-bold text-emerald-950">
-            {formatMoney(totalIncome, { currency })}
+            {formatMoney(totalIncome, { currency, locale })}
           </p>
         </div>
         <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700">
@@ -39,7 +40,7 @@ export function TransactionSummaryCards({
         <div className="min-w-0">
           <p className="text-[10px] sm:text-xs font-semibold text-rose-800 truncate">{t("totalExpense")}</p>
           <p className="mt-0.5 sm:mt-1 truncate text-xs sm:text-xl font-bold text-rose-950">
-            {formatMoney(totalExpense, { currency })}
+            {formatMoney(totalExpense, { currency, locale })}
           </p>
         </div>
         <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-700">
@@ -71,7 +72,7 @@ export function TransactionSummaryCards({
               isNetPositive ? "text-teal-950" : "text-amber-950"
             }`}
           >
-            {formatMoney(net, { currency })}
+            {formatMoney(net, { currency, locale })}
           </p>
         </div>
         <div

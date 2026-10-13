@@ -7,7 +7,7 @@ import { getInvoicePaymentsAction } from "@/features/invoices/actions/get-invoic
 import type { InvoiceListItem, InvoicePaymentListItem } from "@/features/invoices/types";
 
 function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("ar-EG", {
+  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
     day: "numeric",
     month: "short",
     year: "numeric",

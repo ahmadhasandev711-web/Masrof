@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 
 function formatDueDate(isoDate: string | null) {
   if (!isoDate) return null;
-  return new Intl.DateTimeFormat("ar-EG", {
+  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
     day: "numeric",
     month: "short",
     year: "numeric",

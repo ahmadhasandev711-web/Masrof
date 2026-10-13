@@ -4,7 +4,7 @@ import type { InvoicePrintFormat } from "@/features/invoices/constants";
 import { getTranslations } from "next-intl/server";
 
 function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("ar-EG", {
+  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
     day: "numeric",
     month: "long",
     year: "numeric",

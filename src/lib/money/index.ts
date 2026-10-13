@@ -51,18 +51,30 @@ export function fromMinorUnits(
   return amount / factor;
 }
 
+function resolveMoneyLocale(locale?: string): string {
+  if (!locale || locale.startsWith("ar")) {
+    return "ar-EG-u-nu-latn";
+  }
+  if (locale.startsWith("en")) {
+    return "en-US";
+  }
+  return locale;
+}
+
 /**
  * Formats MinorUnits into a localized, currency-aware display string.
+ * Uses standard Latin numerals (1, 2, 3) across Arabic and English.
  * This is the ONLY place UI code should turn money into text.
  */
 export function formatMoney(
   amount: MinorUnits,
   options: { currency?: string; locale?: string } = {},
 ): string {
-  const { currency = "EGP", locale = "ar-EG" } = options;
+  const { currency = "EGP", locale = "ar" } = options;
+  const targetLocale = resolveMoneyLocale(locale);
   const hasFractions = Math.abs(amount) % DEFAULT_MINOR_UNIT_FACTOR !== 0;
 
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(targetLocale, {
     style: "currency",
     currency,
     currencyDisplay: "symbol",

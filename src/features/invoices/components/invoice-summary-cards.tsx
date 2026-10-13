@@ -1,5 +1,5 @@
 import { formatMoney } from "@/lib/money";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export function InvoiceSummaryCards({
   totalInvoiced,
@@ -17,6 +17,7 @@ export function InvoiceSummaryCards({
   currency?: string;
 }) {
   const t = useTranslations("pages.invoices");
+  const locale = useLocale();
 
   return (
     <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
@@ -29,7 +30,7 @@ export function InvoiceSummaryCards({
           </span>
         </div>
         <p className="mt-2 truncate text-base font-bold text-indigo-950 sm:text-xl">
-          {formatMoney(totalInvoiced, { currency })}
+          {formatMoney(totalInvoiced, { currency, locale })}
         </p>
       </div>
 
@@ -42,7 +43,7 @@ export function InvoiceSummaryCards({
           </span>
         </div>
         <p className="mt-2 truncate text-base font-bold text-emerald-950 sm:text-xl">
-          {formatMoney(totalPaid, { currency })}
+          {formatMoney(totalPaid, { currency, locale })}
         </p>
       </div>
 
@@ -55,7 +56,7 @@ export function InvoiceSummaryCards({
           </span>
         </div>
         <p className="mt-2 truncate text-base font-bold text-amber-950 sm:text-xl">
-          {formatMoney(totalRemaining, { currency })}
+          {formatMoney(totalRemaining, { currency, locale })}
         </p>
       </div>
 
@@ -73,7 +74,7 @@ export function InvoiceSummaryCards({
           </span>
         </div>
         <p className="mt-2 truncate text-base font-bold text-rose-950 sm:text-xl">
-          {formatMoney(totalOverdue, { currency })}
+          {formatMoney(totalOverdue, { currency, locale })}
         </p>
       </div>
     </div>

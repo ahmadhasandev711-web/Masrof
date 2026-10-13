@@ -7,7 +7,7 @@ import {
   EditTransactionForm,
   type EditableTransaction,
 } from "@/features/transactions/components/edit-transaction-form";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 type AccountOption = { id: string; name: string };
 type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
@@ -36,8 +36,9 @@ type TransactionRowProps = {
   categories: CategoryOption[];
 };
 
-function formatDate(date: Date | string) {
-  return new Intl.DateTimeFormat("ar-EG", {
+function formatDate(date: Date | string, locale: string = "ar") {
+  const targetLocale = locale.startsWith("en") ? "en-US" : "ar-EG-u-nu-latn";
+  return new Intl.DateTimeFormat(targetLocale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -58,6 +59,7 @@ export function TransactionRow({
   const tForm = useTranslations("forms.transaction");
   const tShared = useTranslations("forms.shared");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const isIncome = transaction.type === "income";
 
@@ -97,7 +99,7 @@ export function TransactionRow({
           </p>
           <p className="truncate text-xs text-neutral-500">
             {transaction.categoryName} · {transaction.accountName} ·{" "}
-            {formatDate(transaction.transactionDate)}
+            {formatDate(transaction.transactionDate, locale)}
             {transaction.clientName ? ` · ${transaction.clientName}` : ""}
             {transaction.projectName ? ` · ${transaction.projectName}` : ""}
           </p>
@@ -116,7 +118,7 @@ export function TransactionRow({
       <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
         <span className={`font-semibold ${isIncome ? "text-emerald-700" : "text-red-600"}`}>
           {isIncome ? "+" : "-"}
-          {formatMoney(transaction.amountMinor, { currency })}
+          {formatMoney(transaction.amountMinor, { currency, locale })}
         </span>
         <button
           type="button"

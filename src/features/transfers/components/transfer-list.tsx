@@ -4,10 +4,11 @@ import { useTransition } from "react";
 import { formatMoney } from "@/lib/money";
 import { archiveTransferAction } from "@/features/transfers/actions/archive-transfer";
 import type { TransferListItem } from "@/features/transfers/types";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("ar-EG", {
+function formatDate(date: string, locale: string = "ar") {
+  const targetLocale = locale.startsWith("en") ? "en-US" : "ar-EG-u-nu-latn";
+  return new Intl.DateTimeFormat(targetLocale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -56,6 +57,7 @@ function TransferRow({
 }) {
   const tTransfer = useTranslations("forms.transfer");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -66,12 +68,12 @@ function TransferRow({
         </p>
         <p className="text-xs text-neutral-500">
           {transfer.fromAccountName} → {transfer.toAccountName} ·{" "}
-          {formatDate(transfer.transferDate)}
+          {formatDate(transfer.transferDate, locale)}
         </p>
       </div>
       <div className="flex items-center gap-3">
         <span className="font-semibold text-blue-700">
-          {formatMoney(transfer.amount, { currency })}
+          {formatMoney(transfer.amount, { currency, locale })}
         </span>
         <button
           type="button"

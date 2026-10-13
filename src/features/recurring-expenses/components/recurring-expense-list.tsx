@@ -16,7 +16,7 @@ import {
 import { useTranslations } from "next-intl";
 
 function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("ar-EG", {
+  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
     day: "numeric",
     month: "short",
     year: "numeric",

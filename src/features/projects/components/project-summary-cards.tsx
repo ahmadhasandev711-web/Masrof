@@ -1,7 +1,7 @@
 "use client";
 
 import { formatMoney } from "@/lib/money";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export function ProjectSummaryCards({
   totalProjects,
@@ -21,6 +21,7 @@ export function ProjectSummaryCards({
   currency?: string;
 }) {
   const t = useTranslations("pages.projects");
+  const locale = useLocale();
 
   return (
     <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
@@ -65,7 +66,7 @@ export function ProjectSummaryCards({
           </span>
         </div>
         <p className="mt-2 truncate text-base font-bold text-indigo-950 sm:text-xl">
-          {formatMoney(totalInvoiced, { currency })}
+          {formatMoney(totalInvoiced, { currency, locale })}
         </p>
       </div>
 
@@ -83,13 +84,13 @@ export function ProjectSummaryCards({
               totalNetProfit >= 0 ? "text-emerald-950" : "text-rose-700"
             }`}
           >
-            {formatMoney(totalNetProfit, { currency })}
+            {formatMoney(totalNetProfit, { currency, locale })}
           </p>
           {totalExpectedProfit != null && totalExpectedProfit > totalNetProfit && (
             <p className="text-[10px] text-neutral-500 mt-0.5">
               {t("expectedUponPayment")}:{" "}
               <span className="font-semibold text-emerald-700">
-                {formatMoney(totalExpectedProfit, { currency })}
+                {formatMoney(totalExpectedProfit, { currency, locale })}
               </span>
             </p>
           )}

@@ -15,5 +15,5 @@ export function getDirection(locale: AppLocale): "rtl" | "ltr" {
 }
 
 export function getIntlLocale(locale: AppLocale): string {
-  return locale === "en" ? "en-US" : "ar-EG";
+  return locale === "en" ? "en-US" : "ar-EG-u-nu-latn";
 }

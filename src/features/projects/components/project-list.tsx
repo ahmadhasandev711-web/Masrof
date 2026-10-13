@@ -11,7 +11,7 @@ import {
 import type { ProjectListItem } from "@/features/projects/types";
 import { projectReceivableReminderMessage } from "@/features/whatsapp/messages";
 import { WhatsAppReminderLink } from "@/features/whatsapp/components/whatsapp-reminder-link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 function ArchiveProjectButton({
   projectId,
@@ -38,9 +38,10 @@ function ArchiveProjectButton({
   );
 }
 
-function formatDueDate(value: string | null) {
+function formatDueDate(value: string | null, locale: string = "ar") {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("ar-EG", {
+  const targetLocale = locale.startsWith("en") ? "en-US" : "ar-EG-u-nu-latn";
+  return new Intl.DateTimeFormat(targetLocale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -60,6 +61,7 @@ export function ProjectList({
   workspaceName: string;
   canUseWhatsApp: boolean;
 }) {
+  const locale = useLocale();
   const tEmpty = useTranslations("empty");
   const tStatus = useTranslations("status");
   const tDashboardAlerts = useTranslations("dashboard.alerts");
@@ -124,7 +126,7 @@ export function ProjectList({
 
               <p className="mt-1 text-xs text-neutral-500">
                 {project.clientName ?? tShared("none")} · {tDashboardAlerts("dueDate")}{" "}
-                {formatDueDate(project.dueDate)}
+                {formatDueDate(project.dueDate, locale)}
               </p>
 
               <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-neutral-50 p-2.5 text-xs sm:grid-cols-4">
@@ -135,7 +137,7 @@ export function ProjectList({
                 <div>
                   <span className="text-neutral-400 block">{tProjects("collected")}</span>
                   <span className="font-semibold text-emerald-700">
-                    {formatMoney(project.incomeTotal, { currency })}
+                    {formatMoney(project.incomeTotal, { currency, locale })}
                   </span>
                 </div>
                 <div>

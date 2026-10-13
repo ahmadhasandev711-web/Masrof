@@ -8,7 +8,8 @@ import { useTranslations, useLocale } from "next-intl";
 
 function formatDate(isoDate: string | null, locale = "ar") {
   if (!isoDate) return "—";
-  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "ar-EG", {
+  const targetLocale = locale.startsWith("en") ? "en-US" : "ar-EG-u-nu-latn";
+  return new Intl.DateTimeFormat(targetLocale, {
     day: "numeric",
     month: "short",
     year: "numeric",
