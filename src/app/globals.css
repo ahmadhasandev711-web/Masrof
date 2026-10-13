@@ -64,5 +64,11 @@ body {
     user-select: none;
     -webkit-user-select: none;
   }
+
+  /* Native App & PWA feel: prevent web elastic rubber-band bounce */
+  html, body {
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
