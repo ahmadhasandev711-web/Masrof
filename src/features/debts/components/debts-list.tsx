@@ -6,6 +6,8 @@ import { formatMoney } from "@/lib/money";
 import { archiveDebtAction } from "@/features/debts/actions/archive-debt";
 import { RecordDebtPaymentDialog } from "@/features/debts/components/record-debt-payment-dialog";
 import { DebtPaymentsDialog } from "@/features/debts/components/debt-payments-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToasts, ToastStack } from "@/components/ui/toast";
 import type { DebtItem } from "@/features/debts/types";
 
 export function DebtsList({
@@ -20,6 +22,7 @@ export function DebtsList({
   currency: string;
 }) {
   const t = useTranslations("forms.debts");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const formatOptions = {
     currency,
@@ -28,20 +31,15 @@ export function DebtsList({
   const [filter, setFilter] = useState<"all" | "active" | "paid">("all");
   const [paymentTargetDebt, setPaymentTargetDebt] = useState<DebtItem | null>(null);
   const [historyTargetDebt, setHistoryTargetDebt] = useState<DebtItem | null>(null);
+  const [archiveTargetDebt, setArchiveTargetDebt] = useState<DebtItem | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { toasts, show: toast, dismiss } = useToasts();
 
   const filteredDebts = debts.filter((d) => {
     if (filter === "active") return d.status === "active";
     if (filter === "paid") return d.status === "paid";
     return true;
   });
-
-  function handleArchive(debtId: string) {
-    if (!window.confirm(t("archiveConfirm"))) return;
-    startTransition(async () => {
-      await archiveDebtAction(workspaceId, debtId);
-    });
-  }
 
   return (
     <div className="space-y-4">
@@ -208,7 +206,7 @@ export function DebtsList({
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() => handleArchive(debt.id)}
+                      onClick={() => setArchiveTargetDebt(debt)}
                       className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:text-red-600"
                     >
                       {t("archive")}
@@ -253,6 +251,37 @@ export function DebtsList({
           currency={currency}
         />
       )}
+
+      {/* Archive Confirmation Dialog */}
+      <ConfirmDialog
+        open={archiveTargetDebt !== null}
+        title={tCommon("confirmation")}
+        message={
+          archiveTargetDebt
+            ? t("archiveConfirmNamed", { name: archiveTargetDebt.name })
+            : ""
+        }
+        confirmLabel={tCommon("archive")}
+        pendingLabel={tCommon("archiving")}
+        tone="danger"
+        isPending={isPending}
+        onConfirm={() => {
+          if (!archiveTargetDebt) return;
+          const target = archiveTargetDebt;
+          startTransition(async () => {
+            const res = await archiveDebtAction(workspaceId, target.id);
+            if (res?.error) {
+              toast(res.error, "error");
+            } else {
+              toast(t("archiveSuccess"), "success");
+            }
+            setArchiveTargetDebt(null);
+          });
+        }}
+        onCancel={() => setArchiveTargetDebt(null)}
+      />
+
+      <ToastStack toasts={toasts} onDismiss={dismiss} />
     </div>
   );
 }

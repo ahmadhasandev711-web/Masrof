@@ -19,6 +19,7 @@ const core = {
     adding: "Adding...",
     exporting: "Exporting...",
     archiving: "Archiving...",
+    deleting: "Deleting...",
     archivedClient: "Client archived",
     savedClient: "Client changes saved",
     edit: "Edit",

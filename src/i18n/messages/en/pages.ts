@@ -45,9 +45,20 @@ const pages = {
     },
     budgets: {
       title: "Budgets & recurring expenses",
+      subtitle: "Track monthly spending limits and recurring expenses for your workspace",
+      totalBudgeted: "Total Budgets",
+      totalSpent: "Total Spent This Month",
+      totalRemaining: "Total Remaining",
+      consumptionRate: "Consumption Rate",
     },
     categories: {
       title: "Categories",
+      subtitle: "Manage and categorize income sources and expense items for this workspace",
+      newCategoryBtn: "+ Add Category",
+      incomeCount: "{count} income categories",
+      expenseCount: "{count} expense categories",
+      totalCount: "{count} total categories",
+      systemBadge: "System",
     },
     clients: {
       title: "Clients",
@@ -177,6 +188,11 @@ const pages = {
     },
     goals: {
       title: "Savings goals",
+      subtitle: "Set financial targets and track your savings progress step by step",
+      totalTarget: "Total Target",
+      totalSaved: "Total Saved",
+      totalRemaining: "Total Remaining",
+      overallProgress: "Overall Progress",
     },
     invoices: {
       title: "Client invoices",

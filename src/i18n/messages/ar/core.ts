@@ -19,6 +19,7 @@ const core = {
     adding: "جارِ الإضافة...",
     exporting: "جارِ التصدير...",
     archiving: "جارِ الأرشفة...",
+    deleting: "جارِ الحذف...",
     archivedClient: "تم أرشفة العميل",
     savedClient: "تم حفظ تعديلات العميل",
     edit: "تعديل",

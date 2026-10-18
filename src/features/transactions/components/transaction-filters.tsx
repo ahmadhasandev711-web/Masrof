@@ -38,9 +38,8 @@ export function TransactionFiltersForm({
   const tFilters = useTranslations("forms.transactionFilters");
   const tTransaction = useTranslations("forms.transaction");
   const tShared = useTranslations("forms.shared");
-  const tCommon = useTranslations("common");
 
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchInput, setSearchInput] = useState(currentFilters.search ?? "");
 
@@ -65,26 +64,20 @@ export function TransactionFiltersForm({
 
   // Quick Date Preset Handler
   function handleDatePreset(preset: "all" | "today" | "thisMonth" | "lastMonth") {
-    const now = new Date();
     if (preset === "all") {
       updateParams({ datePreset: "all", dateFrom: null, dateTo: null });
       return;
     }
     if (preset === "today") {
-      const today = formatDateIso(now);
-      updateParams({ datePreset: null, dateFrom: today, dateTo: today });
+      updateParams({ datePreset: "today", dateFrom: todayStr, dateTo: todayStr });
       return;
     }
     if (preset === "thisMonth") {
-      const start = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 1));
-      const end = formatDateIso(new Date(now.getFullYear(), now.getMonth() + 1, 0));
-      updateParams({ datePreset: "thisMonth", dateFrom: start, dateTo: end });
+      updateParams({ datePreset: "thisMonth", dateFrom: thisMonthStart, dateTo: thisMonthEnd });
       return;
     }
     if (preset === "lastMonth") {
-      const start = formatDateIso(new Date(now.getFullYear(), now.getMonth() - 1, 1));
-      const end = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 0));
-      updateParams({ datePreset: "lastMonth", dateFrom: start, dateTo: end });
+      updateParams({ datePreset: "lastMonth", dateFrom: lastMonthStart, dateTo: lastMonthEnd });
       return;
     }
   }
@@ -122,10 +115,8 @@ export function TransactionFiltersForm({
     currentFilters.type ||
       currentFilters.accountId ||
       currentFilters.categoryId ||
-      currentFilters.dateFrom ||
-      currentFilters.dateTo ||
-      currentFilters.datePreset === "all" ||
-      currentFilters.search,
+      currentFilters.search ||
+      activeDatePreset === "custom",
   );
 
   return (
@@ -392,57 +383,30 @@ export function TransactionFiltersForm({
             </span>
           )}
 
-          {activeDatePreset === "today" ? (
-            <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-0.5 font-medium text-emerald-800">
-              <span>{tFilters("periodToday", { date: todayStr })}</span>
-              <button
-                type="button"
-                onClick={() => handleDatePreset("all")}
-                className="text-emerald-500 hover:text-emerald-800"
-                title={tFilters("showAllPeriods")}
-              >
-                ✕
-              </button>
-            </span>
-          ) : activeDatePreset === "all" ? (
+          {activeDatePreset === "custom" && currentFilters.dateFrom && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-              <span>{tFilters("periodAll")}</span>
+              <span>{tFilters("from", { date: currentFilters.dateFrom })}</span>
               <button
                 type="button"
-                onClick={() => handleDatePreset("today")}
+                onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "today" })}
                 className="text-neutral-400 hover:text-neutral-700"
-                title={tFilters("backToToday")}
               >
                 ✕
               </button>
             </span>
-          ) : (
-            <>
-              {currentFilters.dateFrom && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-                  <span>{tFilters("from", { date: currentFilters.dateFrom })}</span>
-                  <button
-                    type="button"
-                    onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "all" })}
-                    className="text-neutral-400 hover:text-neutral-700"
-                  >
-                    ✕
-                  </button>
-                </span>
-              )}
-              {currentFilters.dateTo && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
-                  <span>{tFilters("to", { date: currentFilters.dateTo })}</span>
-                  <button
-                    type="button"
-                    onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "all" })}
-                    className="text-neutral-400 hover:text-neutral-700"
-                  >
-                    ✕
-                  </button>
-                </span>
-              )}
-            </>
+          )}
+
+          {activeDatePreset === "custom" && currentFilters.dateTo && (
+            <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
+              <span>{tFilters("to", { date: currentFilters.dateTo })}</span>
+              <button
+                type="button"
+                onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "today" })}
+                className="text-neutral-400 hover:text-neutral-700"
+              >
+                ✕
+              </button>
+            </span>
           )}
 
           {currentFilters.search && (
@@ -471,7 +435,7 @@ export function TransactionFiltersForm({
                 categoryId: null,
                 dateFrom: null,
                 dateTo: null,
-                datePreset: "all",
+                datePreset: null,
                 search: null,
               });
             }}

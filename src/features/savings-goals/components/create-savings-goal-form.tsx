@@ -9,28 +9,41 @@ import { useTranslations } from "next-intl";
 
 const initialState: CreateSavingsGoalState = { error: null };
 
-export function CreateSavingsGoalForm({ workspaceId }: { workspaceId: string }) {
+export function CreateSavingsGoalForm({
+  workspaceId,
+  onSuccess,
+  onCancel,
+  showTitle = true,
+}: {
+  workspaceId: string;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  showTitle?: boolean;
+}) {
   const tForm = useTranslations("forms.savingsGoal");
   const tShared = useTranslations("forms.shared");
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createSavingsGoalAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const hasSubmitted = useRef(false);
 
   useEffect(() => {
-    if (!isPending && state.error === null) {
+    if (hasSubmitted.current && !isPending && state.error === null) {
       formRef.current?.reset();
+      hasSubmitted.current = false;
+      onSuccess?.();
     }
-  }, [isPending, state.error]);
+  }, [isPending, state.error, onSuccess]);
 
   return (
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+      className={showTitle ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm" : "flex flex-col gap-4"}
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
 
-      <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
+      {showTitle && <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5 sm:col-span-2">
@@ -82,13 +95,28 @@ export function CreateSavingsGoalForm({ workspaceId }: { workspaceId: string }) 
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="self-start rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("adding") : tForm("submit")}
-      </button>
+      <div className="flex items-center justify-end gap-2 pt-2">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+        <button
+          type="submit"
+          disabled={isPending}
+          onClick={() => {
+            hasSubmitted.current = true;
+          }}
+          className="rounded-xl bg-[#065F46] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#054E3A] disabled:opacity-60"
+        >
+          {isPending ? tCommon("adding") : tForm("submit")}
+        </button>
+      </div>
     </form>
   );
 }

@@ -30,37 +30,47 @@ export function CreateRecurringExpenseForm({
   workspaceId,
   accounts,
   expenseCategories,
+  onSuccess,
+  onCancel,
+  showTitle = true,
 }: {
   workspaceId: string;
   accounts: AccountOption[];
   expenseCategories: CategoryOption[];
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  showTitle?: boolean;
 }) {
   const tRecurring = useTranslations("forms.recurring");
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createRecurringExpenseAction, initialState);
   const [frequency, setFrequency] = useState<"monthly" | "weekly">("monthly");
   const formRef = useRef<HTMLFormElement>(null);
+  const hasSubmitted = useRef(false);
 
   useEffect(() => {
-    if (!isPending && state.error === null) {
+    if (hasSubmitted.current && !isPending && state.error === null) {
       formRef.current?.reset();
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync frequency toggle after native form reset
+      hasSubmitted.current = false;
       setFrequency("monthly");
+      onSuccess?.();
     }
-  }, [isPending, state.error]);
+  }, [isPending, state.error, onSuccess]);
 
   return (
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+      className={showTitle ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm" : "flex flex-col gap-4"}
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
 
-      <div>
-        <h2 className="font-semibold text-neutral-900">{tRecurring("title")}</h2>
-        <p className="mt-1 text-sm text-neutral-500">{tRecurring("hint")}</p>
-      </div>
+      {showTitle && (
+        <div>
+          <h2 className="font-semibold text-neutral-900">{tRecurring("title")}</h2>
+          <p className="mt-1 text-sm text-neutral-500">{tRecurring("hint")}</p>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5 sm:col-span-2">
@@ -171,13 +181,28 @@ export function CreateRecurringExpenseForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending || accounts.length === 0 || expenseCategories.length === 0}
-        className="self-start rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800 disabled:opacity-60"
-      >
-        {isPending ? tCommon("saving") : tRecurring("submit")}
-      </button>
+      <div className="flex items-center justify-end gap-2 pt-2">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            className="rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
+        <button
+          type="submit"
+          disabled={isPending || accounts.length === 0 || expenseCategories.length === 0}
+          onClick={() => {
+            hasSubmitted.current = true;
+          }}
+          className="rounded-xl bg-[#065F46] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#054E3A] disabled:opacity-60"
+        >
+          {isPending ? tCommon("saving") : tRecurring("submit")}
+        </button>
+      </div>
     </form>
   );
 }

@@ -1,13 +1,14 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { formatMoney } from "@/lib/money";
 import { archiveSavingsGoalAction } from "@/features/savings-goals/actions/archive-goal";
 import {
   updateGoalProgressAction,
   type UpdateGoalProgressState,
 } from "@/features/savings-goals/actions/update-goal-progress";
-import { useTranslations } from "next-intl";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useTranslations, useLocale } from "next-intl";
 
 type SavingsGoalItem = {
   _id: string;
@@ -27,9 +28,9 @@ function progressBarColor(percentage: number) {
   return "bg-emerald-600";
 }
 
-function formatDeadline(deadline: Date | string | null) {
+function formatDeadline(deadline: Date | string | null, locale: string) {
   if (!deadline) return null;
-  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", { dateStyle: "medium" }).format(new Date(deadline));
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "medium" }).format(new Date(deadline));
 }
 
 function UpdateProgressForm({
@@ -78,21 +79,39 @@ function UpdateProgressForm({
 }
 
 function ArchiveGoalButton({ goalId, workspaceId }: { goalId: string; workspaceId: string }) {
+  const [open, setOpen] = useState(false);
   const tConfirm = useTranslations("confirm");
   const tCommon = useTranslations("common");
   const [isPending, startTransition] = useTransition();
 
   return (
-    <button
-      onClick={() => {
-        if (!confirm(tConfirm("deleteSavingsGoal"))) return;
-        startTransition(() => archiveSavingsGoalAction(goalId, workspaceId));
-      }}
-      disabled={isPending}
-      className="text-xs text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
-    >
-      {tCommon("delete")}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        disabled={isPending}
+        className="text-xs text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
+      >
+        {tCommon("delete")}
+      </button>
+
+      <ConfirmDialog
+        open={open}
+        title={tCommon("confirmation")}
+        message={tConfirm("deleteSavingsGoal")}
+        confirmLabel={tCommon("delete")}
+        pendingLabel={tCommon("deleting")}
+        tone="danger"
+        isPending={isPending}
+        onConfirm={() => {
+          startTransition(async () => {
+            await archiveSavingsGoalAction(goalId, workspaceId);
+            setOpen(false);
+          });
+        }}
+        onCancel={() => setOpen(false)}
+      />
+    </>
   );
 }
 
@@ -107,6 +126,13 @@ export function SavingsGoalList({
 }) {
   const tEmpty = useTranslations("empty");
   const tDashboard = useTranslations("dashboard.alerts");
+  const locale = useLocale();
+
+  const formatOptions = {
+    currency,
+    locale: locale === "ar" ? "ar-EG" : "en-US",
+  };
+
   if (goals.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-400">
@@ -119,7 +145,7 @@ export function SavingsGoalList({
     <ul className="flex flex-col gap-3">
       {goals.map((goal) => {
         const clampedPercentage = Math.min(100, Math.max(0, goal.percentage));
-        const deadlineLabel = formatDeadline(goal.deadline);
+        const deadlineLabel = formatDeadline(goal.deadline, locale);
         const isComplete = goal.percentage >= 100;
 
         return (
@@ -137,7 +163,8 @@ export function SavingsGoalList({
                 </p>
                 {deadlineLabel && (
                   <p className="text-xs text-neutral-500">
-                    {tDashboard("dueDate")} {deadlineLabel}
+                    {tDashboard("dueDate")}{" "}
+                    <span className="font-mono tabular-nums">{deadlineLabel}</span>
                   </p>
                 )}
               </div>
@@ -152,15 +179,16 @@ export function SavingsGoalList({
             </div>
 
             <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-neutral-500">
-                {formatMoney(goal.currentAmount, { currency })} / {formatMoney(goal.targetAmount, { currency })}
+              <span className="font-mono tabular-nums text-neutral-500">
+                {formatMoney(goal.currentAmount, formatOptions)} / {formatMoney(goal.targetAmount, formatOptions)}
               </span>
-              <span className="font-medium text-neutral-600">{goal.percentage}%</span>
+              <span className="font-mono tabular-nums font-medium text-neutral-600">{goal.percentage}%</span>
             </div>
 
             {goal.remaining > 0 && (
               <p className="mt-1 text-xs text-neutral-400">
-                {tDashboard("remaining")} {formatMoney(goal.remaining, { currency })}
+                {tDashboard("remaining")}{" "}
+                <span className="font-mono tabular-nums">{formatMoney(goal.remaining, formatOptions)}</span>
               </p>
             )}
 

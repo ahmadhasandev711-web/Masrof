@@ -11,32 +11,50 @@ type CategoryItem = {
 
 function CategoryGroup({
   title,
+  icon,
   categories,
   workspaceId,
   emptyLabel,
+  systemBadgeLabel,
 }: {
   title: string;
+  icon: string;
   categories: CategoryItem[];
   workspaceId: string;
   emptyLabel: string;
+  systemBadgeLabel: string;
 }) {
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-3 font-semibold text-neutral-900">{title}</h2>
+      <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{icon}</span>
+          <h2 className="font-semibold text-neutral-900">{title}</h2>
+        </div>
+        <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-neutral-600">
+          {categories.length}
+        </span>
+      </div>
       {categories.length === 0 ? (
-        <p className="text-sm text-neutral-400">{emptyLabel}</p>
+        <div className="rounded-xl border border-dashed border-neutral-200 p-8 text-center">
+          <p className="text-sm text-neutral-400">{emptyLabel}</p>
+        </div>
       ) : (
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2.5">
           {categories.map((category) => {
             const id = String(category._id);
             return (
               <li
                 key={id}
-                className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-sm"
+                className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50/80 px-3 py-1.5 text-sm transition hover:border-neutral-300 hover:bg-neutral-50"
               >
                 <span>{category.icon ?? "🏷️"}</span>
-                <span className="text-neutral-700">{category.name}</span>
-                {!category.isSystem && (
+                <span className="font-medium text-neutral-800">{category.name}</span>
+                {category.isSystem ? (
+                  <span className="rounded bg-neutral-200/70 px-1.5 py-0.5 text-[10px] text-neutral-500">
+                    {systemBadgeLabel}
+                  </span>
+                ) : (
                   <ArchiveCategoryButton categoryId={id} workspaceId={workspaceId} />
                 )}
               </li>
@@ -55,26 +73,31 @@ export async function CategoryList({
   categories: CategoryItem[];
   workspaceId: string;
 }) {
-  const [tCategory, tEmpty] = await Promise.all([
+  const [tCategory, tEmpty, tPages] = await Promise.all([
     getTranslations("forms.category"),
     getTranslations("empty"),
+    getTranslations("pages.categories"),
   ]);
   const incomeCategories = categories.filter((c) => c.kind === "income");
   const expenseCategories = categories.filter((c) => c.kind === "expense");
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <CategoryGroup
         title={tCategory("kindIncome")}
+        icon="💰"
         categories={incomeCategories}
         workspaceId={workspaceId}
         emptyLabel={tEmpty("noCategories")}
+        systemBadgeLabel={tPages("systemBadge")}
       />
       <CategoryGroup
         title={tCategory("kindExpense")}
+        icon="💳"
         categories={expenseCategories}
         workspaceId={workspaceId}
         emptyLabel={tEmpty("noCategories")}
+        systemBadgeLabel={tPages("systemBadge")}
       />
     </div>
   );

@@ -46,14 +46,32 @@ export default async function InvoicesPage({
 
   const rawParams = await searchParams;
 
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const thisMonthStart = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
+  const thisMonthEnd = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate())}`;
+
+  const isExplicitAll = rawParams.datePreset === "all";
+  const hasExplicitDate = Boolean(rawParams.dateFrom || rawParams.dateTo);
+
+  const effectiveDateFrom = isExplicitAll
+    ? undefined
+    : (rawParams.dateFrom ?? (hasExplicitDate ? undefined : thisMonthStart));
+  const effectiveDateTo = isExplicitAll
+    ? undefined
+    : (rawParams.dateTo ?? (hasExplicitDate ? undefined : thisMonthEnd));
+  const effectiveDatePreset = isExplicitAll
+    ? "all"
+    : (rawParams.datePreset ?? (!hasExplicitDate ? "thisMonth" : undefined));
+
   const filters = invoiceFiltersSchema.parse({
     workspaceId,
     status: rawParams.status || undefined,
     clientId: rawParams.clientId || undefined,
     projectId: rawParams.projectId || undefined,
     search: rawParams.search || undefined,
-    dateFrom: rawParams.dateFrom || undefined,
-    dateTo: rawParams.dateTo || undefined,
+    dateFrom: effectiveDateFrom || undefined,
+    dateTo: effectiveDateTo || undefined,
     page: rawParams.page || 1,
     pageSize: rawParams.pageSize || 20,
   });
@@ -136,8 +154,9 @@ export default async function InvoicesPage({
               clientId: rawParams.clientId,
               projectId: rawParams.projectId,
               search: rawParams.search,
-              dateFrom: rawParams.dateFrom,
-              dateTo: rawParams.dateTo,
+              dateFrom: effectiveDateFrom,
+              dateTo: effectiveDateTo,
+              datePreset: effectiveDatePreset,
             }}
           />
 

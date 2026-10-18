@@ -1,6 +1,6 @@
 import { formatMoney } from "@/lib/money";
 import { ArchiveBudgetButton } from "@/features/budgets/components/archive-budget-button";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 
 type PopulatedCategory = { _id: unknown; name: string; icon?: string | null };
 
@@ -39,11 +39,17 @@ export async function BudgetList({
   workspaceId: string;
   currency: string;
 }) {
-  const [tEmpty, tForm, tDashboard] = await Promise.all([
+  const [tEmpty, tForm, tDashboard, locale] = await Promise.all([
     getTranslations("empty"),
     getTranslations("forms.budget"),
     getTranslations("dashboard.alerts"),
+    getLocale(),
   ]);
+
+  const formatOptions = {
+    currency,
+    locale: locale === "ar" ? "ar-EG" : "en-US",
+  };
 
   if (budgets.length === 0) {
     return (
@@ -104,15 +110,15 @@ export async function BudgetList({
             </div>
 
             <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-neutral-500">
-                {formatMoney(budget.spent, { currency })} / {formatMoney(budget.amount, { currency })}
+              <span className="font-mono tabular-nums text-neutral-500">
+                {formatMoney(budget.spent, formatOptions)} / {formatMoney(budget.amount, formatOptions)}
               </span>
               <span
-                className={
+                className={`font-mono tabular-nums ${
                   budget.percentage >= 100
                     ? "font-semibold text-red-600"
                     : "font-medium text-neutral-600"
-                }
+                }`}
               >
                 {budget.percentage}%
               </span>

@@ -6,11 +6,13 @@ import { endOfLocalDay } from "@/lib/dates";
 import { RecurringExpenseModel } from "@/models/recurring-expense";
 import { CategoryModel } from "@/models/category";
 import { AccountModel } from "@/models/account";
-import { toMinorUnits, fromMinorUnits } from "@/lib/money";
-import { createTransaction } from "@/features/transactions/data";
+import { toMinorUnits } from "@/lib/money";
+import { runInTransaction } from "@/lib/db/transaction";
+import { TransactionModel } from "@/models/transaction";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CreateRecurringExpenseInput } from "@/features/recurring-expenses/schemas";
 import type { RecurringFrequency } from "@/models/recurring-expense";
+import { advanceDueDate } from "./due-date";
 
 export class InvalidRecurringExpenseError extends Error {
   readonly code: string;
@@ -59,26 +61,6 @@ function mapRecurringExpenseForList(item: RecurringExpenseLean): RecurringExpens
     categoryName: category?.name ?? "",
     categoryIcon: category?.icon ?? null,
   };
-}
-
-function advanceDueDate(
-  current: Date,
-  frequency: RecurringFrequency,
-  dayOfMonth?: number | null,
-  dayOfWeek?: number | null,
-): Date {
-  const next = new Date(current);
-
-  if (frequency === "monthly") {
-    next.setMonth(next.getMonth() + 1);
-    next.setDate(dayOfMonth ?? next.getDate());
-    return next;
-  }
-
-  const targetDay = dayOfWeek ?? next.getDay();
-  const daysUntil = (targetDay - next.getDay() + 7) % 7 || 7;
-  next.setDate(next.getDate() + daysUntil);
-  return next;
 }
 
 export async function createRecurringExpense(input: CreateRecurringExpenseInput) {
@@ -150,46 +132,84 @@ export async function archiveRecurringExpense(recurringId: string, workspaceId: 
   ).lean();
 }
 
-/** Records the expense as a transaction and advances nextDueDate. */
+/** Records the expense as a transaction and advances nextDueDate atomically with idempotency. */
 export async function recordRecurringExpense(
   recurringId: string,
   workspaceId: string,
   userId: string,
 ) {
-  await connectToDatabase();
+  const mongooseInstance = await connectToDatabase();
 
-  const recurring = await RecurringExpenseModel.findOne({
-    _id: recurringId,
-    workspaceId,
-    isArchived: false,
-    isActive: true,
-  });
-
-  if (!recurring) {
-    throw new InvalidRecurringExpenseError("recurringExpenseNotFound");
-  }
-
-  await createTransaction(
-    {
+  return await runInTransaction(mongooseInstance, async (session) => {
+    const recurring = await RecurringExpenseModel.findOne({
+      _id: recurringId,
       workspaceId,
-      accountId: recurring.accountId.toString(),
-      categoryId: recurring.categoryId.toString(),
-      type: "expense",
-      amount: fromMinorUnits(recurring.amount),
-      transactionDate: recurring.nextDueDate,
-      description: recurring.description || "مصروف متكرر",
-      notes: "",
-    },
-    userId,
-  );
+      isArchived: false,
+      isActive: true,
+    }).session(session);
 
-  recurring.nextDueDate = advanceDueDate(
-    recurring.nextDueDate,
-    recurring.frequency,
-    recurring.dayOfMonth,
-    recurring.dayOfWeek,
-  );
-  await recurring.save();
+    if (!recurring) {
+      throw new InvalidRecurringExpenseError("recurringExpenseNotFound");
+    }
+
+    const currentDueDate = recurring.nextDueDate;
+    const nextDue = advanceDueDate(
+      currentDueDate,
+      recurring.frequency,
+      recurring.dayOfMonth,
+      recurring.dayOfWeek,
+    );
+
+    // Atomic conditional update on nextDueDate ensures idempotency:
+    // If concurrent requests attempt to record the same due date, only one succeeds.
+    const updated = await RecurringExpenseModel.findOneAndUpdate(
+      {
+        _id: recurringId,
+        workspaceId,
+        isArchived: false,
+        isActive: true,
+        nextDueDate: currentDueDate,
+      },
+      { $set: { nextDueDate: nextDue } },
+      session ? { session, returnDocument: "after" } : { returnDocument: "after" },
+    );
+
+    if (!updated) {
+      // Already advanced by a concurrent call; idempotent return
+      return;
+    }
+
+    // 1. Create expense transaction in the selected account
+    const createdTx = await TransactionModel.create(
+      [
+        {
+          workspaceId,
+          accountId: recurring.accountId,
+          categoryId: recurring.categoryId,
+          type: "expense" as const,
+          amount: recurring.amount,
+          transactionDate: currentDueDate,
+          description: recurring.description || "مصروف متكرر",
+          notes: "",
+          createdBy: userId,
+        },
+      ],
+      session ? { session } : {},
+    );
+
+    if (!createdTx || !createdTx[0]) {
+      throw new Error("Failed to create transaction for recurring expense");
+    }
+
+    // 2. Decrement account cached balance atomically
+    await AccountModel.findByIdAndUpdate(
+      recurring.accountId,
+      { $inc: { cachedBalance: -recurring.amount } },
+      session ? { session } : {},
+    );
+
+    return createdTx[0]._id.toString();
+  });
 }
 
 export async function listDueRecurringExpenses(

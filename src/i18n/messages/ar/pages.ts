@@ -45,9 +45,20 @@ const pages = {
     },
     budgets: {
       title: "الميزانيات والمصاريف المتكررة",
+      subtitle: "راقب حدود الإنفاق الشهرية والتزاماتك الدورية لمساحة العمل",
+      totalBudgeted: "إجمالي الميزانيات",
+      totalSpent: "إجمالي المنصرف شهرياً",
+      totalRemaining: "المتبقي الإجمالي",
+      consumptionRate: "نسبة الاستهلاك",
     },
     categories: {
       title: "التصنيفات",
+      subtitle: "إدارة وتصنيف مصادر الدخل وبنود المصروفات لمساحة العمل",
+      newCategoryBtn: "+ إضافة تصنيف",
+      incomeCount: "{count} تصنيف إيرادات",
+      expenseCount: "{count} تصنيف مصروفات",
+      totalCount: "{count} إجمالي التصنيفات",
+      systemBadge: "أساسي",
     },
     clients: {
       title: "العملاء",
@@ -177,6 +188,11 @@ const pages = {
     },
     goals: {
       title: "أهداف الادخار",
+      subtitle: "حدد أهدافك المالية وتابع تقدم مدخراتك خطوة بخطوة",
+      totalTarget: "إجمالي المستهدف",
+      totalSaved: "إجمالي المدخر حالياً",
+      totalRemaining: "المتبقي للوصول",
+      overallProgress: "نسبة الإنجاز",
     },
     invoices: {
       title: "فواتير العملاء",

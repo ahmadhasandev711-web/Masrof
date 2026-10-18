@@ -29,6 +29,7 @@ export function InvoiceFiltersForm({
     search?: string;
     dateFrom?: string;
     dateTo?: string;
+    datePreset?: string;
   };
 }) {
   const router = useRouter();
@@ -57,24 +58,44 @@ export function InvoiceFiltersForm({
     });
   }
 
+  const now = new Date();
+  const thisMonthStart = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 1));
+  const thisMonthEnd = formatDateIso(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+  const lastMonthStart = formatDateIso(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+  const lastMonthEnd = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 0));
+
   function handleDatePreset(preset: "all" | "thisMonth" | "lastMonth") {
-    const now = new Date();
     if (preset === "all") {
-      updateParams({ dateFrom: null, dateTo: null });
+      updateParams({ datePreset: "all", dateFrom: null, dateTo: null });
       return;
     }
     if (preset === "thisMonth") {
-      const start = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 1));
-      const end = formatDateIso(new Date(now.getFullYear(), now.getMonth() + 1, 0));
-      updateParams({ dateFrom: start, dateTo: end });
+      updateParams({ datePreset: "thisMonth", dateFrom: thisMonthStart, dateTo: thisMonthEnd });
       return;
     }
     if (preset === "lastMonth") {
-      const start = formatDateIso(new Date(now.getFullYear(), now.getMonth() - 1, 1));
-      const end = formatDateIso(new Date(now.getFullYear(), now.getMonth(), 0));
-      updateParams({ dateFrom: start, dateTo: end });
+      updateParams({ datePreset: "lastMonth", dateFrom: lastMonthStart, dateTo: lastMonthEnd });
       return;
     }
+  }
+
+  let activeDatePreset: "all" | "thisMonth" | "lastMonth" | "custom" = "thisMonth";
+  if (currentFilters.datePreset === "all") {
+    activeDatePreset = "all";
+  } else if (
+    currentFilters.datePreset === "thisMonth" ||
+    (currentFilters.dateFrom === thisMonthStart && currentFilters.dateTo === thisMonthEnd)
+  ) {
+    activeDatePreset = "thisMonth";
+  } else if (
+    currentFilters.datePreset === "lastMonth" ||
+    (currentFilters.dateFrom === lastMonthStart && currentFilters.dateTo === lastMonthEnd)
+  ) {
+    activeDatePreset = "lastMonth";
+  } else if (currentFilters.dateFrom || currentFilters.dateTo) {
+    activeDatePreset = "custom";
+  } else {
+    activeDatePreset = "thisMonth";
   }
 
   const currentStatus = currentFilters.status ?? "all";
@@ -86,8 +107,7 @@ export function InvoiceFiltersForm({
       currentFilters.clientId ||
       currentFilters.projectId ||
       currentFilters.search ||
-      currentFilters.dateFrom ||
-      currentFilters.dateTo,
+      activeDatePreset === "custom",
   );
 
   return (
@@ -219,8 +239,8 @@ export function InvoiceFiltersForm({
             type="button"
             onClick={() => handleDatePreset("all")}
             className={`rounded-lg px-2.5 py-1 font-medium transition ${
-              !currentFilters.dateFrom && !currentFilters.dateTo
-                ? "bg-[#065F46] text-white"
+              activeDatePreset === "all"
+                ? "bg-[#065F46] text-white shadow-2xs font-bold"
                 : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
@@ -229,14 +249,22 @@ export function InvoiceFiltersForm({
           <button
             type="button"
             onClick={() => handleDatePreset("thisMonth")}
-            className="rounded-lg bg-neutral-100 px-2.5 py-1 font-medium text-neutral-600 hover:bg-neutral-200"
+            className={`rounded-lg px-2.5 py-1 font-medium transition ${
+              activeDatePreset === "thisMonth"
+                ? "bg-[#065F46] text-white shadow-2xs font-bold"
+                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+            }`}
           >
             {tFilters("thisMonth")}
           </button>
           <button
             type="button"
             onClick={() => handleDatePreset("lastMonth")}
-            className="rounded-lg bg-neutral-100 px-2.5 py-1 font-medium text-neutral-600 hover:bg-neutral-200"
+            className={`rounded-lg px-2.5 py-1 font-medium transition ${
+              activeDatePreset === "lastMonth"
+                ? "bg-[#065F46] text-white shadow-2xs font-bold"
+                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+            }`}
           >
             {tFilters("lastMonth")}
           </button>
@@ -385,7 +413,7 @@ export function InvoiceFiltersForm({
             </span>
           )}
 
-          {currentFilters.dateFrom && (
+          {activeDatePreset === "custom" && currentFilters.dateFrom && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
               <span>{tFilters("from", { date: currentFilters.dateFrom })}</span>
               <button
@@ -398,7 +426,7 @@ export function InvoiceFiltersForm({
             </span>
           )}
 
-          {currentFilters.dateTo && (
+          {activeDatePreset === "custom" && currentFilters.dateTo && (
             <span className="inline-flex items-center gap-1 rounded-lg bg-neutral-100 px-2 py-0.5 font-medium text-neutral-700">
               <span>{tFilters("to", { date: currentFilters.dateTo })}</span>
               <button
@@ -422,6 +450,7 @@ export function InvoiceFiltersForm({
                 search: null,
                 dateFrom: null,
                 dateTo: null,
+                datePreset: null,
               });
             }}
             className="ms-auto rounded-lg px-2 py-0.5 text-[11px] font-bold text-rose-600 hover:bg-rose-50"

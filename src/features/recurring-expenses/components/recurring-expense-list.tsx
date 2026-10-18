@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { formatMoney } from "@/lib/money";
 import { isOnOrBeforeToday } from "@/lib/dates";
 import type { RecurringExpenseListItem } from "@/features/recurring-expenses/data";
@@ -13,10 +13,11 @@ import {
   WhatsAppReminderLink,
   WhatsAppSettingsLink,
 } from "@/features/whatsapp/components/whatsapp-reminder-link";
-import { useTranslations } from "next-intl";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useTranslations, useLocale } from "next-intl";
 
-function formatDate(isoDate: string) {
-  return new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
+function formatDate(isoDate: string, locale: string) {
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -43,6 +44,9 @@ export function RecurringExpenseList({
   const tWhatsapp = useTranslations("forms.whatsapp");
   const tWhatsappMessages = useTranslations("whatsapp");
   const tConfirm = useTranslations("confirm");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
+
   const frequencyLabels = { monthly: tRecurring("monthly"), weekly: tRecurring("weekly") } as const;
 
   if (items.length === 0) {
@@ -61,6 +65,7 @@ export function RecurringExpenseList({
           item={item}
           workspaceId={workspaceId}
           currency={currency}
+          locale={locale}
           workspaceName={workspaceName}
           userWhatsAppPhone={userWhatsAppPhone}
           canUseWhatsApp={canUseWhatsApp}
@@ -69,6 +74,7 @@ export function RecurringExpenseList({
           tWhatsapp={tWhatsapp}
           tWhatsappMessages={tWhatsappMessages}
           tConfirm={tConfirm}
+          tCommon={tCommon}
         />
       ))}
     </ul>
@@ -79,6 +85,7 @@ function RecurringRow({
   item,
   workspaceId,
   currency,
+  locale,
   workspaceName,
   userWhatsAppPhone,
   canUseWhatsApp,
@@ -87,10 +94,12 @@ function RecurringRow({
   tWhatsapp,
   tWhatsappMessages,
   tConfirm,
+  tCommon,
 }: {
   item: RecurringExpenseListItem;
   workspaceId: string;
   currency: string;
+  locale: string;
   workspaceName: string;
   userWhatsAppPhone: string | null;
   canUseWhatsApp: boolean;
@@ -99,16 +108,22 @@ function RecurringRow({
   tWhatsapp: ReturnType<typeof useTranslations>;
   tWhatsappMessages: ReturnType<typeof useTranslations>;
   tConfirm: ReturnType<typeof useTranslations>;
+  tCommon: ReturnType<typeof useTranslations>;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [recordConfirmOpen, setRecordConfirmOpen] = useState(false);
+  const [stopConfirmOpen, setStopConfirmOpen] = useState(false);
   const due = isOnOrBeforeToday(item.nextDueDate);
 
-  function handleRecord() {
+  const formatOptions = {
+    currency,
+    locale: locale === "ar" ? "ar-EG" : "en-US",
+  };
+
+  function handleRecordClick() {
     if (!due) {
-      const ok = confirm(
-        `Due date ${formatDate(item.nextDueDate)}. Record now?`,
-      );
-      if (!ok) return;
+      setRecordConfirmOpen(true);
+      return;
     }
     startTransition(() => recordRecurringExpenseAction(item.id, workspaceId));
   }
@@ -125,26 +140,26 @@ function RecurringRow({
             {item.categoryIcon ?? "🔁"} {item.description || item.categoryName}
           </p>
           <p className="mt-1 text-xs text-neutral-500">
-            {formatMoney(item.amount, { currency })} · {frequencyLabels[item.frequency]} ·{" "}
+            <span className="font-mono tabular-nums">{formatMoney(item.amount, formatOptions)}</span> · {frequencyLabels[item.frequency]} ·{" "}
             {item.accountName}
           </p>
           <p className={`mt-1 text-xs ${due ? "font-medium text-amber-700" : "text-neutral-400"}`}>
-            {due ? "⚠️ Due now - " : "Next due: "}
-            {formatDate(item.nextDueDate)}
+            {due ? tRecurring("dueNow") : tRecurring("nextDue")}
+            <span className="font-mono tabular-nums">{formatDate(item.nextDueDate, locale)}</span>
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-1">
           <button
             type="button"
             disabled={isPending}
-            onClick={handleRecord}
+            onClick={handleRecordClick}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-60 ${
               due
                 ? "bg-emerald-700 text-white hover:bg-emerald-800"
                 : "border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
             }`}
           >
-            {tRecurring("submit")}
+            {tRecurring("recordNow")}
           </button>
           {canUseWhatsApp ? (
             userWhatsAppPhone ? (
@@ -153,8 +168,8 @@ function RecurringRow({
                 label={tWhatsapp("label")}
                 message={recurringExpenseReminderMessage(tWhatsappMessages, {
                   description: item.description || item.categoryName,
-                  amountLabel: formatMoney(item.amount, { currency }),
-                  dueDateLabel: formatDate(item.nextDueDate),
+                  amountLabel: formatMoney(item.amount, formatOptions),
+                  dueDateLabel: formatDate(item.nextDueDate, locale),
                   workspaceName,
                 })}
               />
@@ -165,16 +180,49 @@ function RecurringRow({
           <button
             type="button"
             disabled={isPending}
-            onClick={() => {
-              if (!confirm(tConfirm("stopRecurring"))) return;
-              startTransition(() => archiveRecurringExpenseAction(item.id, workspaceId));
-            }}
+            onClick={() => setStopConfirmOpen(true)}
             className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-60"
           >
-            Stop
+            {tRecurring("stop")}
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={recordConfirmOpen}
+        title={tRecurring("recordNow")}
+        message={tRecurring("recordBeforeDueConfirm", {
+          date: formatDate(item.nextDueDate, locale),
+        })}
+        confirmLabel={tRecurring("recordNow")}
+        pendingLabel={tCommon("saving")}
+        tone="primary"
+        isPending={isPending}
+        onConfirm={() => {
+          startTransition(async () => {
+            await recordRecurringExpenseAction(item.id, workspaceId);
+            setRecordConfirmOpen(false);
+          });
+        }}
+        onCancel={() => setRecordConfirmOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={stopConfirmOpen}
+        title={tCommon("confirmation")}
+        message={tConfirm("stopRecurring")}
+        confirmLabel={tRecurring("stop")}
+        pendingLabel={tRecurring("stopping")}
+        tone="danger"
+        isPending={isPending}
+        onConfirm={() => {
+          startTransition(async () => {
+            await archiveRecurringExpenseAction(item.id, workspaceId);
+            setStopConfirmOpen(false);
+          });
+        }}
+        onCancel={() => setStopConfirmOpen(false)}
+      />
     </li>
   );
 }
