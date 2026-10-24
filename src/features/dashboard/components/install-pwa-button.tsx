@@ -17,10 +17,7 @@ function isStandalone() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     // iOS Safari
-    ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone)) ||
-    // Capacitor Native Mobile App
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Boolean((window as any).Capacitor?.isNativePlatform?.())
+    ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone))
   );
 }
 
@@ -83,7 +80,7 @@ export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
         onClick={() => (deferredPrompt ? handleNativeInstall() : setOpen((v) => !v))}
         className="rounded-lg border border-[#065F46]/20 bg-[#ECFDF5] px-2 py-1.5 text-sm font-medium text-[#065F46] transition hover:bg-[#D1FAE5] sm:px-3"
       >
-        {compact ? "📲" : t("install")}
+        {compact ? "" : t("install")}
       </button>
 
       {open && !deferredPrompt && (

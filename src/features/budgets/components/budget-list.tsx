@@ -85,7 +85,7 @@ export async function BudgetList({
               <div className="flex items-center gap-2">
                 <div>
                   <p className="font-medium text-neutral-900">
-                    {budget.categoryId?.icon ?? "📊"} {budget.name}
+                    {budget.categoryId?.icon ?? ""} {budget.name}
                   </p>
                   <p className="text-xs text-neutral-500">
                     {budget.categoryId ? budget.categoryId.name : tForm("wholeWorkspace")}

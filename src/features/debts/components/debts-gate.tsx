@@ -24,7 +24,7 @@ export function DebtsGate() {
 
         <div className="mt-8 grid w-full gap-4 text-start sm:grid-cols-3">
           <div className="rounded-xl border border-neutral-100 bg-[#FBF9F4] p-4">
-            <span className="text-2xl">💳</span>
+            <span className="text-2xl"></span>
             <h3 className="mt-2 text-sm font-bold text-neutral-900">{t("gateFeature1Title")}</h3>
             <p className="mt-1 text-xs text-neutral-600">
               {t("gateFeature1Desc")}
@@ -32,7 +32,7 @@ export function DebtsGate() {
           </div>
 
           <div className="rounded-xl border border-neutral-100 bg-[#FBF9F4] p-4">
-            <span className="text-2xl">⚡</span>
+            <span className="text-2xl"></span>
             <h3 className="mt-2 text-sm font-bold text-neutral-900">{t("gateFeature2Title")}</h3>
             <p className="mt-1 text-xs text-neutral-600">
               {t("gateFeature2Desc")}
@@ -40,7 +40,7 @@ export function DebtsGate() {
           </div>
 
           <div className="rounded-xl border border-neutral-100 bg-[#FBF9F4] p-4">
-            <span className="text-2xl">📊</span>
+            <span className="text-2xl"></span>
             <h3 className="mt-2 text-sm font-bold text-neutral-900">{t("gateFeature3Title")}</h3>
             <p className="mt-1 text-xs text-neutral-600">
               {t("gateFeature3Desc")}

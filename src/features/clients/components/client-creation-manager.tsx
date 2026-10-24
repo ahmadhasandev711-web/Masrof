@@ -68,7 +68,7 @@ export function ClientCreationManager({
                 className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
                 aria-label={tCommon("close")}
               >
-                ✕
+                
               </button>
             </div>
 

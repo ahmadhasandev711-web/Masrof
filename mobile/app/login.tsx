@@ -13,14 +13,13 @@ import {
 import { Redirect, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { authClient } from "@/lib/auth-client";
-import { API_URL } from "@/lib/config";
 import { useI18n } from "@/lib/i18n";
-import { colors, shared } from "@/lib/styles";
+import { colors, fonts, shared } from "@/lib/styles";
 import { AppIcon } from "@/components/icon";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const { t, isRTL } = useI18n();
+  const { t, isRTL, locale, toggleLocale } = useI18n();
   const { data: session, isPending } = authClient.useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +35,7 @@ export default function LoginScreen() {
   }
 
   if (session) {
-    return <Redirect href="/(app)" />;
+    return <Redirect href="/" />;
   }
 
   async function onSubmit() {
@@ -51,7 +50,7 @@ export default function LoginScreen() {
       setError(signInError.message ?? t.login.errorInvalid);
       return;
     }
-    router.replace("/(app)");
+    router.replace("/");
   }
 
   return (
@@ -63,9 +62,38 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingVertical: 16 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Language Switcher in Header */}
+        <View
+          style={[
+            shared.row,
+            {
+              width: "100%",
+              maxWidth: 420,
+              alignSelf: "center",
+              marginBottom: 12,
+              flexDirection: isRTL ? "row-reverse" : "row",
+            },
+          ]}
+        >
+          <View />
+          <Pressable
+            style={[
+              shared.rowStart,
+              styles.langPill,
+              { flexDirection: isRTL ? "row-reverse" : "row" },
+            ]}
+            onPress={() => toggleLocale()}
+          >
+            <AppIcon name="globe" size={14} color={colors.primary} />
+            <Text style={styles.langText}>
+              {locale === "ar" ? "English" : "العربية"}
+            </Text>
+          </Pressable>
+        </View>
+
         <View style={styles.card}>
           {/* Logo / Brand Header */}
           <View style={{ alignItems: "center", gap: 6, marginBottom: 8 }}>
@@ -83,7 +111,7 @@ export default function LoginScreen() {
             >
               <AppIcon name="wallet" size={28} color={colors.primary} />
             </View>
-            <Text style={styles.brand}>{isRTL ? "مصروفاتي" : "Masrofaty"}</Text>
+            <Text style={styles.brand}>{isRTL ? "سندات" : "Sanadat"}</Text>
             <Text style={styles.subtitle}>{t.login.subtitle}</Text>
           </View>
 
@@ -132,9 +160,22 @@ export default function LoginScreen() {
             )}
           </Pressable>
 
-          <Text style={styles.hint}>
-            {t.login.registerWeb}: {API_URL.replace(/^https?:\/\//, "")}
-          </Text>
+          {/* Switch to Register Link */}
+          <View
+            style={[
+              shared.rowStart,
+              {
+                justifyContent: "center",
+                marginTop: 10,
+                flexDirection: isRTL ? "row-reverse" : "row",
+              },
+            ]}
+          >
+            <Text style={[shared.label, { fontSize: 13 }]}>{t.login.noAccount}</Text>
+            <Pressable onPress={() => router.push("/register")} hitSlop={8}>
+              <Text style={styles.linkText}> {t.login.registerLink}</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -152,6 +193,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.bg,
+  },
+  langPill: {
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 6,
+  },
+  langText: {
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.primary,
+  },
+  linkText: {
+    fontFamily: fonts.bold,
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: "700",
   },
   card: {
     backgroundColor: "#FFFFFF",

@@ -61,7 +61,7 @@ export function InvoicePaymentsHistoryDialog({
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600"
           >
-            ✕
+            
           </button>
         </div>
 

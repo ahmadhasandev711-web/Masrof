@@ -48,7 +48,7 @@ function CategoryGroup({
                 key={id}
                 className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50/80 px-3 py-1.5 text-sm transition hover:border-neutral-300 hover:bg-neutral-50"
               >
-                <span>{category.icon ?? "🏷️"}</span>
+                <span>{category.icon ?? ""}</span>
                 <span className="font-medium text-neutral-800">{category.name}</span>
                 {category.isSystem ? (
                   <span className="rounded bg-neutral-200/70 px-1.5 py-0.5 text-[10px] text-neutral-500">
@@ -85,7 +85,7 @@ export async function CategoryList({
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <CategoryGroup
         title={tCategory("kindIncome")}
-        icon="💰"
+        icon=""
         categories={incomeCategories}
         workspaceId={workspaceId}
         emptyLabel={tEmpty("noCategories")}
@@ -93,7 +93,7 @@ export async function CategoryList({
       />
       <CategoryGroup
         title={tCategory("kindExpense")}
-        icon="💳"
+        icon=""
         categories={expenseCategories}
         workspaceId={workspaceId}
         emptyLabel={tEmpty("noCategories")}

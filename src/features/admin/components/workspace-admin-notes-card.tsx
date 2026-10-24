@@ -66,7 +66,7 @@ export function WorkspaceAdminNotesCard({
       <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
         <div>
           <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-            <span>📝</span>
+            <span></span>
             <span>{t("adminNotesTitle")}</span>
           </h3>
           <p className="text-[11px] text-neutral-500 mt-0.5">{t("adminNotesHint")}</p>
@@ -80,7 +80,7 @@ export function WorkspaceAdminNotesCard({
           className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 shadow-2xs transition disabled:opacity-50"
           title="تصدير نسخة احتياطية كاملة لبيانات هذه المساحة"
         >
-          {isExporting ? t("exporting") : `📥 ${t("exportBackup")}`}
+          {isExporting ? t("exporting") : ` ${t("exportBackup")}`}
         </button>
       </div>
 
@@ -99,7 +99,7 @@ export function WorkspaceAdminNotesCard({
         <div className="flex items-center justify-between">
           <span className="text-[11px] text-neutral-400">
             {isSaved ? (
-              <span className="text-emerald-700 font-bold">✓ {t("notesSaved")}</span>
+              <span className="text-emerald-700 font-bold"> {t("notesSaved")}</span>
             ) : (
               `${notes.length} / 2000 حرف`
             )}

@@ -1,8 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import {
   ActivityIndicator,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   Text,
@@ -12,6 +14,7 @@ import {
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
+import { ListSkeleton } from "@/components/skeleton";
 import { createCategory, fetchCategories, type CategoryItem } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -21,6 +24,7 @@ export default function CategoriesScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId } = useWorkspace();
   const [items, setItems] = useState<CategoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "expense" | "income">("all");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -28,11 +32,16 @@ export default function CategoriesScreen() {
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const idempotencyRef = useRef(newIdempotencyKey());
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchCategories(workspaceId, undefined, skipCache);
-    setItems(data.items);
+    try {
+      const data = await fetchCategories(workspaceId, undefined, skipCache);
+      setItems(data.items);
+    } finally {
+      setLoading(false);
+    }
   }, [workspaceId]);
 
   useFocusEffect(
@@ -58,7 +67,13 @@ export default function CategoriesScreen() {
     setBusy(true);
     setError(null);
     try {
-      await createCategory({ workspaceId, name: name.trim(), kind });
+      await createCategory({
+        workspaceId,
+        name: name.trim(),
+        kind,
+        idempotencyKey: idempotencyRef.current,
+      });
+      idempotencyRef.current = newIdempotencyKey();
       setOpen(false);
       setName("");
       await load(true);
@@ -116,12 +131,20 @@ export default function CategoriesScreen() {
         })}
       </View>
 
-      <FlatList
-        data={filteredItems}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
+      {loading && items.length === 0 ? (
+        <ListSkeleton count={6} />
+      ) : (
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item) => item.id}
+          removeClippedSubviews={Platform.OS === "android"}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={7}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
         contentContainerStyle={{ gap: 8, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -171,6 +194,7 @@ export default function CategoriesScreen() {
           );
         }}
       />
+      )}
 
       {/* Add Category Modal */}
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>

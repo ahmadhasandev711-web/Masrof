@@ -26,6 +26,7 @@ export async function createWorkspaceAction(
     initialAccountName: formData.get("initialAccountName"),
     initialAccountType: formData.get("initialAccountType"),
     initialAccountBalance: formData.get("initialAccountBalance") || 0,
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {
@@ -35,17 +36,6 @@ export async function createWorkspaceAction(
   const limitError = await assertCanCreateWorkspace(session.user.id);
   if (limitError) {
     return { error: limitError };
-  }
-
-  const trimmedName = parsed.data.name.trim();
-  const { WorkspaceModel } = await import("@/models/workspace");
-  const existingWs = await WorkspaceModel.findOne({
-    name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
-    isArchived: false,
-  }).lean();
-
-  if (existingWs) {
-    return { error: "اسم مساحة العمل مستخدم بالفعل. يرجى اختيار اسم فريد لمساحتك." };
   }
 
   const workspaceId = await createWorkspaceForUser(session.user.id, parsed.data);

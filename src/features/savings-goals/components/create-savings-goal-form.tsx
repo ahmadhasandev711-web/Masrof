@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useEffect } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import {
   createSavingsGoalAction,
   type CreateSavingsGoalState,
@@ -24,6 +26,7 @@ export function CreateSavingsGoalForm({
   const tShared = useTranslations("forms.shared");
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createSavingsGoalAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
   const formRef = useRef<HTMLFormElement>(null);
   const hasSubmitted = useRef(false);
 
@@ -42,6 +45,7 @@ export function CreateSavingsGoalForm({
       className={showTitle ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm" : "flex flex-col gap-4"}
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <IdempotencyKeyInput value={idempotencyKey} />
 
       {showTitle && <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>}
 

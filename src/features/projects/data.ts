@@ -14,9 +14,22 @@ import { toMinorUnits } from "@/lib/money";
 import type { CreateProjectInput } from "@/features/projects/schemas";
 import type { ProjectListItem } from "@/features/projects/types";
 import { isReceivableReminderDue } from "@/features/projects/utils";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 export async function createProject(input: CreateProjectInput) {
   await connectToDatabase();
+
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await ProjectModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
 
   const project = await ProjectModel.create({
     workspaceId: input.workspaceId,
@@ -28,6 +41,13 @@ export async function createProject(input: CreateProjectInput) {
     dueDate: input.dueDate ?? null,
     description: input.description ?? "",
   });
+
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "project",
+    project._id.toString(),
+  );
 
   return project.toObject();
 }

@@ -24,6 +24,7 @@ export async function createCategoryAction(
     workspaceId: formData.get("workspaceId"),
     name: formData.get("name"),
     kind: formData.get("kind"),
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

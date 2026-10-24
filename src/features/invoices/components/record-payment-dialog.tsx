@@ -74,7 +74,7 @@ export function RecordPaymentDialog({
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600"
           >
-            ✕
+            
           </button>
         </div>
 

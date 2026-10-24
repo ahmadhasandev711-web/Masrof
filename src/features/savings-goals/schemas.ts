@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 
 type SavingsGoalValidationKey =
   | "goalNameMin2"
@@ -18,6 +19,7 @@ export function createSavingsGoalSchema(t: ValidationTranslator) {
         (val) => (val === "" || val == null ? undefined : val),
         z.coerce.date({ message: t("deadlineInvalid") }).optional(),
       ),
+    idempotencyKey: idempotencyKeyField,
   });
 }
 

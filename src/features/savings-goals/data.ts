@@ -6,6 +6,10 @@ import { SavingsGoalModel } from "@/models/savings-goal";
 import { toMinorUnits } from "@/lib/money";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CreateSavingsGoalInput, UpdateGoalProgressInput } from "@/features/savings-goals/schemas";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 export class SavingsGoalNotFoundError extends Error {
   readonly code: string;
@@ -19,12 +23,28 @@ export class SavingsGoalNotFoundError extends Error {
 export async function createSavingsGoal(input: CreateSavingsGoalInput) {
   await connectToDatabase();
 
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await SavingsGoalModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
+
   const goal = await SavingsGoalModel.create({
     workspaceId: input.workspaceId,
     name: input.name,
     targetAmount: toMinorUnits(input.targetAmount),
     deadline: input.deadline ?? null,
   });
+
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "savingsGoal",
+    goal._id.toString(),
+  );
 
   return goal.toObject();
 }

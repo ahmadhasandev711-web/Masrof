@@ -23,12 +23,12 @@ export async function AccountSummary({
   ]);
 
   const accountTypeConfig: Record<string, { label: string; icon: string }> = {
-    cash: { label: tAccountType("cash"), icon: "💵" },
-    bank: { label: tAccountType("bank"), icon: "🏦" },
-    mobile_wallet: { label: tAccountType("mobile_wallet"), icon: "📱" },
-    credit_card: { label: tAccountType("credit_card"), icon: "💳" },
-    savings: { label: tAccountType("savings"), icon: "🪙" },
-    other: { label: tAccountType("other"), icon: "💼" },
+    cash: { label: tAccountType("cash"), icon: "" },
+    bank: { label: tAccountType("bank"), icon: "" },
+    mobile_wallet: { label: tAccountType("mobile_wallet"), icon: "" },
+    credit_card: { label: tAccountType("credit_card"), icon: "" },
+    savings: { label: tAccountType("savings"), icon: "" },
+    other: { label: tAccountType("other"), icon: "" },
   };
 
   return (

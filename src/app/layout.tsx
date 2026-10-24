@@ -17,7 +17,6 @@ import "@fontsource/ibm-plex-mono/600.css";
 import "./globals.css";
 import { getDirection, type AppLocale } from "@/i18n/config";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
-import { CapacitorBridge } from "@/components/capacitor-bridge";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -63,7 +62,6 @@ export default async function RootLayout({
     <html lang={locale} dir={dir} className="h-full antialiased" style={{ colorScheme: "light" }}>
       <body className="flex min-h-full flex-col font-sans">
         <ServiceWorkerRegister />
-        <CapacitorBridge />
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
       </body>
     </html>

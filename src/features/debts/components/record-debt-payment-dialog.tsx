@@ -43,10 +43,12 @@ export function RecordDebtPaymentDialog({
 
   const remainingMajor = fromMinorUnits(debt.remainingAmount);
   const [amountInput, setAmountInput] = useState<string>(String(remainingMajor));
+  const [idempotencyKey, setIdempotencyKey] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       setAmountInput(String(fromMinorUnits(debt.remainingAmount)));
+      setIdempotencyKey(crypto.randomUUID());
     }
   }, [isOpen, debt.remainingAmount]);
 
@@ -80,7 +82,7 @@ export function RecordDebtPaymentDialog({
             onClick={onClose}
             className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
           >
-            ✕
+            
           </button>
         </div>
 
@@ -102,6 +104,7 @@ export function RecordDebtPaymentDialog({
 
         <form action={formAction} className="mt-4 space-y-4">
           <input type="hidden" name="workspaceId" value={workspaceId} />
+          <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
           <input type="hidden" name="debtId" value={debt.id} />
 
           {state.error && (

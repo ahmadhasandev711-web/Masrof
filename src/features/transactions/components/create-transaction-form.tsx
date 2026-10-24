@@ -61,6 +61,11 @@ export function CreateTransactionForm({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [suggesting, setSuggesting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+
+  useEffect(() => {
+    setIdempotencyKey(crypto.randomUUID());
+  }, []);
 
   const comboboxClients = useMemo(
     () => clients.map((c) => ({ _id: c.id, name: c.name, phone: c.phone })),
@@ -90,6 +95,7 @@ export function CreateTransactionForm({
       setScanHint(null);
       setSelectedClientId("");
       setHasSubmitted(false);
+      setIdempotencyKey(crypto.randomUUID());
       onSuccess?.();
     }
   }, [isPending, state.error, hasSubmitted, filteredCategories, onSuccess]);
@@ -196,6 +202,7 @@ export function CreateTransactionForm({
       className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
       <input type="hidden" name="attachmentUrl" value={attachmentUrl} />
       <input type="hidden" name="attachmentName" value={attachmentName} />
 

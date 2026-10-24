@@ -28,7 +28,7 @@ export function ClientSummaryCards({
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-indigo-900">{t("totalClients")}</p>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-xs text-indigo-700">
-            👥
+            
           </span>
         </div>
         <div className="mt-2">
@@ -46,7 +46,7 @@ export function ClientSummaryCards({
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-neutral-800">{t("totalInvoiced")}</p>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-neutral-500/10 text-xs text-neutral-700">
-            🧾
+            
           </span>
         </div>
         <div className="mt-2">
@@ -82,7 +82,7 @@ export function ClientSummaryCards({
                 : "bg-emerald-500/10 text-emerald-700"
             }`}
           >
-            {totalOutstanding > 0 ? "⚠️" : "✓"}
+            {totalOutstanding > 0 ? "" : ""}
           </span>
         </div>
         <div className="mt-2">

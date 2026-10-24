@@ -46,7 +46,7 @@ export function ProjectSummaryCards({
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-emerald-900">{t("completedProjects")}</p>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-xs text-emerald-700">
-            ✓
+            
           </span>
         </div>
         <p className="mt-2 truncate text-base font-bold text-emerald-950 sm:text-xl">
@@ -62,7 +62,7 @@ export function ProjectSummaryCards({
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-indigo-900">{t("totalInvoiced")}</p>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-xs text-indigo-700">
-            🧾
+            
           </span>
         </div>
         <p className="mt-2 truncate text-base font-bold text-indigo-950 sm:text-xl">
@@ -75,7 +75,7 @@ export function ProjectSummaryCards({
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-emerald-900">{t("netProjectsProfit")}</p>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-xs text-emerald-700">
-            📈
+            
           </span>
         </div>
         <div>

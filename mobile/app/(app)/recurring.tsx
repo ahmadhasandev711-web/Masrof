@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import {
   ActivityIndicator,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -13,6 +15,9 @@ import {
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
+import { PlanGate } from "@/components/plan-gate";
+import { ListSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
 import {
   createRecurring,
   fetchAccounts,
@@ -29,7 +34,7 @@ import { useI18n } from "@/lib/i18n";
 
 export default function RecurringScreen() {
   const { t, isRTL } = useI18n();
-  const { workspaceId, currency } = useWorkspace();
+  const { workspaceId, currency, hasFeature } = useWorkspace();
   const [items, setItems] = useState<
     {
       id: string;
@@ -40,6 +45,8 @@ export default function RecurringScreen() {
       categoryName?: string;
     }[]
   >([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<AccountItem[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [open, setOpen] = useState(false);
@@ -53,25 +60,37 @@ export default function RecurringScreen() {
   const [recordingId, setRecordingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const idempotencyRef = useRef(newIdempotencyKey());
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchRecurring(workspaceId, skipCache);
-    setItems(
-      data.items.map((item) => ({
-        id: String(item.id ?? item._id),
-        amount: Number(item.amount),
-        description: String(item.description || (isRTL ? "مصروف متكرر" : "Recurring")),
-        nextDueDate: String(item.nextDueDate),
-        accountName: item.accountName ? String(item.accountName) : undefined,
-        categoryName: item.categoryName ? String(item.categoryName) : undefined,
-      })),
-    );
+    try {
+      setLoadError(null);
+      const data = await fetchRecurring(workspaceId, skipCache);
+      setItems(
+        data.items.map((item) => ({
+          id: String(item.id ?? item._id),
+          amount: Number(item.amount),
+          description: String(item.description || (isRTL ? "مصروف متكرر" : "Recurring")),
+          nextDueDate: String(item.nextDueDate),
+          accountName: item.accountName ? String(item.accountName) : undefined,
+          categoryName: item.categoryName ? String(item.categoryName) : undefined,
+        })),
+      );
+    } catch {
+      setLoadError(
+        isRTL
+          ? "تعذر تحميل المصروفات المتكررة. يرجى التحقق من الاتصال بالإنترنت."
+          : "Failed to load recurring expenses. Please check your network connection.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [workspaceId, isRTL]);
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load();
     }, [load]),
   );
 
@@ -90,8 +109,8 @@ export default function RecurringScreen() {
       ([acc, cats]) => {
         setAccounts(acc.items);
         setCategories(cats.items);
-        if (acc.items.length > 0 && !accountId) setAccountId(acc.items[0].id);
-        if (cats.items.length > 0 && !categoryId) setCategoryId(cats.items[0].id);
+        if (acc.items.length > 0) setAccountId((prev) => prev ?? acc.items[0].id);
+        if (cats.items.length > 0) setCategoryId((prev) => prev ?? cats.items[0].id);
       },
     );
   }, [workspaceId, open]);
@@ -124,7 +143,9 @@ export default function RecurringScreen() {
         frequency,
         dayOfMonth: new Date(nextDueDate).getDate() || 1,
         nextDueDate,
+        idempotencyKey: idempotencyRef.current,
       });
+      idempotencyRef.current = newIdempotencyKey();
       setOpen(false);
       setDescription("");
       setAmount("");
@@ -147,6 +168,21 @@ export default function RecurringScreen() {
     }
   }
 
+  if (!hasFeature("recurringExpenses")) {
+    return (
+      <Screen title={t.recurring.title} showBack>
+        <PlanGate
+          title={isRTL ? "المصاريف المتكررة والاشتراكات" : "Recurring Expenses"}
+          description={
+            isRTL
+              ? "متابعة الاشتراكات الدورية، الفواتير الشهرية، وتسجيلها تلقائياً متاح لمشتركي باقة PRO."
+              : "Track recurring subscriptions, monthly bills, and auto-logging on the PRO plan."
+          }
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen
       title={t.recurring.title}
@@ -158,78 +194,97 @@ export default function RecurringScreen() {
         setOpen(true);
       }}
     >
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
-        contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={shared.center}>
-            <AppIcon name="repeat" size={44} color={colors.faint} />
-            <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              {t.recurring.noRecurring}
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <View style={shared.card}>
-            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-              <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-                <View style={[shared.iconCircle, { backgroundColor: colors.infoSoft }]}>
-                  <AppIcon name="repeat" size={18} color={colors.info} />
-                </View>
-                <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
-                  <Text style={[shared.value, { fontSize: 16 }]}>{item.description}</Text>
-                  <Text style={[shared.label, { fontSize: 12 }]}>
-                    {t.recurring.nextDue}: {formatDate(item.nextDueDate)}
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={[shared.value, { fontSize: 16, color: colors.expense, fontWeight: "800" }]}>
-                {formatMoney(item.amount, currency)}
+      {loading && items.length === 0 ? (
+        <ListSkeleton count={4} />
+      ) : loadError && items.length === 0 ? (
+        <ErrorView
+          message={loadError}
+          onRetry={() => {
+            setLoading(true);
+            void load(true);
+          }}
+        />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          removeClippedSubviews={Platform.OS === "android"}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={7}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
+          contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={shared.center}>
+              <AppIcon name="repeat" size={44} color={colors.faint} />
+              <Text style={[shared.empty, { paddingVertical: 12 }]}>
+                {t.recurring.noRecurring}
               </Text>
             </View>
+          }
+          renderItem={({ item }) => (
+            <View style={shared.card}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                  <View style={[shared.iconCircle, { backgroundColor: colors.infoSoft }]}>
+                    <AppIcon name="repeat" size={18} color={colors.info} />
+                  </View>
+                  <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
+                    <Text style={[shared.value, { fontSize: 16 }]}>{item.description}</Text>
+                    <Text style={[shared.label, { fontSize: 12 }]}>
+                      {t.recurring.nextDue}: {formatDate(item.nextDueDate)}
+                    </Text>
+                  </View>
+                </View>
 
-            {item.accountName || item.categoryName ? (
-              <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 6, marginVertical: 2 }}>
-                {item.categoryName && (
-                  <View style={[shared.badge, { backgroundColor: "#F3F4F6" }]}>
-                    <Text style={[shared.badgeText, { color: colors.muted }]}>
-                      🏷️ {item.categoryName}
-                    </Text>
-                  </View>
-                )}
-                {item.accountName && (
-                  <View style={[shared.badge, { backgroundColor: "#F3F4F6" }]}>
-                    <Text style={[shared.badgeText, { color: colors.muted }]}>
-                      💳 {item.accountName}
-                    </Text>
-                  </View>
-                )}
+                <Text style={[shared.value, { fontSize: 16, color: colors.expense, fontWeight: "800" }]}>
+                  {formatMoney(item.amount, currency)}
+                </Text>
               </View>
-            ) : null}
 
-            <Pressable
-              style={[
-                shared.buttonSecondary,
-                { marginTop: 4, flexDirection: isRTL ? "row-reverse" : "row" },
-                recordingId === item.id && { opacity: 0.6 },
-              ]}
-              onPress={() => onRecord(item.id)}
-              disabled={recordingId === item.id}
-            >
-              <AppIcon name="checkmark" size={15} color={colors.primary} />
-              <Text style={shared.buttonSecondaryText}>
-                {recordingId === item.id ? t.common.loading : t.recurring.recordNow}
-              </Text>
-            </Pressable>
-          </View>
-        )}
-      />
+              {item.accountName || item.categoryName ? (
+                <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 6, marginVertical: 2 }}>
+                  {item.categoryName && (
+                    <View style={[shared.badge, { backgroundColor: "#F3F4F6", flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4 }]}>
+                      <AppIcon name="pricetag" size={11} color={colors.faint} />
+                      <Text style={[shared.badgeText, { color: colors.muted }]}>
+                        {item.categoryName}
+                      </Text>
+                    </View>
+                  )}
+                  {item.accountName && (
+                    <View style={[shared.badge, { backgroundColor: "#F3F4F6", flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 4 }]}>
+                      <AppIcon name="card-outline" size={11} color={colors.faint} />
+                      <Text style={[shared.badgeText, { color: colors.muted }]}>
+                        {item.accountName}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              ) : null}
+
+              <Pressable
+                style={[
+                  shared.buttonSecondary,
+                  { marginTop: 4, flexDirection: isRTL ? "row-reverse" : "row" },
+                  recordingId === item.id && { opacity: 0.6 },
+                ]}
+                onPress={() => onRecord(item.id)}
+                disabled={recordingId === item.id}
+              >
+                <AppIcon name="checkmark" size={15} color={colors.primary} />
+                <Text style={shared.buttonSecondaryText}>
+                  {recordingId === item.id ? t.common.loading : t.recurring.recordNow}
+                </Text>
+              </Pressable>
+            </View>
+          )}
+        />
+      )}
 
       {/* Create Recurring Modal */}
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
@@ -337,11 +392,17 @@ export default function RecurringScreen() {
                     onPress={() => setAccountId(account.id)}
                     style={[
                       shared.chip,
+                      { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
+                    <AppIcon
+                      name="card-outline"
+                      size={13}
+                      color={active ? "#FFFFFF" : colors.primary}
+                    />
                     <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
-                      💳 {account.name}
+                      {account.name}
                     </Text>
                   </Pressable>
                 );
@@ -364,11 +425,17 @@ export default function RecurringScreen() {
                     onPress={() => setCategoryId(category.id)}
                     style={[
                       shared.chip,
+                      { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
+                    <AppIcon
+                      name="pricetag"
+                      size={13}
+                      color={active ? "#FFFFFF" : colors.primary}
+                    />
                     <Text style={[shared.chipText, active && { color: "#FFFFFF" }]}>
-                      🏷️ {category.name}
+                      {category.name}
                     </Text>
                   </Pressable>
                 );

@@ -122,7 +122,7 @@ export default async function AdminOverviewPage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-violet-900 uppercase tracking-wider">{t("mrr")}</span>
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-600 text-white text-xs">
-              💰
+              
             </span>
           </div>
           <p className="mt-2.5 sm:mt-3 text-xl sm:text-2xl font-black text-neutral-900">
@@ -135,7 +135,7 @@ export default async function AdminOverviewPage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider">{t("gtv")}</span>
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs">
-              📈
+              
             </span>
           </div>
           <p className="mt-2.5 sm:mt-3 text-xl sm:text-2xl font-black text-neutral-900">
@@ -148,7 +148,7 @@ export default async function AdminOverviewPage() {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">{t("conversionRate")}</span>
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-600 text-white text-xs">
-              🎯
+              
             </span>
           </div>
           <p className="mt-2.5 sm:mt-3 text-xl sm:text-2xl font-black text-neutral-900">{stats.conversionRate}%</p>

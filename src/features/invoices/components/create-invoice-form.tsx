@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import { useRouter } from "next/navigation";
 import {
   createInvoiceAction,
@@ -43,6 +45,7 @@ export function CreateInvoiceForm({
   const tCommon = useTranslations("common");
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(createInvoiceAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
   const formRef = useRef<HTMLFormElement>(null);
 
   const initialProject = defaultProjectId ? projects.find((p) => p._id === defaultProjectId) : null;
@@ -75,6 +78,7 @@ export function CreateInvoiceForm({
       className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <IdempotencyKeyInput value={idempotencyKey} />
 
       <div>
         <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>

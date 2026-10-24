@@ -15,36 +15,46 @@ const emailFeaturesEnabled = isAuthEmailConfigured();
  * Import `auth` wherever a session needs to be read or an auth API
  * route needs to be exposed — never construct a second instance.
  */
-const trustedOrigins = Array.from(
-  new Set(
-    [
-      env.BETTER_AUTH_URL,
-      process.env.NEXT_PUBLIC_APP_URL,
-      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-      process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : undefined,
-      ...(process.env.TRUSTED_ORIGINS
-        ? process.env.TRUSTED_ORIGINS.split(",").map((s) => s.trim())
-        : []),
-      "sanadat://",
-      "sanadat://*",
-      "masrofaty://",
-      "masrofaty://*",
-      "exp://",
-      "exp://*",
-      "exp://**",
-      "http://localhost:*",
-      "http://127.0.0.1:*",
-      "http://192.168.*:*",
-      "http://10.*:*",
-      "http://172.*:*",
-      "https://*.vercel.app",
-      "https://masrofaty.qema-tech.com",
-      "https://masrof-five.vercel.app",
-    ].filter((url): url is string => typeof url === "string" && url.trim().length > 0),
-  ),
-);
+const SANADAT_PRODUCTION_ORIGINS = [
+  "https://sanadat.site",
+  "https://www.sanadat.site",
+  "sanadat://",
+  "sanadat://*",
+];
+
+const DEVELOPMENT_ONLY_ORIGINS = [
+  "masrofaty://",
+  "masrofaty://*",
+  "exp://",
+  "exp://*",
+  "exp://**",
+  "http://localhost:*",
+  "http://127.0.0.1:*",
+  "http://192.168.*:*",
+  "http://10.*:*",
+  "http://172.*:*",
+];
+
+function buildTrustedOrigins(): string[] {
+  const origins = [
+    env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    ...(process.env.TRUSTED_ORIGINS
+      ? process.env.TRUSTED_ORIGINS.split(",").map((s) => s.trim())
+      : []),
+    ...SANADAT_PRODUCTION_ORIGINS,
+  ];
+
+  if (process.env.NODE_ENV !== "production") {
+    origins.push(...DEVELOPMENT_ONLY_ORIGINS);
+  }
+
+  return Array.from(
+    new Set(origins.filter((url): url is string => typeof url === "string" && url.trim().length > 0)),
+  );
+}
+
+const trustedOrigins = buildTrustedOrigins();
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,

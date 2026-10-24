@@ -31,7 +31,7 @@ export default async function SupportPage() {
           {t("subtitle")}
         </p>
         <p className="mt-2 text-xs font-medium text-neutral-400">
-          🕒 {t("hours")}
+           {t("hours")}
         </p>
       </div>
 

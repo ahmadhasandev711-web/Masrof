@@ -13,6 +13,10 @@ import { sumByKeyInBase } from "@/lib/currency/report-conversion";
 import { getWorkspaceExchangeContext } from "@/features/workspaces/exchange-context";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CreateBudgetInput } from "@/features/budgets/schemas";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 export class InvalidBudgetCategoryError extends Error {
   readonly code: string;
@@ -25,6 +29,15 @@ export class InvalidBudgetCategoryError extends Error {
 
 export async function createBudget(input: CreateBudgetInput) {
   await connectToDatabase();
+
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await BudgetModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
 
   if (input.categoryId) {
     // A budget only makes sense against an expense category, and it must
@@ -47,6 +60,13 @@ export async function createBudget(input: CreateBudgetInput) {
     categoryId: input.categoryId || null,
     amount: toMinorUnits(input.amount),
   });
+
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "budget",
+    budget._id.toString(),
+  );
 
   return budget.toObject();
 }

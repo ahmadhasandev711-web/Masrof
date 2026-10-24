@@ -73,7 +73,7 @@ export function ProjectList({
   if (projects.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-12 text-center text-neutral-400">
-        <span className="text-3xl block mb-2">📁</span>
+        <span className="text-3xl block mb-2"></span>
         <p className="font-semibold text-neutral-700">{tEmpty("noProjects")}</p>
       </div>
     );
@@ -109,7 +109,7 @@ export function ProjectList({
 
                 {project.clientName && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-700">
-                    <span className="text-neutral-400">👤</span>
+                    <span className="text-neutral-400"></span>
                     <span>{project.clientName}</span>
                   </span>
                 )}
@@ -257,7 +257,7 @@ export function ProjectList({
             {remaining > 0 && (
               <div className="mt-2.5 flex items-center justify-between text-xs rounded-lg bg-amber-50/80 px-3 py-1.5 text-amber-900 border border-amber-200/60">
                 <span className="font-semibold">
-                  ⚠️ {tDashboardAlerts("remaining")}: {formatMoney(remaining, { currency, locale })}
+                   {tDashboardAlerts("remaining")}: {formatMoney(remaining, { currency, locale })}
                 </span>
                 <span className="text-[11px] text-amber-700">
                   ({tProjects("expectedUponCollection")}: {formatMoney(project.invoicedTotal - project.expenseTotal, { currency, locale })})

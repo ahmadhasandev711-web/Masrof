@@ -56,10 +56,11 @@ export function Screen({
               {showBack ? (
                 <Pressable
                   onPress={onBack ?? (() => router.back())}
+                  hitSlop={8}
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
                     backgroundColor: colors.card,
                     alignItems: "center",
                     justifyContent: "center",

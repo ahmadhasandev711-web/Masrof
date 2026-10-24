@@ -61,6 +61,16 @@ export async function createTransfer(input: CreateTransferInput, userId: string)
   const mongooseInstance = await connectToDatabase();
 
   return runInTransaction(mongooseInstance, async (session) => {
+    const existing = await TransferModel.findOne({
+      workspaceId: input.workspaceId,
+      idempotencyKey: input.idempotencyKey,
+      isArchived: false,
+    }).session(session);
+
+    if (existing) {
+      return existing._id.toString();
+    }
+
     const { fromAccount } = await assertAccountsInWorkspace(
       input.workspaceId,
       input.fromAccountId,
@@ -85,6 +95,7 @@ export async function createTransfer(input: CreateTransferInput, userId: string)
           description: input.description,
           notes: input.notes,
           createdBy: userId,
+          idempotencyKey: input.idempotencyKey,
         },
       ],
       { session },

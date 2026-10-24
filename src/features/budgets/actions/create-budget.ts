@@ -25,6 +25,7 @@ export async function createBudgetAction(
     name: formData.get("name"),
     categoryId: formData.get("categoryId") || undefined,
     amount: formData.get("amount"),
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

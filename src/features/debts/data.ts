@@ -10,6 +10,11 @@ import { TransactionModel } from "@/models/transaction";
 import { AccountModel } from "@/models/account";
 import { CategoryModel } from "@/models/category";
 import type { DebtItem, DebtPaymentItem, DebtSummary } from "@/features/debts/types";
+import type { CreateDebtInput } from "@/features/debts/schemas";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 export class DebtNotFoundError extends Error {
   readonly code = "debtNotFound";
@@ -164,17 +169,13 @@ export async function getDebtPayments(
   }));
 }
 
-export async function createDebt(input: {
-  workspaceId: string;
-  name: string;
-  creditor: string;
-  amount: number;
-  dueDate?: Date | null;
-  currency?: string;
-  category?: string;
-  notes?: string;
-}): Promise<string> {
+export async function createDebt(input: CreateDebtInput & { currency?: string }): Promise<string> {
   await connectToDatabase();
+
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    return existingId;
+  }
 
   const totalAmountMinor = toMinorUnits(input.amount);
 
@@ -192,6 +193,13 @@ export async function createDebt(input: {
     isArchived: false,
   });
 
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "debt",
+    doc._id.toString(),
+  );
+
   return doc._id.toString();
 }
 
@@ -204,6 +212,7 @@ export async function recordDebtPayment(
     paymentDate: Date;
     reference?: string;
     notes?: string;
+    idempotencyKey: string;
   },
   userId: string,
 ): Promise<{ paymentId: string; transactionId: string }> {
@@ -230,11 +239,6 @@ export async function recordDebtPayment(
   }
 
   const amountMinor = toMinorUnits(input.amount);
-  const remainingMinor = Math.max(0, (debt.totalAmount ?? 0) - (debt.paidAmount ?? 0));
-
-  if (amountMinor > remainingMinor) {
-    throw new DebtOverpaymentError(remainingMinor);
-  }
 
   let expenseCategory = await CategoryModel.findOne({
     slug: "expense-debt-payment",
@@ -252,6 +256,23 @@ export async function recordDebtPayment(
   }
 
   return await runInTransaction(mongoose, async (session) => {
+    const existing = await DebtPaymentModel.findOne({
+      workspaceId: input.workspaceId,
+      idempotencyKey: input.idempotencyKey,
+    }).session(session);
+
+    if (existing) {
+      return {
+        paymentId: existing._id.toString(),
+        transactionId: existing.transactionId,
+      };
+    }
+
+    const remainingMinor = Math.max(0, (debt.totalAmount ?? 0) - (debt.paidAmount ?? 0));
+    if (amountMinor > remainingMinor) {
+      throw new DebtOverpaymentError(remainingMinor);
+    }
+
     // 1. Create expense transaction in the selected account
     const createdTx = await TransactionModel.create(
       [
@@ -265,6 +286,7 @@ export async function recordDebtPayment(
           description: `سداد التزام: ${debt.name}`,
           notes: input.notes?.trim() || `سداد للجهة: ${debt.creditor}`,
           createdBy: userId,
+          idempotencyKey: input.idempotencyKey,
         },
       ],
       session ? { session } : {},
@@ -306,6 +328,7 @@ export async function recordDebtPayment(
           transactionId: tx._id.toString(),
           reference: input.reference?.trim() || "",
           notes: input.notes?.trim() || "",
+          idempotencyKey: input.idempotencyKey,
         },
       ],
       session ? { session } : {},

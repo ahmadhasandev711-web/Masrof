@@ -35,7 +35,7 @@ export async function ReportSummaryCards({
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-emerald-900">{tSummary("totalIncome")}</p>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-xs text-emerald-700 font-bold">
-            ↗️
+            ↗
           </span>
         </div>
         <div className="mt-2">
@@ -50,7 +50,7 @@ export async function ReportSummaryCards({
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-rose-900">{tSummary("totalExpense")}</p>
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/10 text-xs text-rose-700 font-bold">
-            ↘️
+            ↘
           </span>
         </div>
         <div className="mt-2">
@@ -77,7 +77,7 @@ export async function ReportSummaryCards({
               isProfitable ? "bg-teal-500/10 text-teal-700" : "bg-amber-500/10 text-amber-700"
             }`}
           >
-            {isProfitable ? "✓" : "⚠️"}
+            {isProfitable ? "" : ""}
           </span>
         </div>
         <div className="mt-2">

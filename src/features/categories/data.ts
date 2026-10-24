@@ -8,6 +8,10 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
 import { CategoryModel, type CategoryKind } from "@/models/category";
 import type { CreateCategoryInput } from "@/features/categories/schemas";
 import { SYSTEM_CATEGORIES } from "@/features/categories/seed-data";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 let hasCheckedSystemCategories = false;
 
@@ -72,12 +76,28 @@ export const listCategoriesForWorkspace = unstable_cache(
 export async function createCustomCategory(input: CreateCategoryInput) {
   await connectToDatabase();
 
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await CategoryModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
+
   const category = await CategoryModel.create({
     name: input.name,
     kind: input.kind,
     workspaceId: input.workspaceId,
     isSystem: false,
   });
+
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "category",
+    category._id.toString(),
+  );
 
   return category.toObject();
 }

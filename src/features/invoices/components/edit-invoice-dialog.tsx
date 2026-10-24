@@ -171,7 +171,7 @@ export function EditInvoiceDialog({
             className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
             aria-label={tCommon("close")}
           >
-            ✕
+            
           </button>
         </div>
 
@@ -287,7 +287,7 @@ export function EditInvoiceDialog({
                   className="self-center rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-600 hover:bg-neutral-100 disabled:opacity-30"
                   aria-label={tForm("removeItem")}
                 >
-                  ✕
+                  
                 </button>
               </div>
             ))}

@@ -29,7 +29,7 @@ export async function MonthlyTrendChart({
       {/* Header with Title & Legend */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-base">📈</span>
+          <span className="text-base"></span>
           <h3 className="text-sm sm:text-base font-bold text-neutral-900">{t("incomeVsExpense")}</h3>
         </div>
         <div className="flex items-center gap-4 text-xs font-semibold text-neutral-600">

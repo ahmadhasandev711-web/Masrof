@@ -33,6 +33,7 @@ export async function createProjectAction(
     expectedAmount: expectedAmountRaw ? expectedAmountRaw : null,
     dueDate: dueDateRaw ? dueDateRaw : null,
     description: formData.get("description") ?? undefined,
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

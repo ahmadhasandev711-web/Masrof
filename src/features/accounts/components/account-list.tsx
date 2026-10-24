@@ -36,32 +36,32 @@ export async function AccountList({
   > = {
     cash: {
       label: tAccountType("cash"),
-      icon: "💵",
+      icon: "",
       badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
     },
     bank: {
       label: tAccountType("bank"),
-      icon: "🏦",
+      icon: "",
       badgeClass: "bg-blue-50 text-blue-800 border-blue-200/80",
     },
     mobile_wallet: {
       label: tAccountType("mobile_wallet"),
-      icon: "📱",
+      icon: "",
       badgeClass: "bg-purple-50 text-purple-800 border-purple-200/80",
     },
     credit_card: {
       label: tAccountType("credit_card"),
-      icon: "💳",
+      icon: "",
       badgeClass: "bg-amber-50 text-amber-800 border-amber-200/80",
     },
     savings: {
       label: tAccountType("savings"),
-      icon: "🪙",
+      icon: "",
       badgeClass: "bg-teal-50 text-teal-800 border-teal-200/80",
     },
     other: {
       label: tAccountType("other"),
-      icon: "💼",
+      icon: "",
       badgeClass: "bg-neutral-100 text-neutral-700 border-neutral-200",
     },
   };
@@ -69,7 +69,7 @@ export async function AccountList({
   if (accounts.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-12 text-center text-neutral-400">
-        <span className="mb-2 block text-3xl">🏦</span>
+        <span className="mb-2 block text-3xl"></span>
         <p className="font-semibold text-neutral-700">{tEmpty("noAccounts")}</p>
       </div>
     );
@@ -95,9 +95,11 @@ export async function AccountList({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 {/* Account Identity & Type */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 text-xl shadow-2xs">
-                    {config.icon}
-                  </span>
+                  {config.icon ? (
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 text-xl shadow-2xs">
+                      {config.icon}
+                    </span>
+                  ) : null}
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate text-base font-bold text-neutral-900">
@@ -136,7 +138,7 @@ export async function AccountList({
                       href={`/dashboard/transactions?accountId=${id}`}
                       className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-neutral-50 px-2.5 py-1.5 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-100 active:scale-95"
                     >
-                      <span>📜</span>
+                      <span></span>
                       <span>{tPages("viewTransactions")}</span>
                     </Link>
 

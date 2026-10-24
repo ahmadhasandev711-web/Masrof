@@ -35,6 +35,7 @@ export async function createRecurringExpenseAction(
     dayOfMonth: frequency === "monthly" ? formData.get("dayOfMonth") : undefined,
     dayOfWeek: frequency === "weekly" ? formData.get("dayOfWeek") : undefined,
     nextDueDate: formData.get("nextDueDate"),
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

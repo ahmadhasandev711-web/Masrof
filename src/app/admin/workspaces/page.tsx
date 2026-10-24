@@ -143,7 +143,7 @@ export default async function AdminWorkspacesPage() {
                   href={`/admin/workspaces/${ws.id}`}
                   className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition"
                 >
-                  {t("viewDetails")} ⚙️
+                  {t("viewDetails")} 
                 </Link>
               </div>
             </div>

@@ -49,6 +49,7 @@ export async function createInvoiceAction(
     dueDate: dueDateRaw || null,
     notes: formData.get("notes") || "",
     items: parseItemsFromForm(formData),
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

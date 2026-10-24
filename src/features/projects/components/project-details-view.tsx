@@ -407,7 +407,7 @@ export function ProjectDetailsView({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-base">{tx.categoryIcon ?? "🏷️"}</span>
+                          <span className="text-base">{tx.categoryIcon ?? ""}</span>
                           <div>
                             <p className="font-semibold text-xs text-neutral-900">
                               {tx.description || tx.notes || tx.categoryName}
@@ -476,7 +476,7 @@ export function ProjectDetailsView({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-base">{tx.categoryIcon ?? "💰"}</span>
+                          <span className="text-base">{tx.categoryIcon ?? ""}</span>
                           <div>
                             <p className="font-semibold text-xs text-neutral-900">
                               {tx.description || tx.notes || tx.categoryName}

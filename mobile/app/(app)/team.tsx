@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
-import { FlatList, RefreshControl, Text, View } from "react-native";
+import { FlatList, Platform, RefreshControl, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
+import { PlanGate } from "@/components/plan-gate";
 import { fetchTeam } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -10,7 +11,7 @@ import { useI18n } from "@/lib/i18n";
 
 export default function TeamScreen() {
   const { t, isRTL } = useI18n();
-  const { workspaceId } = useWorkspace();
+  const { workspaceId, hasFeature } = useWorkspace();
   const [members, setMembers] = useState<
     { userId: string; name: string; email: string; role: string }[]
   >([]);
@@ -51,11 +52,31 @@ export default function TeamScreen() {
     }
   }
 
+  if (!hasFeature("teamWorkspace")) {
+    return (
+      <Screen title={t.team.title} showBack>
+        <PlanGate
+          title={isRTL ? "مساحة فريق العمل" : "Team Workspace"}
+          description={
+            isRTL
+              ? "إضافة أعضاء لفريق العمل، وتوزيع الصلاحيات (مدير / محاسب / مشاهد) متاح لمشتركي باقة PRO."
+              : "Invite team members and assign roles (admin / member / viewer) on the PRO plan."
+          }
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen title={t.team.title} showBack>
       <FlatList
         data={members}
         keyExtractor={(item) => item.userId}
+        removeClippedSubviews={Platform.OS === "android"}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={10}
+        windowSize={7}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
         }
@@ -79,7 +100,7 @@ export default function TeamScreen() {
                 </Text>
               </View>
             </View>
-          ) : null
+          ) : undefined
         }
         renderItem={({ item }) => {
           const roleConf = ROLE_MAP[item.role] ?? {

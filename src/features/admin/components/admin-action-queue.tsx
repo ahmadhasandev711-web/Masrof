@@ -80,7 +80,7 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
   if (!hasItems) {
     return (
       <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-6 text-center shadow-xs">
-        <span className="text-3xl">✨</span>
+        <span className="text-3xl"></span>
         <h3 className="mt-2 text-base font-bold text-emerald-900">{t("noPendingActions")}</h3>
         <p className="mt-1 text-xs text-emerald-700">
           جميع الحسابات والاشتراكات في حالة ممتازة ولا توجد اشتراكات مهددة بالانتهاء العاجل.
@@ -131,7 +131,7 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
 
       {successMsg && (
         <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800">
-          ✓ {successMsg}
+           {successMsg}
         </div>
       )}
 
@@ -167,7 +167,7 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
                     onClick={() => handleVerify(user.id)}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition disabled:opacity-50"
                   >
-                    <span>✓</span>
+                    <span></span>
                     <span>{pendingId === user.id ? "جارِ التفعيل..." : t("verifyNow")}</span>
                   </button>
                   <Link

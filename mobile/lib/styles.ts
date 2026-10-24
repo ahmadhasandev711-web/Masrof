@@ -30,6 +30,13 @@ export const colors = {
   danger: "#DC2626",
 };
 
+export const fonts = {
+  regular: "Cairo_400Regular",
+  medium: "Cairo_500Medium",
+  semiBold: "Cairo_600SemiBold",
+  bold: "Cairo_700Bold",
+};
+
 export const shared = StyleSheet.create({
   screen: {
     flex: 1,
@@ -47,11 +54,13 @@ export const shared = StyleSheet.create({
     gap: 12,
   },
   title: {
+    fontFamily: fonts.bold,
     fontSize: 22,
     fontWeight: "800",
     color: colors.text,
   },
   subtitle: {
+    fontFamily: fonts.regular,
     fontSize: 14,
     color: colors.muted,
   },
@@ -93,15 +102,18 @@ export const shared = StyleSheet.create({
     gap: 10,
   },
   label: {
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: colors.faint,
   },
   value: {
+    fontFamily: fonts.bold,
     fontSize: 16,
     fontWeight: "700",
     color: colors.text,
   },
   input: {
+    fontFamily: fonts.regular,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 12,
@@ -110,6 +122,7 @@ export const shared = StyleSheet.create({
     fontSize: 15,
     color: colors.text,
     backgroundColor: "#FBF9F4",
+    minHeight: 48,
   },
   button: {
     backgroundColor: colors.primary,
@@ -120,8 +133,10 @@ export const shared = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
+    minHeight: 48,
   },
   buttonText: {
+    fontFamily: fonts.bold,
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "700",
@@ -137,8 +152,10 @@ export const shared = StyleSheet.create({
     borderColor: colors.primaryBorder,
     flexDirection: "row",
     gap: 6,
+    minHeight: 44,
   },
   buttonSecondaryText: {
+    fontFamily: fonts.bold,
     color: colors.primary,
     fontSize: 13,
     fontWeight: "700",
@@ -152,18 +169,22 @@ export const shared = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "#FECACA",
+    minHeight: 44,
   },
   buttonDangerText: {
+    fontFamily: fonts.bold,
     color: colors.expenseText,
     fontSize: 13,
     fontWeight: "700",
   },
   error: {
+    fontFamily: fonts.medium,
     color: colors.danger,
     fontSize: 13,
     fontWeight: "500",
   },
   empty: {
+    fontFamily: fonts.regular,
     textAlign: "center",
     color: colors.faint,
     paddingVertical: 32,
@@ -178,6 +199,7 @@ export const shared = StyleSheet.create({
     borderColor: colors.primaryBorder,
   },
   chipText: {
+    fontFamily: fonts.bold,
     color: colors.primary,
     fontSize: 12,
     fontWeight: "700",
@@ -189,6 +211,7 @@ export const shared = StyleSheet.create({
     alignSelf: "flex-start",
   },
   badgeText: {
+    fontFamily: fonts.bold,
     fontSize: 11,
     fontWeight: "700",
   },

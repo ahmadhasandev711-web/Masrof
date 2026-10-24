@@ -26,6 +26,7 @@ export async function createTransferAction(
     transferDate: formData.get("transferDate"),
     description: formData.get("description") || "",
     notes: formData.get("notes") || "",
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

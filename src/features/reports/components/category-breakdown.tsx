@@ -49,7 +49,7 @@ export async function CategoryBreakdown({
               <li key={String(row.categoryId)}>
                 <div className="mb-1.5 flex items-center justify-between text-xs sm:text-sm">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-sm shrink-0">{row.icon ?? "🏷️"}</span>
+                    <span className="text-sm shrink-0">{row.icon ?? ""}</span>
                     <span className="truncate font-semibold text-neutral-800">{row.name}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

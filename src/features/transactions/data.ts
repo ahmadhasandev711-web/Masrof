@@ -165,6 +165,16 @@ export async function createTransaction(input: CreateTransactionInput, userId: s
   const mongooseInstance = await connectToDatabase();
 
   return runInTransaction(mongooseInstance, async (session) => {
+    const existing = await TransactionModel.findOne({
+      workspaceId: input.workspaceId,
+      idempotencyKey: input.idempotencyKey,
+      isArchived: false,
+    }).session(session);
+
+    if (existing) {
+      return existing._id.toString();
+    }
+
     const amountMinorUnits = toMinorUnits(input.amount);
 
     const [transaction] = await TransactionModel.create(
@@ -183,6 +193,7 @@ export async function createTransaction(input: CreateTransactionInput, userId: s
           attachmentUrl: input.attachmentUrl || null,
           attachmentName: input.attachmentName || null,
           createdBy: userId,
+          idempotencyKey: input.idempotencyKey,
         },
       ],
       { session },

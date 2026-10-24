@@ -369,7 +369,7 @@ export async function DashboardHome({
           <div className="flex items-center justify-between pb-3 border-b border-sky-100">
             <div className="flex items-center gap-2">
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-100 text-sky-800 text-sm">
-                📲
+                
               </span>
               <div>
                 <h2 className="font-bold text-neutral-900 text-sm sm:text-base">
@@ -434,7 +434,7 @@ export async function DashboardHome({
                       rel="noopener noreferrer"
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition active:scale-95"
                     >
-                      <span>📲</span>
+                      <span></span>
                       <span className="hidden sm:inline">{t("radar.remindWhatsApp")}</span>
                     </a>
                   ) : (
@@ -443,7 +443,7 @@ export async function DashboardHome({
                       prefetch={true}
                       className="shrink-0 rounded-lg border border-neutral-200 px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50"
                     >
-                      🔒 {t("radar.remindWhatsApp")}
+                       {t("radar.remindWhatsApp")}
                     </Link>
                   )}
                 </div>
@@ -459,7 +459,7 @@ export async function DashboardHome({
           <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
             <div className="flex items-center gap-2">
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800 text-sm">
-                📊
+                
               </span>
               <div>
                 <div className="flex items-center gap-2">
@@ -540,7 +540,7 @@ export async function DashboardHome({
       <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
           <h2 className="font-bold text-neutral-900 text-sm sm:text-base flex items-center gap-2">
-            <span>📋</span>
+            <span></span>
             <span>{t("recentTransactions")}</span>
           </h2>
           <Link

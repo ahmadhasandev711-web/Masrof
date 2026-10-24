@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useEffect, useState } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import {
   createAccountAction,
   type CreateAccountState,
@@ -31,6 +33,7 @@ export function CreateAccountForm({
   const tCommon = useTranslations("common");
   const tAccountType = useTranslations("accountType");
   const [state, formAction, isPending] = useActionState(createAccountAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
   const [accountType, setAccountType] = useState("cash");
   const formRef = useRef<HTMLFormElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +45,7 @@ export function CreateAccountForm({
     } else if (isSubmittedRef.current && state.error === null) {
       isSubmittedRef.current = false;
       formRef.current?.reset();
+      regenerateIdempotencyKey();
       // eslint-disable-next-line react-hooks/set-state-in-effect -- sync controlled select after native form reset
       setAccountType("cash");
       onSuccess?.();
@@ -62,6 +66,7 @@ export function CreateAccountForm({
       className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <IdempotencyKeyInput value={idempotencyKey} />
 
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
@@ -72,7 +77,7 @@ export function CreateAccountForm({
             className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
             aria-label={tCommon("cancel")}
           >
-            ✕
+            
           </button>
         )}
       </div>

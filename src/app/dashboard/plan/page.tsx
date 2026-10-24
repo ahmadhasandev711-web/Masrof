@@ -88,7 +88,7 @@ export default async function MyPlanPage() {
         <ul className="mt-6 flex flex-col gap-2 text-sm text-neutral-700">
           {plan.features.map((f) => (
             <li key={f} className="flex gap-2">
-              <span className="text-[#065F46]">✓</span>
+              <span className="text-[#065F46]"></span>
               {f}
             </li>
           ))}
@@ -171,7 +171,7 @@ export default async function MyPlanPage() {
                     <ul className="flex flex-col gap-1 text-xs text-neutral-600">
                       {localizedPlanById[id].features.slice(0, 4).map((f) => (
                         <li key={f} className="flex items-center gap-1.5">
-                          <span className="font-bold text-emerald-700">✓</span>
+                          <span className="font-bold text-emerald-700"></span>
                           <span>{f}</span>
                         </li>
                       ))}
@@ -180,7 +180,7 @@ export default async function MyPlanPage() {
                   <td className="py-3.5 text-center">
                     {displayPlanId === id ? (
                       <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">
-                        ✓ {tPlansPage("youAreHere")}
+                         {tPlansPage("youAreHere")}
                       </span>
                     ) : (
                       <span className="text-neutral-300">—</span>

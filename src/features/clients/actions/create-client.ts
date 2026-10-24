@@ -27,6 +27,7 @@ export async function createClientAction(
     name: formData.get("name"),
     email: formData.get("email") ?? undefined,
     phone: formData.get("phone") ?? undefined,
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

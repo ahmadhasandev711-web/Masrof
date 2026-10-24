@@ -1,8 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import {
   ActivityIndicator,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   Text,
@@ -12,6 +14,8 @@ import {
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
+import { PlanGate } from "@/components/plan-gate";
+import { ListSkeleton } from "@/components/skeleton";
 import { createBudget, fetchBudgets } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
@@ -20,7 +24,7 @@ import { useI18n } from "@/lib/i18n";
 
 export default function BudgetsScreen() {
   const { t, isRTL } = useI18n();
-  const { workspaceId, currency } = useWorkspace();
+  const { workspaceId, currency, hasFeature } = useWorkspace();
   const [items, setItems] = useState<
     {
       id: string;
@@ -31,17 +35,23 @@ export default function BudgetsScreen() {
       percentage: number;
     }[]
   >([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const idempotencyRef = useRef(newIdempotencyKey());
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchBudgets(workspaceId, skipCache);
-    setItems(data.items);
+    try {
+      const data = await fetchBudgets(workspaceId, skipCache);
+      setItems(data.items);
+    } finally {
+      setLoading(false);
+    }
   }, [workspaceId]);
 
   useFocusEffect(
@@ -73,7 +83,13 @@ export default function BudgetsScreen() {
     setBusy(true);
     setError(null);
     try {
-      await createBudget({ workspaceId, name: name.trim(), amount: val });
+      await createBudget({
+        workspaceId,
+        name: name.trim(),
+        amount: val,
+        idempotencyKey: idempotencyRef.current,
+      });
+      idempotencyRef.current = newIdempotencyKey();
       setOpen(false);
       setName("");
       setAmount("");
@@ -83,6 +99,21 @@ export default function BudgetsScreen() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (!hasFeature("budgets")) {
+    return (
+      <Screen title={t.budgets.title} showBack>
+        <PlanGate
+          title={isRTL ? "الميزانيات الشهرية" : "Monthly Budgets"}
+          description={
+            isRTL
+              ? "وضع حدود صرف شهرية وتنبيهات ذكية عند الاقتراب من سقف الميزانية متاح لمشتركي باقة PRO."
+              : "Set monthly spending limits and receive smart alerts when approaching budget thresholds on PRO."
+          }
+        />
+      </Screen>
+    );
   }
 
   return (
@@ -96,12 +127,20 @@ export default function BudgetsScreen() {
         setOpen(true);
       }}
     >
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
+      {loading && items.length === 0 ? (
+        <ListSkeleton count={4} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          removeClippedSubviews={Platform.OS === "android"}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={7}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
         contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -185,6 +224,7 @@ export default function BudgetsScreen() {
           );
         }}
       />
+      )}
 
       {/* Add Budget Modal */}
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>

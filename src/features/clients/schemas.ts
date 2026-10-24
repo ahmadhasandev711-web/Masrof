@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 
 type ClientValidationKey = "clientNameMin2";
 
@@ -20,6 +21,7 @@ export function createClientSchema(t: ValidationTranslator) {
       .max(30)
       .optional()
       .transform((v) => (v && v.length > 0 ? v : null)),
+    idempotencyKey: idempotencyKeyField,
   });
 }
 

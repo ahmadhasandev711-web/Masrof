@@ -27,6 +27,7 @@ export async function createSavingsGoalAction(
     name: formData.get("name"),
     targetAmount: formData.get("targetAmount"),
     deadline: formData.get("deadline"),
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

@@ -68,7 +68,7 @@ export function TransactionSummaryCards({
               isNetPositive ? "bg-teal-500/15 text-teal-700" : "bg-amber-500/15 text-amber-700"
             }`}
           >
-            ⚖️
+            
           </span>
         </div>
         <p

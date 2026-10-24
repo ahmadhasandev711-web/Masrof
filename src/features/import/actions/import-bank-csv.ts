@@ -1,5 +1,6 @@
 "use server";
 
+import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
@@ -95,8 +96,9 @@ export async function importBankCsvAction(
   }
 
   let imported = 0;
+  const importBatchId = crypto.randomUUID();
 
-  for (const line of lines.slice(1)) {
+  for (const [lineIndex, line] of lines.slice(1).entries()) {
     const cols = parseCsvLine(line);
     const amount = parseAmount(cols[amountIdx] ?? "");
     const date = parseDate(cols[dateIdx] ?? "");
@@ -115,6 +117,7 @@ export async function importBankCsvAction(
           transactionDate: date,
           description: description.slice(0, 140),
           notes: tErrors("importBankNotes"),
+          idempotencyKey: `csv:${importBatchId}:${lineIndex}`,
         },
         session.user.id,
       );

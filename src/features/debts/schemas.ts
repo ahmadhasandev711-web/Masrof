@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 
 type ValidationTranslator = (key: string) => string;
 
@@ -16,6 +17,7 @@ export function createDebtSchema(t: ValidationTranslator) {
       .transform((val) => (val && val.length > 0 ? new Date(val) : null)),
     category: z.string().trim().max(80).optional().default(""),
     notes: z.string().trim().max(500).optional().default(""),
+    idempotencyKey: idempotencyKeyField,
   });
 }
 
@@ -30,6 +32,7 @@ export function recordDebtPaymentSchema(t: ValidationTranslator) {
     }),
     reference: z.string().trim().max(100).optional().default(""),
     notes: z.string().trim().max(500).optional().default(""),
+    idempotencyKey: z.string().trim().min(1).max(64),
   });
 }
 

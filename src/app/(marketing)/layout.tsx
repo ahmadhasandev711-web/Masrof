@@ -88,7 +88,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
                 {t("terms")}
               </Link>
               <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-emerald-800 font-medium">
-                <span>🔒</span>
+                <span></span>
                 <span>{t("footerSecurityBadge")}</span>
               </div>
             </div>

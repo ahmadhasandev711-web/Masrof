@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   Linking,
+  Platform,
   Pressable,
   RefreshControl,
   Share,
@@ -13,7 +14,9 @@ import {
 import { useFocusEffect, router } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
-import { fetchInvoices, updateInvoiceStatus, API_URL } from "@/lib/api";
+import { ListSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
+import { fetchInvoices, API_URL } from "@/lib/api";
 import { formatDate, formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -34,14 +37,14 @@ export default function InvoicesScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<InvoiceRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-
   const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
     draft: { label: t.invoices.statusDraft, bg: "#F3F4F6", text: colors.muted },
     sent: { label: t.invoices.statusSent, bg: colors.infoSoft, text: colors.infoText },
@@ -52,11 +55,22 @@ export default function InvoicesScreen() {
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchInvoices(workspaceId, 1, skipCache);
-    setItems(data.items);
-    setPage(data.page);
-    setTotalPages(data.totalPages);
-  }, [workspaceId]);
+    try {
+      setError(null);
+      const data = await fetchInvoices(workspaceId, 1, skipCache);
+      setItems(data.items);
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+    } catch {
+      setError(
+        isRTL
+          ? "تعذر تحميل الفواتير. يرجى التحقق من الاتصال بالإنترنت."
+          : "Failed to load invoices. Please check your network connection.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, isRTL]);
 
   const loadMore = useCallback(async () => {
     if (!workspaceId || loadingMore || page >= totalPages) return;
@@ -79,7 +93,7 @@ export default function InvoicesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load();
     }, [load]),
   );
 
@@ -89,17 +103,6 @@ export default function InvoicesScreen() {
       await load(true);
     } finally {
       setRefreshing(false);
-    }
-  }
-
-  async function markPaid(invoiceId: string) {
-    if (!workspaceId) return;
-    setUpdatingId(invoiceId);
-    try {
-      await updateInvoiceStatus({ workspaceId, invoiceId, status: "paid" });
-      await load(true);
-    } finally {
-      setUpdatingId(null);
     }
   }
 
@@ -134,7 +137,7 @@ export default function InvoicesScreen() {
       showBack
       actionLabel={t.invoices.add}
       actionIcon="add"
-      onAction={() => router.push("/(app)/invoice-new")}
+      onAction={() => router.push("/invoice-new")}
     >
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>
@@ -178,107 +181,114 @@ export default function InvoicesScreen() {
         })}
       </View>
 
-      <FlatList
-        data={filteredItems}
-        keyExtractor={(item) => item._id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
-        onEndReached={() => void loadMore()}
-        onEndReachedThreshold={0.4}
-        ListFooterComponent={
-          loadingMore ? (
-            <View style={{ paddingVertical: 16, alignItems: "center" }}>
-              <ActivityIndicator color={colors.primary} />
+      {loading && items.length === 0 ? (
+        <ListSkeleton count={4} />
+      ) : error && items.length === 0 ? (
+        <ErrorView
+          message={error}
+          onRetry={() => {
+            setLoading(true);
+            void load(true);
+          }}
+        />
+      ) : (
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item) => item._id}
+          removeClippedSubviews={Platform.OS === "android"}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={7}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
+          onEndReached={() => void loadMore()}
+          onEndReachedThreshold={0.4}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{ paddingVertical: 16, alignItems: "center" }}>
+                <ActivityIndicator color={colors.primary} />
+              </View>
+            ) : undefined
+          }
+          contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={shared.center}>
+              <AppIcon name="receipt-outline" size={44} color={colors.faint} />
+              <Text style={[shared.empty, { paddingVertical: 12 }]}>
+                {search ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching invoices found") : t.invoices.noInvoices}
+              </Text>
             </View>
-          ) : null
-        }
-        contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={shared.center}>
-            <AppIcon name="receipt-outline" size={44} color={colors.faint} />
-            <Text style={[shared.empty, { paddingVertical: 12 }]}>
-              {search ? (isRTL ? "لا توجد نتائج مطابقة للبحث" : "No matching invoices found") : t.invoices.noInvoices}
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => {
-          const conf = STATUS_CONFIG[item.displayStatus] ?? {
-            label: item.displayStatus,
-            bg: "#F3F4F6",
-            text: colors.text,
-          };
-          return (
-            <View style={shared.card}>
-              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-                <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-                  <View style={[shared.iconCircle, { backgroundColor: conf.bg }]}>
-                    <AppIcon name="receipt" size={18} color={conf.text} />
+          }
+          renderItem={({ item }) => {
+            const conf = STATUS_CONFIG[item.displayStatus] ?? {
+              label: item.displayStatus,
+              bg: "#F3F4F6",
+              text: colors.text,
+            };
+            return (
+              <View style={shared.card}>
+                <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                  <View style={[shared.rowStart, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                    <View style={[shared.iconCircle, { backgroundColor: conf.bg }]}>
+                      <AppIcon name="receipt" size={18} color={conf.text} />
+                    </View>
+                    <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
+                      <Text style={[shared.value, { fontSize: 16 }]}>{item.invoiceNumber}</Text>
+                      <View style={[shared.rowStart, { gap: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                        <AppIcon name="people-outline" size={12} color={colors.faint} />
+                        <Text style={[shared.label, { fontSize: 12 }]}>
+                          {item.clientName || (isRTL ? "عميل عام" : "General Client")} · {formatDate(item.issueDate)}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                  <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
-                    <Text style={[shared.value, { fontSize: 16 }]}>{item.invoiceNumber}</Text>
-                    <Text style={[shared.label, { fontSize: 12 }]}>
-                      👤 {item.clientName || (isRTL ? "عميل عام" : "General Client")} · {formatDate(item.issueDate)}
-                    </Text>
+
+                  <View style={[shared.badge, { backgroundColor: conf.bg }]}>
+                    <Text style={[shared.badgeText, { color: conf.text }]}>{conf.label}</Text>
                   </View>
                 </View>
 
-                <View style={[shared.badge, { backgroundColor: conf.bg }]}>
-                  <Text style={[shared.badgeText, { color: conf.text }]}>{conf.label}</Text>
+                <View style={[shared.row, { marginVertical: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                  <Text style={shared.label}>{t.common.total}:</Text>
+                  <Text style={[shared.value, { fontSize: 18, color: colors.primary, fontWeight: "800" }]}>
+                    {formatMoney(item.total, currency)}
+                  </Text>
                 </View>
-              </View>
 
-              <View style={[shared.row, { marginVertical: 4, flexDirection: isRTL ? "row-reverse" : "row" }]}>
-                <Text style={shared.label}>{t.common.total}:</Text>
-                <Text style={[shared.value, { fontSize: 18, color: colors.primary, fontWeight: "800" }]}>
-                  {formatMoney(item.total, currency)}
-                </Text>
-              </View>
-
-              {/* Action Buttons for Invoices */}
-              <View style={{ flexDirection: isRTL ? "row-reverse" : "row", flexWrap: "wrap", gap: 8, marginTop: 6, borderTopWidth: 1, borderTopColor: colors.borderLight, paddingTop: 8 }}>
-                {item.status !== "paid" ? (
+                {/* Action Buttons for Invoices */}
+                <View style={{ flexDirection: isRTL ? "row-reverse" : "row", flexWrap: "wrap", gap: 8, marginTop: 6, borderTopWidth: 1, borderTopColor: colors.borderLight, paddingTop: 8 }}>
                   <Pressable
-                    style={[shared.buttonSecondary, { backgroundColor: colors.incomeSoft, borderColor: "#A7F3D0", flexDirection: isRTL ? "row-reverse" : "row" }]}
-                    onPress={() => markPaid(item._id)}
-                    disabled={updatingId === item._id}
+                    style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
+                    onPress={() => shareInvoice(item)}
                   >
-                    <AppIcon name="checkmark" size={15} color={colors.income} />
-                    <Text style={[shared.buttonSecondaryText, { color: colors.incomeText }]}>
-                      {updatingId === item._id ? t.common.loading : t.invoices.markPaid}
-                    </Text>
+                    <AppIcon name="share-social" size={15} color={colors.primary} />
+                    <Text style={shared.buttonSecondaryText}>{t.invoices.shareText}</Text>
                   </Pressable>
-                ) : null}
 
-                <Pressable
-                  style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
-                  onPress={() => shareInvoice(item)}
-                >
-                  <AppIcon name="share-social" size={15} color={colors.primary} />
-                  <Text style={shared.buttonSecondaryText}>{t.invoices.shareText}</Text>
-                </Pressable>
+                  <Pressable
+                    style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
+                    onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=a4`)}
+                  >
+                    <AppIcon name="print" size={15} color={colors.primary} />
+                    <Text style={shared.buttonSecondaryText}>A4</Text>
+                  </Pressable>
 
-                <Pressable
-                  style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
-                  onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=a4`)}
-                >
-                  <AppIcon name="print" size={15} color={colors.primary} />
-                  <Text style={shared.buttonSecondaryText}>A4</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
-                  onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=pos`)}
-                >
-                  <AppIcon name="print" size={15} color={colors.primary} />
-                  <Text style={shared.buttonSecondaryText}>POS</Text>
-                </Pressable>
+                  <Pressable
+                    style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
+                    onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=pos`)}
+                  >
+                    <AppIcon name="print" size={15} color={colors.primary} />
+                    <Text style={shared.buttonSecondaryText}>POS</Text>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          );
-        }}
-      />
+            );
+          }}
+        />
+      )}
     </Screen>
   );
 }

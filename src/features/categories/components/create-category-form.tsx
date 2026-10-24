@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useEffect } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import {
   createCategoryAction,
   type CreateCategoryState,
@@ -23,6 +25,7 @@ export function CreateCategoryForm({
   const tForm = useTranslations("forms.category");
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createCategoryAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
   const formRef = useRef<HTMLFormElement>(null);
   const hasSubmitted = useRef(false);
 
@@ -52,6 +55,7 @@ export function CreateCategoryForm({
       )}
 
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <IdempotencyKeyInput value={idempotencyKey} />
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="category-name" className="text-sm font-medium text-neutral-700">

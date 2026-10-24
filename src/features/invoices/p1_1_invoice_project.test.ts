@@ -28,9 +28,17 @@ vi.mock("@/models/invoice", () => ({
   InvoiceModel: {
     countDocuments: vi.fn(),
     create: vi.fn(),
+    findOne: vi.fn(),
   },
   INVOICE_STATUSES: ["draft", "sent", "paid", "cancelled"] as const,
 }));
+
+vi.mock("@/lib/idempotency/workspace-resource", () => ({
+  findWorkspaceIdempotentId: vi.fn().mockResolvedValue(null),
+  registerWorkspaceIdempotentResource: vi.fn().mockResolvedValue(undefined),
+}));
+
+const testIdempotencyKey = "test-invoice-idempotency-key";
 
 describe("P1.1 — createInvoiceSchema with projectId", () => {
   const tValidation = (key: string) => key;
@@ -42,6 +50,7 @@ describe("P1.1 — createInvoiceSchema with projectId", () => {
       clientId: "client-1",
       issueDate: "2026-09-17",
       items: [{ description: "Consulting", amount: 500 }],
+      idempotencyKey: testIdempotencyKey,
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -56,6 +65,7 @@ describe("P1.1 — createInvoiceSchema with projectId", () => {
       projectId: "project-123",
       issueDate: "2026-09-17",
       items: [{ description: "Consulting", amount: 500 }],
+      idempotencyKey: testIdempotencyKey,
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -70,6 +80,7 @@ describe("P1.1 — createInvoiceSchema with projectId", () => {
       projectId: null,
       issueDate: "2026-09-17",
       items: [{ description: "Consulting", amount: 500 }],
+      idempotencyKey: testIdempotencyKey,
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -106,6 +117,7 @@ describe("P1.1 — createInvoice domain service", () => {
       dueDate: null,
       notes: "",
       items: [{ description: "Service", amount: 100 }],
+      idempotencyKey: testIdempotencyKey,
     });
 
     expect(result.projectId).toBeNull();
@@ -151,6 +163,7 @@ describe("P1.1 — createInvoice domain service", () => {
       dueDate: null,
       notes: "",
       items: [{ description: "Web Dev", amount: 1500 }],
+      idempotencyKey: testIdempotencyKey,
     });
 
     expect(result.projectId).toBe("project-1");
@@ -185,6 +198,7 @@ describe("P1.1 — createInvoice domain service", () => {
         dueDate: null,
         notes: "",
         items: [{ description: "Design", amount: 200 }],
+        idempotencyKey: testIdempotencyKey,
       }),
     ).rejects.toThrow(InvalidInvoiceReferenceError);
 
@@ -197,6 +211,7 @@ describe("P1.1 — createInvoice domain service", () => {
         dueDate: null,
         notes: "",
         items: [{ description: "Design", amount: 200 }],
+        idempotencyKey: testIdempotencyKey,
       });
     } catch (err) {
       expect(err).toBeInstanceOf(InvalidInvoiceReferenceError);

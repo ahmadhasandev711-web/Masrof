@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 import { ACCOUNT_TYPES } from "@/models/account";
 import { SUPPORTED_CURRENCIES } from "@/models/workspace";
 
@@ -16,6 +17,7 @@ export function createAccountSchema(t: ValidationTranslator) {
       .number()
       .refine((val) => Number.isFinite(val), t("openingBalanceInvalid"))
       .default(0),
+    idempotencyKey: idempotencyKeyField,
   });
 }
 

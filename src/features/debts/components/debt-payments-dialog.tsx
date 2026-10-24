@@ -78,7 +78,7 @@ export function DebtPaymentsDialog({
             onClick={onClose}
             className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
           >
-            ✕
+            
           </button>
         </div>
 
@@ -106,7 +106,7 @@ export function DebtPaymentsDialog({
             <div className="py-6 text-center text-xs text-red-600">{error}</div>
           ) : payments.length === 0 ? (
             <div className="rounded-xl border border-dashed border-neutral-200 py-8 text-center">
-              <span className="text-2xl">📝</span>
+              <span className="text-2xl"></span>
               <p className="mt-2 text-xs font-medium text-neutral-500">
                 {t("noPaymentsYet")}
               </p>

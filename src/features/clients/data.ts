@@ -12,9 +12,22 @@ import { InvoiceModel } from "@/models/invoice";
 import { InvoicePaymentModel } from "@/models/invoice-payment";
 import type { CreateClientInput } from "@/features/clients/schemas";
 import type { ClientListItem } from "@/features/clients/types";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 export async function createClient(input: CreateClientInput) {
   await connectToDatabase();
+
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await ClientModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
 
   const client = await ClientModel.create({
     workspaceId: input.workspaceId,
@@ -22,6 +35,13 @@ export async function createClient(input: CreateClientInput) {
     email: input.email ?? null,
     phone: input.phone ?? null,
   });
+
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "client",
+    client._id.toString(),
+  );
 
   return client.toObject();
 }

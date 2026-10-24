@@ -100,7 +100,7 @@ export function TransactionRow({
               : "bg-neutral-100 text-neutral-700 border border-neutral-200/60"
           }`}
         >
-          {transaction.categoryIcon ?? (isIncome ? "💰" : "🏷️")}
+          {transaction.categoryIcon ?? (isIncome ? "" : "")}
         </div>
 
         <div className="min-w-0 flex-1">
@@ -128,12 +128,12 @@ export function TransactionRow({
             <span className="text-neutral-400">{formatDate(transaction.transactionDate, locale)}</span>
             {transaction.clientName && (
               <span className="rounded-md bg-blue-50 px-1.5 py-0.5 font-medium text-blue-700">
-                👤 {transaction.clientName}
+                 {transaction.clientName}
               </span>
             )}
             {transaction.projectName && (
               <span className="rounded-md bg-purple-50 px-1.5 py-0.5 font-medium text-purple-700">
-                📁 {transaction.projectName}
+                 {transaction.projectName}
               </span>
             )}
             {transaction.attachmentUrl && (
@@ -143,7 +143,7 @@ export function TransactionRow({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 px-1.5 py-0.5 font-medium text-amber-800 hover:underline"
               >
-                📎 {transaction.attachmentName ?? tForm("receipt")}
+                 {transaction.attachmentName ?? tForm("receipt")}
               </a>
             )}
           </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useEffect, useState } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import {
   createRecurringExpenseAction,
   type CreateRecurringState,
@@ -44,6 +46,7 @@ export function CreateRecurringExpenseForm({
   const tRecurring = useTranslations("forms.recurring");
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createRecurringExpenseAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
   const [frequency, setFrequency] = useState<"monthly" | "weekly">("monthly");
   const formRef = useRef<HTMLFormElement>(null);
   const hasSubmitted = useRef(false);
@@ -64,6 +67,7 @@ export function CreateRecurringExpenseForm({
       className={showTitle ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm" : "flex flex-col gap-4"}
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <IdempotencyKeyInput value={idempotencyKey} />
 
       {showTitle && (
         <div>

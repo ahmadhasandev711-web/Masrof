@@ -43,7 +43,7 @@ export function WhatsAppReminderLink({
         "inline-flex items-center gap-1 rounded-lg border border-[#25D366]/40 bg-[#25D366]/10 px-2.5 py-1 text-xs font-medium text-[#128C7E] hover:bg-[#25D366]/20"
       }
     >
-      <span aria-hidden>💬</span>
+      <span aria-hidden></span>
       {resolvedLabel}
     </a>
   );

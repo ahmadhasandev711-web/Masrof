@@ -63,7 +63,7 @@ export function ClientList({
   if (clients.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-12 text-center text-neutral-400">
-        <span className="mb-2 block text-3xl">👥</span>
+        <span className="mb-2 block text-3xl"></span>
         <p className="font-semibold text-neutral-700">{tEmpty("noClients")}</p>
       </div>
     );
@@ -105,13 +105,13 @@ export function ClientList({
                       {/* Outstanding Debt / Settled Badge */}
                       {client.outstandingBalance > 0 ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-rose-200/90 bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-700 font-mono tabular-nums">
-                          <span>⚠️</span>
+                          <span></span>
                           <span>{tClients("debtDue")}:</span>
                           <span>{formatMoney(client.outstandingBalance, { currency, locale })}</span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
-                          <span>✓</span>
+                          <span></span>
                           <span>{tClients("settledAccount")}</span>
                         </span>
                       )}
@@ -119,7 +119,7 @@ export function ClientList({
                       {/* Linked Projects Pill */}
                       {client.projectCount > 0 && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-700">
-                          <span>📁</span>
+                          <span></span>
                           <span>
                             {client.projectCount} {tNav("projects")}
                           </span>
@@ -137,7 +137,7 @@ export function ClientList({
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 active:scale-95"
                           >
-                            <span>💬</span>
+                            <span></span>
                             <span>{tClients("whatsappChat")}</span>
                           </a>
                         )}
@@ -145,7 +145,7 @@ export function ClientList({
                           href={`tel:${cleanPhone}`}
                           className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-200 active:scale-95"
                         >
-                          <span>📞</span>
+                          <span></span>
                           <span>{tClients("callPhone")}</span>
                         </a>
                       </div>
@@ -204,7 +204,7 @@ export function ClientList({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
                       >
-                        <span>📄</span>
+                        <span></span>
                         <span>{tClients("statement")}</span>
                       </a>
                       <span className="text-neutral-300">·</span>

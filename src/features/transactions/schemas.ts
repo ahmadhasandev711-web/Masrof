@@ -24,6 +24,7 @@ export function createTransactionSchema(t: ValidationTranslator) {
     projectId: z.string().optional(),
     attachmentUrl: z.string().trim().optional(),
     attachmentName: z.string().trim().max(120).optional(),
+    idempotencyKey: z.string().trim().min(1).max(64),
   });
 }
 

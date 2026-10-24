@@ -29,6 +29,7 @@ export async function createAccountAction(
     type: formData.get("type"),
     openingBalance: formData.get("openingBalance") || 0,
     currency: formData.get("currency") || undefined,
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {
@@ -40,7 +41,11 @@ export async function createAccountAction(
   const requestedCurrency = resolveAccountCurrency(parsed.data.currency, workspaceCurrency);
 
   if (requestedCurrency !== workspaceCurrency) {
-    const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "multiCurrency");
+    const featureError = await assertWorkspacePlanFeature(
+      session.user.id,
+      parsed.data.workspaceId,
+      "multiCurrency",
+    );
     if (featureError) {
       return { error: featureError };
     }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import { useTranslations } from "next-intl";
 import {
   createDebtAction,
@@ -19,12 +21,14 @@ export function CreateDebtDialog({
   const t = useTranslations("forms.debts");
   const [isOpen, setIsOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(createDebtAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
 
   useEffect(() => {
     if (state.success) {
+      regenerateIdempotencyKey();
       setIsOpen(false);
     }
-  }, [state.success]);
+  }, [state.success, regenerateIdempotencyKey]);
 
   return (
     <>
@@ -61,12 +65,13 @@ export function CreateDebtDialog({
                 onClick={() => setIsOpen(false)}
                 className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
               >
-                ✕
+                
               </button>
             </div>
 
             <form action={formAction} className="mt-4 space-y-4">
               <input type="hidden" name="workspaceId" value={workspaceId} />
+      <IdempotencyKeyInput value={idempotencyKey} />
 
               {state.error && (
                 <div className="rounded-lg bg-red-50 p-3 text-xs font-medium text-red-700">

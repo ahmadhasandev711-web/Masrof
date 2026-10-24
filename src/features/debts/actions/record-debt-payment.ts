@@ -40,6 +40,7 @@ export async function recordDebtPaymentAction(
     paymentDate: formData.get("paymentDate"),
     reference: formData.get("reference") || "",
     notes: formData.get("notes") || "",
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {
@@ -61,6 +62,7 @@ export async function recordDebtPaymentAction(
         paymentDate: parsed.data.paymentDate,
         reference: parsed.data.reference,
         notes: parsed.data.notes,
+        idempotencyKey: parsed.data.idempotencyKey,
       },
       session.user.id,
     );

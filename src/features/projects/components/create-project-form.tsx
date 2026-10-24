@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useRef, useEffect, useState } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import {
   createProjectAction,
   type CreateProjectState,
@@ -28,6 +30,7 @@ export function CreateProjectForm({
   const tCommon = useTranslations("common");
   const tStatus = useTranslations("status");
   const [state, formAction, isPending] = useActionState(createProjectAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const hasSubmittedRef = useRef(false);
@@ -39,6 +42,7 @@ export function CreateProjectForm({
       formRef.current?.reset();
       setSelectedClientId("");
       hasSubmittedRef.current = false;
+      regenerateIdempotencyKey();
       onSuccess?.();
     }
   }, [isPending, state.error, onSuccess]);
@@ -50,6 +54,7 @@ export function CreateProjectForm({
       className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <IdempotencyKeyInput value={idempotencyKey} />
 
       <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
 

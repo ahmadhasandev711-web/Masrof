@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 
 type BudgetValidationKey = "budgetNameMin2" | "budgetAmountPositive";
 
@@ -10,6 +11,7 @@ export function createBudgetSchema(t: ValidationTranslator) {
     name: z.string().trim().min(2, t("budgetNameMin2")).max(60),
     categoryId: z.string().optional(),
     amount: z.coerce.number().positive(t("budgetAmountPositive")),
+    idempotencyKey: idempotencyKeyField,
   });
 }
 

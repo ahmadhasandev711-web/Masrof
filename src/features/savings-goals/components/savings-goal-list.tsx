@@ -158,7 +158,7 @@ export function SavingsGoalList({
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-neutral-900">
-                  {isComplete ? "🎉 " : "🎯 "}
+                  {isComplete ? " " : " "}
                   {goal.name}
                 </p>
                 {deadlineLabel && (

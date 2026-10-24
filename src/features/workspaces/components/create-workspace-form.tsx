@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
+import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import { useRouter } from "next/navigation";
 import {
   createWorkspaceAction,
@@ -22,6 +24,7 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
   const tSeed = useTranslations("forms.categories.seed");
   const tAccountType = useTranslations("accountType");
   const [state, formAction, isPending] = useActionState(createWorkspaceAction, initialState);
+  const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
   const [workspaceType, setWorkspaceType] = useState<WorkspaceType>("personal");
 
   useEffect(() => {
@@ -35,6 +38,7 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
+      <IdempotencyKeyInput value={idempotencyKey} />
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-sm font-medium text-neutral-700">
           {tForm("name")}

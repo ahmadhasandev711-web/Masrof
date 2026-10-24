@@ -33,6 +33,7 @@ export async function createTransactionAction(
     projectId: String(formData.get("projectId") ?? "") || undefined,
     attachmentUrl: String(formData.get("attachmentUrl") ?? "") || undefined,
     attachmentName: String(formData.get("attachmentName") ?? "") || undefined,
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {

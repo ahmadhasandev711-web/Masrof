@@ -94,7 +94,7 @@ export function ClientFilters({
             className="absolute inset-y-0 end-2.5 flex items-center text-neutral-400 hover:text-neutral-600"
             aria-label={t("clearSearch")}
           >
-            ✕
+            
           </button>
         )}
       </form>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 import { RECURRING_FREQUENCIES } from "@/models/recurring-expense";
 
 type RecurringValidationKey =
@@ -24,6 +25,7 @@ export function createRecurringExpenseSchema(t: ValidationTranslator) {
       dayOfMonth: z.coerce.number().int().min(1).max(28).optional(),
       dayOfWeek: z.coerce.number().int().min(0).max(6).optional(),
       nextDueDate: z.coerce.date({ message: t("dueDateInvalid") }),
+      idempotencyKey: idempotencyKeyField,
     })
     .superRefine((data, ctx) => {
       if (data.frequency === "monthly" && data.dayOfMonth == null) {

@@ -1,8 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import {
   ActivityIndicator,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   Text,
@@ -12,6 +14,7 @@ import {
 import { useFocusEffect, router } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon, type IconName } from "@/components/icon";
+import { ListSkeleton } from "@/components/skeleton";
 import { createAccount, fetchAccounts, type AccountItem } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
@@ -22,6 +25,7 @@ export default function AccountsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [items, setItems] = useState<AccountItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [type, setType] = useState("cash");
@@ -29,6 +33,7 @@ export default function AccountsScreen() {
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const idempotencyRef = useRef(newIdempotencyKey());
 
   const ACCOUNT_TYPES: { value: string; label: string; icon: IconName }[] = [
     { value: "cash", label: t.accounts.cash, icon: "wallet" },
@@ -40,8 +45,12 @@ export default function AccountsScreen() {
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchAccounts(workspaceId, skipCache);
-    setItems(data.items);
+    try {
+      const data = await fetchAccounts(workspaceId, skipCache);
+      setItems(data.items);
+    } finally {
+      setLoading(false);
+    }
   }, [workspaceId]);
 
   useFocusEffect(
@@ -72,7 +81,9 @@ export default function AccountsScreen() {
         name: name.trim(),
         type,
         openingBalance: Number(balance) || 0,
+        idempotencyKey: idempotencyRef.current,
       });
+      idempotencyRef.current = newIdempotencyKey();
       setOpen(false);
       setName("");
       setBalance("0");
@@ -106,7 +117,7 @@ export default function AccountsScreen() {
               shared.buttonSecondary,
               { paddingVertical: 6, paddingHorizontal: 10, flexDirection: isRTL ? "row-reverse" : "row" },
             ]}
-            onPress={() => router.push("/(app)/transfers")}
+            onPress={() => router.push("/transfers")}
           >
             <AppIcon name="swap-horizontal" size={14} color={colors.primary} />
             <Text style={[shared.buttonSecondaryText, { fontSize: 12 }]}>{t.accounts.transfer}</Text>
@@ -127,12 +138,20 @@ export default function AccountsScreen() {
         </Text>
       </View>
 
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
+      {loading && items.length === 0 ? (
+        <ListSkeleton count={4} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          removeClippedSubviews={Platform.OS === "android"}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={7}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
         contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -176,6 +195,7 @@ export default function AccountsScreen() {
           );
         }}
       />
+      )}
 
       {/* Add Account Modal */}
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>

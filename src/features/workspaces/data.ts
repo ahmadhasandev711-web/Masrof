@@ -9,6 +9,10 @@ import { WorkspaceMembershipModel } from "@/models/workspace-membership";
 import { AccountModel } from "@/models/account";
 import { toMinorUnits } from "@/lib/money";
 import type { CreateWorkspaceInput } from "@/features/workspaces/schemas";
+import {
+  findIdempotentResourceId,
+  registerIdempotentResource,
+} from "@/lib/idempotency/resolve";
 
 /**
  * Creates a workspace, its owner membership, AND its first account,
@@ -17,9 +21,15 @@ import type { CreateWorkspaceInput } from "@/features/workspaces/schemas";
  * with nothing in it. All three writes commit together or none do.
  */
 export async function createWorkspaceForUser(userId: string, input: CreateWorkspaceInput) {
+  const userScope = { type: "user" as const, userId };
+  const existingId = await findIdempotentResourceId(userScope, input.idempotencyKey);
+  if (existingId) {
+    return existingId;
+  }
+
   const mongoose = await connectToDatabase();
 
-  return runInTransaction(mongoose, async (session) => {
+  const workspaceId = await runInTransaction(mongoose, async (session) => {
     const [workspace] = await WorkspaceModel.create(
       [
         {
@@ -67,6 +77,9 @@ export async function createWorkspaceForUser(userId: string, input: CreateWorksp
 
     return workspace._id.toString();
   });
+
+  await registerIdempotentResource(userScope, input.idempotencyKey, "workspace", workspaceId);
+  return workspaceId;
 }
 
 /** Lists every non-archived workspace the given user belongs to, newest first. */

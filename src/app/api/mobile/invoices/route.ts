@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import {
   createInvoice,
+  InvoicePaidStatusNotAllowedError,
   listInvoicesPaginated,
   updateInvoiceStatus,
 } from "@/features/invoices/data";
@@ -85,6 +86,9 @@ export async function PATCH(request: Request) {
     if (!body.invoiceId || !body.status || !(INVOICE_STATUSES as readonly string[]).includes(body.status)) {
       return NextResponse.json({ error: "invalidData" }, { status: 400 });
     }
+    if (body.status === "paid") {
+      return NextResponse.json({ error: "useRecordPayment" }, { status: 400 });
+    }
 
     const access = await requireMobileWorkspace(session.user.id, body.workspaceId, "write");
     if (access instanceof NextResponse) return access;
@@ -97,6 +101,9 @@ export async function PATCH(request: Request) {
     revalidateTag(CACHE_TAGS.invoices, "max");
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (error instanceof InvoicePaidStatusNotAllowedError) {
+      return NextResponse.json({ error: error.code }, { status: 400 });
+    }
     return mobileErrorResponse(error);
   }
 }

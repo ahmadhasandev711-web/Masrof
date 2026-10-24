@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -7,87 +6,34 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { router } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
-import {
-  createTransaction,
-  fetchAccounts,
-  fetchCategories,
-  type AccountItem,
-  type CategoryItem,
-} from "@/lib/api";
-import { todayISO } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
-import { useWorkspace } from "@/lib/workspace";
-import { useI18n } from "@/lib/i18n";
+import { useTransactionForm } from "@/hooks/use-transaction-form";
 
 export default function NewTransactionScreen() {
-  const { t, isRTL } = useI18n();
-  const { workspaceId, currency } = useWorkspace();
-  const [type, setType] = useState<"income" | "expense">("expense");
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState(todayISO());
-  const [accounts, setAccounts] = useState<AccountItem[]>([]);
-  const [categories, setCategories] = useState<CategoryItem[]>([]);
-  const [accountId, setAccountId] = useState<string | null>(null);
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!workspaceId) return;
-    void Promise.all([
-      fetchAccounts(workspaceId),
-      fetchCategories(workspaceId, type),
-    ]).then(([acc, cats]) => {
-      setAccounts(acc.items);
-      setCategories(cats.items);
-      if (acc.items.length > 0 && !accountId) {
-        setAccountId(acc.items[0].id);
-      }
-      if (cats.items.length > 0) {
-        setCategoryId(cats.items[0].id);
-      }
-    });
-  }, [workspaceId, type]);
-
-  async function onSubmit() {
-    if (!workspaceId) return;
-    if (!accountId) {
-      setError(isRTL ? "يرجى اختيار الحساب" : "Please select an account");
-      return;
-    }
-    if (!categoryId) {
-      setError(isRTL ? "يرجى اختيار التصنيف" : "Please select a category");
-      return;
-    }
-    const value = Number(amount);
-    if (!Number.isFinite(value) || value <= 0) {
-      setError(isRTL ? "أدخل مبلغاً صحيحاً أكبر من صفر" : "Enter a valid amount");
-      return;
-    }
-
-    setBusy(true);
-    setError(null);
-    try {
-      await createTransaction({
-        workspaceId,
-        accountId,
-        categoryId,
-        type,
-        amount: value,
-        transactionDate: date,
-        description: description.trim() || undefined,
-      });
-      router.back();
-    } catch {
-      setError(isRTL ? "تعذر حفظ العملية. تأكد من صحة البيانات والاتصال." : "Failed to create transaction.");
-    } finally {
-      setBusy(false);
-    }
-  }
+  const {
+    t,
+    isRTL,
+    currency,
+    type,
+    setType,
+    amount,
+    setAmount,
+    description,
+    setDescription,
+    date,
+    setDate,
+    accounts,
+    categories,
+    accountId,
+    setAccountId,
+    categoryId,
+    setCategoryId,
+    busy,
+    error,
+    onSubmit,
+  } = useTransactionForm();
 
   return (
     <Screen title={t.dashboard.newTransaction} showBack>
@@ -223,16 +169,22 @@ export default function NewTransactionScreen() {
                     onPress={() => setAccountId(account.id)}
                     style={[
                       shared.chip,
+                      { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
+                    <AppIcon
+                      name="card-outline"
+                      size={13}
+                      color={active ? "#FFFFFF" : colors.primary}
+                    />
                     <Text
                       style={[
                         shared.chipText,
                         active && { color: "#FFFFFF", fontWeight: "700" },
                       ]}
                     >
-                      💳 {account.name}
+                      {account.name}
                     </Text>
                   </Pressable>
                 );
@@ -260,16 +212,22 @@ export default function NewTransactionScreen() {
                     onPress={() => setCategoryId(category.id)}
                     style={[
                       shared.chip,
+                      { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
+                    <AppIcon
+                      name="pricetag"
+                      size={13}
+                      color={active ? "#FFFFFF" : colors.primary}
+                    />
                     <Text
                       style={[
                         shared.chipText,
                         active && { color: "#FFFFFF", fontWeight: "700" },
                       ]}
                     >
-                      🏷️ {category.name}
+                      {category.name}
                     </Text>
                   </Pressable>
                 );

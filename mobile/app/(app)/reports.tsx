@@ -9,6 +9,8 @@ import {
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
+import { CardSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
 import { fetchReports } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
@@ -21,6 +23,8 @@ export default function ReportsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
   const [preset, setPreset] = useState<PresetKey>("thisMonth");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [summary, setSummary] = useState<{
     income: number | null;
     expense: number | null;
@@ -32,19 +36,26 @@ export default function ReportsScreen() {
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchReports(workspaceId, preset, skipCache);
-    setSummary(data.summary);
-    setExpenseRows(data.expenseBreakdown?.rows ?? []);
-    setIncomeRows(data.incomeBreakdown?.rows ?? []);
-  }, [workspaceId, preset]);
+    try {
+      setLoadError(null);
+      const data = await fetchReports(workspaceId, preset, skipCache);
+      setSummary(data.summary);
+      setExpenseRows(data.expenseBreakdown?.rows ?? []);
+      setIncomeRows(data.incomeBreakdown?.rows ?? []);
+    } catch {
+      setLoadError(
+        isRTL
+          ? "تعذر تحميل التقارير المالية. يرجى التحقق من الاتصال بالإنترنت."
+          : "Failed to load financial reports. Please check your network connection.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, preset, isRTL]);
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => {
-        setSummary(null);
-        setExpenseRows([]);
-        setIncomeRows([]);
-      });
+      void load();
     }, [load]),
   );
 
@@ -100,139 +111,157 @@ export default function ReportsScreen() {
           })}
         </View>
 
-        {/* Financial Summary Cards */}
-        <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-          <View style={[shared.card, { flex: 1 }]}>
+        {loading && !summary ? (
+          <View style={{ gap: 12 }}>
+            <CardSkeleton height={90} />
+            <CardSkeleton height={90} />
+            <CardSkeleton height={140} />
+          </View>
+        ) : loadError && !summary ? (
+          <ErrorView
+            message={loadError}
+            onRetry={() => {
+              setLoading(true);
+              void load(true);
+            }}
+          />
+        ) : (
+          <>
+            {/* Financial Summary Cards */}
             <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-              <Text style={shared.label}>{t.common.income}</Text>
-              <AppIcon name="trending-up" size={18} color={colors.income} />
-            </View>
-            <Text
-              style={[
-                shared.value,
-                {
-                  color: colors.income,
-                  fontSize: 18,
-                  marginTop: 4,
-                  textAlign: isRTL ? "right" : "left",
-                },
-              ]}
-            >
-              {formatMoney(summary?.income, currency)}
-            </Text>
-          </View>
-
-          <View style={[shared.card, { flex: 1 }]}>
-            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-              <Text style={shared.label}>{t.common.expense}</Text>
-              <AppIcon name="trending-down" size={18} color={colors.expense} />
-            </View>
-            <Text
-              style={[
-                shared.value,
-                {
-                  color: colors.expense,
-                  fontSize: 18,
-                  marginTop: 4,
-                  textAlign: isRTL ? "right" : "left",
-                },
-              ]}
-            >
-              {formatMoney(summary?.expense, currency)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Net Savings Card */}
-        <View style={shared.cardHighlighted}>
-          <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-            <Text style={shared.label}>{t.dashboard.netSavings}</Text>
-            <AppIcon name="wallet" size={20} color={colors.primary} />
-          </View>
-          <Text
-            style={[
-              shared.value,
-              {
-                fontSize: 24,
-                color: (summary?.net ?? 0) >= 0 ? colors.income : colors.expense,
-                fontWeight: "800",
-                textAlign: isRTL ? "right" : "left",
-              },
-            ]}
-          >
-            {(summary?.net ?? 0) >= 0 ? "+" : ""}
-            {formatMoney(summary?.net, currency)}
-          </Text>
-        </View>
-
-        {/* Expense Breakdown */}
-        <View style={{ gap: 8 }}>
-          <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
-            {t.reports.expenseBreakdown}
-          </Text>
-          {expenseRows.length === 0 ? (
-            <View style={[shared.card, { alignItems: "center", paddingVertical: 14 }]}>
-              <Text style={shared.label}>{t.reports.noReports}</Text>
-            </View>
-          ) : (
-            expenseRows.map((row) => {
-              const pct =
-                expenseTotal > 0 && row.total != null
-                  ? Math.round((row.total / expenseTotal) * 100)
-                  : 0;
-              return (
-                <View key={row.name} style={shared.card}>
-                  <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-                    <Text style={[shared.value, { fontSize: 15 }]}>{row.name}</Text>
-                    <Text style={[shared.value, { fontSize: 15, color: colors.expense }]}>
-                      {formatMoney(row.total, currency)} ({pct}%)
-                    </Text>
-                  </View>
-                  <View style={shared.progressBarBg}>
-                    <View
-                      style={[
-                        shared.progressBarFill,
-                        { width: `${pct}%`, backgroundColor: colors.expense },
-                      ]}
-                    />
-                  </View>
+              <View style={[shared.card, { flex: 1 }]}>
+                <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                  <Text style={shared.label}>{t.common.income}</Text>
+                  <AppIcon name="trending-up" size={18} color={colors.income} />
                 </View>
-              );
-            })
-          )}
-        </View>
+                <Text
+                  style={[
+                    shared.value,
+                    {
+                      color: colors.income,
+                      fontSize: 18,
+                      marginTop: 4,
+                      textAlign: isRTL ? "right" : "left",
+                    },
+                  ]}
+                >
+                  {formatMoney(summary?.income, currency)}
+                </Text>
+              </View>
 
-        {/* Income Breakdown */}
-        {incomeRows.length > 0 && (
-          <View style={{ gap: 8 }}>
-            <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
-              {t.reports.incomeBreakdown}
-            </Text>
-            {incomeRows.map((row) => {
-              const pct =
-                incomeTotal > 0 && row.total != null
-                  ? Math.round((row.total / incomeTotal) * 100)
-                  : 0;
-              return (
-                <View key={row.name} style={shared.card}>
-                  <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
-                    <Text style={[shared.value, { fontSize: 15 }]}>{row.name}</Text>
-                    <Text style={[shared.value, { fontSize: 15, color: colors.income }]}>
-                      {formatMoney(row.total, currency)} ({pct}%)
-                    </Text>
-                  </View>
-                  <View style={shared.progressBarBg}>
-                    <View
-                      style={[
-                        shared.progressBarFill,
-                        { width: `${pct}%`, backgroundColor: colors.income },
-                      ]}
-                    />
-                  </View>
+              <View style={[shared.card, { flex: 1 }]}>
+                <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                  <Text style={shared.label}>{t.common.expense}</Text>
+                  <AppIcon name="trending-down" size={18} color={colors.expense} />
                 </View>
-              );
-            })}
-          </View>
+                <Text
+                  style={[
+                    shared.value,
+                    {
+                      color: colors.expense,
+                      fontSize: 18,
+                      marginTop: 4,
+                      textAlign: isRTL ? "right" : "left",
+                    },
+                  ]}
+                >
+                  {formatMoney(summary?.expense, currency)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Net Savings Card */}
+            <View style={shared.cardHighlighted}>
+              <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                <Text style={shared.label}>{t.dashboard.netSavings}</Text>
+                <AppIcon name="wallet" size={20} color={colors.primary} />
+              </View>
+              <Text
+                style={[
+                  shared.value,
+                  {
+                    fontSize: 24,
+                    color: (summary?.net ?? 0) >= 0 ? colors.income : colors.expense,
+                    fontWeight: "800",
+                    textAlign: isRTL ? "right" : "left",
+                  },
+                ]}
+              >
+                {(summary?.net ?? 0) >= 0 ? "+" : ""}
+                {formatMoney(summary?.net, currency)}
+              </Text>
+            </View>
+
+            {/* Expense Breakdown */}
+            <View style={{ gap: 8 }}>
+              <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
+                {t.reports.expenseBreakdown}
+              </Text>
+              {expenseRows.length === 0 ? (
+                <View style={[shared.card, { alignItems: "center", paddingVertical: 14 }]}>
+                  <Text style={shared.label}>{t.reports.noReports}</Text>
+                </View>
+              ) : (
+                expenseRows.map((row) => {
+                  const pct =
+                    expenseTotal > 0 && row.total != null
+                      ? Math.round((row.total / expenseTotal) * 100)
+                      : 0;
+                  return (
+                    <View key={row.name} style={shared.card}>
+                      <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                        <Text style={[shared.value, { fontSize: 15 }]}>{row.name}</Text>
+                        <Text style={[shared.value, { fontSize: 15, color: colors.expense }]}>
+                          {formatMoney(row.total, currency)} ({pct}%)
+                        </Text>
+                      </View>
+                      <View style={shared.progressBarBg}>
+                        <View
+                          style={[
+                            shared.progressBarFill,
+                            { width: `${pct}%`, backgroundColor: colors.expense },
+                          ]}
+                        />
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </View>
+
+            {/* Income Breakdown */}
+            {incomeRows.length > 0 && (
+              <View style={{ gap: 8 }}>
+                <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
+                  {t.reports.incomeBreakdown}
+                </Text>
+                {incomeRows.map((row) => {
+                  const pct =
+                    incomeTotal > 0 && row.total != null
+                      ? Math.round((row.total / incomeTotal) * 100)
+                      : 0;
+                  return (
+                    <View key={row.name} style={shared.card}>
+                      <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                        <Text style={[shared.value, { fontSize: 15 }]}>{row.name}</Text>
+                        <Text style={[shared.value, { fontSize: 15, color: colors.income }]}>
+                          {formatMoney(row.total, currency)} ({pct}%)
+                        </Text>
+                      </View>
+                      <View style={shared.progressBarBg}>
+                        <View
+                          style={[
+                            shared.progressBarFill,
+                            { width: `${pct}%`, backgroundColor: colors.income },
+                          ]}
+                        />
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
     </Screen>

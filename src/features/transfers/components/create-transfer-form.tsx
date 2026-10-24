@@ -30,12 +30,18 @@ export function CreateTransferForm({
   const tCommon = useTranslations("common");
   const [state, formAction, isPending] = useActionState(createTransferAction, initialState);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [idempotencyKey, setIdempotencyKey] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    setIdempotencyKey(crypto.randomUUID());
+  }, []);
 
   useEffect(() => {
     if (!isPending && state.error === null && hasSubmitted) {
       formRef.current?.reset();
       setHasSubmitted(false);
+      setIdempotencyKey(crypto.randomUUID());
       onSuccess?.();
     }
   }, [isPending, state.error, hasSubmitted, onSuccess]);
@@ -50,6 +56,7 @@ export function CreateTransferForm({
       className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
+      <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
 
       <div>
         <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>

@@ -29,7 +29,7 @@ export default async function NewWorkspacePage() {
         ) : (
           <>
             <div className="flex items-start gap-3 rounded-xl border border-emerald-200/80 bg-emerald-50/70 p-3.5 text-xs text-emerald-900 shadow-2xs">
-              <span className="text-base select-none">💡</span>
+              <span className="text-base select-none"></span>
               <p className="leading-relaxed">
                 {t("freeNotice")}
               </p>

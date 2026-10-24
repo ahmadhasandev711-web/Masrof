@@ -18,6 +18,10 @@ import { TransferModel } from "@/models/transfer";
 import { computeAccountBalanceMinor } from "@/features/accounts/balance-math";
 import type { CreateAccountInput } from "@/features/accounts/schemas";
 import { getWorkspaceExchangeContext } from "@/features/workspaces/exchange-context";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 /**
  * Creates an account. `openingBalance` arrives as a decimal (e.g. 500.75)
@@ -33,6 +37,15 @@ export async function createAccount(
 ) {
   await connectToDatabase();
 
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await AccountModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
+
   const openingBalanceMinor = toMinorUnits(input.openingBalance);
   const currency = resolveAccountCurrency(input.currency, workspaceCurrency);
 
@@ -44,6 +57,13 @@ export async function createAccount(
     openingBalance: openingBalanceMinor,
     cachedBalance: openingBalanceMinor,
   });
+
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "account",
+    account._id.toString(),
+  );
 
   return account.toObject();
 }

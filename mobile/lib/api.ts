@@ -1,5 +1,15 @@
 import { getAuthCookie } from "@/lib/auth-client";
 import { API_URL } from "@/lib/config";
+import type {
+  TransactionInput,
+  InvoiceInput,
+  TransferInput,
+  AccountInput,
+  CategoryInput,
+  DebtInput,
+  DebtPaymentInput,
+  CreateWorkspaceInput,
+} from "@/lib/validation";
 
 export class ApiError extends Error {
   status: number;
@@ -28,6 +38,11 @@ export function invalidateCache(pattern?: string): void {
 
 export function clearAllCache(): void {
   apiCache.clear();
+}
+
+export function getCached<T>(path: string): T | undefined {
+  const cached = apiCache.get(path);
+  return cached ? (cached.data as T) : undefined;
 }
 
 async function mobileFetch<T>(
@@ -80,10 +95,19 @@ async function mobileFetch<T>(
 
 export type MobileEntitlements = {
   user: { id: string; name: string; email: string };
-  plan: "free" | "pro" | "plus";
+  plan: "free" | "pro";
   showAds: boolean;
   isSuspended: boolean;
+  flags?: Record<string, boolean>;
+  limits?: {
+    maxInvoicesPerMonth: number;
+    maxClients: number;
+    maxActiveProjects: number;
+    maxWorkspaces: number;
+  };
 };
+
+export type WorkspaceRole = "owner" | "admin" | "member" | "viewer";
 
 export type WorkspaceItem = {
   id: string;
@@ -91,6 +115,7 @@ export type WorkspaceItem = {
   type: string;
   currency: string;
   businessName: string | null;
+  role?: WorkspaceRole;
 };
 
 export type DashboardSummary = {
@@ -141,9 +166,20 @@ export function fetchWorkspaces() {
   );
 }
 
-export function fetchDashboard(workspaceId: string) {
+export async function createWorkspace(body: CreateWorkspaceInput) {
+  const result = await mobileFetch<{ workspaceId: string }>("/api/mobile/workspaces", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  invalidateCache("workspaces");
+  return result;
+}
+
+export function fetchDashboard(workspaceId: string, skipCache = false) {
   return mobileFetch<DashboardSummary>(
     `/api/mobile/dashboard?workspaceId=${encodeURIComponent(workspaceId)}`,
+    undefined,
+    { skipCache },
   );
 }
 
@@ -155,12 +191,7 @@ export function fetchAccounts(workspaceId: string, skipCache = false) {
   );
 }
 
-export async function createAccount(body: {
-  workspaceId: string;
-  name: string;
-  type: string;
-  openingBalance?: number;
-}) {
+export async function createAccount(body: AccountInput) {
   const result = await mobileFetch<AccountItem>("/api/mobile/accounts", {
     method: "POST",
     body: JSON.stringify(body),
@@ -177,7 +208,7 @@ export function fetchCategories(workspaceId: string, kind?: "income" | "expense"
   return mobileFetch<{ items: CategoryItem[] }>(`/api/mobile/categories?${qs}`, undefined, { skipCache });
 }
 
-export async function createCategory(body: { workspaceId: string; name: string; kind: string }) {
+export async function createCategory(body: CategoryInput) {
   const result = await mobileFetch("/api/mobile/categories", { method: "POST", body: JSON.stringify(body) });
   invalidateCache("categories");
   return result;
@@ -210,7 +241,7 @@ export function fetchTransactions(
   });
 }
 
-export async function createTransaction(body: Record<string, unknown>) {
+export async function createTransaction(body: TransactionInput) {
   const result = await mobileFetch<{ id: string }>("/api/mobile/transactions", {
     method: "POST",
     body: JSON.stringify(body),
@@ -234,6 +265,7 @@ export async function createClient(body: {
   name: string;
   email?: string;
   phone?: string;
+  idempotencyKey: string;
 }) {
   const result = await mobileFetch("/api/mobile/clients", { method: "POST", body: JSON.stringify(body) });
   invalidateCache("clients");
@@ -278,23 +310,11 @@ export function fetchInvoices(workspaceId: string, page = 1, skipCache = false) 
   );
 }
 
-export async function createInvoice(body: Record<string, unknown>) {
+export async function createInvoice(body: InvoiceInput) {
   const result = await mobileFetch<{ id: string; invoiceNumber: string }>("/api/mobile/invoices", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  invalidateCache("invoices");
-  invalidateCache("dashboard");
-  invalidateCache("reports");
-  return result;
-}
-
-export async function updateInvoiceStatus(body: {
-  workspaceId: string;
-  invoiceId: string;
-  status: string;
-}) {
-  const result = await mobileFetch("/api/mobile/invoices", { method: "PATCH", body: JSON.stringify(body) });
   invalidateCache("invoices");
   invalidateCache("dashboard");
   invalidateCache("reports");
@@ -319,6 +339,7 @@ export async function createBudget(body: {
   name: string;
   amount: number;
   categoryId?: string;
+  idempotencyKey: string;
 }) {
   const result = await mobileFetch("/api/mobile/budgets", { method: "POST", body: JSON.stringify(body) });
   invalidateCache("budgets");
@@ -339,7 +360,12 @@ export function fetchGoals(workspaceId: string, skipCache = false) {
   }>(`/api/mobile/goals?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
 }
 
-export async function createGoal(body: { workspaceId: string; name: string; targetAmount: number }) {
+export async function createGoal(body: {
+  workspaceId: string;
+  name: string;
+  targetAmount: number;
+  idempotencyKey: string;
+}) {
   const result = await mobileFetch("/api/mobile/goals", { method: "POST", body: JSON.stringify(body) });
   invalidateCache("goals");
   invalidateCache("dashboard");
@@ -398,7 +424,7 @@ export function fetchTransfers(workspaceId: string, page = 1, skipCache = false)
   );
 }
 
-export async function createTransfer(body: Record<string, unknown>) {
+export async function createTransfer(body: TransferInput) {
   const result = await mobileFetch("/api/mobile/transfers", { method: "POST", body: JSON.stringify(body) });
   invalidateCache("transfers");
   invalidateCache("accounts");
@@ -449,6 +475,99 @@ export function fetchTeam(workspaceId: string, skipCache = false) {
     members: { userId: string; name: string; email: string; role: string }[];
     invitations: { id: string; email: string; role: string }[];
   }>(`/api/mobile/team?workspaceId=${encodeURIComponent(workspaceId)}`, undefined, { skipCache });
+}
+
+export type DebtItem = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  creditor: string;
+  totalAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  progressPercent: number;
+  currency: string;
+  dueDate: string | null;
+  status: "active" | "paid";
+  category: string;
+  notes: string;
+  createdAt: string;
+};
+
+export type DebtSummary = {
+  totalLiabilities: number;
+  totalPaid: number;
+  remainingLiabilities: number;
+  activeCount: number;
+  paidCount: number;
+  currency: string;
+};
+
+export type DebtPaymentItem = {
+  id: string;
+  workspaceId: string;
+  debtId: string;
+  amount: number;
+  paymentDate: string;
+  accountId: string;
+  accountName: string;
+  transactionId: string;
+  reference: string;
+  notes: string;
+  createdAt: string;
+};
+
+export function fetchDebts(
+  workspaceId: string,
+  status?: "active" | "paid",
+  skipCache = false,
+) {
+  const qs = new URLSearchParams({ workspaceId });
+  if (status) qs.set("status", status);
+  return mobileFetch<{ items: DebtItem[]; summary: DebtSummary }>(
+    `/api/mobile/debts?${qs}`,
+    undefined,
+    { skipCache },
+  );
+}
+
+export async function createDebt(body: DebtInput) {
+  const result = await mobileFetch<{ id: string }>("/api/mobile/debts", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  invalidateCache("debts");
+  invalidateCache("dashboard");
+  return result;
+}
+
+export function fetchDebtPayments(
+  workspaceId: string,
+  debtId: string,
+  skipCache = false,
+) {
+  const qs = new URLSearchParams({ workspaceId, debtId });
+  return mobileFetch<{ items: DebtPaymentItem[] }>(
+    `/api/mobile/debts/payments?${qs}`,
+    undefined,
+    { skipCache },
+  );
+}
+
+export async function recordDebtPayment(body: DebtPaymentInput) {
+  const result = await mobileFetch<{ paymentId: string; transactionId: string }>(
+    "/api/mobile/debts/payments",
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+  invalidateCache("debts");
+  invalidateCache("accounts");
+  invalidateCache("transactions");
+  invalidateCache("dashboard");
+  invalidateCache("reports");
+  return result;
 }
 
 export { API_URL };

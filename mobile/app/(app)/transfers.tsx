@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -13,11 +14,13 @@ import {
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
-import { createTransfer, fetchAccounts, fetchTransfers, type AccountItem } from "@/lib/api";
-import { formatDate, formatMoney, todayISO } from "@/lib/format";
+import { ListSkeleton } from "@/components/skeleton";
+import { fetchTransfers } from "@/lib/api";
+import { formatDate, formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { useTransferForm } from "@/hooks/use-transfer-form";
 
 export default function TransfersScreen() {
   const { t, isRTL } = useI18n();
@@ -32,26 +35,27 @@ export default function TransfersScreen() {
       description: string;
     }[]
   >([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [accounts, setAccounts] = useState<AccountItem[]>([]);
-  const [open, setOpen] = useState(false);
-  const [fromAccountId, setFromAccountId] = useState<string | null>(null);
-  const [toAccountId, setToAccountId] = useState<string | null>(null);
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(todayISO());
-  const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchTransfers(workspaceId, 1, skipCache);
-    setItems(data.items);
-    setPage(data.page);
-    setTotalPages(data.totalPages);
+    try {
+      const data = await fetchTransfers(workspaceId, 1, skipCache);
+      setItems(data.items);
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+    } finally {
+      setLoading(false);
+    }
   }, [workspaceId]);
+
+  const form = useTransferForm({
+    onSuccess: () => load(true),
+  });
 
   const loadMore = useCallback(async () => {
     if (!workspaceId || loadingMore || page >= totalPages) return;
@@ -87,70 +91,28 @@ export default function TransfersScreen() {
     }
   }
 
-  useEffect(() => {
-    if (!workspaceId || !open) return;
-    void fetchAccounts(workspaceId).then((data) => {
-      setAccounts(data.items);
-      if (data.items.length > 0) {
-        setFromAccountId(data.items[0].id);
-        setToAccountId(data.items.length > 1 ? data.items[1].id : data.items[0].id);
-      }
-    });
-  }, [workspaceId, open]);
-
-  async function onCreate() {
-    if (!workspaceId) return;
-    if (!fromAccountId || !toAccountId) {
-      setError(isRTL ? "يرجى اختيار حسابي التحويل" : "Please select source and destination accounts");
-      return;
-    }
-    if (fromAccountId === toAccountId) {
-      setError(isRTL ? "لا يمكن التحويل لنفس الحساب" : "Source and destination cannot be the same");
-      return;
-    }
-    const value = Number(amount);
-    if (!Number.isFinite(value) || value <= 0) {
-      setError(isRTL ? "أدخل مبلغاً صحيحاً أكبر من صفر" : "Enter a valid amount");
-      return;
-    }
-
-    setBusy(true);
-    setError(null);
-    try {
-      await createTransfer({
-        workspaceId,
-        fromAccountId,
-        toAccountId,
-        amount: value,
-        transferDate: date,
-      });
-      setOpen(false);
-      setAmount("");
-      await load(true);
-    } catch {
-      setError(isRTL ? "تعذر تنفيذ التحويل. تأكد من توفر الرصيد الكافي." : "Failed to transfer. Ensure sufficient balance.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
     <Screen
       title={t.transfers.title}
       showBack
       actionLabel={t.transfers.add}
       actionIcon="swap-horizontal"
-      onAction={() => {
-        setError(null);
-        setOpen(true);
-      }}
+      onAction={() => form.setOpen(true)}
     >
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item._id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
+      {loading && items.length === 0 ? (
+        <ListSkeleton count={5} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item._id}
+          removeClippedSubviews={Platform.OS === "android"}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={7}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
         onEndReached={() => void loadMore()}
         onEndReachedThreshold={0.4}
         ListFooterComponent={
@@ -158,7 +120,7 @@ export default function TransfersScreen() {
             <View style={{ paddingVertical: 16, alignItems: "center" }}>
               <ActivityIndicator color={colors.primary} />
             </View>
-          ) : null
+          ) : undefined
         }
         contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
@@ -178,9 +140,11 @@ export default function TransfersScreen() {
                   <AppIcon name="swap-horizontal" size={18} color={colors.warning} />
                 </View>
                 <View style={{ alignItems: isRTL ? "flex-end" : "flex-start" }}>
-                  <Text style={[shared.value, { fontSize: 15 }]}>
-                    {item.fromAccountName} ➔ {item.toAccountName}
-                  </Text>
+                  <View style={[shared.rowStart, { gap: 6, flexDirection: isRTL ? "row-reverse" : "row" }]}>
+                    <Text style={[shared.value, { fontSize: 15 }]}>{item.fromAccountName}</Text>
+                    <AppIcon name={isRTL ? "chevron-back" : "chevron-forward"} size={14} color={colors.faint} />
+                    <Text style={[shared.value, { fontSize: 15 }]}>{item.toAccountName}</Text>
+                  </View>
                   <Text style={[shared.label, { fontSize: 12 }]}>
                     {formatDate(item.transferDate)}
                   </Text>
@@ -194,12 +158,13 @@ export default function TransfersScreen() {
           </View>
         )}
       />
+      )}
 
       {/* Add Transfer Modal */}
-      <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
+      <Modal visible={form.open} animationType="slide" transparent onRequestClose={() => form.setOpen(false)}>
         <Pressable
           style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "#00000066" }}
-          onPress={() => setOpen(false)}
+          onPress={() => form.setOpen(false)}
         >
           <Pressable
             style={[
@@ -215,7 +180,7 @@ export default function TransfersScreen() {
           >
             <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
               <Text style={[shared.value, { fontSize: 18 }]}>{t.transfers.newTitle}</Text>
-              <Pressable onPress={() => setOpen(false)}>
+              <Pressable onPress={() => form.setOpen(false)}>
                 <AppIcon name="close" size={22} color={colors.text} />
               </Pressable>
             </View>
@@ -228,24 +193,30 @@ export default function TransfersScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
             >
-              {accounts.map((account) => {
-                const active = fromAccountId === account.id;
+              {form.accounts.map((account) => {
+                const active = form.fromAccountId === account.id;
                 return (
                   <Pressable
                     key={account.id}
-                    onPress={() => setFromAccountId(account.id)}
+                    onPress={() => form.setFromAccountId(account.id)}
                     style={[
                       shared.chip,
+                      { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
+                    <AppIcon
+                      name="card-outline"
+                      size={13}
+                      color={active ? "#FFFFFF" : colors.primary}
+                    />
                     <Text
                       style={[
                         shared.chipText,
                         active && { color: "#FFFFFF", fontWeight: "700" },
                       ]}
                     >
-                      💳 {account.name}
+                      {account.name}
                     </Text>
                   </Pressable>
                 );
@@ -260,24 +231,30 @@ export default function TransfersScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
             >
-              {accounts.map((account) => {
-                const active = toAccountId === account.id;
+              {form.accounts.map((account) => {
+                const active = form.toAccountId === account.id;
                 return (
                   <Pressable
                     key={account.id}
-                    onPress={() => setToAccountId(account.id)}
+                    onPress={() => form.setToAccountId(account.id)}
                     style={[
                       shared.chip,
+                      { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
+                    <AppIcon
+                      name="card-outline"
+                      size={13}
+                      color={active ? "#FFFFFF" : colors.primary}
+                    />
                     <Text
                       style={[
                         shared.chipText,
                         active && { color: "#FFFFFF", fontWeight: "700" },
                       ]}
                     >
-                      💳 {account.name}
+                      {account.name}
                     </Text>
                   </Pressable>
                 );
@@ -290,8 +267,8 @@ export default function TransfersScreen() {
             <TextInput
               style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               keyboardType="numeric"
-              value={amount}
-              onChangeText={setAmount}
+              value={form.amount}
+              onChangeText={form.setAmount}
               placeholder="0.00"
               placeholderTextColor={colors.faint}
             />
@@ -301,19 +278,19 @@ export default function TransfersScreen() {
             </Text>
             <TextInput
               style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              value={date}
-              onChangeText={setDate}
+              value={form.date}
+              onChangeText={form.setDate}
               placeholder="YYYY-MM-DD"
             />
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {form.error ? <Text style={shared.error}>{form.error}</Text> : null}
 
             <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
+              style={[shared.button, form.busy && { opacity: 0.7 }]}
+              onPress={form.onSubmit}
+              disabled={form.busy}
             >
-              {busy ? (
+              {form.busy ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text style={shared.buttonText}>{t.transfers.confirmTransfer}</Text>

@@ -108,15 +108,15 @@ export default async function MarketingHomePage() {
                 {/* Trust badges */}
                 <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-[#1C1B1A]/60">
                   <span className="flex items-center gap-1.5">
-                    <span className="text-emerald-700 font-bold">✓</span>{" "}
+                    <span className="text-emerald-700 font-bold"></span>{" "}
                     {t("hero.trust0")}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="text-emerald-700 font-bold">✓</span>{" "}
+                    <span className="text-emerald-700 font-bold"></span>{" "}
                     {t("hero.trust1")}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="text-emerald-700 font-bold">✓</span>{" "}
+                    <span className="text-emerald-700 font-bold"></span>{" "}
                     {t("hero.trust2")}
                   </span>
                 </div>
@@ -411,7 +411,7 @@ export default async function MarketingHomePage() {
                   <ul className="mt-6 space-y-2.5 text-xs text-neutral-700">
                     {([0, 1, 2, 3, 4] as const).map((i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <span className="text-emerald-700 font-bold">✓</span>
+                        <span className="text-emerald-700 font-bold"></span>
                         {t(
                           `pricing.free.features.${i}` as Parameters<
                             typeof t
@@ -455,7 +455,7 @@ export default async function MarketingHomePage() {
                   <ul className="mt-6 space-y-2.5 text-xs text-neutral-800">
                     {([0, 1, 2, 3, 4, 5] as const).map((i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <span className="text-emerald-700 font-bold">✓</span>
+                        <span className="text-emerald-700 font-bold"></span>
                         {i <= 1 ? (
                           <strong className="font-semibold">
                             {t(

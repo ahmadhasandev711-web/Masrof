@@ -1,9 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   fetchEntitlements,
   fetchWorkspaces,
   type MobileEntitlements,
   type WorkspaceItem,
+  type WorkspaceRole,
 } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 
@@ -13,6 +14,10 @@ type WorkspaceContextValue = {
   workspaces: WorkspaceItem[];
   entitlements: MobileEntitlements | null;
   currency: string;
+  role: WorkspaceRole;
+  canWrite: boolean;
+  isOwner: boolean;
+  hasFeature: (feature: string) => boolean;
   showAds: boolean;
   loading: boolean;
   error: string | null;
@@ -29,6 +34,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [entitlements, setEntitlements] = useState<MobileEntitlements | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   const refresh = useCallback(async () => {
     if (!session) {
@@ -36,9 +42,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setWorkspaceId(null);
       setEntitlements(null);
       setLoading(false);
+      hasLoadedRef.current = false;
       return;
     }
-    setLoading(true);
+    // Only trigger full-screen loading on the very first cold load
+    if (!hasLoadedRef.current) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const [ws, ent] = await Promise.all([fetchWorkspaces(), fetchEntitlements()]);
@@ -48,6 +58,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         if (current && ws.items.some((item) => item.id === current)) return current;
         return ws.activeWorkspaceId ?? ws.items[0]?.id ?? null;
       });
+      hasLoadedRef.current = true;
     } catch {
       setError("تعذر تحميل المساحات.");
     } finally {
@@ -64,6 +75,21 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     [workspaces, workspaceId],
   );
 
+  const role: WorkspaceRole = workspace?.role ?? "owner";
+  const canWrite = role !== "viewer";
+  const isOwner = role === "owner";
+
+  const hasFeature = useCallback(
+    (feature: string): boolean => {
+      if (entitlements?.plan === "pro") return true;
+      if (entitlements?.flags && typeof entitlements.flags[feature] === "boolean") {
+        return entitlements.flags[feature];
+      }
+      return false;
+    },
+    [entitlements],
+  );
+
   const value = useMemo<WorkspaceContextValue>(
     () => ({
       workspaceId,
@@ -71,13 +97,29 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       workspaces,
       entitlements,
       currency: workspace?.currency ?? "EGP",
+      role,
+      canWrite,
+      isOwner,
+      hasFeature,
       showAds: entitlements?.showAds ?? true,
       loading,
       error,
       setWorkspaceId,
       refresh,
     }),
-    [workspaceId, workspace, workspaces, entitlements, loading, error, refresh],
+    [
+      workspaceId,
+      workspace,
+      workspaces,
+      entitlements,
+      role,
+      canWrite,
+      isOwner,
+      hasFeature,
+      loading,
+      error,
+      refresh,
+    ],
   );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;

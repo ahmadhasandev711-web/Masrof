@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 
 type InvoiceValidationKey =
   | "invoiceItemDescription"
@@ -23,11 +24,12 @@ export function createInvoiceSchema(t: ValidationTranslator) {
     dueDate: z.coerce.date().optional().nullable(),
     notes: z.string().trim().max(500).optional().default(""),
     items: z.array(invoiceItemSchema).min(1, t("invoiceItemsMin1")),
+    idempotencyKey: idempotencyKeyField,
   });
 }
 
 export function updateInvoiceSchema(t: ValidationTranslator) {
-  return createInvoiceSchema(t).extend({
+  return createInvoiceSchema(t).omit({ idempotencyKey: true }).extend({
     invoiceId: z.string().min(1),
   });
 }

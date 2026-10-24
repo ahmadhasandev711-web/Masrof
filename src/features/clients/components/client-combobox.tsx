@@ -171,7 +171,7 @@ export function ClientCombobox({
               </span>
               {selectedClient.phone && (
                 <span className="ms-2 inline-flex items-center rounded-md bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600 dir-ltr">
-                  📱 {selectedClient.phone}
+                   {selectedClient.phone}
                 </span>
               )}
             </div>
@@ -183,7 +183,7 @@ export function ClientCombobox({
               className="rounded p-1 text-xs text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
               title={t("clearSelection")}
             >
-              ✕
+              
             </button>
             <span className="text-xs text-emerald-700 hover:underline">
               {t("clearSelection")}
@@ -290,7 +290,7 @@ export function ClientCombobox({
                     <div className="flex shrink-0 items-center gap-2">
                       {client.phone && (
                         <span className="inline-flex items-center rounded bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600 dir-ltr">
-                          📱 {client.phone}
+                           {client.phone}
                         </span>
                       )}
                       {isSelected && (

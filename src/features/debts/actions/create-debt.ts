@@ -34,6 +34,7 @@ export async function createDebtAction(
     dueDate: formData.get("dueDate") || null,
     category: formData.get("category") || "",
     notes: formData.get("notes") || "",
+    idempotencyKey: formData.get("idempotencyKey"),
   });
 
   if (!parsed.success) {
@@ -47,13 +48,7 @@ export async function createDebtAction(
 
   try {
     await createDebt({
-      workspaceId: parsed.data.workspaceId,
-      name: parsed.data.name,
-      creditor: parsed.data.creditor,
-      amount: parsed.data.amount,
-      dueDate: parsed.data.dueDate,
-      category: parsed.data.category,
-      notes: parsed.data.notes,
+      ...parsed.data,
     });
 
     revalidatePath("/dashboard/debts");

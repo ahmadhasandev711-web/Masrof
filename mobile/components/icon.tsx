@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/lib/styles";
 
 export type IconName =

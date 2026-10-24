@@ -58,9 +58,9 @@ Built with Next.js 16 (App Router), React 19, and MongoDB, Sanadat strictly enfo
 - **⚙️ Dynamic Admin Engine:**
   - Manage plans, pricing, limits, and feature flags directly from `/admin/plans` without redeploying code.
 
-- **📱 Mobile App Ready (PWA + Capacitor):**
+- **📱 Mobile App Ready (PWA & React Native):**
   - Offline-capable Progressive Web App with service worker caching via Serwist.
-  - Cross-platform Android shell powered by Capacitor.
+  - Native mobile application powered by React Native & Expo in `/mobile`.
 
 ---
 
@@ -202,13 +202,12 @@ npm run build
 
 ## 🚢 Deployment
 
-### Deploying to Vercel
+Production runs at **https://sanadat.site**. Use any Node host (VPS, dedicated server, etc.) — not tied to Vercel.
 
-1. Push your repository to GitHub.
-2. Import the project into [Vercel](https://vercel.com/).
-3. In Project Settings, set the environment variables from `.env.local`.
-4. Ensure the build command is `npm run build` (uses `--webpack` for Serwist PWA support).
-5. Deploy.
+1. Set environment variables from `.env.example` (required: `MONGODB_URI`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL` — both auth URLs must be `https://sanadat.site` in production).
+2. Build with `npm run build` (uses `--webpack` for Serwist PWA support).
+3. Start with `npm run start` behind HTTPS (Nginx/Caddy). Configure **HSTS** on the reverse proxy.
+4. Optional: extra auth origins via `TRUSTED_ORIGINS` (comma-separated) for staging only.
 
 ---
 

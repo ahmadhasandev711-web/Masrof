@@ -15,21 +15,21 @@ import whatsapp from "./whatsapp";
 import workspaceTeam from "./workspace-team";
 
 const messages = {
-  ...core,
-  ...auth,
-  ...dashboard,
-  ...pages,
-  ...forms,
-  ...marketing,
-  ...homepage,
-  ...faq,
-  ...plans,
-  ...reports,
-  ...admin,
-  ...legal,
-  ...notifications,
-  ...whatsapp,
-  ...workspaceTeam,
+ ...core,
+ ...auth,
+ ...dashboard,
+ ...pages,
+ ...forms,
+ ...marketing,
+ ...homepage,
+ ...faq,
+ ...plans,
+ ...reports,
+ ...admin,
+ ...legal,
+ ...notifications,
+ ...whatsapp,
+ ...workspaceTeam,
 };
 
 export default messages;

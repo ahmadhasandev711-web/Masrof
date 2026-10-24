@@ -11,11 +11,19 @@ const debtPaymentSchema = new Schema(
     transactionId: { type: String, required: true },
     reference: { type: String, trim: true, default: "" },
     notes: { type: String, trim: true, maxlength: 500, default: "" },
+    idempotencyKey: { type: String, trim: true, maxlength: 64, default: null },
   },
   { timestamps: true },
 );
 
 debtPaymentSchema.index({ workspaceId: 1, debtId: 1, paymentDate: -1 });
+debtPaymentSchema.index(
+  { workspaceId: 1, idempotencyKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { idempotencyKey: { $type: "string" } },
+  },
+);
 debtPaymentSchema.index({ workspaceId: 1, transactionId: 1 });
 
 export type DebtPaymentMongoDocument = InferSchemaType<typeof debtPaymentSchema>;

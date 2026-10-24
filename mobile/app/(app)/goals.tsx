@@ -1,8 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import {
   ActivityIndicator,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   Text,
@@ -12,6 +14,8 @@ import {
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
+import { PlanGate } from "@/components/plan-gate";
+import { ListSkeleton } from "@/components/skeleton";
 import { createGoal, fetchGoals, updateGoalProgress } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
@@ -20,7 +24,7 @@ import { useI18n } from "@/lib/i18n";
 
 export default function GoalsScreen() {
   const { t, isRTL } = useI18n();
-  const { workspaceId, currency } = useWorkspace();
+  const { workspaceId, currency, hasFeature } = useWorkspace();
   const [items, setItems] = useState<
     {
       id: string;
@@ -31,6 +35,7 @@ export default function GoalsScreen() {
       percentage: number;
     }[]
   >([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [target, setTarget] = useState("");
@@ -39,11 +44,16 @@ export default function GoalsScreen() {
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const idempotencyRef = useRef(newIdempotencyKey());
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
-    const data = await fetchGoals(workspaceId, skipCache);
-    setItems(data.items);
+    try {
+      const data = await fetchGoals(workspaceId, skipCache);
+      setItems(data.items);
+    } finally {
+      setLoading(false);
+    }
   }, [workspaceId]);
 
   useFocusEffect(
@@ -75,7 +85,13 @@ export default function GoalsScreen() {
     setBusy(true);
     setError(null);
     try {
-      await createGoal({ workspaceId, name: name.trim(), targetAmount: val });
+      await createGoal({
+        workspaceId,
+        name: name.trim(),
+        targetAmount: val,
+        idempotencyKey: idempotencyRef.current,
+      });
+      idempotencyRef.current = newIdempotencyKey();
       setOpen(false);
       setName("");
       setTarget("");
@@ -113,6 +129,21 @@ export default function GoalsScreen() {
     }
   }
 
+  if (!hasFeature("savingsGoals")) {
+    return (
+      <Screen title={t.goals.title} showBack>
+        <PlanGate
+          title={isRTL ? "أهداف الادخار والتوفير" : "Savings Goals"}
+          description={
+            isRTL
+              ? "إنشاء أهداف التوفير والادخار، تتبع نسبة الإنجاز والوصول لهدفك متاح لمشتركي باقة PRO."
+              : "Create savings goals, track milestones, and achieve your targets on the PRO plan."
+          }
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen
       title={t.goals.title}
@@ -124,12 +155,20 @@ export default function GoalsScreen() {
         setOpen(true);
       }}
     >
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
-        }
+      {loading && items.length === 0 ? (
+        <ListSkeleton count={4} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          removeClippedSubviews={Platform.OS === "android"}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={7}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+          }
         contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -203,7 +242,7 @@ export default function GoalsScreen() {
               <View style={[shared.row, { marginTop: 6, flexDirection: isRTL ? "row-reverse" : "row" }]}>
                 <Text style={[shared.label, { fontSize: 12 }]}>
                   {isDone
-                    ? (isRTL ? "🎉 تم تحقيق الهدف بنجاح!" : "🎉 Goal completed!")
+                    ? (isRTL ? "تم تحقيق الهدف بنجاح" : "Goal completed")
                     : `${t.goals.remaining}: ${formatMoney(item.remaining, currency)}`}
                 </Text>
 
@@ -225,6 +264,7 @@ export default function GoalsScreen() {
           );
         }}
       />
+      )}
 
       {/* Create Goal Modal */}
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>

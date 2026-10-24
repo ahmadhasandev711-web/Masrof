@@ -14,12 +14,20 @@ const transferSchema = new Schema(
     description: { type: String, trim: true, maxlength: 140, default: "" },
     notes: { type: String, trim: true, maxlength: 1000, default: "" },
     createdBy: { type: String, required: true },
+    idempotencyKey: { type: String, trim: true, maxlength: 64, default: null },
     isArchived: { type: Boolean, required: true, default: false },
   },
   { timestamps: true },
 );
 
 transferSchema.index({ workspaceId: 1, isArchived: 1, transferDate: -1 });
+transferSchema.index(
+  { workspaceId: 1, idempotencyKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { idempotencyKey: { $type: "string" } },
+  },
+);
 
 export type TransferDocument = InferSchemaType<typeof transferSchema>;
 

@@ -131,7 +131,7 @@ export function InvoiceShareDialog({
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600 text-lg leading-none p-1"
           >
-            ✕
+            
           </button>
         </div>
 
@@ -150,7 +150,7 @@ export function InvoiceShareDialog({
         <div className="text-xs">
           {invoice.viewedAt ? (
             <p className="flex items-center gap-1.5 text-emerald-700 font-medium">
-              <span>✓✓</span>
+              <span></span>
               <span>{t("viewedAt", { date: formatDueDate(invoice.viewedAt) ?? "" })}</span>
             </p>
           ) : (
@@ -200,7 +200,7 @@ export function InvoiceShareDialog({
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700"
             >
-              <span>💬</span>
+              <span></span>
               <span>{t("shareViaWhatsApp")}</span>
             </a>
           )}

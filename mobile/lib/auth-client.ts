@@ -8,8 +8,8 @@ export const authClient = createAuthClient({
   plugins: [
     // expoClient types are slightly behind better-auth's client plugin type.
     expoClient({
-      scheme: "masrofaty",
-      storagePrefix: "masrofaty",
+      scheme: "sanadat",
+      storagePrefix: "sanadat",
       storage: SecureStore,
     }) as never,
   ],

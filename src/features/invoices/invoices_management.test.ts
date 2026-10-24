@@ -6,7 +6,9 @@ import {
   cancelInvoice,
   archiveInvoice,
   updateInvoice,
+  updateInvoiceStatus,
   InvalidInvoiceReferenceError,
+  InvoicePaidStatusNotAllowedError,
 } from "@/features/invoices/data";
 import { updateInvoiceSchema, invoiceFiltersSchema } from "@/features/invoices/schemas";
 import { ClientModel } from "@/models/client";
@@ -34,6 +36,7 @@ vi.mock("@/models/invoice", () => ({
   InvoiceModel: {
     findOne: vi.fn(),
     find: vi.fn(),
+    findOneAndUpdate: vi.fn(),
   },
 }));
 
@@ -79,6 +82,28 @@ describe("Invoices Management — Cancel, Archive, Update & Filters", () => {
       });
       expect(parsed.page).toBe(1);
       expect(parsed.pageSize).toBe(20);
+    });
+  });
+
+  describe("updateInvoiceStatus", () => {
+    it("rejects marking invoice paid without a payment allocation", async () => {
+      await expect(
+        updateInvoiceStatus("inv-1", "ws-1", "paid"),
+      ).rejects.toThrow(InvoicePaidStatusNotAllowedError);
+    });
+
+    it("allows non-paid workflow statuses", async () => {
+      (InvoiceModel.findOneAndUpdate as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue({ _id: "inv-1", status: "cancelled" }),
+      });
+
+      const result = await updateInvoiceStatus("inv-1", "ws-1", "cancelled");
+      expect(result).toMatchObject({ status: "cancelled" });
+      expect(InvoiceModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: "inv-1", workspaceId: "ws-1", isArchived: false },
+        { status: "cancelled" },
+        { returnDocument: "after" },
+      );
     });
   });
 

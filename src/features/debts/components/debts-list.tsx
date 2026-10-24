@@ -79,7 +79,7 @@ export function DebtsList({
       {/* Debts Grid / Empty state */}
       {filteredDebts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-neutral-300 bg-white py-12 text-center">
-          <span className="text-4xl">📑</span>
+          <span className="text-4xl"></span>
           <h3 className="mt-3 text-sm font-bold text-neutral-900">{t("emptyTitle")}</h3>
           <p className="mt-1 text-xs text-neutral-500">
             {filter === "all"

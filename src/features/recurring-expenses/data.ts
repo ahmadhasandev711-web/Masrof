@@ -13,6 +13,10 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CreateRecurringExpenseInput } from "@/features/recurring-expenses/schemas";
 import type { RecurringFrequency } from "@/models/recurring-expense";
 import { advanceDueDate } from "./due-date";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 export class InvalidRecurringExpenseError extends Error {
   readonly code: string;
@@ -66,6 +70,15 @@ function mapRecurringExpenseForList(item: RecurringExpenseLean): RecurringExpens
 export async function createRecurringExpense(input: CreateRecurringExpenseInput) {
   await connectToDatabase();
 
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await RecurringExpenseModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
+
   const [account, category] = await Promise.all([
     AccountModel.findOne({
       _id: input.accountId,
@@ -94,6 +107,13 @@ export async function createRecurringExpense(input: CreateRecurringExpenseInput)
     dayOfWeek: input.frequency === "weekly" ? input.dayOfWeek : undefined,
     nextDueDate: input.nextDueDate,
   });
+
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "recurringExpense",
+    recurring._id.toString(),
+  );
 
   return recurring.toObject();
 }

@@ -116,7 +116,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
               onClick={() => setSearchTerm("")}
               className="absolute end-2.5 top-1/2 -translate-y-1/2 text-xs text-neutral-400 hover:text-neutral-700"
             >
-              ✕
+              
             </button>
           )}
         </div>
@@ -174,14 +174,14 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                             className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px]"
                             title="بريد مؤكد"
                           >
-                            ✓
+                            
                           </span>
                         ) : (
                           <span
                             className="inline-flex shrink-0 items-center rounded-md bg-amber-50 px-1.5 py-0.2 text-[10px] font-bold text-amber-700 border border-amber-200/60"
                             title="بريد غير مؤكد"
                           >
-                            ⚠️
+                            
                           </span>
                         )}
                       </div>
@@ -215,7 +215,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                         className="inline-flex items-center gap-1 font-mono text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
                         title="مراسلة عبر واتساب"
                       >
-                        <span>📱</span>
+                        <span></span>
                         <span>{user.phone}</span>
                         <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800">واتساب</span>
                       </a>
@@ -265,7 +265,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                         className="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition disabled:opacity-50"
                         title={t("verifyEmail")}
                       >
-                        ✓ {t("verifyEmail")}
+                         {t("verifyEmail")}
                       </button>
                     )}
                     <button
@@ -287,7 +287,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                       className="rounded-lg border border-neutral-200 bg-white px-2 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 shadow-2xs transition disabled:opacity-50"
                       title={t("sendPasswordReset")}
                     >
-                      🔑
+                      
                     </button>
                   </div>
 
@@ -326,7 +326,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                       className="rounded-lg p-1 text-xs text-neutral-400 hover:text-rose-600 transition disabled:opacity-50"
                       title={t("deleteUser")}
                     >
-                      🗑️
+                      
                     </button>
                   </div>
                 </div>
@@ -382,14 +382,14 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                             className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-[10px]"
                             title="بريد مؤكد"
                           >
-                            ✓
+                            
                           </span>
                         ) : (
                           <span
                             className="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.2 text-[10px] font-bold text-amber-700 border border-amber-200/60"
                             title="بريد غير مؤكد"
                           >
-                            ⚠️
+                            
                           </span>
                         )}
                       </div>
@@ -432,7 +432,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                           className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 hover:text-emerald-800 hover:underline font-semibold"
                           title="مراسلة عبر واتساب"
                         >
-                          <span>📱</span>
+                          <span></span>
                           <span>{user.phone}</span>
                         </a>
                       ) : (
@@ -492,7 +492,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                           className="rounded-md border border-neutral-200 bg-white px-2 py-1 text-[11px] font-medium text-neutral-700 hover:bg-neutral-50 shadow-2xs transition disabled:opacity-50"
                           title={t("sendPasswordReset")}
                         >
-                          🔑
+                          
                         </button>
 
                         {/* 3. Edit User Modal Button */}
@@ -542,7 +542,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                           className="rounded-md px-1.5 py-1 text-[11px] text-neutral-400 hover:text-rose-600 transition disabled:opacity-50"
                           title={t("deleteUser")}
                         >
-                          🗑️
+                          
                         </button>
                       </div>
                     </td>

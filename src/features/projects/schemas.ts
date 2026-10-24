@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idempotencyKeyField } from "@/lib/idempotency/fields";
 import { PROJECT_STATUSES } from "@/features/projects/constants";
 
 type ProjectValidationKey =
@@ -30,6 +31,7 @@ export function createProjectSchema(t: ValidationTranslator) {
       .max(500)
       .optional()
       .transform((v) => v ?? ""),
+    idempotencyKey: idempotencyKeyField,
   });
 }
 

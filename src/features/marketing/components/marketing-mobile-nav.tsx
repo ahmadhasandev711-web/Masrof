@@ -88,7 +88,7 @@ export function MarketingMobileNav({
           onClick={() => setOpen(true)}
           className="rounded-lg border border-[#E4DFD3] px-3 py-1.5 text-sm text-[#065F46]"
         >
-          ☰
+          
         </button>
       </div>
 

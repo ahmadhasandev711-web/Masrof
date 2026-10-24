@@ -137,7 +137,7 @@ function RecurringRow({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-medium text-neutral-900">
-            {item.categoryIcon ?? "🔁"} {item.description || item.categoryName}
+            {item.categoryIcon ?? ""} {item.description || item.categoryName}
           </p>
           <p className="mt-1 text-xs text-neutral-500">
             <span className="font-mono tabular-nums">{formatMoney(item.amount, formatOptions)}</span> · {frequencyLabels[item.frequency]} ·{" "}

@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "مصروفاتي",
-    "slug": "masrofaty",
+    "name": "سندات",
+    "slug": "sanadat",
     "owner": "ahmad-hasan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "masrofaty",
+    "scheme": "sanadat",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -31,7 +31,6 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-dev-client",
       [
         "expo-splash-screen",
         {
@@ -62,7 +61,11 @@
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

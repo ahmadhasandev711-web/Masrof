@@ -23,6 +23,10 @@ import type {
   InvoiceSummary,
 } from "@/features/invoices/types";
 import { resolveInvoiceDisplayStatus } from "@/features/invoices/status";
+import {
+  findWorkspaceIdempotentId,
+  registerWorkspaceIdempotentResource,
+} from "@/lib/idempotency/workspace-resource";
 
 export class InvalidInvoiceReferenceError extends Error {
   readonly code: string;
@@ -30,6 +34,15 @@ export class InvalidInvoiceReferenceError extends Error {
     super(code);
     this.code = code;
     this.name = "InvalidInvoiceReferenceError";
+  }
+}
+
+/** Invoice `paid` must come from {@link recordInvoicePayment}, not a status toggle. */
+export class InvoicePaidStatusNotAllowedError extends Error {
+  readonly code = "useRecordPayment";
+  constructor() {
+    super("Invoice paid status must be recorded via a payment allocation");
+    this.name = "InvoicePaidStatusNotAllowedError";
   }
 }
 
@@ -45,6 +58,15 @@ async function nextInvoiceNumber(workspaceId: string, issueDate: Date): Promise<
 
 export async function createInvoice(input: CreateInvoiceInput) {
   await connectToDatabase();
+
+  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
+  if (existingId) {
+    const existing = await InvoiceModel.findOne({
+      _id: existingId,
+      workspaceId: input.workspaceId,
+    }).lean();
+    if (existing) return existing;
+  }
 
   const client = await ClientModel.findOne({
     _id: input.clientId,
@@ -92,6 +114,15 @@ export async function createInvoice(input: CreateInvoiceInput) {
     isShareable: true,
   });
 
+  const invoiceResourceId =
+    invoice._id != null ? String(invoice._id) : String(invoice.toObject()._id);
+  await registerWorkspaceIdempotentResource(
+    input.workspaceId,
+    input.idempotencyKey,
+    "invoice",
+    invoiceResourceId,
+  );
+
   return invoice.toObject();
 }
 
@@ -100,16 +131,15 @@ export async function updateInvoiceStatus(
   workspaceId: string,
   status: InvoiceStatus,
 ) {
-  await connectToDatabase();
+  if (status === "paid") {
+    throw new InvoicePaidStatusNotAllowedError();
+  }
 
-  const updates: { status: InvoiceStatus; paidAt: Date | null } = {
-    status,
-    paidAt: status === "paid" ? new Date() : null,
-  };
+  await connectToDatabase();
 
   return InvoiceModel.findOneAndUpdate(
     { _id: invoiceId, workspaceId, isArchived: false },
-    updates,
+    { status },
     { returnDocument: "after" },
   ).lean();
 }

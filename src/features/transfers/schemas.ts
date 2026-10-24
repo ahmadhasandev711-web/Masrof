@@ -19,6 +19,7 @@ export function createTransferSchema(t: ValidationTranslator) {
       transferDate: z.coerce.date({ message: t("dateInvalid") }),
       description: z.string().trim().max(140).optional().default(""),
       notes: z.string().trim().max(1000).optional().default(""),
+      idempotencyKey: z.string().trim().min(1).max(64),
     })
     .refine((data) => data.fromAccountId !== data.toAccountId, {
       message: t("transferAccountsMustDiffer"),

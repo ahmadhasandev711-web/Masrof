@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -10,69 +9,31 @@ import {
 import { router } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
-import { createInvoice, fetchClients } from "@/lib/api";
-import { todayISO } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
-import { useWorkspace } from "@/lib/workspace";
-import { useI18n } from "@/lib/i18n";
+import { useInvoiceForm } from "@/hooks/use-invoice-form";
 
 export default function NewInvoiceScreen() {
-  const { t, isRTL } = useI18n();
-  const { workspaceId, currency } = useWorkspace();
-  const [clients, setClients] = useState<{ _id: string; name: string }[]>([]);
-  const [clientId, setClientId] = useState<string | null>(null);
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [issueDate, setIssueDate] = useState(todayISO());
-  const [dueDate, setDueDate] = useState("");
-  const [notes, setNotes] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!workspaceId) return;
-    void fetchClients(workspaceId).then((data) => {
-      setClients(data.items);
-      if (data.items.length > 0 && !clientId) {
-        setClientId(data.items[0]._id);
-      }
-    });
-  }, [workspaceId]);
-
-  async function onSubmit() {
-    if (!workspaceId) return;
-    if (!clientId) {
-      setError(isRTL ? "يرجى اختيار العميل أو إضافة عميل أولاً" : "Please select or add a client first");
-      return;
-    }
-    const value = Number(amount);
-    if (!description.trim()) {
-      setError(isRTL ? "يرجى إدخال وصف البند أو الخدمة" : "Please enter item or service description");
-      return;
-    }
-    if (!Number.isFinite(value) || value <= 0) {
-      setError(isRTL ? "أدخل مبلغاً صحيحاً أكبر من صفر" : "Enter a valid amount");
-      return;
-    }
-
-    setBusy(true);
-    setError(null);
-    try {
-      await createInvoice({
-        workspaceId,
-        clientId,
-        issueDate,
-        dueDate: dueDate.trim() || undefined,
-        notes: notes.trim() || undefined,
-        items: [{ description: description.trim(), amount: value, quantity: 1, unitPrice: value }],
-      });
-      router.back();
-    } catch {
-      setError(isRTL ? "تعذر إنشاء الفاتورة. تأكد من صحة البيانات والاتصال." : "Failed to create invoice.");
-    } finally {
-      setBusy(false);
-    }
-  }
+  const {
+    t,
+    isRTL,
+    currency,
+    clients,
+    clientId,
+    setClientId,
+    description,
+    setDescription,
+    amount,
+    setAmount,
+    issueDate,
+    setIssueDate,
+    dueDate,
+    setDueDate,
+    notes,
+    setNotes,
+    busy,
+    error,
+    onSubmit,
+  } = useInvoiceForm();
 
   return (
     <Screen title={t.invoices.newTitle} showBack>
@@ -85,7 +46,7 @@ export default function NewInvoiceScreen() {
           <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row" }]}>
             <Text style={shared.label}>{t.invoices.clientName}</Text>
             {clients.length === 0 ? (
-              <Pressable onPress={() => router.push("/(app)/clients")}>
+              <Pressable onPress={() => router.push("/clients")}>
                 <Text style={[shared.label, { color: colors.primary, fontWeight: "700" }]}>
                   {t.clients.add}
                 </Text>
@@ -111,16 +72,22 @@ export default function NewInvoiceScreen() {
                     onPress={() => setClientId(client._id)}
                     style={[
                       shared.chip,
+                      { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6 },
                       active && { backgroundColor: colors.primary, borderColor: colors.primary },
                     ]}
                   >
+                    <AppIcon
+                      name="people-outline"
+                      size={13}
+                      color={active ? "#FFFFFF" : colors.primary}
+                    />
                     <Text
                       style={[
                         shared.chipText,
                         active && { color: "#FFFFFF", fontWeight: "700" },
                       ]}
                     >
-                      👤 {client.name}
+                      {client.name}
                     </Text>
                   </Pressable>
                 );

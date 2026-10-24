@@ -53,7 +53,7 @@ export function LiquidityHeroCard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-sm">
-              💰
+              
             </span>
             <span className="text-xs sm:text-sm font-semibold tracking-wide text-emerald-100">
               {t("netLiquidity")}
@@ -81,7 +81,7 @@ export function LiquidityHeroCard({
           {/* Wallets */}
           <div className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 border border-white/10">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm">📱</span>
+              <span className="text-sm"></span>
               <span className="text-xs text-emerald-100">{t("walletsShare")}</span>
             </div>
             <div className="text-end font-mono text-xs font-bold tabular-nums text-white">
@@ -95,7 +95,7 @@ export function LiquidityHeroCard({
           {/* Cash */}
           <div className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 border border-white/10">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm">💵</span>
+              <span className="text-sm"></span>
               <span className="text-xs text-emerald-100">{t("cashShare")}</span>
             </div>
             <div className="text-end font-mono text-xs font-bold tabular-nums text-white">
@@ -109,7 +109,7 @@ export function LiquidityHeroCard({
           {/* Banks */}
           <div className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 border border-white/10">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm">🏦</span>
+              <span className="text-sm"></span>
               <span className="text-xs text-emerald-100">{t("banksShare")}</span>
             </div>
             <div className="text-end font-mono text-xs font-bold tabular-nums text-white">

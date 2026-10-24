@@ -41,6 +41,8 @@ const transactionSchema = new Schema(
     // better-auth user id of whoever recorded this entry.
     createdBy: { type: String, required: true },
 
+    idempotencyKey: { type: String, trim: true, maxlength: 64, default: null },
+
     // Soft-deleted rather than hard-deleted, so historical reports stay
     // reconstructible and an accidental delete is always recoverable.
     isArchived: { type: Boolean, required: true, default: false },
@@ -73,6 +75,13 @@ transactionSchema.index({ workspaceId: 1, projectId: 1, isArchived: 1 });
 // substring `$regex` behaviour is unchanged (a `$text` index would only
 // match whole words and change search UX).
 transactionSchema.index({ workspaceId: 1, description: 1 });
+transactionSchema.index(
+  { workspaceId: 1, idempotencyKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { idempotencyKey: { $type: "string" } },
+  },
+);
 
 export type TransactionDocument = InferSchemaType<typeof transactionSchema>;
 

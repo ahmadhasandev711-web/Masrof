@@ -174,7 +174,7 @@ export function PricingTableClient({
       {/* ========================================================= */}
       <div className="flex flex-col items-center justify-center gap-2">
         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-4 py-1.5 text-xs sm:text-sm font-bold text-emerald-900 shadow-2xs">
-          <span>✨</span>
+          <span></span>
           <span>{yearlyDiscountBadge}</span>
         </div>
       </div>
@@ -211,7 +211,7 @@ export function PricingTableClient({
               <ul className="mt-3 space-y-2.5 text-sm text-neutral-700">
                 {freePlan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-2.5">
-                    <span className="text-emerald-700 font-bold">✓</span>
+                    <span className="text-emerald-700 font-bold"></span>
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -272,7 +272,7 @@ export function PricingTableClient({
               <ul className="mt-3 space-y-2.5 text-sm text-emerald-950">
                 {proPlan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-2.5">
-                    <span className="text-emerald-700 font-black">✓</span>
+                    <span className="text-emerald-700 font-black"></span>
                     <span className="font-medium">{feature}</span>
                   </li>
                 ))}
@@ -294,7 +294,7 @@ export function PricingTableClient({
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full rounded-xl border border-emerald-700/40 bg-white py-3 text-center text-xs font-semibold text-emerald-850 transition hover:bg-emerald-50"
             >
-              <span>💬</span>
+              <span></span>
               <span>{whatsappCta}</span>
             </a>
           </div>
@@ -349,7 +349,7 @@ export function PricingTableClient({
                       {row.isBoolean ? (
                         row.free === included ? (
                           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 font-bold">
-                            ✓
+                            
                           </span>
                         ) : (
                           <span className="text-neutral-300 font-bold">—</span>
@@ -363,7 +363,7 @@ export function PricingTableClient({
                     <td className="py-4 px-6 text-center text-xs font-semibold bg-emerald-50/30 text-emerald-950">
                       {row.isBoolean ? (
                         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-800 text-white font-bold shadow-xs">
-                          ✓
+                          
                         </span>
                       ) : (
                         <span className={row.proHighlight ? "font-bold text-emerald-900" : ""}>

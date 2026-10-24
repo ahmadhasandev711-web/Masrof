@@ -14,19 +14,11 @@
     "seed:posts": "tsx --env-file=.env.local scripts/seed-posts.ts",
     "seed:admin": "tsx --env-file=.env.local scripts/seed-admin.ts",
     "db:ping": "tsx --env-file=.env.local scripts/db-ping.ts",
-    "cap:sync": "cap sync",
-    "cap:open": "cap open android",
-    "cap:assets": "tsx scripts/generate-android-assets.ts"
+    "deploy:fresh-checklist": "node scripts/fresh-database-deploy.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1106.0",
     "@better-auth/expo": "^1.6.27",
-    "@capacitor/android": "^8.5.3",
-    "@capacitor/app": "^8.1.2",
-    "@capacitor/core": "^8.5.3",
-    "@capacitor/keyboard": "^8.0.6",
-    "@capacitor/splash-screen": "^8.0.2",
-    "@capacitor/status-bar": "^8.0.4",
     "@fontsource/cairo": "^5.2.7",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/markazi-text": "^5.2.9",
@@ -52,7 +44,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.3",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.2",
     "@types/react": "19.2.17",
