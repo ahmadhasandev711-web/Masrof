@@ -161,7 +161,7 @@ function InvoiceRow({
                 title={new Date(invoice.viewedAt).toLocaleString("ar-EG")}
                 className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-800"
               >
-                <span></span>
+                <span>👁</span>
                 <span>{tForm("viewedBadge")}</span>
               </span>
             )}
@@ -198,18 +198,18 @@ function InvoiceRow({
         {/* Client & Date Details */}
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-neutral-400 text-xs"></span>
+            <span className="text-neutral-400 text-xs">👤</span>
             <p className="font-bold text-neutral-900 text-sm sm:text-base">
               {invoice.clientName}
             </p>
             {invoice.projectName && (
               <span className="font-medium text-xs text-purple-700 bg-purple-50 border border-purple-200/60 px-2 py-0.5 rounded-md">
-                 {invoice.projectName}
+                📁 {invoice.projectName}
               </span>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
-            <span> {formatDate(invoice.issueDate, locale)}</span>
+            <span>📅 {formatDate(invoice.issueDate, locale)}</span>
             {invoice.dueDate && (
               <span className={`font-medium ${invoice.displayStatus === "overdue" ? "text-rose-700 font-bold" : "text-neutral-600"}`}>
                 ⏳ {tForm("dueDate")}: {formatDate(invoice.dueDate, locale)}
@@ -237,7 +237,7 @@ function InvoiceRow({
             </div>
           ) : invoice.financialStatus === "paid" ? (
             <div className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
-              <span></span>
+              <span>✓</span>
               <span>{tForm("financialStatuses.paid")}</span>
             </div>
           ) : null}
@@ -246,13 +246,13 @@ function InvoiceRow({
         {/* Action Error Message */}
         {actionError && (
           <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">
-            <span> {actionError}</span>
+            <span>⚠️ {actionError}</span>
             <button
               type="button"
               onClick={() => setActionError(null)}
               className="px-1 font-bold text-red-500 hover:text-red-700"
             >
-              
+              ✕
             </button>
           </div>
         )}
@@ -339,7 +339,7 @@ function InvoiceRow({
                 onClick={() => setIsPaymentOpen(true)}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-center text-xs sm:text-sm font-bold text-white shadow-xs transition hover:bg-[#054E3B] active:scale-95"
               >
-                <span></span>
+                <span>💳</span>
                 <span>{tForm("recordPayment")}</span>
               </button>
             )}

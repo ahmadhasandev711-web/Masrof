@@ -215,7 +215,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                         className="inline-flex items-center gap-1 font-mono text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
                         title="مراسلة عبر واتساب"
                       >
-                        <span></span>
+                        <span>💬</span>
                         <span>{user.phone}</span>
                         <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800">واتساب</span>
                       </a>
@@ -432,7 +432,7 @@ export function AdminUsersTable({ users }: { users: AppUserWithWorkspaces[] }) {
                           className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 hover:text-emerald-800 hover:underline font-semibold"
                           title="مراسلة عبر واتساب"
                         >
-                          <span></span>
+                          <span>💬</span>
                           <span>{user.phone}</span>
                         </a>
                       ) : (

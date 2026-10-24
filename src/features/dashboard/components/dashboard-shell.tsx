@@ -220,11 +220,17 @@ function MobileMoreSheet({
   onClose,
   tNav,
   locale,
+  userName,
+  planLabel,
+  isAdmin,
 }: {
   open: boolean;
   onClose: () => void;
   tNav: ReturnType<typeof useTranslations<"nav">>;
   locale: string;
+  userName?: string;
+  planLabel?: string;
+  isAdmin?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -288,6 +294,37 @@ function MobileMoreSheet({
               </div>
             </div>
           ))}
+
+          {/* User Account & Session Card */}
+          <div className="flex flex-col gap-1.5 pt-1">
+            <p className="px-1 text-xs font-bold text-neutral-400">
+              {locale.startsWith("en") ? "Account & Session" : "الحساب والجلسة"}
+            </p>
+            <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-white p-3.5 shadow-xs flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-neutral-900 truncate">
+                  {userName ? tNav("greeting", { name: userName }) : ""}
+                </p>
+                {planLabel && (
+                  <p className="text-[11px] font-semibold text-emerald-800 mt-0.5 truncate">
+                    {planLabel}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={onClose}
+                    className="rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-800 transition hover:bg-violet-100"
+                  >
+                    {tNav("admin")}
+                  </Link>
+                )}
+                <SignOutButton compact />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -331,7 +368,7 @@ export function DashboardShell({
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-clip bg-[#FBF9F4] pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] text-[#1C1B1A] lg:pb-8">
       {/* Header */}
-      <header className="relative z-40 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
+      <header className="sticky top-0 z-40 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
         <div className="mx-auto max-w-6xl px-4 py-2.5 sm:py-3 lg:px-8 lg:py-3.5">
           {/* Desktop & Tablet Header Row */}
           <div className="hidden lg:flex items-center justify-between gap-4">
@@ -400,30 +437,21 @@ export function DashboardShell({
               <WorkspaceSwitcher
                 workspaces={workspaces}
                 activeWorkspaceId={activeWorkspaceId}
-                className="min-w-0 flex-1 max-w-[180px] sm:max-w-xs"
+                className="min-w-0 flex-1 max-w-[190px] sm:max-w-xs"
               />
-            </div>
-
-            <div className="flex shrink-0 items-center gap-1.5">
               {planLabel && planId !== "free" && (
                 <Link
                   href="/dashboard/plan"
-                  className="rounded-md bg-violet-50 border border-violet-200 px-2 py-0.5 text-[10px] font-bold text-violet-700"
+                  className="shrink-0 rounded-md bg-violet-50 border border-violet-200 px-2 py-0.5 text-[10px] font-bold text-violet-700"
                 >
                   {planLabel}
                 </Link>
               )}
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-800"
-                >
-                  {tNav("admin")}
-                </Link>
-              )}
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5">
               <InstallPwaButton compact />
               <LocaleSwitcher />
-              <SignOutButton compact />
             </div>
           </div>
         </div>
@@ -522,6 +550,9 @@ export function DashboardShell({
         onClose={() => setMoreOpen(false)}
         tNav={tNav}
         locale={locale}
+        userName={userName}
+        planLabel={planLabel}
+        isAdmin={isAdmin}
       />
     </div>
   );

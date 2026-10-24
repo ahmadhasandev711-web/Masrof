@@ -102,7 +102,7 @@ export async function exportTransactionsExcelAction(input: {
   ]);
 
   return {
-    base64: workbookToBase64(workbook),
+    base64: await workbookToBase64(workbook),
     filename: `sanadat-transactions-${generatedAt}.xlsx`,
     truncated,
   };

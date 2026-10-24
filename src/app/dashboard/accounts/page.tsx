@@ -72,11 +72,11 @@ export default async function AccountsPage() {
         <details className="group overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-xs">
           <summary className="flex cursor-pointer items-center justify-between p-4 sm:p-5 font-semibold text-neutral-800 transition select-none hover:bg-neutral-50">
             <div className="flex items-center gap-2">
-              <span className="text-base"></span>
+              <span className="text-base">💱</span>
               <span className="text-sm sm:text-base">{t("exchangeRatesSection")}</span>
             </div>
             <span className="text-xs text-neutral-400 transition-transform group-open:rotate-180">
-              
+              ▼
             </span>
           </summary>
           <div className="border-t border-neutral-100 p-4 sm:p-6 bg-[#FBF9F4]/40">

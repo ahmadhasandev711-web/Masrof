@@ -1,4 +1,5 @@
 import { ClientRedirect } from "@/components/client-redirect";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { requireSession } from "@/features/auth/session";
 import { userHasAnyWorkspace } from "@/features/workspaces/data";
 import { getPendingInvitationsForEmail } from "@/features/workspaces/members-data";
@@ -29,6 +30,13 @@ export default async function OnboardingPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
       <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
+        <div className="flex items-center justify-between gap-2 mb-6 pb-3 border-b border-neutral-100">
+          <span className="text-xs font-bold text-[#065F46] tracking-wide">
+            سندات | Sanadat
+          </span>
+          <LocaleSwitcher />
+        </div>
+
         {hadPreviousTeam && (
           <div className="mb-4 rounded-xl border border-amber-200/80 bg-amber-50/80 p-3 text-xs text-amber-900 leading-relaxed">
             {tPlans("teamPlanExpiredNotice")}

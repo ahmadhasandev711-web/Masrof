@@ -104,7 +104,7 @@ export function AgencyShowcaseCard({ locale = "ar" }: { locale?: AppLocale }) {
               <span>{isEn ? "Fully Paid" : "مدفوعة بالكامل"}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100/90 px-2.5 py-0.5 text-[11px] font-semibold text-sky-900 border border-sky-200/60">
-              <span className="text-sky-600 font-bold tracking-tighter"></span>
+              <span className="text-sky-600 font-bold tracking-tighter">✓✓</span>
               <span>{isEn ? "Delivered & Read on WhatsApp" : "تم الاستلام والمشاهدة عبر واتساب"}</span>
             </span>
           </div>
@@ -119,8 +119,8 @@ export function AgencyShowcaseCard({ locale = "ar" }: { locale?: AppLocale }) {
               {isEn ? "+84% (+12,600 EGP)" : "+84% (+١٢,٦٠٠ ج.م)"}
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-md bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-neutral-700">
-            <span></span>
+          <span className="inline-flex items-center gap-1 rounded-md bg-neutral-100 px-2.5 py-0.5 text-[11px] font-medium text-neutral-700">
+            <span>🔒</span>
             <span>{isEn ? "Encrypted Link" : "رابط دفع مشفر"}</span>
           </span>
         </div>

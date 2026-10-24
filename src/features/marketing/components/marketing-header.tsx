@@ -24,19 +24,17 @@ export async function MarketingHeader() {
           />
           <span>{common("appName")}</span>
         </Link>
-        <div className="marketing-nav-menu">
-          <MarketingMobileNav
-            appName={common("appName")}
-            blog={t("blog")}
-            pricing={t("pricing")}
-            faq={t("faq")}
-            support={t("support")}
-            login={t("login")}
-            startFree={t("startFree")}
-            menuLabel={nav("openMenu")}
-            closeMenu={nav("closeMenu")}
-          />
-        </div>
+        <MarketingMobileNav
+          appName={common("appName")}
+          blog={t("blog")}
+          pricing={t("pricing")}
+          faq={t("faq")}
+          support={t("support")}
+          login={t("login")}
+          startFree={t("startFree")}
+          menuLabel={nav("openMenu")}
+          closeMenu={nav("closeMenu")}
+        />
       </div>
     </header>
   );

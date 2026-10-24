@@ -189,7 +189,7 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition"
             >
-              <span></span>
+              <span>💬</span>
               <span>{t("whatsappOwner")}</span>
             </a>
           )}

@@ -66,7 +66,7 @@ export function WorkspaceAdminNotesCard({
       <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
         <div>
           <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-            <span></span>
+            <span>📝</span>
             <span>{t("adminNotesTitle")}</span>
           </h3>
           <p className="text-[11px] text-neutral-500 mt-0.5">{t("adminNotesHint")}</p>

@@ -88,7 +88,7 @@ export default async function ReportsPage({
             href="/dashboard/reports/advanced"
             className="inline-flex items-center gap-1 rounded-xl border border-[#065F46]/20 bg-[#ECFDF5] px-3.5 py-2 text-xs sm:text-sm font-semibold text-[#065F46] hover:bg-[#D1FAE5] transition"
           >
-            <span></span>
+            <span>📊</span>
             <span>{tPages("advanced")}</span>
           </Link>
 

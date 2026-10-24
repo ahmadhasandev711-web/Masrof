@@ -34,13 +34,16 @@ function contentSecurityPolicy(): string {
   const connect = isProd
     ? "'self' https://sanadat.site https://www.sanadat.site"
     : "'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*";
+  const scriptSrc = isProd
+    ? "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com";
   return [
     "default-src 'self'",
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
     "object-src 'none'",
-    "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com",
+    scriptSrc,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://sanadat.site https://www.sanadat.site https:",
     "font-src 'self'",
@@ -69,6 +72,7 @@ const buildWorkerCpus = Math.max(
 );
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.1.7", "localhost", "127.0.0.1"],
   experimental: {
     cpus: buildWorkerCpus,
     memoryBasedWorkersCount: false,

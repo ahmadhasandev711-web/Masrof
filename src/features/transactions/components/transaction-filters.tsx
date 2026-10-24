@@ -192,7 +192,7 @@ export function TransactionFiltersForm({
               className="absolute inset-y-0 end-2.5 flex items-center text-neutral-400 hover:text-neutral-600"
               aria-label={tFilters("clearSearch")}
             >
-              
+              ✕
             </button>
           ) : null}
         </form>
@@ -352,7 +352,7 @@ export function TransactionFiltersForm({
                 onClick={() => updateParams({ type: null })}
                 className="text-neutral-400 hover:text-neutral-700"
               >
-                
+                ✕
               </button>
             </span>
           )}
@@ -365,7 +365,7 @@ export function TransactionFiltersForm({
                 onClick={() => updateParams({ accountId: null })}
                 className="text-neutral-400 hover:text-neutral-700"
               >
-                
+                ✕
               </button>
             </span>
           )}
@@ -378,7 +378,7 @@ export function TransactionFiltersForm({
                 onClick={() => updateParams({ categoryId: null })}
                 className="text-neutral-400 hover:text-neutral-700"
               >
-                
+                ✕
               </button>
             </span>
           )}
@@ -391,7 +391,7 @@ export function TransactionFiltersForm({
                 onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "today" })}
                 className="text-neutral-400 hover:text-neutral-700"
               >
-                
+                ✕
               </button>
             </span>
           )}
@@ -404,7 +404,7 @@ export function TransactionFiltersForm({
                 onClick={() => updateParams({ dateFrom: null, dateTo: null, datePreset: "today" })}
                 className="text-neutral-400 hover:text-neutral-700"
               >
-                
+                ✕
               </button>
             </span>
           )}
@@ -420,7 +420,7 @@ export function TransactionFiltersForm({
                 }}
                 className="text-neutral-400 hover:text-neutral-700"
               >
-                
+                ✕
               </button>
             </span>
           )}

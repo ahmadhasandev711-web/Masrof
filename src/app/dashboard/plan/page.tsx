@@ -88,7 +88,7 @@ export default async function MyPlanPage() {
         <ul className="mt-6 flex flex-col gap-2 text-sm text-neutral-700">
           {plan.features.map((f) => (
             <li key={f} className="flex gap-2">
-              <span className="text-[#065F46]"></span>
+              <span className="text-[#065F46] font-bold">✓</span>
               {f}
             </li>
           ))}
@@ -143,9 +143,50 @@ export default async function MyPlanPage() {
         </section>
       )}
 
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-neutral-800">{tPlansPage("comparePlans")}</h2>
-        <div className="mt-4 overflow-x-auto">
+
+        {/* Mobile-Friendly Comparison Cards */}
+        <div className="mt-4 flex flex-col gap-3 sm:hidden">
+          {DISPLAY_PLANS.map((id: PlanId) => (
+            <div
+              key={id}
+              className={`rounded-2xl border p-4 transition ${
+                displayPlanId === id
+                  ? "border-emerald-300 bg-[#ECFDF5]/40 shadow-xs"
+                  : "border-neutral-200 bg-white"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-base text-neutral-900">{localizedPlanLabelById[id]}</h3>
+                  <p className="font-bold text-sm text-emerald-800 mt-0.5">
+                    {localizedPlanById[id].priceYearly === 0
+                      ? tPlans("free")
+                      : `${localizedPlanById[id].priceDisplay} ${localizedPlanById[id].periodDisplay}`}
+                  </p>
+                </div>
+                {displayPlanId === id && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">
+                    {tPlansPage("youAreHere")}
+                  </span>
+                )}
+              </div>
+
+              <ul className="mt-3 flex flex-col gap-1.5 border-t border-neutral-100 pt-3 text-xs text-neutral-600">
+                {localizedPlanById[id].features.slice(0, 5).map((f) => (
+                  <li key={f} className="flex items-center gap-1.5">
+                    <span className="font-bold text-emerald-700">✓</span>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Comparison Table */}
+        <div className="mt-4 hidden sm:block overflow-x-auto">
           <table className="w-full min-w-[500px] text-right text-sm">
             <thead>
               <tr className="border-b border-neutral-200 text-xs text-neutral-500">
@@ -171,7 +212,7 @@ export default async function MyPlanPage() {
                     <ul className="flex flex-col gap-1 text-xs text-neutral-600">
                       {localizedPlanById[id].features.slice(0, 4).map((f) => (
                         <li key={f} className="flex items-center gap-1.5">
-                          <span className="font-bold text-emerald-700"></span>
+                          <span className="font-bold text-emerald-700">✓</span>
                           <span>{f}</span>
                         </li>
                       ))}
@@ -180,7 +221,7 @@ export default async function MyPlanPage() {
                   <td className="py-3.5 text-center">
                     {displayPlanId === id ? (
                       <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">
-                         {tPlansPage("youAreHere")}
+                        {tPlansPage("youAreHere")}
                       </span>
                     ) : (
                       <span className="text-neutral-300">—</span>

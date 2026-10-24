@@ -605,8 +605,8 @@ export async function DashboardHome({
         moneyLocale={moneyLocale}
       />
 
-      {/* Navigation Quick Links */}
-      <div className="grid gap-3 sm:grid-cols-2">
+      {/* Navigation Quick Links (Desktop only - mobile uses bottom tab bar) */}
+      <div className="hidden sm:grid gap-3 sm:grid-cols-2">
         <Link
           href="/dashboard/transactions"
           prefetch={true}

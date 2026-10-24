@@ -15,6 +15,9 @@ function isIos() {
 
 function isStandalone() {
   if (typeof window === "undefined") return false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isNative = Boolean((window as any).Capacitor?.isNativePlatform?.());
+  if (isNative) return true;
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     // iOS Safari

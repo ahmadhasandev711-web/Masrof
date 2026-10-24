@@ -31,9 +31,10 @@ export function CapacitorBridge() {
         // 1. Hide splash screen smoothly once the web client is mounted
         await SplashScreen.hide().catch(() => {});
 
-        // 2. Configure native Status Bar to match Sanadat brand (#065F46)
-        await StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
-        await StatusBar.setBackgroundColor({ color: "#065F46" }).catch(() => {});
+        // 2. Configure native Status Bar: dark icons on light cream background (#FBF9F4)
+        await StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+        await StatusBar.setStyle({ style: Style.Light }).catch(() => {});
+        await StatusBar.setBackgroundColor({ color: "#FBF9F4" }).catch(() => {});
 
         // 3. Handle Android hardware/gesture back button smoothly
         const backHandler = await App.addListener("backButton", ({ canGoBack }) => {

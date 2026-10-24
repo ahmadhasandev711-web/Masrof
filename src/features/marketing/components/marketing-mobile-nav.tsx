@@ -78,7 +78,7 @@ export function MarketingMobileNav({
         <LocaleSwitcher />
         <Link
           href="/register"
-          className="rounded-lg bg-[#065F46] px-3 py-1.5 text-sm font-medium text-white transition hover:bg-[#054d3a]"
+          className="marketing-nav-link rounded-lg bg-[#065F46] px-3 py-1.5 text-sm font-medium text-white transition hover:bg-[#054d3a]"
         >
           {startFree}
         </Link>
@@ -87,7 +87,7 @@ export function MarketingMobileNav({
           aria-label={menuLabel}
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className="inline-flex items-center justify-center rounded-lg border border-[#E4DFD3] p-2 text-[#065F46] transition hover:bg-[#F3F0E8]"
+          className="marketing-nav-link inline-flex items-center justify-center rounded-lg border border-[#E4DFD3] p-2 text-[#065F46] transition hover:bg-[#F3F0E8]"
         >
           <NavIcon name="more" className="h-5 w-5" />
         </button>

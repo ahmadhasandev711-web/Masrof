@@ -71,8 +71,16 @@ body {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* In native app: hide public marketing dropdown on auth pages */
-  .is-native-app .marketing-nav-menu {
+  /* Safe area utilities for native mobile notches & navigation bars */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* In native app: hide public marketing links while preserving language switcher */
+  .is-native-app .marketing-nav-link {
     display: none !important;
   }
 }

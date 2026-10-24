@@ -47,7 +47,7 @@ export function AccountCreationManager({
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
           role="dialog"
           aria-modal="true"
         >
@@ -59,8 +59,9 @@ export function AccountCreationManager({
             aria-label="Close"
           />
 
-          {/* Modal Content */}
-          <div className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
+          {/* Modal / Bottom Sheet Content */}
+          <div className="relative z-10 w-full max-w-lg max-h-[88vh] sm:max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border-t sm:border border-[#E4DFD3] bg-white pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:pb-6 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+            <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-neutral-300 sm:hidden" />
             <CreateAccountForm
               workspaceId={workspaceId}
               workspaceCurrency={workspaceCurrency}

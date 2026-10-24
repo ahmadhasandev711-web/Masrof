@@ -33,28 +33,28 @@ export default async function CategoriesPage() {
         <CategoryCreationManager workspaceId={workspaceId} canWrite={canWrite} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <p className="text-xs font-medium text-neutral-500">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center sm:text-start">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-3 sm:p-4 shadow-xs">
+          <p className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">
             {t("totalCount", { count: categories.length })}
           </p>
-          <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-neutral-900">
+          <p className="mt-1 font-mono text-lg sm:text-2xl font-bold tabular-nums text-neutral-900">
             {categories.length}
           </p>
         </div>
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <p className="text-xs font-medium text-emerald-600">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-3 sm:p-4 shadow-xs">
+          <p className="text-[11px] sm:text-xs font-medium text-emerald-600 truncate">
             {t("incomeCount", { count: incomeCount })}
           </p>
-          <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-emerald-700">
+          <p className="mt-1 font-mono text-lg sm:text-2xl font-bold tabular-nums text-emerald-700">
             {incomeCount}
           </p>
         </div>
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
-          <p className="text-xs font-medium text-amber-600">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-3 sm:p-4 shadow-xs">
+          <p className="text-[11px] sm:text-xs font-medium text-amber-600 truncate">
             {t("expenseCount", { count: expenseCount })}
           </p>
-          <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-amber-700">
+          <p className="mt-1 font-mono text-lg sm:text-2xl font-bold tabular-nums text-amber-700">
             {expenseCount}
           </p>
         </div>

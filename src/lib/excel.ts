@@ -1,22 +1,24 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 export type ExcelSheetInput = {
   name: string;
   rows: (string | number | null)[][];
 };
 
-export function createWorkbook(sheets: ExcelSheetInput[]) {
-  const workbook = XLSX.utils.book_new();
+export function createWorkbook(sheets: ExcelSheetInput[]): ExcelJS.Workbook {
+  const workbook = new ExcelJS.Workbook();
 
   for (const sheet of sheets) {
-    const worksheet = XLSX.utils.aoa_to_sheet(sheet.rows);
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name.slice(0, 31));
+    const worksheet = workbook.addWorksheet(sheet.name.slice(0, 31));
+    for (const row of sheet.rows) {
+      worksheet.addRow(row);
+    }
   }
 
   return workbook;
 }
 
-export function workbookToBase64(workbook: XLSX.WorkBook): string {
-  const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) as Buffer;
-  return buffer.toString("base64");
+export async function workbookToBase64(workbook: ExcelJS.Workbook): Promise<string> {
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer).toString("base64");
 }
