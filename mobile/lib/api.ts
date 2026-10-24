@@ -508,6 +508,40 @@ export async function saveBranding(body: Record<string, unknown>) {
   return result;
 }
 
+export async function uploadBrandingLogo(
+  workspaceId: string,
+  file: { uri: string; mimeType?: string | null; fileName?: string | null },
+) {
+  const form = new FormData();
+  form.append("workspaceId", workspaceId);
+  const name = file.fileName ?? "logo.jpg";
+  const type = file.mimeType ?? "image/jpeg";
+  form.append("file", { uri: file.uri, name, type } as unknown as Blob);
+
+  const cookies = getAuthCookie();
+  const response = await fetch(`${API_URL}/api/uploads/branding`, {
+    method: "POST",
+    headers: cookies ? { Cookie: cookies } : {},
+    body: form,
+  });
+
+  if (!response.ok) {
+    let code = "server-error";
+    try {
+      const data = (await response.json()) as { error?: string };
+      code = data.error ?? code;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(response.status, code);
+  }
+
+  const data = (await response.json()) as { url: string };
+  invalidateCache("branding");
+  invalidateCache("workspaces");
+  return data;
+}
+
 export function fetchTeam(workspaceId: string, skipCache = false) {
   return mobileFetch<{
     members: { userId: string; name: string; email: string; role: string }[];

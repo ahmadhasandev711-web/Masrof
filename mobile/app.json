@@ -66,7 +66,14 @@
       "expo-image",
       "expo-status-bar",
       "expo-web-browser",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "يُستخدم لاختيار شعار نشاطك التجاري على الفواتير.",
+          "cameraPermission": "يُستخدم لالتقاط شعار نشاطك التجاري."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

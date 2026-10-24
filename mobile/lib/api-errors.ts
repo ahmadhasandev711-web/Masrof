@@ -51,6 +51,22 @@ export function resolveApiErrorMessage(
         ar: "حدث خطأ غير متوقع. حاول مرة أخرى.",
         en: "An unexpected error occurred. Please try again.",
       },
+      rateLimited: {
+        ar: "محاولات كثيرة. انتظر قليلاً ثم أعد المحاولة.",
+        en: "Too many attempts. Wait a moment and try again.",
+      },
+      fileTooLarge: {
+        ar: "حجم الصورة أكبر من 2 ميجابايت.",
+        en: "Image is larger than 2 MB.",
+      },
+      unsupportedFileType: {
+        ar: "نوع الصورة غير مدعوم. استخدم JPG أو PNG أو WebP.",
+        en: "Unsupported image type. Use JPG, PNG, or WebP.",
+      },
+      noFile: {
+        ar: "لم يتم اختيار ملف.",
+        en: "No file was selected.",
+      },
     };
 
     const entry = messages[error.code];

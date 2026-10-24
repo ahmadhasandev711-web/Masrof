@@ -1,6 +1,12 @@
-# مصروفاتي — Expo SDK 54
+# سندات — Expo (موبايل)
 
-تطبيق الموبايل يتصل بنفس حساب الويب. Free يظهر إعلان AdMob، Pro يخفيه.
+تطبيق الموبايل يتصل بنفس حساب الويب على `https://sanadat.site`. Free يظهر إعلان AdMob، Pro يخفيه.
+
+## موجة 3 — QA ثم APK
+
+1. **قائمة تحقق الجهاز:** [`../docs/mobile/wave3-device-qa-checklist.md`](../docs/mobile/wave3-device-qa-checklist.md)  
+2. **رفع الشعار:** الإعدادات → شعار الفواتير (مالك المساحة فقط).  
+3. **Preview APK:** الأوامر في القائمة أو `npm run build:android` من هذا المجلد.
 
 `npx expo run:android` يحتاج **Android Studio + SDK** على الجهاز. من غيرهم الأمر هيفشل (adb / ANDROID_HOME).
 

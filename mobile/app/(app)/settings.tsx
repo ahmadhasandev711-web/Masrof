@@ -1,9 +1,11 @@
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
-import { fetchBranding, saveBranding } from "@/lib/api";
+import { fetchBranding, saveBranding, uploadBrandingLogo } from "@/lib/api";
 import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -14,9 +16,11 @@ import { CardSkeleton } from "@/components/skeleton";
 
 export default function SettingsScreen() {
   const { t, locale, setLocale, isRTL } = useI18n();
-  const { workspaceId, workspace } = useWorkspace();
+  const { workspaceId, workspace, isOwner } = useWorkspace();
   const { canWrite } = useWriteAccess();
   const [loading, setLoading] = useState(true);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [businessName, setBusinessName] = useState("");
   const [businessPhone, setBusinessPhone] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
@@ -29,6 +33,7 @@ export default function SettingsScreen() {
     if (!workspaceId) return;
     try {
       const data = await fetchBranding(workspaceId, true);
+      setLogoUrl(data.logoUrl ?? "");
       setBusinessName(data.businessName ?? "");
       setBusinessPhone(data.businessPhone ?? "");
       setBusinessAddress(data.businessAddress ?? "");
@@ -56,12 +61,64 @@ export default function SettingsScreen() {
         businessPhone: businessPhone.trim(),
         businessAddress: businessAddress.trim(),
         taxId: taxId.trim(),
+        logoUrl: logoUrl.trim(),
       });
       setMessage(t.settings.saveSuccess);
     } catch (err) {
       setError(resolveApiErrorMessage(err, isRTL, t.common.error));
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function onPickLogo() {
+    if (!workspaceId || !isOwner) return;
+    setError(null);
+    setMessage(null);
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setError(
+        isRTL
+          ? "يلزم السماح بالوصول للصور لاختيار الشعار."
+          : "Photo library access is required to pick a logo.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    setUploadingLogo(true);
+    try {
+      const { url } = await uploadBrandingLogo(workspaceId, {
+        uri: asset.uri,
+        mimeType: asset.mimeType,
+        fileName: asset.fileName,
+      });
+      setLogoUrl(url);
+      await saveBranding({
+        workspaceId,
+        businessName: businessName.trim(),
+        businessPhone: businessPhone.trim(),
+        businessAddress: businessAddress.trim(),
+        taxId: taxId.trim(),
+        logoUrl: url,
+      });
+      setMessage(isRTL ? "تم رفع الشعار وحفظه." : "Logo uploaded and saved.");
+    } catch (err) {
+      setError(
+        resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر رفع الشعار." : "Failed to upload logo."),
+      );
+    } finally {
+      setUploadingLogo(false);
     }
   }
 
@@ -162,6 +219,47 @@ export default function SettingsScreen() {
             />
           ) : null}
 
+          <View style={{ gap: 10, marginBottom: 8 }}>
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "شعار الفواتير" : "Invoice logo"}
+            </Text>
+            <View style={[shared.row, { flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center" }]}>
+              {logoUrl ? (
+                <Image
+                  source={{ uri: logoUrl }}
+                  style={{ width: 72, height: 72, borderRadius: 12, backgroundColor: colors.cardAlt }}
+                  contentFit="contain"
+                />
+              ) : (
+                <View
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 12,
+                    backgroundColor: colors.cardAlt,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <AppIcon name="business" size={28} color={colors.faint} />
+                </View>
+              )}
+              {isOwner ? (
+                <PrimaryButton
+                  label={uploadingLogo ? t.common.loading : isRTL ? "اختيار شعار" : "Choose logo"}
+                  onPress={onPickLogo}
+                  loading={uploadingLogo}
+                  disabled={uploadingLogo}
+                  isRTL={isRTL}
+                />
+              ) : (
+                <Text style={[shared.label, { flex: 1, textAlign: isRTL ? "right" : "left" }]}>
+                  {isRTL ? "رفع الشعار للمالك فقط." : "Only the workspace owner can upload a logo."}
+                </Text>
+              )}
+            </View>
+          </View>
+
           <Field
             label={t.settings.businessName}
             placeholder={isRTL ? "مثال: استوديو الإبداع..." : "e.g. Acme Corp..."}
@@ -202,13 +300,15 @@ export default function SettingsScreen() {
           {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
           {message ? <FormBanner tone="info" message={message} isRTL={isRTL} /> : null}
 
-          {canWrite ? (
+          {canWrite && isOwner ? (
             <PrimaryButton label={t.common.save} onPress={onSave} loading={saving} disabled={saving} isRTL={isRTL} />
           ) : null}
         </View>
 
         <Text style={[shared.label, { textAlign: "center", fontSize: 12 }]}>
-          {isRTL ? "رفع الشعار والنسخ الاحتياطي الكامل متاحان عبر لوحة الويب." : "Logo upload and database backup are available on the web portal."}
+          {isRTL
+            ? "النسخ الاحتياطي الكامل للبيانات متاح عبر لوحة الويب."
+            : "Full data backup is available on the web dashboard."}
         </Text>
       </ScrollView>
       )}
