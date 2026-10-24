@@ -20,6 +20,7 @@ import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
 import { colors, fonts, shared } from "@/lib/styles";
 import { AppIcon, type IconName } from "@/components/icon";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 
 type WorkspaceTypeOption = "personal" | "freelance" | "business";
 
@@ -119,11 +120,15 @@ export default function OnboardingScreen() {
       idempotencyRef.current = newIdempotencyKey();
       await refresh();
       router.replace("/");
-    } catch {
+    } catch (err) {
       setError(
-        isRTL
-          ? "تعذر إنشاء مساحة العمل. تحقق من الاتصال وحاول مرة أخرى"
-          : "Could not create workspace. Check your connection and try again",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر إنشاء مساحة العمل. تحقق من الاتصال وحاول مرة أخرى"
+            : "Could not create workspace. Check your connection and try again",
+        ),
       );
     } finally {
       setBusy(false);

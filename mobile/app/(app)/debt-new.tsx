@@ -1,26 +1,21 @@
 import { useRef, useState } from "react";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ScrollView, View } from "react-native";
 import { router } from "expo-router";
 import { Screen } from "@/components/screen";
-import { AppIcon } from "@/components/icon";
+import { AmountField, DateField, Field, FormBanner, PrimaryButton } from "@/components/forms";
 import { createDebt } from "@/lib/api";
 import { parsePositiveAmount } from "@/lib/format";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { debtInputSchema } from "@/lib/validation";
-import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { useWriteAccess } from "@/lib/write-access";
 
 export default function NewDebtScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
+  const { canWrite, readOnlyMessage } = useWriteAccess();
 
   const [name, setName] = useState("");
   const [creditor, setCreditor] = useState("");
@@ -33,7 +28,7 @@ export default function NewDebtScreen() {
   const idempotencyRef = useRef(newIdempotencyKey());
 
   async function onSubmit() {
-    if (!workspaceId) return;
+    if (!workspaceId || !canWrite) return;
 
     const numAmount = parsePositiveAmount(amount);
     if (numAmount == null || numAmount <= 0) {
@@ -66,11 +61,15 @@ export default function NewDebtScreen() {
       await createDebt(parsed.data);
       idempotencyRef.current = newIdempotencyKey();
       router.back();
-    } catch {
+    } catch (err) {
       setError(
-        isRTL
-          ? "تعذر حفظ الدين أو الالتزام. تحقق من البيانات والاتصال."
-          : "Failed to create debt. Please check your connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر حفظ الدين أو الالتزام. تحقق من البيانات والاتصال."
+            : "Failed to create debt. Please check your connection.",
+        ),
       );
     } finally {
       setBusy(false);
@@ -79,117 +78,64 @@ export default function NewDebtScreen() {
 
   return (
     <Screen title={t.debts.newTitle} showBack>
-      <ScrollView
-        contentContainerStyle={{ gap: 14, paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Name Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.debts.namePlaceholder}
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-            value={name}
-            onChangeText={setName}
-            placeholder={t.debts.namePlaceholder}
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+      <ScrollView contentContainerStyle={{ gap: 14, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+        <Field
+          label={t.debts.namePlaceholder}
+          value={name}
+          onChangeText={setName}
+          isRTL={isRTL}
+          placeholder={t.debts.namePlaceholder}
+        />
 
-        {/* Creditor Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.debts.creditorPlaceholder}
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-            value={creditor}
-            onChangeText={setCreditor}
-            placeholder={t.debts.creditorPlaceholder}
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+        <Field
+          label={t.debts.creditorPlaceholder}
+          value={creditor}
+          onChangeText={setCreditor}
+          isRTL={isRTL}
+          placeholder={t.debts.creditorPlaceholder}
+        />
 
-        {/* Amount Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.debts.amount} ({currency})
-          </Text>
-          <TextInput
-            style={[shared.input, { fontSize: 20, fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}
-            keyboardType="decimal-pad"
-            value={amount}
-            onChangeText={setAmount}
-            placeholder="0.00"
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+        <AmountField
+          label={t.debts.amount}
+          currency={currency}
+          value={amount}
+          onChangeText={setAmount}
+          isRTL={isRTL}
+        />
 
-        {/* Due Date Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.debts.dueDate} (YYYY-MM-DD - {isRTL ? "اختياري" : "optional"})
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-            value={dueDate}
-            onChangeText={setDueDate}
-            placeholder="2026-12-31"
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+        <DateField
+          label={t.debts.dueDate}
+          value={dueDate}
+          onChange={setDueDate}
+          isRTL={isRTL}
+          optional
+          emptyLabel={isRTL ? "بدون تاريخ استحقاق" : "No due date"}
+        />
 
-        {/* Category Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.debts.category}
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-            value={category}
-            onChangeText={setCategory}
-            placeholder={isRTL ? "مثال: بنكي / تمويل / موردين" : "e.g. Bank / Supplier"}
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+        <Field
+          label={t.debts.category}
+          value={category}
+          onChangeText={setCategory}
+          isRTL={isRTL}
+          placeholder={isRTL ? "مثال: بنكي / موردين" : "e.g. Bank / Supplier"}
+        />
 
-        {/* Notes Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.debts.notes}
-          </Text>
-          <TextInput
-            style={[
-              shared.input,
-              { height: 80, textAlignVertical: "top", textAlign: isRTL ? "right" : "left" },
-            ]}
-            multiline
-            numberOfLines={3}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder={isRTL ? "أي ملاحظات إضافية أو شروط سداد" : "Additional repayment notes"}
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+        <Field
+          label={t.debts.notes}
+          value={notes}
+          onChangeText={setNotes}
+          isRTL={isRTL}
+          multiline
+          style={{ minHeight: 70, textAlignVertical: "top" }}
+        />
 
-        {error ? <Text style={shared.error}>{error}</Text> : null}
+        {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-        {/* Submit Button */}
-        <Pressable
-          style={[shared.button, busy && { opacity: 0.6 }]}
-          onPress={onSubmit}
-          disabled={busy}
-        >
-          {busy ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <>
-              <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-              <Text style={shared.buttonText}>{t.debts.add}</Text>
-            </>
-          )}
-        </Pressable>
+        {canWrite ? (
+          <PrimaryButton label={t.common.save} loading={busy} isRTL={isRTL} onPress={onSubmit} disabled={busy} />
+        ) : (
+          <FormBanner tone="info" message={readOnlyMessage} isRTL={isRTL} />
+        )}
       </ScrollView>
     </Screen>
   );

@@ -20,10 +20,13 @@ import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
 
 export default function AccountsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
+  const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<AccountItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -55,7 +58,7 @@ export default function AccountsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load(true).catch(() => setItems([]));
     }, [load]),
   );
 
@@ -88,8 +91,8 @@ export default function AccountsScreen() {
       setName("");
       setBalance("0");
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر إنشاء الحساب" : "Failed to create account");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر إنشاء الحساب" : "Failed to create account"));
     } finally {
       setBusy(false);
     }
@@ -101,12 +104,10 @@ export default function AccountsScreen() {
     <Screen
       title={t.accounts.title}
       showBack
-      actionLabel={t.accounts.add}
-      actionIcon="add"
-      onAction={() => {
+      {...headerAction(t.accounts.add, "add", () => {
         setError(null);
         setOpen(true);
-      }}
+      })}
     >
       {/* Total Accounts Balance Header */}
       <View style={[shared.cardHighlighted, { marginBottom: 6 }]}>

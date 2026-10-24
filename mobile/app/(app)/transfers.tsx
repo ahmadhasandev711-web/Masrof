@@ -8,9 +8,10 @@ import {
   RefreshControl,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import { AmountField, DateField, FormBanner, PrimaryButton } from "@/components/forms";
+import { useWriteAccess } from "@/lib/write-access";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
@@ -25,6 +26,7 @@ import { useTransferForm } from "@/hooks/use-transfer-form";
 export default function TransfersScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
+  const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<
     {
       _id: string;
@@ -95,9 +97,7 @@ export default function TransfersScreen() {
     <Screen
       title={t.transfers.title}
       showBack
-      actionLabel={t.transfers.add}
-      actionIcon="swap-horizontal"
-      onAction={() => form.setOpen(true)}
+      {...headerAction(t.transfers.add, "swap-horizontal", () => form.setOpen(true))}
     >
       {loading && items.length === 0 ? (
         <ListSkeleton count={5} />
@@ -261,41 +261,30 @@ export default function TransfersScreen() {
               })}
             </ScrollView>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.common.amount} ({currency})
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              keyboardType="numeric"
+            <AmountField
+              label={t.common.amount}
+              currency={currency}
               value={form.amount}
               onChangeText={form.setAmount}
-              placeholder="0.00"
-              placeholderTextColor={colors.faint}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "تاريخ التحويل" : "Transfer Date"} (YYYY-MM-DD)
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <DateField
+              label={isRTL ? "تاريخ التحويل" : "Transfer date"}
               value={form.date}
-              onChangeText={form.setDate}
-              placeholder="YYYY-MM-DD"
+              onChange={form.setDate}
+              isRTL={isRTL}
             />
 
-            {form.error ? <Text style={shared.error}>{form.error}</Text> : null}
+            {form.error ? <FormBanner message={form.error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, form.busy && { opacity: 0.7 }]}
+            <PrimaryButton
+              label={t.transfers.confirmTransfer}
+              loading={form.busy}
+              isRTL={isRTL}
               onPress={form.onSubmit}
               disabled={form.busy}
-            >
-              {form.busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.transfers.confirmTransfer}</Text>
-              )}
-            </Pressable>
+            />
           </Pressable>
         </Pressable>
       </Modal>

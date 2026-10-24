@@ -1,16 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Modal, Platform, Pressable, RefreshControl, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
@@ -21,10 +11,14 @@ import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
+import { AmountField, Field, FormBanner, PrimaryButton } from "@/components/forms";
 
 export default function BudgetsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency, hasFeature } = useWorkspace();
+  const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<
     {
       id: string;
@@ -56,7 +50,7 @@ export default function BudgetsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load(true).catch(() => setItems([]));
     }, [load]),
   );
 
@@ -94,8 +88,8 @@ export default function BudgetsScreen() {
       setName("");
       setAmount("");
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر إنشاء الميزانية" : "Failed to create budget");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر إنشاء الميزانية" : "Failed to create budget"));
     } finally {
       setBusy(false);
     }
@@ -120,12 +114,10 @@ export default function BudgetsScreen() {
     <Screen
       title={t.budgets.title}
       showBack
-      actionLabel={t.budgets.add}
-      actionIcon="add"
-      onAction={() => {
+      {...headerAction(t.budgets.add, "add", () => {
         setError(null);
         setOpen(true);
-      }}
+      })}
     >
       {loading && items.length === 0 ? (
         <ListSkeleton count={4} />
@@ -251,42 +243,25 @@ export default function BudgetsScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "اسم الميزانية" : "Budget Name"}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={isRTL ? "اسم الميزانية" : "Budget Name"}
               placeholder={t.budgets.namePlaceholder}
-              placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.budgets.limit} ({currency})
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder={t.budgets.amountPlaceholder}
-              placeholderTextColor={colors.faint}
+            <AmountField
+              label={t.budgets.limit}
+              currency={currency}
               value={amount}
               onChangeText={setAmount}
-              keyboardType="numeric"
+              isRTL={isRTL}
             />
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              )}
-            </Pressable>
+            <PrimaryButton label={t.common.save} onPress={onCreate} loading={busy} disabled={busy} isRTL={isRTL} />
           </Pressable>
         </Pressable>
       </Modal>

@@ -3,6 +3,7 @@ import { newIdempotencyKey } from "@/lib/idempotency";
 import { router } from "expo-router";
 import { createInvoice, fetchClients } from "@/lib/api";
 import { parsePositiveAmount, todayISO } from "@/lib/format";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { invoiceInputSchema } from "@/lib/validation";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
@@ -89,11 +90,15 @@ export function useInvoiceForm() {
       await createInvoice(validation.data);
       idempotencyRef.current = newIdempotencyKey();
       router.back();
-    } catch {
+    } catch (err) {
       setError(
-        isRTL
-          ? "تعذر إنشاء الفاتورة. تأكد من صحة البيانات والاتصال."
-          : "Failed to create invoice. Please check your connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر إنشاء الفاتورة. تأكد من صحة البيانات والاتصال."
+            : "Failed to create invoice. Please check your connection.",
+        ),
       );
     } finally {
       setBusy(false);

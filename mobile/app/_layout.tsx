@@ -25,8 +25,6 @@ I18nManager.forceRTL(false);
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Cairo_400Regular,
-    Cairo_500Medium,
-    Cairo_600SemiBold,
     Cairo_700Bold,
   });
 

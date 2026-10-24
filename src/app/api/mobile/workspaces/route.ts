@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       initialAccountName: body.initialAccountName || "الخزينة النقدية",
       initialAccountType: body.initialAccountType || "cash",
       initialAccountBalance: body.initialAccountBalance || 0,
+      idempotencyKey: body.idempotencyKey,
     });
 
     if (!parsed.success) {

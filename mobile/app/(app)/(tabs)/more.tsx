@@ -4,6 +4,7 @@ import { Screen } from "@/components/screen";
 import { AppIcon, type IconName } from "@/components/icon";
 import { colors, shared } from "@/lib/styles";
 import { authClient } from "@/lib/auth-client";
+import { signOutAndClearCache } from "@/lib/auth-actions";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
 
@@ -236,7 +237,7 @@ export default function MoreScreen() {
           onPress={() => {
             Alert.alert(t.more.logout, t.more.confirmLogout, [
               { text: t.common.cancel, style: "cancel" },
-              { text: t.more.logout, style: "destructive", onPress: () => authClient.signOut() },
+              { text: t.more.logout, style: "destructive", onPress: () => void signOutAndClearCache() },
             ]);
           }}
         >

@@ -10,12 +10,15 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
 
 type FilterType = "all" | "expense" | "income";
 
 export default function TransactionsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
+  const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<TransactionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,9 +50,15 @@ export default function TransactionsScreen() {
         setItems(data.items);
         setPage(1);
         setTotalPages(data.totalPages);
-      } catch {
+      } catch (err) {
         if (seq !== requestSeq.current) return;
-        setError(isRTL ? "تعذر تحميل العمليات. تحقق من الاتصال." : "Failed to load transactions.");
+        setError(
+          resolveApiErrorMessage(
+            err,
+            isRTL,
+            isRTL ? "تعذر تحميل العمليات. تحقق من الاتصال." : "Failed to load transactions.",
+          ),
+        );
         setItems([]);
         setTotalPages(1);
       } finally {
@@ -63,7 +72,7 @@ export default function TransactionsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void reload();
+      void reload(true);
     }, [reload]),
   );
 
@@ -99,9 +108,7 @@ export default function TransactionsScreen() {
   return (
     <Screen
       title={t.transactions.title}
-      actionLabel={t.transactions.add}
-      actionIcon="add"
-      onAction={() => router.push("/transaction-new")}
+      {...headerAction(t.transactions.add, "add", () => router.push("/transaction-new"))}
     >
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>

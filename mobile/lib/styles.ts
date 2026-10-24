@@ -32,8 +32,8 @@ export const colors = {
 
 export const fonts = {
   regular: "Cairo_400Regular",
-  medium: "Cairo_500Medium",
-  semiBold: "Cairo_600SemiBold",
+  medium: "Cairo_400Regular",
+  semiBold: "Cairo_700Bold",
   bold: "Cairo_700Bold",
 };
 

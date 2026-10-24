@@ -1,17 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Modal, Platform, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
@@ -31,10 +20,14 @@ import { formatDate, formatMoney, todayISO } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
+import { AmountField, DateField, Field, FormBanner, PrimaryButton } from "@/components/forms";
 
 export default function RecurringScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency, hasFeature } = useWorkspace();
+  const { headerAction, canWrite } = useWriteAccess();
   const [items, setItems] = useState<
     {
       id: string;
@@ -77,11 +70,15 @@ export default function RecurringScreen() {
           categoryName: item.categoryName ? String(item.categoryName) : undefined,
         })),
       );
-    } catch {
+    } catch (err) {
       setLoadError(
-        isRTL
-          ? "تعذر تحميل المصروفات المتكررة. يرجى التحقق من الاتصال بالإنترنت."
-          : "Failed to load recurring expenses. Please check your network connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل المصروفات المتكررة. يرجى التحقق من الاتصال بالإنترنت."
+            : "Failed to load recurring expenses. Please check your network connection.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -90,7 +87,7 @@ export default function RecurringScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load();
+      void load(true);
     }, [load]),
   );
 
@@ -150,8 +147,8 @@ export default function RecurringScreen() {
       setDescription("");
       setAmount("");
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر حفظ المصروف المتكرر" : "Failed to create recurring expense");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر حفظ المصروف المتكرر" : "Failed to create recurring expense"));
     } finally {
       setBusy(false);
     }
@@ -160,9 +157,18 @@ export default function RecurringScreen() {
   async function onRecord(recurringId: string) {
     if (!workspaceId) return;
     setRecordingId(recurringId);
+    setError(null);
     try {
       await recordRecurring({ workspaceId, recurringId });
       await load(true);
+    } catch (err) {
+      setError(
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL ? "تعذر تسجيل المصروف المتكرر" : "Failed to record recurring expense",
+        ),
+      );
     } finally {
       setRecordingId(null);
     }
@@ -187,12 +193,10 @@ export default function RecurringScreen() {
     <Screen
       title={t.recurring.title}
       showBack
-      actionLabel={t.recurring.add}
-      actionIcon="add"
-      onAction={() => {
+      {...headerAction(t.recurring.add, "add", () => {
         setError(null);
         setOpen(true);
-      }}
+      })}
     >
       {loading && items.length === 0 ? (
         <ListSkeleton count={4} />
@@ -205,6 +209,8 @@ export default function RecurringScreen() {
           }}
         />
       ) : (
+        <>
+        {error && !open ? <Text style={[shared.error, { marginBottom: 8 }]}>{error}</Text> : null}
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
@@ -267,23 +273,26 @@ export default function RecurringScreen() {
                 </View>
               ) : null}
 
-              <Pressable
-                style={[
-                  shared.buttonSecondary,
-                  { marginTop: 4, flexDirection: isRTL ? "row-reverse" : "row" },
-                  recordingId === item.id && { opacity: 0.6 },
-                ]}
-                onPress={() => onRecord(item.id)}
-                disabled={recordingId === item.id}
-              >
-                <AppIcon name="checkmark" size={15} color={colors.primary} />
-                <Text style={shared.buttonSecondaryText}>
-                  {recordingId === item.id ? t.common.loading : t.recurring.recordNow}
-                </Text>
-              </Pressable>
+              {canWrite ? (
+                <Pressable
+                  style={[
+                    shared.buttonSecondary,
+                    { marginTop: 4, flexDirection: isRTL ? "row-reverse" : "row" },
+                    recordingId === item.id && { opacity: 0.6 },
+                  ]}
+                  onPress={() => onRecord(item.id)}
+                  disabled={recordingId === item.id}
+                >
+                  <AppIcon name="checkmark" size={15} color={colors.primary} />
+                  <Text style={shared.buttonSecondaryText}>
+                    {recordingId === item.id ? t.common.loading : t.recurring.recordNow}
+                  </Text>
+                </Pressable>
+              ) : null}
             </View>
           )}
         />
+        </>
       )}
 
       {/* Create Recurring Modal */}
@@ -311,27 +320,22 @@ export default function RecurringScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.recurring.descriptionPlaceholder}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder={isRTL ? "مثال: اشتراك نتفليكس، إيجار المكتب" : "e.g. Netflix subscription, Office rent"}
-              placeholderTextColor={colors.faint}
+            <Field
+              label={isRTL ? "الوصف" : "Description"}
+              placeholder={
+                isRTL ? "مثال: اشتراك نتفليكس، إيجار المكتب" : "e.g. Netflix subscription, Office rent"
+              }
               value={description}
               onChangeText={setDescription}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.common.amount} ({currency})
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder="0.00"
-              placeholderTextColor={colors.faint}
+            <AmountField
+              label={t.common.amount}
+              currency={currency}
               value={amount}
               onChangeText={setAmount}
-              keyboardType="numeric"
+              isRTL={isRTL}
             />
 
             <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
@@ -367,13 +371,11 @@ export default function RecurringScreen() {
               })}
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.recurring.nextDue} (YYYY-MM-DD)
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <DateField
+              label={t.recurring.nextDue}
               value={nextDueDate}
-              onChangeText={setNextDueDate}
+              onChange={setNextDueDate}
+              isRTL={isRTL}
             />
 
             <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
@@ -442,19 +444,9 @@ export default function RecurringScreen() {
               })}
             </ScrollView>
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              )}
-            </Pressable>
+            <PrimaryButton label={t.common.save} onPress={onCreate} loading={busy} disabled={busy} isRTL={isRTL} />
           </Pressable>
         </Pressable>
       </Modal>

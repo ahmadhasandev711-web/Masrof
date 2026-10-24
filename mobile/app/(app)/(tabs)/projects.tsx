@@ -22,6 +22,8 @@ import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
 
 type ProjectRow = {
   _id: string;
@@ -36,6 +38,7 @@ type ProjectRow = {
 export default function ProjectsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency } = useWorkspace();
+  const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<ProjectRow[]>([]);
   const [clients, setClients] = useState<{ _id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,11 +70,15 @@ export default function ProjectsScreen() {
       ]);
       setItems(projects.items as unknown as ProjectRow[]);
       setClients(clientData.items);
-    } catch {
+    } catch (err) {
       setLoadError(
-        isRTL
-          ? "تعذر تحميل المشاريع. يرجى التحقق من الاتصال بالإنترنت."
-          : "Failed to load projects. Please check your network connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل المشاريع. يرجى التحقق من الاتصال بالإنترنت."
+            : "Failed to load projects. Please check your network connection.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -80,7 +87,7 @@ export default function ProjectsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load();
+      void load(true);
     }, [load]),
   );
 
@@ -121,8 +128,8 @@ export default function ProjectsScreen() {
       setExpected("");
       setClientId(null);
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر إنشاء المشروع" : "Failed to create project");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر إنشاء المشروع" : "Failed to create project"));
     } finally {
       setBusy(false);
     }
@@ -140,12 +147,10 @@ export default function ProjectsScreen() {
   return (
     <Screen
       title={isRTL ? "المشاريع" : "Projects"}
-      actionLabel={isRTL ? "+ مشروع" : "+ Project"}
-      actionIcon="add"
-      onAction={() => {
+      {...headerAction(isRTL ? "+ مشروع" : "+ Project", "add", () => {
         setError(null);
         setOpen(true);
-      }}
+      })}
     >
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>

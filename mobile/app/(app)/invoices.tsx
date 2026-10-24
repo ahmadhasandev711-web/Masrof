@@ -17,6 +17,8 @@ import { AppIcon } from "@/components/icon";
 import { ListSkeleton } from "@/components/skeleton";
 import { ErrorView } from "@/components/error-view";
 import { fetchInvoices, API_URL } from "@/lib/api";
+import { RecordInvoicePaymentModal } from "@/components/record-invoice-payment-modal";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { formatDate, formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -27,15 +29,19 @@ type InvoiceRow = {
   invoiceNumber: string;
   clientName: string;
   total: number;
+  paidAmount?: number;
+  remainingAmount?: number;
   displayStatus: string;
   status: string;
   issueDate: string;
   dueDate: string | null;
+  shareToken?: string | null;
 };
 
 export default function InvoicesScreen() {
   const { t, isRTL } = useI18n();
-  const { workspaceId, currency } = useWorkspace();
+  const { workspaceId, currency, canWrite } = useWorkspace();
+  const [paymentInvoice, setPaymentInvoice] = useState<InvoiceRow | null>(null);
   const [items, setItems] = useState<InvoiceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,11 +67,15 @@ export default function InvoicesScreen() {
       setItems(data.items);
       setPage(data.page);
       setTotalPages(data.totalPages);
-    } catch {
+    } catch (err) {
       setError(
-        isRTL
-          ? "تعذر تحميل الفواتير. يرجى التحقق من الاتصال بالإنترنت."
-          : "Failed to load invoices. Please check your network connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل الفواتير. يرجى التحقق من الاتصال بالإنترنت."
+            : "Failed to load invoices. Please check your network connection.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -93,7 +103,7 @@ export default function InvoicesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load();
+      void load(true);
     }, [load]),
   );
 
@@ -107,7 +117,9 @@ export default function InvoicesScreen() {
   }
 
   async function shareInvoice(item: InvoiceRow) {
-    const url = `${API_URL}/print/invoice/${item._id}?format=a4`;
+    const url = item.shareToken
+      ? `${API_URL}/i/${item.shareToken}`
+      : `${API_URL}/print/invoice/${item._id}?format=a4`;
     try {
       await Share.share({
         title: `${t.invoices.title} #${item.invoiceNumber}`,
@@ -135,9 +147,9 @@ export default function InvoicesScreen() {
     <Screen
       title={t.invoices.title}
       showBack
-      actionLabel={t.invoices.add}
+      actionLabel={canWrite ? t.invoices.add : undefined}
       actionIcon="add"
-      onAction={() => router.push("/invoice-new")}
+      onAction={canWrite ? () => router.push("/invoice-new") : undefined}
     >
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>
@@ -260,6 +272,17 @@ export default function InvoicesScreen() {
 
                 {/* Action Buttons for Invoices */}
                 <View style={{ flexDirection: isRTL ? "row-reverse" : "row", flexWrap: "wrap", gap: 8, marginTop: 6, borderTopWidth: 1, borderTopColor: colors.borderLight, paddingTop: 8 }}>
+                  {canWrite && item.status !== "paid" && item.status !== "cancelled" ? (
+                    <Pressable
+                      style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
+                      onPress={() => setPaymentInvoice(item)}
+                    >
+                      <AppIcon name="wallet" size={15} color={colors.income} />
+                      <Text style={shared.buttonSecondaryText}>
+                        {isRTL ? "تسجيل دفعة" : "Record payment"}
+                      </Text>
+                    </Pressable>
+                  ) : null}
                   <Pressable
                     style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
                     onPress={() => shareInvoice(item)}
@@ -289,6 +312,16 @@ export default function InvoicesScreen() {
           }}
         />
       )}
+
+      <RecordInvoicePaymentModal
+        visible={paymentInvoice != null}
+        workspaceId={workspaceId}
+        currency={currency}
+        invoice={paymentInvoice}
+        isRTL={isRTL}
+        onClose={() => setPaymentInvoice(null)}
+        onSuccess={() => void load(true)}
+      />
     </Screen>
   );
 }

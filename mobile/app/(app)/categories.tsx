@@ -1,16 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Modal, Platform, Pressable, RefreshControl, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
@@ -19,10 +9,14 @@ import { createCategory, fetchCategories, type CategoryItem } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
+import { Field, FormBanner, PrimaryButton } from "@/components/forms";
 
 export default function CategoriesScreen() {
   const { t, isRTL, locale } = useI18n();
   const { workspaceId } = useWorkspace();
+  const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "expense" | "income">("all");
@@ -47,7 +41,7 @@ export default function CategoriesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load(true).catch(() => setItems([]));
     }, [load]),
   );
 
@@ -81,8 +75,8 @@ export default function CategoriesScreen() {
       setName("");
       setNameEn("");
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر إنشاء التصنيف" : "Failed to create category");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر إنشاء التصنيف" : "Failed to create category"));
     } finally {
       setBusy(false);
     }
@@ -97,12 +91,10 @@ export default function CategoriesScreen() {
     <Screen
       title={isRTL ? "التصنيفات" : "Categories"}
       showBack
-      actionLabel={isRTL ? "+ تصنيف" : "+ Category"}
-      actionIcon="add"
-      onAction={() => {
+      {...headerAction(isRTL ? "+ تصنيف" : "+ Category", "add", () => {
         setError(null);
         setOpen(true);
-      }}
+      })}
     >
       {/* Filter Tabs */}
       <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 8, marginBottom: 8 }}>
@@ -229,26 +221,20 @@ export default function CategoriesScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "الاسم (عربي)" : "Name (Arabic)"}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={isRTL ? "الاسم (عربي)" : "Name (Arabic)"}
               value={name}
               onChangeText={setName}
               placeholder={isRTL ? "مثال: مصروف مكتب" : "e.g. Office supplies"}
-              placeholderTextColor={colors.faint}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "الاسم (إنجليزي، اختياري)" : "Name (English, optional)"}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={isRTL ? "الاسم (إنجليزي، اختياري)" : "Name (English, optional)"}
               value={nameEn}
               onChangeText={setNameEn}
-              placeholder={isRTL ? "e.g. Office supplies" : "e.g. Office supplies"}
-              placeholderTextColor={colors.faint}
+              placeholder="e.g. Office supplies"
+              isRTL={isRTL}
             />
 
             <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
@@ -298,19 +284,9 @@ export default function CategoriesScreen() {
               </Pressable>
             </View>
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              )}
-            </Pressable>
+            <PrimaryButton label={t.common.save} onPress={onCreate} loading={busy} disabled={busy} isRTL={isRTL} />
           </Pressable>
         </Pressable>
       </Modal>

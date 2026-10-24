@@ -31,12 +31,17 @@ import { formatDate, formatMoney, parsePositiveAmount, todayISO } from "@/lib/fo
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { newIdempotencyKey } from "@/lib/idempotency";
+import { useWriteAccess } from "@/lib/write-access";
+import { AmountField, DateField, FormBanner, PrimaryButton } from "@/components/forms";
 
 type FilterTab = "all" | "active" | "paid";
 
 export default function DebtsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency, hasFeature } = useWorkspace();
+  const { canWrite, headerAction } = useWriteAccess();
   const [items, setItems] = useState<DebtItem[]>([]);
   const [summary, setSummary] = useState<DebtSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,9 +59,7 @@ export default function DebtsScreen() {
   const [accounts, setAccounts] = useState<AccountItem[]>([]);
   const [paymentBusy, setPaymentBusy] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const paymentIdempotencyRef = useRef(
-    globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`,
-  );
+  const paymentIdempotencyRef = useRef(newIdempotencyKey());
 
   // History Modal State
   const [historyDebt, setHistoryDebt] = useState<DebtItem | null>(null);
@@ -82,7 +85,9 @@ export default function DebtsScreen() {
               : "Debts service is awaiting cloud deployment. Please retry in a few moments.",
           );
         } else {
-          setError(isRTL ? "تعذر تحميل الديون والالتزامات." : "Failed to load debts.");
+          setError(
+            resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر تحميل الديون والالتزامات." : "Failed to load debts."),
+          );
         }
         setItems([]);
       } finally {
@@ -94,7 +99,7 @@ export default function DebtsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load();
+      void load(true);
     }, [load]),
   );
 
@@ -157,13 +162,16 @@ export default function DebtsScreen() {
         idempotencyKey: paymentIdempotencyRef.current,
       });
 
-      paymentIdempotencyRef.current =
-        globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+      paymentIdempotencyRef.current = newIdempotencyKey();
       setPayingDebt(null);
       await load(true);
-    } catch {
+    } catch (err) {
       setPaymentError(
-        isRTL ? "تعذر تسجيل الدفعة. تحقق من الاتصال والحساب." : "Failed to record payment.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL ? "تعذر تسجيل الدفعة. تحقق من الاتصال والحساب." : "Failed to record payment.",
+        ),
       );
     } finally {
       setPaymentBusy(false);
@@ -203,9 +211,7 @@ export default function DebtsScreen() {
     <Screen
       title={t.debts.title}
       showBack
-      actionLabel={t.debts.add}
-      actionIcon="add"
-      onAction={() => router.push("/debt-new")}
+      {...headerAction(t.debts.add, "add", () => router.push("/debt-new"))}
     >
       {/* Summary Card */}
       <View style={shared.cardHighlighted}>
@@ -484,7 +490,7 @@ export default function DebtsScreen() {
                     </Text>
                   </Pressable>
 
-                  {!isFullyPaid ? (
+                  {canWrite && !isFullyPaid ? (
                     <Pressable
                       style={[
                         shared.button,
@@ -527,24 +533,22 @@ export default function DebtsScreen() {
               </Text>
             ) : null}
 
-            {paymentError ? (
-              <Text style={[shared.error, { marginBottom: 10 }]}>{paymentError}</Text>
-            ) : null}
+            {paymentError ? <FormBanner message={paymentError} isRTL={isRTL} /> : null}
 
-            {/* Payment Amount Input */}
-            <View style={{ gap: 6, marginBottom: 12 }}>
-              <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-                {t.debts.paymentAmount} ({currency})
-              </Text>
-              <TextInput
-                style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-                keyboardType="decimal-pad"
-                value={paymentAmount}
-                onChangeText={setPaymentAmount}
-                placeholder="0.00"
-                placeholderTextColor={colors.faint}
-              />
-            </View>
+            <AmountField
+              label={t.debts.paymentAmount}
+              currency={currency}
+              value={paymentAmount}
+              onChangeText={setPaymentAmount}
+              isRTL={isRTL}
+            />
+
+            <DateField
+              label={isRTL ? "تاريخ السداد" : "Payment date"}
+              value={paymentDate}
+              onChange={setPaymentDate}
+              isRTL={isRTL}
+            />
 
             {/* Account Selector */}
             <View style={{ gap: 6, marginBottom: 12 }}>
@@ -586,18 +590,12 @@ export default function DebtsScreen() {
               />
             </View>
 
-            {/* Submit Button */}
-            <Pressable
-              style={[shared.button, paymentBusy && { opacity: 0.6 }]}
+            <PrimaryButton
+              label={t.debts.recordPayment}
               onPress={handleRecordPayment}
+              loading={paymentBusy}
               disabled={paymentBusy}
-            >
-              {paymentBusy ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <Text style={shared.buttonText}>{t.debts.recordPayment}</Text>
-              )}
-            </Pressable>
+            />
           </View>
         </View>
       </Modal>

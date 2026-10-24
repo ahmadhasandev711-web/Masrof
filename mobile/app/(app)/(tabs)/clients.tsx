@@ -20,6 +20,8 @@ import { createClient, fetchClients } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
 
 type ClientRow = {
   _id: string;
@@ -32,6 +34,7 @@ type ClientRow = {
 export default function ClientsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId } = useWorkspace();
+  const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -56,7 +59,7 @@ export default function ClientsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load(true).catch(() => setItems([]));
     }, [load]),
   );
 
@@ -90,8 +93,8 @@ export default function ClientsScreen() {
       setPhone("");
       setEmail("");
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر إضافة العميل" : "Failed to add client");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر إضافة العميل" : "Failed to add client"));
     } finally {
       setBusy(false);
     }
@@ -110,12 +113,10 @@ export default function ClientsScreen() {
   return (
     <Screen
       title={t.clients.title}
-      actionLabel={t.clients.add}
-      actionIcon="add"
-      onAction={() => {
+      {...headerAction(t.clients.add, "add", () => {
         setError(null);
         setOpen(true);
-      }}
+      })}
     >
       {/* Search Input */}
       <View style={{ marginBottom: 6 }}>

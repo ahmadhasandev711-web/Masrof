@@ -1,5 +1,6 @@
 import { getAuthCookie } from "@/lib/auth-client";
 import { API_URL } from "@/lib/config";
+import { scopedCacheKey } from "@/lib/cache-scope";
 import type {
   TransactionInput,
   InvoiceInput,
@@ -41,7 +42,7 @@ export function clearAllCache(): void {
 }
 
 export function getCached<T>(path: string): T | undefined {
-  const cached = apiCache.get(path);
+  const cached = apiCache.get(scopedCacheKey(path));
   return cached ? (cached.data as T) : undefined;
 }
 
@@ -53,8 +54,10 @@ async function mobileFetch<T>(
   const method = init?.method?.toUpperCase() ?? "GET";
   const isGet = method === "GET";
 
+  const cacheKey = scopedCacheKey(path);
+
   if (isGet && !options?.skipCache) {
-    const cached = apiCache.get(path);
+    const cached = apiCache.get(cacheKey);
     const ttl = options?.ttlMs ?? DEFAULT_CACHE_TTL_MS;
     if (cached && Date.now() - cached.timestamp < ttl) {
       return cached.data as T;
@@ -87,7 +90,7 @@ async function mobileFetch<T>(
   const result = (await response.json()) as T;
 
   if (isGet) {
-    apiCache.set(path, { data: result, timestamp: Date.now() });
+    apiCache.set(cacheKey, { data: result, timestamp: Date.now() });
   }
 
   return result;
@@ -302,10 +305,13 @@ export function fetchInvoices(workspaceId: string, page = 1, skipCache = false) 
       invoiceNumber: string;
       clientName: string;
       total: number;
+      paidAmount?: number;
+      remainingAmount?: number;
       displayStatus: string;
       status: string;
       issueDate: string;
       dueDate: string | null;
+      shareToken?: string | null;
     }[];
     total: number;
     page: number;
@@ -324,6 +330,30 @@ export async function createInvoice(body: InvoiceInput) {
     body: JSON.stringify(body),
   });
   invalidateCache("invoices");
+  invalidateCache("dashboard");
+  invalidateCache("reports");
+  return result;
+}
+
+export async function recordInvoicePayment(body: {
+  workspaceId: string;
+  invoiceId: string;
+  accountId: string;
+  categoryId?: string | null;
+  amount: number;
+  paymentDate: string;
+  paymentMethod?: string;
+  reference?: string;
+  notes?: string;
+  idempotencyKey: string;
+}) {
+  const result = await mobileFetch<{ paymentId: string }>("/api/mobile/invoices/payments", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  invalidateCache("invoices");
+  invalidateCache("transactions");
+  invalidateCache("accounts");
   invalidateCache("dashboard");
   invalidateCache("reports");
   return result;

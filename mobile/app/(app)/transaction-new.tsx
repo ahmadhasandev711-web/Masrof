@@ -1,17 +1,13 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
+import { AmountField, DateField, Field, FormBanner, PrimaryButton } from "@/components/forms";
 import { colors, shared } from "@/lib/styles";
 import { useTransactionForm } from "@/hooks/use-transaction-form";
+import { useWorkspace } from "@/lib/workspace";
 
 export default function NewTransactionScreen() {
+  const { canWrite } = useWorkspace();
   const {
     t,
     isRTL,
@@ -97,56 +93,29 @@ export default function NewTransactionScreen() {
         </View>
 
         {/* Amount Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.common.amount} ({currency})
-          </Text>
-          <TextInput
-            keyboardType="numeric"
-            value={amount}
-            onChangeText={setAmount}
-            style={[
-              shared.input,
-              {
-                fontSize: 22,
-                fontWeight: "700",
-                color: type === "expense" ? colors.expense : colors.income,
-                textAlign: isRTL ? "right" : "left",
-              },
-            ]}
-            placeholder="0.00"
-            placeholderTextColor={colors.faint}
-            autoFocus
-          />
-        </View>
+        <AmountField
+          label={t.common.amount}
+          currency={currency}
+          value={amount}
+          onChangeText={setAmount}
+          isRTL={isRTL}
+          accentColor={type === "expense" ? colors.expense : colors.income}
+        />
 
-        {/* Description Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {isRTL ? "الوصف أو البيان (اختياري)" : "Description (optional)"}
-          </Text>
-          <TextInput
-            value={description}
-            onChangeText={setDescription}
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-            placeholder={isRTL ? "مثال: مشتريات سوبرماركت، فاتورة إنترنت..." : "e.g. Groceries, Internet bill..."}
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+        <Field
+          label={isRTL ? "الوصف أو البيان (اختياري)" : "Description (optional)"}
+          value={description}
+          onChangeText={setDescription}
+          isRTL={isRTL}
+          placeholder={isRTL ? "مثال: مشتريات سوبرماركت..." : "e.g. Groceries, Internet bill..."}
+        />
 
-        {/* Date Input */}
-        <View style={{ gap: 6 }}>
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.common.date} (YYYY-MM-DD)
-          </Text>
-          <TextInput
-            value={date}
-            onChangeText={setDate}
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-            placeholder="2026-08-14"
-            placeholderTextColor={colors.faint}
-          />
-        </View>
+        <DateField
+          label={t.common.date}
+          value={date}
+          onChange={setDate}
+          isRTL={isRTL}
+        />
 
         {/* Account Selector */}
         <View style={{ gap: 8 }}>
@@ -236,23 +205,17 @@ export default function NewTransactionScreen() {
           )}
         </View>
 
-        {error ? <Text style={shared.error}>{error}</Text> : null}
+        {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-        {/* Submit Button */}
-        <Pressable
-          style={[shared.button, busy && { opacity: 0.7 }, { flexDirection: isRTL ? "row-reverse" : "row" }]}
-          onPress={onSubmit}
-          disabled={busy}
-        >
-          {busy ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <>
-              <AppIcon name="checkmark" size={20} color="#FFFFFF" />
-              <Text style={shared.buttonText}>{t.common.save}</Text>
-            </>
-          )}
-        </Pressable>
+        {canWrite ? (
+          <PrimaryButton label={t.common.save} loading={busy} isRTL={isRTL} onPress={onSubmit} disabled={busy} />
+        ) : (
+          <FormBanner
+            tone="info"
+            isRTL={isRTL}
+            message={isRTL ? "صلاحيتك للعرض فقط في هذه المساحة." : "You have view-only access in this workspace."}
+          />
+        )}
       </ScrollView>
     </Screen>
   );

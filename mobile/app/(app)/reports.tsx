@@ -16,6 +16,7 @@ import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 
 type PresetKey = "thisMonth" | "lastMonth" | "thisYear";
 
@@ -42,11 +43,15 @@ export default function ReportsScreen() {
       setSummary(data.summary);
       setExpenseRows(data.expenseBreakdown?.rows ?? []);
       setIncomeRows(data.incomeBreakdown?.rows ?? []);
-    } catch {
+    } catch (err) {
       setLoadError(
-        isRTL
-          ? "تعذر تحميل التقارير المالية. يرجى التحقق من الاتصال بالإنترنت."
-          : "Failed to load financial reports. Please check your network connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل التقارير المالية. يرجى التحقق من الاتصال بالإنترنت."
+            : "Failed to load financial reports. Please check your network connection.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -55,7 +60,7 @@ export default function ReportsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load();
+      void load(true);
     }, [load]),
   );
 

@@ -8,13 +8,11 @@ import {
   type CategoryItem,
 } from "@/lib/api";
 import { parsePositiveAmount, todayISO } from "@/lib/format";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { newIdempotencyKey } from "@/lib/idempotency";
 import { transactionInputSchema } from "@/lib/validation";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
-
-function createIdempotencyKey(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
-}
 
 export function useTransactionForm() {
   const { t, isRTL } = useI18n();
@@ -30,7 +28,7 @@ export function useTransactionForm() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const idempotencyRef = useRef(createIdempotencyKey());
+  const idempotencyRef = useRef(newIdempotencyKey());
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -95,13 +93,17 @@ export function useTransactionForm() {
 
     try {
       await createTransaction(validation.data);
-      idempotencyRef.current = createIdempotencyKey();
+      idempotencyRef.current = newIdempotencyKey();
       router.back();
-    } catch {
+    } catch (err) {
       setError(
-        isRTL
-          ? "تعذر حفظ العملية. تأكد من صحة البيانات والاتصال."
-          : "Failed to create transaction. Please check your connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر حفظ العملية. تأكد من صحة البيانات والاتصال."
+            : "Failed to create transaction. Please check your connection.",
+        ),
       );
     } finally {
       setBusy(false);

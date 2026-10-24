@@ -6,6 +6,7 @@ import { AppIcon } from "@/components/icon";
 import { DashboardSkeleton } from "@/components/skeleton";
 import { ErrorView } from "@/components/error-view";
 import { fetchDashboard, type DashboardSummary } from "@/lib/api";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -14,7 +15,7 @@ import { useI18n } from "@/lib/i18n";
 
 export default function HomeScreen() {
   const { t, isRTL } = useI18n();
-  const { workspaceId, currency, workspaces, setWorkspaceId, entitlements } = useWorkspace();
+  const { workspaceId, currency, workspaces, setWorkspaceId, entitlements, canWrite } = useWorkspace();
   const { data: session } = authClient.useSession();
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,11 +28,15 @@ export default function HomeScreen() {
       setError(null);
       const summary = await fetchDashboard(workspaceId, skipCache);
       setData(summary);
-    } catch {
+    } catch (err) {
       setError(
-        isRTL
-          ? "تعذر تحميل لوحة التحكم. تحقق من الاتصال."
-          : "Failed to load dashboard. Please check your connection.",
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل لوحة التحكم. تحقق من الاتصال."
+            : "Failed to load dashboard. Please check your connection.",
+        ),
       );
       setData(null);
     } finally {
@@ -41,7 +46,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load();
+      void load(true);
     }, [load]),
   );
 
@@ -197,7 +202,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Quick Actions Grid */}
+        {canWrite ? (
         <View style={{ gap: 8 }}>
           <Text style={[shared.label, { fontWeight: "700", textAlign: isRTL ? "right" : "left" }]}>
             {t.dashboard.quickActions}
@@ -268,6 +273,7 @@ export default function HomeScreen() {
             </Pressable>
           </View>
         </View>
+        ) : null}
 
         {/* Debts & Liabilities Quick Card */}
         <Pressable

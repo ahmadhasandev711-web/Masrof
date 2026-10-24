@@ -1,16 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Modal, Platform, Pressable, RefreshControl, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
@@ -21,10 +11,14 @@ import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
+import { useWriteAccess } from "@/lib/write-access";
+import { AmountField, Field, FormBanner, PrimaryButton } from "@/components/forms";
 
 export default function GoalsScreen() {
   const { t, isRTL } = useI18n();
   const { workspaceId, currency, hasFeature } = useWorkspace();
+  const { headerAction, canWrite } = useWriteAccess();
   const [items, setItems] = useState<
     {
       id: string;
@@ -58,7 +52,7 @@ export default function GoalsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load(true).catch(() => setItems([]));
     }, [load]),
   );
 
@@ -96,8 +90,8 @@ export default function GoalsScreen() {
       setName("");
       setTarget("");
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر إنشاء الهدف" : "Failed to create goal");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر إنشاء الهدف" : "Failed to create goal"));
     } finally {
       setBusy(false);
     }
@@ -122,8 +116,8 @@ export default function GoalsScreen() {
       setAddOpen(null);
       setAddAmount("");
       await load(true);
-    } catch {
-      setError(isRTL ? "تعذر تحديث التقدم" : "Failed to update progress");
+    } catch (err) {
+      setError(resolveApiErrorMessage(err, isRTL, isRTL ? "تعذر تحديث التقدم" : "Failed to update progress"));
     } finally {
       setBusy(false);
     }
@@ -148,12 +142,10 @@ export default function GoalsScreen() {
     <Screen
       title={t.goals.title}
       showBack
-      actionLabel={t.goals.add}
-      actionIcon="add"
-      onAction={() => {
+      {...headerAction(t.goals.add, "add", () => {
         setError(null);
         setOpen(true);
-      }}
+      })}
     >
       {loading && items.length === 0 ? (
         <ListSkeleton count={4} />
@@ -246,19 +238,21 @@ export default function GoalsScreen() {
                     : `${t.goals.remaining}: ${formatMoney(item.remaining, currency)}`}
                 </Text>
 
-                <Pressable
-                  style={[
-                    shared.buttonSecondary,
-                    { paddingVertical: 6, paddingHorizontal: 12, flexDirection: isRTL ? "row-reverse" : "row" },
-                  ]}
-                  onPress={() => {
-                    setError(null);
-                    setAddOpen(item.id);
-                  }}
-                >
-                  <AppIcon name="add" size={14} color={colors.primary} />
-                  <Text style={[shared.buttonSecondaryText, { fontSize: 12 }]}>{t.goals.deposit}</Text>
-                </Pressable>
+                {canWrite ? (
+                  <Pressable
+                    style={[
+                      shared.buttonSecondary,
+                      { paddingVertical: 6, paddingHorizontal: 12, flexDirection: isRTL ? "row-reverse" : "row" },
+                    ]}
+                    onPress={() => {
+                      setError(null);
+                      setAddOpen(item.id);
+                    }}
+                  >
+                    <AppIcon name="add" size={14} color={colors.primary} />
+                    <Text style={[shared.buttonSecondaryText, { fontSize: 12 }]}>{t.goals.deposit}</Text>
+                  </Pressable>
+                ) : null}
               </View>
             </View>
           );
@@ -291,42 +285,25 @@ export default function GoalsScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "اسم الهدف" : "Goal Name"}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={isRTL ? "اسم الهدف" : "Goal Name"}
               placeholder={t.goals.namePlaceholder}
-              placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.goals.target} ({currency})
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder={t.goals.targetPlaceholder}
-              placeholderTextColor={colors.faint}
+            <AmountField
+              label={t.goals.target}
+              currency={currency}
               value={target}
               onChangeText={setTarget}
-              keyboardType="numeric"
+              isRTL={isRTL}
             />
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              )}
-            </Pressable>
+            <PrimaryButton label={t.common.save} onPress={onCreate} loading={busy} disabled={busy} isRTL={isRTL} />
           </Pressable>
         </Pressable>
       </Modal>
@@ -356,32 +333,23 @@ export default function GoalsScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.goals.depositAmount} ({currency})
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder="0.00"
-              placeholderTextColor={colors.faint}
+            <AmountField
+              label={t.goals.depositAmount}
+              currency={currency}
               value={addAmount}
               onChangeText={setAddAmount}
-              keyboardType="numeric"
-              autoFocus
+              isRTL={isRTL}
             />
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
+            <PrimaryButton
+              label={t.goals.confirmDeposit}
               onPress={onAddProgress}
+              loading={busy}
               disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.goals.confirmDeposit}</Text>
-              )}
-            </Pressable>
+              isRTL={isRTL}
+            />
           </Pressable>
         </Pressable>
       </Modal>

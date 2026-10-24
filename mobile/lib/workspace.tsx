@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
+  clearAllCache,
   fetchEntitlements,
   fetchWorkspaces,
   type MobileEntitlements,
@@ -7,6 +8,7 @@ import {
   type WorkspaceRole,
 } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
+import { setMobileCacheScope } from "@/lib/cache-scope";
 
 type WorkspaceContextValue = {
   workspaceId: string | null;
@@ -35,6 +37,19 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
+  const previousUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const userId = session?.user?.id ?? null;
+    if (previousUserIdRef.current && userId !== previousUserIdRef.current) {
+      clearAllCache();
+    }
+    previousUserIdRef.current = userId;
+    setMobileCacheScope({
+      userId: userId ?? "anon",
+      workspaceId: workspaceId ?? "",
+    });
+  }, [session?.user?.id, workspaceId]);
 
   const refresh = useCallback(async () => {
     if (!session) {
@@ -101,7 +116,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       canWrite,
       isOwner,
       hasFeature,
-      showAds: entitlements?.showAds ?? true,
+      showAds: entitlements?.showAds ?? false,
       loading,
       error,
       setWorkspaceId,
