@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Linking,
   Platform,
@@ -113,6 +114,27 @@ export default function InvoicesScreen() {
       await load(true);
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  async function openPrintUrl(url: string) {
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (!canOpen) {
+        Alert.alert(
+          isRTL ? "تعذر فتح الطباعة" : "Cannot open print",
+          isRTL
+            ? "تأكد من الاتصال بالإنترنت أو سجّل الدخول على الويب ثم أعد المحاولة."
+            : "Check your connection or sign in on the web, then try again.",
+        );
+        return;
+      }
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert(
+        isRTL ? "تعذر فتح الطباعة" : "Cannot open print",
+        isRTL ? "لم نتمكن من فتح رابط الطباعة." : "We could not open the print link.",
+      );
     }
   }
 
@@ -293,7 +315,7 @@ export default function InvoicesScreen() {
 
                   <Pressable
                     style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
-                    onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=a4`)}
+                    onPress={() => void openPrintUrl(`${API_URL}/print/invoice/${item._id}?format=a4`)}
                   >
                     <AppIcon name="print" size={15} color={colors.primary} />
                     <Text style={shared.buttonSecondaryText}>A4</Text>
@@ -301,7 +323,7 @@ export default function InvoicesScreen() {
 
                   <Pressable
                     style={[shared.buttonSecondary, { flexDirection: isRTL ? "row-reverse" : "row" }]}
-                    onPress={() => Linking.openURL(`${API_URL}/print/invoice/${item._id}?format=pos`)}
+                    onPress={() => void openPrintUrl(`${API_URL}/print/invoice/${item._id}?format=pos`)}
                   >
                     <AppIcon name="print" size={15} color={colors.primary} />
                     <Text style={shared.buttonSecondaryText}>POS</Text>

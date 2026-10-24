@@ -5,6 +5,7 @@ import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
 import { ListSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
 import { createCategory, fetchCategories, type CategoryItem } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -26,22 +27,34 @@ export default function CategoriesScreen() {
   const [kind, setKind] = useState<"expense" | "income">("expense");
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const idempotencyRef = useRef(newIdempotencyKey());
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     try {
+      setLoadError(null);
       const data = await fetchCategories(workspaceId, undefined, skipCache, locale);
       setItems(data.items);
+    } catch (err) {
+      setLoadError(
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل التصنيفات. تحقق من الاتصال."
+            : "Failed to load categories. Check your connection.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
-  }, [workspaceId, locale]);
+  }, [workspaceId, locale, isRTL]);
 
   useFocusEffect(
     useCallback(() => {
-      void load(true).catch(() => setItems([]));
+      void load(true);
     }, [load]),
   );
 
@@ -129,6 +142,14 @@ export default function CategoriesScreen() {
 
       {loading && items.length === 0 ? (
         <ListSkeleton count={6} />
+      ) : loadError && items.length === 0 ? (
+        <ErrorView
+          message={loadError}
+          onRetry={() => {
+            setLoading(true);
+            void load(true);
+          }}
+        />
       ) : (
         <FlatList
           data={filteredItems}

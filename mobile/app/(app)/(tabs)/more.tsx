@@ -20,7 +20,7 @@ type MenuItem = {
 export default function MoreScreen() {
   const { t, locale, toggleLocale, isRTL } = useI18n();
   const { data: session } = authClient.useSession();
-  const { workspace, entitlements } = useWorkspace();
+  const { workspace, workspaces, setWorkspaceId, entitlements } = useWorkspace();
 
   const planLabel = entitlements?.plan === "pro" ? t.plan.pro : t.plan.free;
 
@@ -156,6 +156,37 @@ export default function MoreScreen() {
             </View>
           </View>
         </View>
+
+        {workspaces.length > 1 ? (
+          <View style={shared.card}>
+            <Text style={[shared.label, { fontWeight: "700", marginBottom: 8, textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "تبديل مساحة العمل" : "Switch workspace"}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, flexDirection: isRTL ? "row-reverse" : "row" }}
+            >
+              {workspaces.map((ws) => {
+                const active = ws.id === workspace?.id;
+                return (
+                  <Pressable
+                    key={ws.id}
+                    onPress={() => setWorkspaceId(ws.id)}
+                    style={[
+                      shared.chip,
+                      active && { backgroundColor: colors.primary, borderColor: colors.primary },
+                    ]}
+                  >
+                    <Text style={[shared.chipText, active && { color: "#FFFFFF", fontWeight: "700" }]}>
+                      {ws.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ) : null}
 
         {/* Language Switcher Card */}
         <Pressable

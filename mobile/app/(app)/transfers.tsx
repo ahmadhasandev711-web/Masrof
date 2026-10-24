@@ -16,6 +16,8 @@ import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
 import { ListSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { fetchTransfers } from "@/lib/api";
 import { formatDate, formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
@@ -38,6 +40,7 @@ export default function TransfersScreen() {
     }[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -46,14 +49,25 @@ export default function TransfersScreen() {
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     try {
+      setLoadError(null);
       const data = await fetchTransfers(workspaceId, 1, skipCache);
       setItems(data.items);
       setPage(data.page);
       setTotalPages(data.totalPages);
+    } catch (err) {
+      setLoadError(
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل التحويلات. تحقق من الاتصال."
+            : "Failed to load transfers. Check your connection.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, isRTL]);
 
   const form = useTransferForm({
     onSuccess: () => load(true),
@@ -80,7 +94,7 @@ export default function TransfersScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => setItems([]));
+      void load(true);
     }, [load]),
   );
 
@@ -101,6 +115,14 @@ export default function TransfersScreen() {
     >
       {loading && items.length === 0 ? (
         <ListSkeleton count={5} />
+      ) : loadError && items.length === 0 ? (
+        <ErrorView
+          message={loadError}
+          onRetry={() => {
+            setLoading(true);
+            void load(true);
+          }}
+        />
       ) : (
         <FlatList
           data={items}

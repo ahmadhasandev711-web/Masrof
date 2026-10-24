@@ -1,20 +1,12 @@
 import { useCallback, useRef, useState } from "react";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Modal, Platform, Pressable, RefreshControl, Text, View } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon, type IconName } from "@/components/icon";
 import { ListSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
+import { AmountField, Field, FormBanner, PrimaryButton } from "@/components/forms";
 import { createAccount, fetchAccounts, type AccountItem } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
@@ -29,6 +21,7 @@ export default function AccountsScreen() {
   const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<AccountItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [type, setType] = useState("cash");
@@ -49,12 +42,21 @@ export default function AccountsScreen() {
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     try {
+      setLoadError(null);
       const data = await fetchAccounts(workspaceId, skipCache);
       setItems(data.items);
+    } catch (err) {
+      setLoadError(
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL ? "تعذر تحميل الحسابات. تحقق من الاتصال." : "Failed to load accounts. Check your connection.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, isRTL]);
 
   useFocusEffect(
     useCallback(() => {
@@ -141,6 +143,14 @@ export default function AccountsScreen() {
 
       {loading && items.length === 0 ? (
         <ListSkeleton count={4} />
+      ) : loadError && items.length === 0 ? (
+        <ErrorView
+          message={loadError}
+          onRetry={() => {
+            setLoading(true);
+            void load(true);
+          }}
+        />
       ) : (
         <FlatList
           data={items}
@@ -223,15 +233,12 @@ export default function AccountsScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.accounts.accountName}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={t.accounts.accountName}
               placeholder={isRTL ? "مثال: البنك الأهلي، كاش، فودافون كاش" : "e.g. Bank Account, Cash, Wallet"}
-              placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
+              isRTL={isRTL}
             />
 
             <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
@@ -259,31 +266,17 @@ export default function AccountsScreen() {
               ))}
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.accounts.openingBalance} ({currency})
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder="0.00"
-              placeholderTextColor={colors.faint}
+            <AmountField
+              label={t.accounts.openingBalance}
+              currency={currency}
               value={balance}
               onChangeText={setBalance}
-              keyboardType="numeric"
+              isRTL={isRTL}
             />
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              )}
-            </Pressable>
+            <PrimaryButton label={t.common.save} onPress={onCreate} loading={busy} disabled={busy} isRTL={isRTL} />
           </Pressable>
         </Pressable>
       </Modal>

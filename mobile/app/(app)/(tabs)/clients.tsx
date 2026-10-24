@@ -1,21 +1,12 @@
 import { useCallback, useRef, useState } from "react";
 import { newIdempotencyKey } from "@/lib/idempotency";
-import {
-  ActivityIndicator,
-  FlatList,
-  Linking,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, Linking, Modal, Platform, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
 import { ListSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
+import { Field, FormBanner, PrimaryButton } from "@/components/forms";
 import { createClient, fetchClients } from "@/lib/api";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
@@ -37,6 +28,7 @@ export default function ClientsScreen() {
   const { headerAction } = useWriteAccess();
   const [items, setItems] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -50,16 +42,25 @@ export default function ClientsScreen() {
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     try {
+      setLoadError(null);
       const data = await fetchClients(workspaceId, skipCache);
       setItems(data.items);
+    } catch (err) {
+      setLoadError(
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL ? "تعذر تحميل العملاء. تحقق من الاتصال." : "Failed to load clients. Check your connection.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, isRTL]);
 
   useFocusEffect(
     useCallback(() => {
-      void load(true).catch(() => setItems([]));
+      void load(true);
     }, [load]),
   );
 
@@ -131,6 +132,14 @@ export default function ClientsScreen() {
 
       {loading && items.length === 0 ? (
         <ListSkeleton count={5} />
+      ) : loadError && items.length === 0 ? (
+        <ErrorView
+          message={loadError}
+          onRetry={() => {
+            setLoading(true);
+            void load(true);
+          }}
+        />
       ) : (
         <FlatList
           data={filteredItems}
@@ -252,55 +261,36 @@ export default function ClientsScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.clients.namePlaceholder}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={t.clients.namePlaceholder}
               placeholder={isRTL ? "مثال: شركة النور، أحمد علي..." : "e.g. Acme Corp, John Doe..."}
-              placeholderTextColor={colors.faint}
               value={name}
               onChangeText={setName}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.clients.phonePlaceholder}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={t.clients.phonePlaceholder}
               placeholder="01000000000"
-              placeholderTextColor={colors.faint}
               keyboardType="phone-pad"
               value={phone}
               onChangeText={setPhone}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {t.clients.emailPlaceholder}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+            <Field
+              label={t.clients.emailPlaceholder}
               placeholder="client@example.com"
-              placeholderTextColor={colors.faint}
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
+              isRTL={isRTL}
             />
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              )}
-            </Pressable>
+            <PrimaryButton label={t.common.save} onPress={onCreate} loading={busy} disabled={busy} isRTL={isRTL} />
           </Pressable>
         </Pressable>
       </Modal>

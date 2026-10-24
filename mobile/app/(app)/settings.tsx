@@ -1,23 +1,22 @@
 import { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
 import { fetchBranding, saveBranding } from "@/lib/api";
+import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { colors, shared } from "@/lib/styles";
 import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
+import { useWriteAccess } from "@/lib/write-access";
+import { Field, FormBanner, PrimaryButton } from "@/components/forms";
+import { CardSkeleton } from "@/components/skeleton";
 
 export default function SettingsScreen() {
   const { t, locale, setLocale, isRTL } = useI18n();
   const { workspaceId, workspace } = useWorkspace();
+  const { canWrite } = useWriteAccess();
+  const [loading, setLoading] = useState(true);
   const [businessName, setBusinessName] = useState("");
   const [businessPhone, setBusinessPhone] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
@@ -28,16 +27,20 @@ export default function SettingsScreen() {
 
   const load = useCallback(async () => {
     if (!workspaceId) return;
-    const data = await fetchBranding(workspaceId);
-    setBusinessName(data.businessName ?? "");
-    setBusinessPhone(data.businessPhone ?? "");
-    setBusinessAddress(data.businessAddress ?? "");
-    setTaxId(data.taxId ?? "");
+    try {
+      const data = await fetchBranding(workspaceId, true);
+      setBusinessName(data.businessName ?? "");
+      setBusinessPhone(data.businessPhone ?? "");
+      setBusinessAddress(data.businessAddress ?? "");
+      setTaxId(data.taxId ?? "");
+    } finally {
+      setLoading(false);
+    }
   }, [workspaceId]);
 
   useFocusEffect(
     useCallback(() => {
-      void load().catch(() => undefined);
+      void load();
     }, [load]),
   );
 
@@ -56,7 +59,7 @@ export default function SettingsScreen() {
       });
       setMessage(t.settings.saveSuccess);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.common.error);
+      setError(resolveApiErrorMessage(err, isRTL, t.common.error));
     } finally {
       setSaving(false);
     }
@@ -64,6 +67,12 @@ export default function SettingsScreen() {
 
   return (
     <Screen title={t.settings.title} showBack>
+      {loading ? (
+        <View style={{ gap: 12 }}>
+          <CardSkeleton />
+          <CardSkeleton />
+        </View>
+      ) : (
       <ScrollView
         contentContainerStyle={{ gap: 14, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
@@ -141,80 +150,68 @@ export default function SettingsScreen() {
             {t.settings.title}
           </Text>
 
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.settings.businessName}
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          {!canWrite ? (
+            <FormBanner
+              tone="info"
+              message={
+                isRTL
+                  ? "صلاحيتك للعرض فقط. تعديل بيانات الفواتير من الويب أو اطلب صلاحية كتابة."
+                  : "You have view-only access. Edit invoice branding on the web or ask for write access."
+              }
+              isRTL={isRTL}
+            />
+          ) : null}
+
+          <Field
+            label={t.settings.businessName}
             placeholder={isRTL ? "مثال: استوديو الإبداع..." : "e.g. Acme Corp..."}
-            placeholderTextColor={colors.faint}
             value={businessName}
             onChangeText={setBusinessName}
+            editable={canWrite}
+            isRTL={isRTL}
           />
 
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.settings.businessPhone}
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          <Field
+            label={t.settings.businessPhone}
             placeholder="01000000000"
-            placeholderTextColor={colors.faint}
             value={businessPhone}
             onChangeText={setBusinessPhone}
             keyboardType="phone-pad"
+            editable={canWrite}
+            isRTL={isRTL}
           />
 
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.settings.businessAddress}
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          <Field
+            label={t.settings.businessAddress}
             placeholder={isRTL ? "مثال: القاهرة، المعادي" : "e.g. Cairo, Egypt"}
-            placeholderTextColor={colors.faint}
             value={businessAddress}
             onChangeText={setBusinessAddress}
+            editable={canWrite}
+            isRTL={isRTL}
           />
 
-          <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-            {t.settings.taxId}
-          </Text>
-          <TextInput
-            style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+          <Field
+            label={t.settings.taxId}
             placeholder="123-456-789"
-            placeholderTextColor={colors.faint}
             value={taxId}
             onChangeText={setTaxId}
+            editable={canWrite}
+            isRTL={isRTL}
           />
 
-          {error ? <Text style={shared.error}>{error}</Text> : null}
-          {message ? (
-            <View style={[shared.card, { backgroundColor: colors.incomeSoft, borderColor: "#A7F3D0", paddingVertical: 10 }]}>
-              <Text style={{ color: colors.incomeText, textAlign: "center", fontWeight: "700" }}>
-                {message}
-              </Text>
-            </View>
-          ) : null}
+          {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
+          {message ? <FormBanner tone="info" message={message} isRTL={isRTL} /> : null}
 
-          <Pressable
-            style={[shared.button, saving && { opacity: 0.7 }, { marginTop: 6, flexDirection: isRTL ? "row-reverse" : "row" }]}
-            onPress={onSave}
-            disabled={saving}
-          >
-            {saving ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <>
-                <AppIcon name="checkmark" size={18} color="#FFFFFF" />
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              </>
-            )}
-          </Pressable>
+          {canWrite ? (
+            <PrimaryButton label={t.common.save} onPress={onSave} loading={saving} disabled={saving} isRTL={isRTL} />
+          ) : null}
         </View>
 
         <Text style={[shared.label, { textAlign: "center", fontSize: 12 }]}>
           {isRTL ? "رفع الشعار والنسخ الاحتياطي الكامل متاحان عبر لوحة الويب." : "Logo upload and database backup are available on the web portal."}
         </Text>
       </ScrollView>
+      )}
     </Screen>
   );
 }

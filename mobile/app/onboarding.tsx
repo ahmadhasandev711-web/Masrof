@@ -175,6 +175,11 @@ export default function OnboardingScreen() {
               placeholder={t.onboarding.workspaceNamePlaceholder}
               placeholderTextColor={colors.faint}
             />
+            <Text style={[shared.label, { fontSize: 12, textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL
+                ? "الاسم لمساحتك فقط — لا يحتاج أن يكون فريداً عالمياً. بعد الإنشاء ستبدأ بإضافة حسابك الأول."
+                : "This name is for your workspace only — it does not need to be globally unique. Next you will set up your first account."}
+            </Text>
           </View>
 
           {/* Workspace Type Selector */}

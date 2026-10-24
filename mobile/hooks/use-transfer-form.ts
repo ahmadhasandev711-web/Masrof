@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Alert } from "react-native";
 import { createTransfer, fetchAccounts, type AccountItem } from "@/lib/api";
 import { parsePositiveAmount, todayISO } from "@/lib/format";
 import { resolveApiErrorMessage } from "@/lib/api-errors";
@@ -81,11 +82,31 @@ export function useTransferForm({ onSuccess }: { onSuccess?: () => Promise<void>
       return;
     }
 
+    const fromName = accounts.find((a) => a.id === fromAccountId)?.name ?? "";
+    const toName = accounts.find((a) => a.id === toAccountId)?.name ?? "";
+    const summary = isRTL
+      ? `تحويل ${numericAmount} ${currency} من «${fromName}» إلى «${toName}» بتاريخ ${date}.`
+      : `Transfer ${numericAmount} ${currency} from "${fromName}" to "${toName}" on ${date}.`;
+
+    Alert.alert(
+      isRTL ? "تأكيد التحويل" : "Confirm transfer",
+      summary,
+      [
+        { text: isRTL ? "إلغاء" : "Cancel", style: "cancel" },
+        {
+          text: isRTL ? "تأكيد" : "Confirm",
+          onPress: () => void executeTransfer(validation.data),
+        },
+      ],
+    );
+  }
+
+  async function executeTransfer(data: Parameters<typeof createTransfer>[0]) {
     setBusy(true);
     setError(null);
 
     try {
-      await createTransfer(validation.data);
+      await createTransfer(data);
       idempotencyRef.current = newIdempotencyKey();
       setOpen(false);
       resetForm();

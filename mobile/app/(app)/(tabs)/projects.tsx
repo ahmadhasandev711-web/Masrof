@@ -24,6 +24,7 @@ import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
 import { resolveApiErrorMessage } from "@/lib/api-errors";
 import { useWriteAccess } from "@/lib/write-access";
+import { AmountField, Field, FormBanner, PrimaryButton } from "@/components/forms";
 
 type ProjectRow = {
   _id: string;
@@ -286,27 +287,20 @@ export default function ProjectsScreen() {
               </Pressable>
             </View>
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "اسم المشروع" : "Project Name"}
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder={isRTL ? "مثال: تطبيق متجر إلكتروني، حملة تسويقية..." : "e.g. Mobile App, Branding Campaign..."}
-              placeholderTextColor={colors.faint}
+            <Field
+              label={isRTL ? "اسم المشروع" : "Project Name"}
+              placeholder={isRTL ? "مثال: تطبيق متجر إلكتروني..." : "e.g. Mobile App, Branding Campaign..."}
               value={name}
               onChangeText={setName}
+              isRTL={isRTL}
             />
 
-            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "المبلغ المتوقع / قيمة المشروع" : "Expected Budget"} ({currency})
-            </Text>
-            <TextInput
-              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
-              placeholder="0.00"
-              placeholderTextColor={colors.faint}
-              keyboardType="numeric"
+            <AmountField
+              label={isRTL ? "المبلغ المتوقع / قيمة المشروع" : "Expected Budget"}
+              currency={currency}
               value={expected}
               onChangeText={setExpected}
+              isRTL={isRTL}
             />
 
             {clients.length > 0 ? (
@@ -367,19 +361,9 @@ export default function ProjectsScreen() {
               </View>
             ) : null}
 
-            {error ? <Text style={shared.error}>{error}</Text> : null}
+            {error ? <FormBanner message={error} isRTL={isRTL} /> : null}
 
-            <Pressable
-              style={[shared.button, busy && { opacity: 0.7 }]}
-              onPress={onCreate}
-              disabled={busy}
-            >
-              {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={shared.buttonText}>{t.common.save}</Text>
-              )}
-            </Pressable>
+            <PrimaryButton label={t.common.save} onPress={onCreate} loading={busy} disabled={busy} isRTL={isRTL} />
           </Pressable>
         </Pressable>
       </Modal>

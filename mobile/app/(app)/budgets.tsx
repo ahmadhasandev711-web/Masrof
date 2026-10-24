@@ -6,6 +6,7 @@ import { Screen } from "@/components/screen";
 import { AppIcon } from "@/components/icon";
 import { PlanGate } from "@/components/plan-gate";
 import { ListSkeleton } from "@/components/skeleton";
+import { ErrorView } from "@/components/error-view";
 import { createBudget, fetchBudgets } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { colors, shared } from "@/lib/styles";
@@ -35,22 +36,34 @@ export default function BudgetsScreen() {
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const idempotencyRef = useRef(newIdempotencyKey());
 
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     try {
+      setLoadError(null);
       const data = await fetchBudgets(workspaceId, skipCache);
       setItems(data.items);
+    } catch (err) {
+      setLoadError(
+        resolveApiErrorMessage(
+          err,
+          isRTL,
+          isRTL
+            ? "تعذر تحميل الميزانيات. تحقق من الاتصال."
+            : "Failed to load budgets. Check your connection.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, isRTL]);
 
   useFocusEffect(
     useCallback(() => {
-      void load(true).catch(() => setItems([]));
+      void load(true);
     }, [load]),
   );
 
@@ -121,6 +134,14 @@ export default function BudgetsScreen() {
     >
       {loading && items.length === 0 ? (
         <ListSkeleton count={4} />
+      ) : loadError && items.length === 0 ? (
+        <ErrorView
+          message={loadError}
+          onRetry={() => {
+            setLoading(true);
+            void load(true);
+          }}
+        />
       ) : (
         <FlatList
           data={items}
