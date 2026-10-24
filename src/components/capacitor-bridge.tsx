@@ -12,6 +12,14 @@ export function CapacitorBridge() {
 
     if (!isNative) return;
 
+    document.documentElement.classList.add("is-native-app");
+
+    // In native app, never show the marketing landing page "/"
+    if (window.location.pathname === "/" || window.location.pathname === "") {
+      window.location.replace("/dashboard");
+      return;
+    }
+
     let cleanupBackButton: (() => void) | undefined;
 
     async function initNativePlugins() {

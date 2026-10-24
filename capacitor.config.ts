@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: "سندات | Sanadat",
   webDir: "public",
   server: {
-    url: "https://sanadat.site",
+    url: "https://sanadat.site/dashboard",
     cleartext: false,
     androidScheme: "https",
   },

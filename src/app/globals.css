@@ -70,5 +70,10 @@ body {
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
   }
+
+  /* In native app: hide public marketing dropdown on auth pages */
+  .is-native-app .marketing-nav-menu {
+    display: none !important;
+  }
 }
 
