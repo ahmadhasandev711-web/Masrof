@@ -140,6 +140,9 @@ export type AccountItem = {
 export type CategoryItem = {
   id: string;
   name: string;
+  nameEn: string | null;
+  displayName: string;
+  slug: string | null;
   kind: "income" | "expense";
   icon: string | null;
   isSystem: boolean;
@@ -202,8 +205,13 @@ export async function createAccount(body: AccountInput) {
   return result;
 }
 
-export function fetchCategories(workspaceId: string, kind?: "income" | "expense", skipCache = false) {
-  const qs = new URLSearchParams({ workspaceId });
+export function fetchCategories(
+  workspaceId: string,
+  kind?: "income" | "expense",
+  skipCache = false,
+  locale: "ar" | "en" = "ar",
+) {
+  const qs = new URLSearchParams({ workspaceId, locale });
   if (kind) qs.set("kind", kind);
   return mobileFetch<{ items: CategoryItem[] }>(`/api/mobile/categories?${qs}`, undefined, { skipCache });
 }

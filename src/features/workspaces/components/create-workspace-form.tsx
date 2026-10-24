@@ -9,9 +9,11 @@ import {
   type CreateWorkspaceState,
 } from "@/features/workspaces/actions/create-workspace";
 import { getSuggestedCategoriesForType } from "@/features/categories/seed-data";
-import { SEED_CATEGORY_MESSAGE_KEYS } from "@/features/categories/seed-i18n";
+import { resolveCategoryLabel } from "@/features/categories/labels";
+import { CategoryIcon } from "@/components/ui/app-icons";
 import type { WorkspaceType } from "@/models/workspace";
-import { useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
 
 const WORKSPACE_TYPE_OPTIONS: WorkspaceType[] = ["personal", "freelance", "business"];
 
@@ -19,9 +21,9 @@ const initialState: CreateWorkspaceState = { error: null, redirectTo: null };
 
 export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboarding" | "new" }) {
   const router = useRouter();
+  const locale = useLocale() as AppLocale;
   const tForm = useTranslations("forms.workspace");
   const tWorkspaceType = useTranslations("workspaceType");
-  const tSeed = useTranslations("forms.categories.seed");
   const tAccountType = useTranslations("accountType");
   const [state, formAction, isPending] = useActionState(createWorkspaceAction, initialState);
   const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
@@ -85,23 +87,19 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
           {suggestedIncome.map((category) => (
             <span
               key={category.slug}
-              className="rounded-full bg-white px-2.5 py-1 text-xs text-emerald-800 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs text-emerald-800 shadow-sm"
             >
-              {category.icon}{" "}
-              {tSeed(
-                SEED_CATEGORY_MESSAGE_KEYS[category.slug] as Parameters<typeof tSeed>[0],
-              )}
+              <CategoryIcon slug={category.slug} kind="income" className="h-3.5 w-3.5" />
+              {resolveCategoryLabel(category, locale)}
             </span>
           ))}
           {suggestedExpense.map((category) => (
             <span
               key={category.slug}
-              className="rounded-full bg-white px-2.5 py-1 text-xs text-neutral-700 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs text-neutral-700 shadow-sm"
             >
-              {category.icon}{" "}
-              {tSeed(
-                SEED_CATEGORY_MESSAGE_KEYS[category.slug] as Parameters<typeof tSeed>[0],
-              )}
+              <CategoryIcon slug={category.slug} kind="expense" className="h-3.5 w-3.5" />
+              {resolveCategoryLabel(category, locale)}
             </span>
           ))}
         </div>

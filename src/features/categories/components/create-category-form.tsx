@@ -59,16 +59,31 @@ export function CreateCategoryForm({
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="category-name" className="text-sm font-medium text-neutral-700">
-          {tForm("name")}
+          {tForm("nameAr")}
         </label>
         <input
           id="category-name"
           name="name"
           type="text"
-          placeholder={tForm("name")}
+          placeholder={tForm("nameArPlaceholder")}
           className="rounded-lg border border-neutral-300 px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
           required
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="category-name-en" className="text-sm font-medium text-neutral-700">
+          {tForm("nameEn")}{" "}
+          <span className="font-normal text-neutral-400">({tForm("nameEnOptional")})</span>
+        </label>
+        <input
+          id="category-name-en"
+          name="nameEn"
+          type="text"
+          placeholder={tForm("nameEnPlaceholder")}
+          className="rounded-lg border border-neutral-300 px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        />
+        <p className="text-xs text-neutral-500">{tForm("nameEnHint")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">

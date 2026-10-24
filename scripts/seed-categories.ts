@@ -22,6 +22,7 @@ async function main() {
       { slug: category.slug },
       {
         name: category.name,
+        nameEn: category.nameEn,
         kind: category.kind,
         icon: category.icon,
         suggestedFor: category.suggestedFor,

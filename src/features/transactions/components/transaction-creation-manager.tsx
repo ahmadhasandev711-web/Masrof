@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { CreateTransactionForm } from "@/features/transactions/components/create-transaction-form";
 import { CreateTransferForm } from "@/features/transfers/components/create-transfer-form";
 import { useTranslations } from "next-intl";
+import type { CategoryOption } from "@/features/categories/map-options";
 
 type AccountOption = { id: string; name: string; currency: string };
-type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
 type LinkOption = { id: string; name: string; phone?: string | null };
 
 export function TransactionCreationManager({

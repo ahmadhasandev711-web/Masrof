@@ -2,6 +2,8 @@ import "server-only";
 
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { resolveCategoryLabelFromPopulated } from "@/features/categories/labels";
+import type { AppLocale } from "@/i18n/config";
 import { toPlain } from "@/lib/db/plain";
 import { ProjectModel, type ProjectStatus } from "@/models/project";
 import { ClientModel } from "@/models/client";
@@ -29,7 +31,7 @@ export type ProjectTransactionItem = {
   description: string;
   notes: string;
   categoryName: string;
-  categoryIcon: string | null;
+  categorySlug: string | null;
   accountName: string;
   accountCurrency: string;
 };
@@ -68,6 +70,7 @@ export type ProjectFinancialDetailsView = {
 export async function getProjectFinancialDetails(
   projectId: string,
   workspaceId: string,
+  locale: AppLocale = "ar",
 ): Promise<ProjectFinancialDetailsView | null> {
   if (
     !mongoose.Types.ObjectId.isValid(projectId) ||
@@ -108,7 +111,7 @@ export async function getProjectFinancialDetails(
       workspaceId,
       isArchived: false,
     })
-      .populate("categoryId", "name icon kind")
+      .populate("categoryId", "name nameEn icon kind slug")
       .populate("accountId", "name currency")
       .sort({ transactionDate: -1, createdAt: -1 })
       .lean(),
@@ -184,7 +187,11 @@ export async function getProjectFinancialDetails(
       expenseTotal += tx.amount;
     }
 
-    const category = tx.categoryId as { name?: string; icon?: string | null } | null;
+    const category = tx.categoryId as {
+      name?: string;
+      nameEn?: string | null;
+      slug?: string | null;
+    } | null;
     const account = tx.accountId as { name?: string; currency?: string } | null;
 
     return {
@@ -194,8 +201,8 @@ export async function getProjectFinancialDetails(
       transactionDate: new Date(tx.transactionDate).toISOString(),
       description: tx.description || "",
       notes: tx.notes || "",
-      categoryName: category?.name || "—",
-      categoryIcon: category?.icon ?? null,
+      categoryName: resolveCategoryLabelFromPopulated(category, locale, "—"),
+      categorySlug: category?.slug ?? null,
       accountName: account?.name || "—",
       accountCurrency: account?.currency || "",
     };

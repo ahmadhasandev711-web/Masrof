@@ -131,6 +131,7 @@ const core = {
  budgetNameMin2: "اسم الميزانية لازم يكون حرفين على الأقل",
  budgetAmountPositive: "قيمة الميزانية لازم تكون أكبر من صفر",
  categoryNameMin2: "اسم التصنيف لازم يكون حرفين على الأقل",
+ categoryNameEnMin2: "الاسم الإنجليزي لازم يكون حرفين على الأقل إن وُجد",
  categoryKindInvalid: "نوع التصنيف غير صحيح",
  postTitleShort: "العنوان قصير جداً",
  slugInvalid: "الرابط غير صالح",

@@ -233,6 +233,12 @@ const forms = {
  category: {
  title: "إضافة تصنيف",
  name: "اسم التصنيف",
+ nameAr: "الاسم (عربي)",
+ nameArPlaceholder: "مثال: مصروف مكتب",
+ nameEn: "الاسم (إنجليزي)",
+ nameEnOptional: "اختياري",
+ nameEnPlaceholder: "e.g. Office supplies",
+ nameEnHint: "يظهر عند استخدام التطبيق بالإنجليزية. اتركه فارغاً لاستخدام الاسم العربي في كل اللغات.",
  kind: "النوع",
  kindExpense: "مصروف",
  kindIncome: "دخل",

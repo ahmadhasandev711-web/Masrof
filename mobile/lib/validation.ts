@@ -88,7 +88,15 @@ export type AccountInput = z.infer<typeof accountInputSchema>;
 
 export const categoryInputSchema = z.object({
   workspaceId: z.string().min(1, "Workspace is required"),
-  name: z.string().trim().min(1, "Category name is required").max(60),
+  name: z.string().trim().min(2, "Category name must be at least 2 characters").max(60),
+  nameEn: z.preprocess(
+    (val) => {
+      if (val == null || val === "") return undefined;
+      const s = String(val).trim();
+      return s.length === 0 ? undefined : s;
+    },
+    z.string().min(2, "English name must be at least 2 characters").max(60).optional(),
+  ),
   kind: z.enum(["income", "expense"]),
   idempotencyKey: z.string().trim().min(1).max(64),
 });

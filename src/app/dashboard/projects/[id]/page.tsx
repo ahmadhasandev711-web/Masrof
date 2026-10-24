@@ -5,6 +5,8 @@ import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { getProjectFinancialDetails } from "@/features/projects/project-details-data";
 import { ProjectDetailsView } from "@/features/projects/components/project-details-view";
+import { getLocale } from "next-intl/server";
+import type { AppLocale } from "@/i18n/config";
 
 export default async function ProjectDetailPage({
   params,
@@ -28,7 +30,8 @@ export default async function ProjectDetailPage({
   }
 
   const { id } = await params;
-  const details = await getProjectFinancialDetails(id, workspaceId);
+  const locale = (await getLocale()) as AppLocale;
+  const details = await getProjectFinancialDetails(id, workspaceId, locale);
 
   if (!details) {
     notFound();

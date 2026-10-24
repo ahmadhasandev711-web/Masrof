@@ -32,7 +32,8 @@ export default async function ReportsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const session = await requireSession();
-  const moneyLocale = getIntlLocale((await getLocale()) as AppLocale);
+  const locale = (await getLocale()) as AppLocale;
+  const moneyLocale = getIntlLocale(locale);
   const tPages = await getTranslations("pages.reports");
   const tReports = await getTranslations("reports");
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
@@ -51,8 +52,8 @@ export default async function ReportsPage({
   const [summary, incomeBreakdownResult, expenseBreakdownResult, monthlyTrendResult, accounts] =
     await Promise.all([
       getWorkspaceSummary(workspaceId, range),
-      getCategoryBreakdown(workspaceId, "income", range),
-      getCategoryBreakdown(workspaceId, "expense", range),
+      getCategoryBreakdown(workspaceId, "income", range, locale),
+      getCategoryBreakdown(workspaceId, "expense", range, locale),
       getMonthlyTrend(workspaceId, 6, moneyLocale),
       listAccountsForWorkspace(workspaceId),
     ]);

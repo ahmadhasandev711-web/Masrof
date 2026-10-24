@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { CreateBudgetForm } from "@/features/budgets/components/create-budget-form";
 import { useTranslations } from "next-intl";
+import type { CategoryOption } from "@/features/categories/map-options";
 
 export function BudgetCreationManager({
   workspaceId,
@@ -11,7 +12,7 @@ export function BudgetCreationManager({
   canWrite = true,
 }: {
   workspaceId: string;
-  expenseCategories: { id: string; name: string; icon?: string | null }[];
+  expenseCategories: CategoryOption[];
   canWrite?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);

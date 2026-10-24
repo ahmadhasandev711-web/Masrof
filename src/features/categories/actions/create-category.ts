@@ -23,6 +23,7 @@ export async function createCategoryAction(
   const parsed = createCategorySchema(tValidation).safeParse({
     workspaceId: formData.get("workspaceId"),
     name: formData.get("name"),
+    nameEn: formData.get("nameEn"),
     kind: formData.get("kind"),
     idempotencyKey: formData.get("idempotencyKey"),
   });

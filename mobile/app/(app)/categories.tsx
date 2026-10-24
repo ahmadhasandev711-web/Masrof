@@ -21,13 +21,14 @@ import { useWorkspace } from "@/lib/workspace";
 import { useI18n } from "@/lib/i18n";
 
 export default function CategoriesScreen() {
-  const { t, isRTL } = useI18n();
+  const { t, isRTL, locale } = useI18n();
   const { workspaceId } = useWorkspace();
   const [items, setItems] = useState<CategoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "expense" | "income">("all");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [nameEn, setNameEn] = useState("");
   const [kind, setKind] = useState<"expense" | "income">("expense");
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -37,12 +38,12 @@ export default function CategoriesScreen() {
   const load = useCallback(async (skipCache = false) => {
     if (!workspaceId) return;
     try {
-      const data = await fetchCategories(workspaceId, undefined, skipCache);
+      const data = await fetchCategories(workspaceId, undefined, skipCache, locale);
       setItems(data.items);
     } finally {
       setLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, locale]);
 
   useFocusEffect(
     useCallback(() => {
@@ -67,15 +68,18 @@ export default function CategoriesScreen() {
     setBusy(true);
     setError(null);
     try {
+      const trimmedEn = nameEn.trim();
       await createCategory({
         workspaceId,
         name: name.trim(),
+        ...(trimmedEn.length >= 2 ? { nameEn: trimmedEn } : {}),
         kind,
         idempotencyKey: idempotencyRef.current,
       });
       idempotencyRef.current = newIdempotencyKey();
       setOpen(false);
       setName("");
+      setNameEn("");
       await load(true);
     } catch {
       setError(isRTL ? "تعذر إنشاء التصنيف" : "Failed to create category");
@@ -172,7 +176,9 @@ export default function CategoriesScreen() {
                     color={isIncome ? colors.income : colors.expense}
                   />
                 </View>
-                <Text style={[shared.value, { fontSize: 16 }]}>{item.name}</Text>
+                <Text style={[shared.value, { fontSize: 16 }]}>
+                  {item.displayName || item.name}
+                </Text>
               </View>
 
               <View
@@ -224,13 +230,24 @@ export default function CategoriesScreen() {
             </View>
 
             <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
-              {isRTL ? "اسم التصنيف" : "Category Name"}
+              {isRTL ? "الاسم (عربي)" : "Name (Arabic)"}
             </Text>
             <TextInput
               style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
               value={name}
               onChangeText={setName}
-              placeholder={isRTL ? "مثال: مطاعم، مواصلات، استشارات..." : "e.g. Dining, Travel, Software..."}
+              placeholder={isRTL ? "مثال: مصروف مكتب" : "e.g. Office supplies"}
+              placeholderTextColor={colors.faint}
+            />
+
+            <Text style={[shared.label, { textAlign: isRTL ? "right" : "left" }]}>
+              {isRTL ? "الاسم (إنجليزي، اختياري)" : "Name (English, optional)"}
+            </Text>
+            <TextInput
+              style={[shared.input, { textAlign: isRTL ? "right" : "left" }]}
+              value={nameEn}
+              onChangeText={setNameEn}
+              placeholder={isRTL ? "e.g. Office supplies" : "e.g. Office supplies"}
               placeholderTextColor={colors.faint}
             />
 

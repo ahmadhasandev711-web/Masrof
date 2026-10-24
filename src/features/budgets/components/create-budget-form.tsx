@@ -8,8 +8,7 @@ import {
   type CreateBudgetState,
 } from "@/features/budgets/actions/create-budget";
 import { useTranslations } from "next-intl";
-
-type CategoryOption = { id: string; name: string; icon?: string | null };
+import type { CategoryOption } from "@/features/categories/map-options";
 
 const initialState: CreateBudgetState = { error: null };
 
@@ -80,7 +79,7 @@ export function CreateBudgetForm({
             <option value="">{tForm("wholeWorkspace")}</option>
             {expenseCategories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.icon ?? ""} {category.name}
+                {category.displayName}
               </option>
             ))}
           </select>

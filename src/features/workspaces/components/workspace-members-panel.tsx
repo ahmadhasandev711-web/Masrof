@@ -8,6 +8,7 @@ import {
   removeMemberAction,
 } from "@/features/workspaces/actions/members";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { NavIcon } from "@/components/ui/app-icons";
 import { useToasts, ToastStack } from "@/components/ui/toast";
 import type { WorkspaceInvitationRow, WorkspaceMemberRow } from "@/features/workspaces/members-data";
 import type { WorkspaceRole } from "@/models/workspace-membership";
@@ -72,7 +73,7 @@ export function WorkspaceMembersPanel({
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg"></span>
+            <NavIcon name="team" className="h-5 w-5 text-neutral-700" />
             <h2 className="font-semibold text-neutral-900">{t("membersTitle")}</h2>
           </div>
           <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-neutral-600">
@@ -125,7 +126,7 @@ export function WorkspaceMembersPanel({
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
           <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
             <div className="flex items-center gap-2">
-              <span className="text-lg"></span>
+              <NavIcon name="inbox" className="h-5 w-5 text-amber-700" />
               <h2 className="font-semibold text-neutral-900">{t("pendingTitle")}</h2>
             </div>
             <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-amber-700">

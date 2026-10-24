@@ -7,9 +7,9 @@ import {
 } from "@/features/transactions/actions/create-transaction";
 import { ClientCombobox } from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
+import type { CategoryOption } from "@/features/categories/map-options";
 
 type AccountOption = { id: string; name: string };
-type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
 type LinkOption = { id: string; name: string; phone?: string | null };
 
 const initialState: CreateTransactionState = { error: null };
@@ -310,7 +310,7 @@ export function CreateTransactionForm({
           >
             {filteredCategories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.icon ?? ""} {category.name}
+                {category.displayName}
               </option>
             ))}
           </select>

@@ -1,6 +1,7 @@
 import { formatMoney } from "@/lib/money";
 import { getTranslations } from "next-intl/server";
 import { resolveAccountCurrency, type SupportedCurrency } from "@/lib/currency";
+import { AccountTypeIcon } from "@/components/ui/app-icons";
 
 type AccountRow = {
   _id: unknown;
@@ -22,13 +23,13 @@ export async function AccountSummary({
     getTranslations("accountType"),
   ]);
 
-  const accountTypeConfig: Record<string, { label: string; icon: string }> = {
-    cash: { label: tAccountType("cash"), icon: "" },
-    bank: { label: tAccountType("bank"), icon: "" },
-    mobile_wallet: { label: tAccountType("mobile_wallet"), icon: "" },
-    credit_card: { label: tAccountType("credit_card"), icon: "" },
-    savings: { label: tAccountType("savings"), icon: "" },
-    other: { label: tAccountType("other"), icon: "" },
+  const accountTypeConfig: Record<string, { label: string }> = {
+    cash: { label: tAccountType("cash") },
+    bank: { label: tAccountType("bank") },
+    mobile_wallet: { label: tAccountType("mobile_wallet") },
+    credit_card: { label: tAccountType("credit_card") },
+    savings: { label: tAccountType("savings") },
+    other: { label: tAccountType("other") },
   };
 
   return (
@@ -54,8 +55,8 @@ export async function AccountSummary({
                 className="flex items-center justify-between rounded-2xl border border-neutral-200/80 bg-[#FBF9F4]/70 p-3"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-base shadow-2xs">
-                    {config.icon}
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-neutral-700 shadow-2xs">
+                    <AccountTypeIcon type={account.type} className="h-4 w-4" />
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-xs font-bold text-neutral-900">{account.name}</p>

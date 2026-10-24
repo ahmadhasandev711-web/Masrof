@@ -26,7 +26,11 @@ export type CategoryKind = (typeof CATEGORY_KINDS)[number];
  */
 const categorySchema = new Schema(
   {
+    /** Primary (Arabic) display name — canonical for `ar` locale and exports. */
     name: { type: String, required: true, trim: true, maxlength: 60 },
+
+    /** English display name for system categories and optional bilingual custom categories. */
+    nameEn: { type: String, default: null, trim: true, maxlength: 60 },
 
     kind: {
       type: String,
@@ -48,7 +52,8 @@ const categorySchema = new Schema(
       default: [],
     },
 
-    icon: { type: String, default: null }, // an emoji or icon-library key
+    /** Legacy; UI uses slug-based SVG icons. Kept for API compatibility, cleared on seed. */
+    icon: { type: String, default: null },
 
     isArchived: { type: Boolean, required: true, default: false },
   },

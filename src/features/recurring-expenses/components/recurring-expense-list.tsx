@@ -15,6 +15,9 @@ import {
 } from "@/features/whatsapp/components/whatsapp-reminder-link";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useTranslations, useLocale } from "next-intl";
+import { CategoryIcon } from "@/components/ui/app-icons";
+import { resolveCategoryLabel } from "@/features/categories/labels";
+import type { AppLocale } from "@/i18n/config";
 
 function formatDate(isoDate: string, locale: string) {
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
@@ -45,7 +48,7 @@ export function RecurringExpenseList({
   const tWhatsappMessages = useTranslations("whatsapp");
   const tConfirm = useTranslations("confirm");
   const tCommon = useTranslations("common");
-  const locale = useLocale();
+  const locale = useLocale() as AppLocale;
 
   const frequencyLabels = { monthly: tRecurring("monthly"), weekly: tRecurring("weekly") } as const;
 
@@ -136,8 +139,15 @@ function RecurringRow({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-medium text-neutral-900">
-            {item.categoryIcon ?? ""} {item.description || item.categoryName}
+          <p className="font-medium text-neutral-900 flex items-center gap-2">
+            <CategoryIcon slug={item.categorySlug} kind="expense" className="h-4 w-4 shrink-0" />
+            <span>
+              {item.description ||
+                resolveCategoryLabel(
+                  { name: item.categoryName, nameEn: item.categoryNameEn },
+                  locale,
+                )}
+            </span>
           </p>
           <p className="mt-1 text-xs text-neutral-500">
             <span className="font-mono tabular-nums">{formatMoney(item.amount, formatOptions)}</span> · {frequencyLabels[item.frequency]} ·{" "}

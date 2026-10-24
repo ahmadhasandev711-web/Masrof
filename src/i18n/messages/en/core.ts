@@ -131,6 +131,7 @@ const core = {
  budgetNameMin2: "Budget name must be at least 2 characters",
  budgetAmountPositive: "Budget amount must be greater than zero",
  categoryNameMin2: "Category name must be at least 2 characters",
+ categoryNameEnMin2: "English name must be at least 2 characters when provided",
  categoryKindInvalid: "Invalid category type",
  postTitleShort: "Title is too short",
  slugInvalid: "Invalid URL slug",

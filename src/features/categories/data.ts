@@ -27,6 +27,7 @@ export async function ensureSystemCategories(): Promise<void> {
             $setOnInsert: {
               slug: category.slug,
               name: category.name,
+              nameEn: category.nameEn,
               kind: category.kind,
               icon: category.icon,
               suggestedFor: category.suggestedFor,
@@ -87,6 +88,7 @@ export async function createCustomCategory(input: CreateCategoryInput) {
 
   const category = await CategoryModel.create({
     name: input.name,
+    nameEn: input.nameEn ?? null,
     kind: input.kind,
     workspaceId: input.workspaceId,
     isSystem: false,

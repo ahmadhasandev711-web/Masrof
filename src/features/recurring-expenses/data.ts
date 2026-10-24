@@ -35,11 +35,17 @@ export type RecurringExpenseListItem = {
   nextDueDate: string;
   accountName: string;
   categoryName: string;
-  categoryIcon: string | null;
+  categoryNameEn: string | null;
+  categorySlug: string | null;
 };
 
 type PopulatedAccount = { name?: string };
-type PopulatedCategory = { name?: string; icon?: string | null };
+type PopulatedCategory = {
+  name?: string;
+  nameEn?: string | null;
+  icon?: string | null;
+  slug?: string | null;
+};
 
 type RecurringExpenseLean = {
   _id: unknown;
@@ -63,7 +69,8 @@ function mapRecurringExpenseForList(item: RecurringExpenseLean): RecurringExpens
     nextDueDate: new Date(item.nextDueDate).toISOString(),
     accountName: account?.name ?? "",
     categoryName: category?.name ?? "",
-    categoryIcon: category?.icon ?? null,
+    categoryNameEn: category?.nameEn ?? null,
+    categorySlug: category?.slug ?? null,
   };
 }
 
@@ -129,7 +136,7 @@ export const listRecurringExpenses = unstable_cache(
     })
       .sort({ nextDueDate: 1 })
       .populate("accountId", "name")
-      .populate("categoryId", "name icon");
+      .populate("categoryId", "name nameEn icon slug");
 
     if (typeof limit === "number") {
       query.limit(limit);
@@ -245,7 +252,7 @@ export async function listDueRecurringExpenses(
     nextDueDate: { $lte: cutoff },
   })
     .populate("accountId", "name")
-    .populate("categoryId", "name icon")
+    .populate("categoryId", "name nameEn icon slug")
     .lean();
 
   return items.map((item) => mapRecurringExpenseForList(item as RecurringExpenseLean));

@@ -12,6 +12,7 @@ import type { ProjectListItem } from "@/features/projects/types";
 import { projectReceivableReminderMessage } from "@/features/whatsapp/messages";
 import { WhatsAppReminderLink } from "@/features/whatsapp/components/whatsapp-reminder-link";
 import { useLocale, useTranslations } from "next-intl";
+import { NavIcon } from "@/components/ui/app-icons";
 
 function ArchiveProjectButton({
   projectId,
@@ -73,7 +74,9 @@ export function ProjectList({
   if (projects.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-12 text-center text-neutral-400">
-        <span className="text-3xl block mb-2"></span>
+        <span className="mb-2 flex justify-center text-neutral-400">
+          <NavIcon name="projects" className="h-10 w-10" />
+        </span>
         <p className="font-semibold text-neutral-700">{tEmpty("noProjects")}</p>
       </div>
     );

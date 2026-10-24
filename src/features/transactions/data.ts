@@ -2,6 +2,8 @@ import "server-only";
 
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { resolveCategoryLabelFromPopulated } from "@/features/categories/labels";
+import type { AppLocale } from "@/i18n/config";
 import { runInTransaction } from "@/lib/db/transaction";
 import { TransactionModel } from "@/models/transaction";
 import { AccountModel } from "@/models/account";
@@ -400,7 +402,7 @@ export async function listTransactionsForExport(
       .sort({ transactionDate: -1, createdAt: -1 })
       .limit(TRANSACTION_EXPORT_MAX_ROWS)
       .populate("accountId", "name")
-      .populate("categoryId", "name icon")
+      .populate("categoryId", "name nameEn icon slug")
       .populate("clientId", "name")
       .populate("projectId", "name")
       .lean(),
@@ -485,13 +487,14 @@ export type RecentTransactionItem = {
   transactionDate: Date;
   accountName?: string;
   categoryName?: string;
-  categoryIcon?: string;
+  categorySlug?: string | null;
 };
 
 /** Retrieves the newest active transactions for workspace home feed. */
 export async function getRecentTransactions(
   workspaceId: string,
   limit = 5,
+  locale: AppLocale = "ar",
 ): Promise<RecentTransactionItem[]> {
   await connectToDatabase();
   const items = await TransactionModel.find({
@@ -501,7 +504,7 @@ export async function getRecentTransactions(
     .sort({ transactionDate: -1, createdAt: -1 })
     .limit(limit)
     .populate("accountId", "name")
-    .populate("categoryId", "name icon")
+    .populate("categoryId", "name nameEn icon slug")
     .lean();
 
   return items.map((item) => ({
@@ -511,8 +514,11 @@ export async function getRecentTransactions(
     description: item.description || undefined,
     transactionDate: item.transactionDate,
     accountName: (item.accountId as { name?: string } | null)?.name,
-    categoryName: (item.categoryId as { name?: string } | null)?.name,
-    categoryIcon: (item.categoryId as { icon?: string } | null)?.icon,
+    categoryName: resolveCategoryLabelFromPopulated(
+      item.categoryId as { name?: string; nameEn?: string | null } | null,
+      locale,
+    ),
+    categorySlug: (item.categoryId as { slug?: string } | null)?.slug ?? null,
   }));
 }
 

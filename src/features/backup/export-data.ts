@@ -75,6 +75,7 @@ export async function fetchWorkspaceBackupPayload(
     slug: category.slug ?? null,
     isSystem: category.isSystem,
     name: category.name,
+    nameEn: category.nameEn ?? null,
     kind: category.kind,
   }));
 

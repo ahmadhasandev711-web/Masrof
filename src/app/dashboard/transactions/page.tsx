@@ -19,7 +19,9 @@ import { TransactionPagination } from "@/features/transactions/components/pagina
 import { ExportTransactionsExcelButton } from "@/features/transactions/components/export-excel-button";
 import { TransferList } from "@/features/transfers/components/transfer-list";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { mapPlainCategoryToOption } from "@/features/categories/map-options";
+import type { AppLocale } from "@/i18n/config";
 
 type SearchParams = Record<string, string | undefined>;
 
@@ -29,6 +31,7 @@ export default async function TransactionsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const session = await requireSession();
+  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("pages.transactions");
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
@@ -85,12 +88,7 @@ export default async function TransactionsPage({
     currency: resolveAccountCurrency(a.currency, activeWorkspace.currency as SupportedCurrency),
   }));
   const accountCurrencies = Object.fromEntries(accountOptions.map((a) => [a.id, a.currency]));
-  const categoryOptions = categories.map((c) => ({
-    id: String(c._id),
-    name: c.name,
-    kind: c.kind,
-    icon: c.icon,
-  }));
+  const categoryOptions = categories.map((c) => mapPlainCategoryToOption(c, locale));
 
   const clientOptions = clients.map((c) => ({
     id: String(c._id),

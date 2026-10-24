@@ -5,6 +5,7 @@ import { useState } from "react";
 import { formatMoney } from "@/lib/money";
 import type { ProjectFinancialDetailsView } from "@/features/projects/project-details-data";
 import { useTranslations, useLocale } from "next-intl";
+import { CategoryIcon } from "@/components/ui/app-icons";
 
 function formatDate(isoDate: string | null, locale = "ar") {
   if (!isoDate) return "—";
@@ -407,7 +408,7 @@ export function ProjectDetailsView({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-base">{tx.categoryIcon ?? ""}</span>
+                          <CategoryIcon slug={tx.categorySlug} kind="expense" className="h-4 w-4 shrink-0" />
                           <div>
                             <p className="font-semibold text-xs text-neutral-900">
                               {tx.description || tx.notes || tx.categoryName}
@@ -445,8 +446,10 @@ export function ProjectDetailsView({
                         <tr key={tx.id} className="hover:bg-neutral-50/60">
                           <td className="py-2.5 text-neutral-600">{formatDate(tx.transactionDate, locale)}</td>
                           <td className="py-2.5 font-medium text-neutral-800">
-                            {tx.categoryIcon ? `${tx.categoryIcon} ` : ""}
-                            {tx.categoryName}
+                            <span className="inline-flex items-center gap-1.5">
+                              <CategoryIcon slug={tx.categorySlug} kind="expense" className="h-3.5 w-3.5" />
+                              {tx.categoryName}
+                            </span>
                           </td>
                           <td className="py-2.5 text-neutral-600">{tx.description || tx.notes || "—"}</td>
                           <td className="py-2.5 text-neutral-500">{tx.accountName}</td>
@@ -476,7 +479,7 @@ export function ProjectDetailsView({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-base">{tx.categoryIcon ?? ""}</span>
+                          <CategoryIcon slug={tx.categorySlug} kind="income" className="h-4 w-4 shrink-0" />
                           <div>
                             <p className="font-semibold text-xs text-neutral-900">
                               {tx.description || tx.notes || tx.categoryName}
@@ -514,8 +517,10 @@ export function ProjectDetailsView({
                         <tr key={tx.id} className="hover:bg-neutral-50/60">
                           <td className="py-2.5 text-neutral-600">{formatDate(tx.transactionDate, locale)}</td>
                           <td className="py-2.5 font-medium text-neutral-800">
-                            {tx.categoryIcon ? `${tx.categoryIcon} ` : ""}
-                            {tx.categoryName}
+                            <span className="inline-flex items-center gap-1.5">
+                              <CategoryIcon slug={tx.categorySlug} kind="income" className="h-3.5 w-3.5" />
+                              {tx.categoryName}
+                            </span>
                           </td>
                           <td className="py-2.5 text-neutral-600">{tx.description || tx.notes || "—"}</td>
                           <td className="py-2.5 text-neutral-500">{tx.accountName}</td>

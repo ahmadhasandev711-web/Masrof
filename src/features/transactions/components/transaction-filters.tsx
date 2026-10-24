@@ -3,9 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import type { CategoryOption } from "@/features/categories/map-options";
 
 type AccountOption = { id: string; name: string };
-type CategoryOption = { id: string; name: string };
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -309,7 +309,7 @@ export function TransactionFiltersForm({
               <option value="">{tFilters("allCategories")}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {c.displayName}
                 </option>
               ))}
             </select>

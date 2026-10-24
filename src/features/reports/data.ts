@@ -8,6 +8,8 @@ import { resolveAccountCurrency } from "@/lib/currency";
 import { transactionAccountCurrencyStages } from "@/lib/currency/transaction-pipeline";
 import { sumByKeyInBase, sumAmountsInBase, type ConversionMeta } from "@/lib/currency/report-conversion";
 import { getWorkspaceExchangeContext } from "@/features/workspaces/exchange-context";
+import { resolveCategoryLabel } from "@/features/categories/labels";
+import type { AppLocale } from "@/i18n/config";
 
 export type CategoryBreakdownRow = {
   categoryId: mongoose.Types.ObjectId;
@@ -29,6 +31,7 @@ export async function getCategoryBreakdown(
   workspaceId: string,
   kind: TransactionType,
   range: { from: Date; to: Date },
+  locale: AppLocale = "ar",
 ): Promise<CategoryBreakdownResult> {
   await connectToDatabase();
 
@@ -38,6 +41,7 @@ export async function getCategoryBreakdown(
     _id: { categoryId: mongoose.Types.ObjectId; currency: string | null };
     total: number;
     name: string;
+    nameEn: string | null;
     icon: string | null;
   }>([
     {
@@ -69,6 +73,7 @@ export async function getCategoryBreakdown(
         _id: 1,
         total: 1,
         name: "$category.name",
+        nameEn: "$category.nameEn",
         icon: "$category.icon",
       },
     },
@@ -85,7 +90,10 @@ export async function getCategoryBreakdown(
   );
 
   const metaByCategory = new Map(
-    rawRows.map((row) => [String(row._id.categoryId), { name: row.name, icon: row.icon }]),
+    rawRows.map((row) => [
+      String(row._id.categoryId),
+      { name: row.name, nameEn: row.nameEn, icon: row.icon },
+    ]),
   );
 
   const rows: CategoryBreakdownRow[] = [...totals.entries()]
@@ -93,7 +101,9 @@ export async function getCategoryBreakdown(
       const meta = metaByCategory.get(categoryId);
       return {
         categoryId: new mongoose.Types.ObjectId(categoryId),
-        name: meta?.name ?? "—",
+        name: meta
+          ? resolveCategoryLabel({ name: meta.name, nameEn: meta.nameEn }, locale)
+          : "—",
         icon: meta?.icon ?? null,
         total,
       };

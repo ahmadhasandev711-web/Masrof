@@ -8,9 +8,10 @@ import {
   type EditableTransaction,
 } from "@/features/transactions/components/edit-transaction-form";
 import { useLocale, useTranslations } from "next-intl";
+import { CategoryIcon } from "@/components/ui/app-icons";
+import type { CategoryOption } from "@/features/categories/map-options";
 
 type AccountOption = { id: string; name: string };
-type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
 
 type TransactionRowProps = {
   transaction: {
@@ -24,7 +25,7 @@ type TransactionRowProps = {
     accountName: string;
     categoryId: string;
     categoryName: string;
-    categoryIcon?: string | null;
+    categorySlug?: string | null;
     clientName?: string | null;
     projectName?: string | null;
     attachmentUrl?: string | null;
@@ -94,13 +95,17 @@ export function TransactionRow({
       {/* Left: Category Icon & Details */}
       <div className="flex min-w-0 items-start gap-3 sm:items-center">
         <div
-          className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl text-lg ${
+          className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl ${
             isIncome
               ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
               : "bg-neutral-100 text-neutral-700 border border-neutral-200/60"
           }`}
         >
-          {transaction.categoryIcon ?? (isIncome ? "" : "")}
+          <CategoryIcon
+            slug={transaction.categorySlug}
+            kind={transaction.type}
+            className="h-5 w-5"
+          />
         </div>
 
         <div className="min-w-0 flex-1">

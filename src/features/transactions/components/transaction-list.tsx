@@ -1,10 +1,18 @@
 import { TransactionRow } from "@/features/transactions/components/transaction-row";
-import { getTranslations } from "next-intl/server";
+import { resolveCategoryLabelFromPopulated } from "@/features/categories/labels";
+import type { AppLocale } from "@/i18n/config";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { CategoryOption } from "@/features/categories/map-options";
 
 type AccountOption = { id: string; name: string };
-type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
 
-type PopulatedRef = { _id: unknown; name: string; icon?: string | null };
+type PopulatedRef = {
+  _id: unknown;
+  name: string;
+  nameEn?: string | null;
+  icon?: string | null;
+  slug?: string | null;
+};
 
 type TransactionItem = {
   _id: unknown;
@@ -34,6 +42,7 @@ export async function TransactionList({
   accounts: AccountOption[];
   categories: CategoryOption[];
 }) {
+  const locale = (await getLocale()) as AppLocale;
   const tEmpty = await getTranslations("empty");
   if (transactions.length === 0) {
     return (
@@ -70,8 +79,8 @@ export async function TransactionList({
               accountId: String(account._id),
               accountName: account.name,
               categoryId: String(category._id),
-              categoryName: category.name,
-              categoryIcon: category.icon,
+              categoryName: resolveCategoryLabelFromPopulated(category, locale),
+              categorySlug: category.slug,
               clientName: client?.name ?? null,
               projectName: project?.name ?? null,
               attachmentUrl: tx.attachmentUrl ?? null,

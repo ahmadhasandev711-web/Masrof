@@ -6,9 +6,9 @@ import {
   type UpdateTransactionState,
 } from "@/features/transactions/actions/update-transaction";
 import { useTranslations } from "next-intl";
+import type { CategoryOption } from "@/features/categories/map-options";
 
 type AccountOption = { id: string; name: string };
-type CategoryOption = { id: string; name: string; kind: "income" | "expense"; icon?: string | null };
 
 export type EditableTransaction = {
   id: string;
@@ -139,7 +139,7 @@ export function EditTransactionForm({
           >
             {filteredCategories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.icon ?? ""} {category.name}
+                {category.displayName}
               </option>
             ))}
           </select>

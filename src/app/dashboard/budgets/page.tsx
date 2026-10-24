@@ -19,6 +19,8 @@ import { getUserWhatsAppPhone } from "@/features/whatsapp/data";
 import { formatMoney } from "@/lib/money";
 import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
+import { mapPlainCategoryToOption } from "@/features/categories/map-options";
+import type { AppLocale } from "@/i18n/config";
 
 export default async function BudgetsPage() {
   const session = await requireSession();
@@ -64,11 +66,9 @@ export default async function BudgetsPage() {
   };
 
   const accountOptions = accounts.map((a) => ({ id: a._id.toString(), name: a.name }));
-  const categoryOptions = expenseCategories.map((c) => ({
-    id: c._id.toString(),
-    name: c.name,
-    icon: c.icon,
-  }));
+  const categoryOptions = expenseCategories.map((c) =>
+    mapPlainCategoryToOption(c, locale as AppLocale),
+  );
 
   return (
     <div className="flex max-w-5xl flex-col gap-8">

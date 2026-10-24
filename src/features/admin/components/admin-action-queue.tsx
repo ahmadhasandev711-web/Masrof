@@ -7,6 +7,7 @@ import {
   adminVerifyUserEmailAction,
   adminQuickExtendUserSubscriptionAction,
 } from "@/features/admin/actions/user-admin-ops";
+import { NavIcon } from "@/components/ui/app-icons";
 
 type UnverifiedUser = {
   id: string;
@@ -80,7 +81,9 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
   if (!hasItems) {
     return (
       <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-6 text-center shadow-xs">
-        <span className="text-3xl"></span>
+        <span className="flex justify-center text-emerald-700">
+          <NavIcon name="check" className="h-10 w-10" />
+        </span>
         <h3 className="mt-2 text-base font-bold text-emerald-900">{t("noPendingActions")}</h3>
         <p className="mt-1 text-xs text-emerald-700">
           جميع الحسابات والاشتراكات في حالة ممتازة ولا توجد اشتراكات مهددة بالانتهاء العاجل.
@@ -167,7 +170,7 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
                     onClick={() => handleVerify(user.id)}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition disabled:opacity-50"
                   >
-                    <span></span>
+                    <NavIcon name="check" className="h-3.5 w-3.5" />
                     <span>{pendingId === user.id ? "جارِ التفعيل..." : t("verifyNow")}</span>
                   </button>
                   <Link

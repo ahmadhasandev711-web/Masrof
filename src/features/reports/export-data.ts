@@ -5,7 +5,8 @@ import { verifyWorkspaceAccess } from "@/features/workspaces/access";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { getWorkspaceSummary } from "@/features/transactions/data";
 import { getCategoryBreakdown } from "@/features/reports/data";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/config";
 import { resolveReportDateRange, type ReportRangePreset } from "@/features/reports/date-ranges";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { WorkspaceModel } from "@/models/workspace";
@@ -39,10 +40,11 @@ export async function fetchReportExportPayload(input: {
     to: input.to ? new Date(input.to) : undefined,
   });
 
+  const locale = (await getLocale()) as AppLocale;
   const [summary, expenseBreakdownResult, incomeBreakdownResult, workspace, tErrors] = await Promise.all([
     getWorkspaceSummary(input.workspaceId, range),
-    getCategoryBreakdown(input.workspaceId, "expense", range),
-    getCategoryBreakdown(input.workspaceId, "income", range),
+    getCategoryBreakdown(input.workspaceId, "expense", range, locale),
+    getCategoryBreakdown(input.workspaceId, "income", range, locale),
     connectToDatabase().then(() =>
       WorkspaceModel.findById(input.workspaceId).select("name currency").lean(),
     ),

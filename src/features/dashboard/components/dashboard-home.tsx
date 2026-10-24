@@ -22,6 +22,7 @@ import { invoiceShareWhatsAppMessage } from "@/features/whatsapp/messages";
 import { normalizeWhatsAppPhone } from "@/lib/whatsapp";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import { CategoryIcon, NavIcon } from "@/components/ui/app-icons";
 import { after } from "next/server";
 
 export async function DashboardHome({
@@ -60,7 +61,7 @@ export async function DashboardHome({
     getMonthlyTrend(workspaceId, 6, moneyLocale),
     getUserWhatsAppPhone(userId),
     getWorkspaceReceivablesSummary(workspaceId),
-    getRecentTransactions(workspaceId, 5),
+    getRecentTransactions(workspaceId, 5, locale),
     getDebtSummary(workspaceId, currency),
     getOpenInvoicesRadar(workspaceId, 4),
     isOwner ? listProjectsWithTotals(workspaceId) : Promise.resolve([]),
@@ -368,8 +369,8 @@ export async function DashboardHome({
         <div className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 sm:p-5 shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-sky-100">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-100 text-sky-800 text-sm">
-                
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-100 text-sky-800">
+                <NavIcon name="invoices" className="h-4 w-4" />
               </span>
               <div>
                 <h2 className="font-bold text-neutral-900 text-sm sm:text-base">
@@ -434,7 +435,7 @@ export async function DashboardHome({
                       rel="noopener noreferrer"
                       className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition active:scale-95"
                     >
-                      <span></span>
+                      <NavIcon name="chat" className="h-3.5 w-3.5" />
                       <span className="hidden sm:inline">{t("radar.remindWhatsApp")}</span>
                     </a>
                   ) : (
@@ -458,8 +459,8 @@ export async function DashboardHome({
         <div className="rounded-2xl border border-emerald-200/80 bg-white p-4 sm:p-5 shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800 text-sm">
-                
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800">
+                <NavIcon name="projects" className="h-4 w-4" />
               </span>
               <div>
                 <div className="flex items-center gap-2">
@@ -540,7 +541,7 @@ export async function DashboardHome({
       <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
           <h2 className="font-bold text-neutral-900 text-sm sm:text-base flex items-center gap-2">
-            <span></span>
+            <NavIcon name="transactions" className="h-4 w-4 text-[#065F46]" />
             <span>{t("recentTransactions")}</span>
           </h2>
           <Link
@@ -567,7 +568,7 @@ export async function DashboardHome({
                         : "bg-neutral-100 text-neutral-600"
                     }`}
                   >
-                    {tx.categoryIcon ? tx.categoryIcon : tx.type === "income" ? "↓" : "↑"}
+                    <CategoryIcon slug={tx.categorySlug} kind={tx.type} className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-xs sm:text-sm font-semibold text-neutral-800">

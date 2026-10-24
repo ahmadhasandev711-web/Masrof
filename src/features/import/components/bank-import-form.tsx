@@ -17,7 +17,7 @@ export function BankImportForm({
 }: {
   workspaceId: string;
   accounts: { id: string; name: string }[];
-  expenseCategories: { id: string; name: string }[];
+  expenseCategories: { id: string; name: string; displayName: string }[];
 }) {
   const tForm = useTranslations("forms.import");
   const [state, formAction, isPending] = useActionState(importBankCsvAction, initialState);
@@ -46,7 +46,7 @@ export function BankImportForm({
           <select name="categoryId" required className="rounded-lg border border-neutral-300 px-3 py-2">
             {expenseCategories.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {c.displayName}
               </option>
             ))}
           </select>

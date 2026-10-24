@@ -233,6 +233,12 @@ const forms = {
  category: {
  title: "Add category",
  name: "Category name",
+ nameAr: "Name (Arabic)",
+ nameArPlaceholder: "e.g. Office supplies",
+ nameEn: "Name (English)",
+ nameEnOptional: "optional",
+ nameEnPlaceholder: "e.g. Office supplies",
+ nameEnHint: "Shown when the app is in English. Leave blank to use the Arabic name everywhere.",
  kind: "Type",
  kindExpense: "Expense",
  kindIncome: "Income",

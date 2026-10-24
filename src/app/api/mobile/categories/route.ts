@@ -10,6 +10,8 @@ import {
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resolveCategoryLabel } from "@/features/categories/labels";
+import type { AppLocale } from "@/i18n/config";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -21,6 +23,9 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
+  const localeParam = url.searchParams.get("locale");
+  const locale: AppLocale = localeParam === "en" ? "en" : "ar";
+
   const categories = await listCategoriesForWorkspace(
     access.workspaceId,
     kind === "income" || kind === "expense" ? kind : undefined,
@@ -30,6 +35,12 @@ export async function GET(request: Request) {
     items: categories.map((category) => ({
       id: serializeId(category._id),
       name: category.name,
+      nameEn: category.nameEn ?? null,
+      displayName: resolveCategoryLabel(
+        { name: category.name, nameEn: category.nameEn },
+        locale,
+      ),
+      slug: category.slug ?? null,
       kind: category.kind,
       icon: category.icon ?? null,
       isSystem: Boolean(category.isSystem),
@@ -56,6 +67,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       id: serializeId(category._id),
       name: category.name,
+      nameEn: category.nameEn ?? null,
       kind: category.kind,
     });
   } catch (error) {
