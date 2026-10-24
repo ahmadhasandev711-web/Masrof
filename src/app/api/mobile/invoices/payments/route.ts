@@ -46,7 +46,6 @@ export async function POST(request: Request) {
 
     revalidateTag(CACHE_TAGS.invoices, "max");
     revalidateTag(CACHE_TAGS.accounts, "max");
-    revalidateTag(CACHE_TAGS.transactions, "max");
 
     const paymentId =
       payment && typeof payment === "object" && "_id" in payment

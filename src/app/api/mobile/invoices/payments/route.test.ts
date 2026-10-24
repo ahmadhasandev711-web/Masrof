@@ -110,7 +110,7 @@ describe("POST /api/mobile/invoices/payments", () => {
       user: { id: "user-1", name: "Test", email: "t@example.com" },
     });
     mockedWorkspace.mockResolvedValue({
-      workspace: { _id: "ws-1" },
+      workspace: { _id: "ws-1" } as never,
       workspaceId: "ws-1",
     });
     mockedRecord.mockResolvedValue({ _id: "pay-99" } as never);
@@ -136,7 +136,7 @@ describe("POST /api/mobile/invoices/payments", () => {
       user: { id: "user-1", name: "Test", email: "t@example.com" },
     });
     mockedWorkspace.mockResolvedValue({
-      workspace: { _id: "ws-1" },
+      workspace: { _id: "ws-1" } as never,
       workspaceId: "ws-1",
     });
     mockedRecord.mockRejectedValue(new InvoiceOverpaymentError(50));
