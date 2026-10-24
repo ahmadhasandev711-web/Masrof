@@ -62,7 +62,7 @@ export function RecordPaymentDialog({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity"
     >
       <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
@@ -72,9 +72,9 @@ export function RecordPaymentDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-600"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
           >
-            
+            ✕
           </button>
         </div>
 
@@ -126,9 +126,11 @@ export function RecordPaymentDialog({
               step="0.01"
               min="0.01"
               max={remainingMajor}
+              inputMode="decimal"
+              dir="ltr"
               value={amountInput}
               onChange={(e) => setAmountInput(e.target.value)}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-base font-semibold"
+              className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono text-base font-bold"
               required
             />
           </div>

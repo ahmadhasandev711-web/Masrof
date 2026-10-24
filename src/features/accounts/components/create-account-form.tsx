@@ -77,7 +77,7 @@ export function CreateAccountForm({
             className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
             aria-label={tCommon("cancel")}
           >
-            
+            ✕
           </button>
         )}
       </div>
@@ -147,8 +147,10 @@ export function CreateAccountForm({
             name="openingBalance"
             type="number"
             step="0.01"
+            inputMode="decimal"
+            dir="ltr"
             defaultValue={0}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
           />
         </div>
 

@@ -170,8 +170,10 @@ export function CreateInvoiceForm({
               type="number"
               step="0.01"
               min="0.01"
-              placeholder={tForm("itemAmount")}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+              inputMode="decimal"
+              dir="ltr"
+              placeholder="0.00"
+              className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono font-bold text-sm"
               required
             />
             <button

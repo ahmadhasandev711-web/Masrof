@@ -118,8 +118,8 @@ export function InvoiceShareDialog({
     : `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-      <div className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="flex w-full max-w-md max-h-[85dvh] flex-col gap-4 overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl overscroll-contain">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -131,7 +131,7 @@ export function InvoiceShareDialog({
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600 text-lg leading-none p-1"
           >
-            
+            ✕
           </button>
         </div>
 

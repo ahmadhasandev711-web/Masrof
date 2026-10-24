@@ -64,11 +64,11 @@ export function TransactionSummaryCards({
             </span>
           </div>
           <span
-            className={`flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-xs ${
+            className={`flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-xs font-bold ${
               isNetPositive ? "bg-teal-500/15 text-teal-700" : "bg-amber-500/15 text-amber-700"
             }`}
           >
-            
+            {isNetPositive ? "↑" : "↓"}
           </span>
         </div>
         <p

@@ -149,13 +149,13 @@ export function EditInvoiceDialog({
       {/* Backdrop */}
       <button
         type="button"
-        className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/60 transition-opacity"
         aria-label={tCommon("close")}
         onClick={onClose}
       />
 
       {/* Modal Container */}
-      <div className="relative z-10 max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-[#E4DFD3] bg-[#FBF9F4] p-5 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 sm:p-7">
+      <div className="relative z-10 max-h-[85dvh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-[#E4DFD3] bg-[#FBF9F4] p-5 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 sm:p-7 overscroll-contain">
         <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
           <div>
             <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
@@ -171,7 +171,7 @@ export function EditInvoiceDialog({
             className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
             aria-label={tCommon("close")}
           >
-            
+            ✕
           </button>
         </div>
 
@@ -271,12 +271,13 @@ export function EditInvoiceDialog({
                 />
                 <input
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min="0.01"
                   placeholder="0.00"
                   value={row.amount}
                   onChange={(e) => updateRow(row.id, "amount", e.target.value)}
-                  className="rounded-lg border border-neutral-300 px-3 py-2 text-left text-sm"
+                  className="rounded-lg border border-neutral-300 px-3 py-2 text-left text-sm font-mono"
                   dir="ltr"
                   required
                 />

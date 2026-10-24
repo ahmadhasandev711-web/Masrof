@@ -183,7 +183,7 @@ export function ClientCombobox({
               className="rounded p-1 text-xs text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
               title={t("clearSelection")}
             >
-              
+              ✕
             </button>
             <span className="text-xs text-emerald-700 hover:underline">
               {t("clearSelection")}

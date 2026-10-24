@@ -63,7 +63,7 @@ export function LiquidityHeroCard({
 
           <Link
             href="/dashboard/transactions?tab=transfers"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs backdrop-blur-xs transition hover:bg-white/20 active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-white/20 active:scale-95"
           >
             <span>{t("transferFunds")}</span>
             <span>←</span>

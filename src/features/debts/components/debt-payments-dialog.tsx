@@ -60,12 +60,12 @@ export function DebtPaymentsDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/60 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Card */}
-      <div className="relative z-10 w-full max-w-xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl">
+      <div className="relative z-10 w-full max-w-xl max-h-[85dvh] flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl overscroll-contain">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
           <div>
             <h3 className="text-lg font-bold text-neutral-900">{t("historyTitle")}</h3>
@@ -78,7 +78,7 @@ export function DebtPaymentsDialog({
             onClick={onClose}
             className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
           >
-            
+            ✕
           </button>
         </div>
 

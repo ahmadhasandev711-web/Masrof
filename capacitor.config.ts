@@ -17,6 +17,11 @@ const config: CapacitorConfig = {
       androidScaleType: "CENTER_CROP",
       showSpinner: false,
     },
+    SystemBars: {
+      insetsHandling: "native",
+      style: "LIGHT",
+      hidden: false,
+    },
     StatusBar: {
       overlaysWebView: false,
       style: "LIGHT",
@@ -24,7 +29,6 @@ const config: CapacitorConfig = {
     },
     Keyboard: {
       resize: "body",
-      resizeOnFullScreen: true,
     },
   },
 };

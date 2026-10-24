@@ -136,7 +136,7 @@ export async function DashboardHome({
 
           {/* Receivables & Debts row on Mobile - OWNER ONLY */}
           {isOwner && (receivablesMinor > 0 || debtsMinor > 0) && (
-            <div className="mt-3.5 rounded-2xl bg-black/25 p-3 backdrop-blur-md">
+            <div className="mt-3.5 rounded-2xl bg-black/30 p-3">
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <Link href="/dashboard/invoices" prefetch={true} className="flex flex-col min-w-0">
                   <span className="text-sky-200 truncate">+{t("netPosition.receivables")}</span>
@@ -155,7 +155,7 @@ export async function DashboardHome({
           )}
 
           {/* Monthly Income / Expense row */}
-          <div className="mt-3 grid grid-cols-2 gap-2 rounded-2xl bg-black/20 p-2.5 backdrop-blur-md">
+          <div className="mt-3 grid grid-cols-2 gap-2 rounded-2xl bg-black/30 p-2.5">
             <div className="flex items-center gap-2 min-w-0">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-emerald-400/20 text-emerald-300">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -277,7 +277,7 @@ export async function DashboardHome({
         <div className="hidden sm:block rounded-2xl border border-[#065F46]/20 bg-gradient-to-br from-emerald-900 via-[#065F46] to-teal-800 p-4 sm:p-5 text-white shadow-md shadow-emerald-950/10">
           <div className="grid grid-cols-3 gap-3">
             {/* 1. السيولة النقدية */}
-            <div className="rounded-xl bg-white/10 p-3.5 backdrop-blur-xs flex flex-col justify-between">
+            <div className="rounded-xl bg-white/10 p-3.5 flex flex-col justify-between">
               <span className="text-xs text-emerald-200 font-bold">{t("netPosition.cash")}</span>
               <p className="text-xl sm:text-2xl font-black text-white font-mono mt-2">
                 {formatMoney(availableCashMinor, { currency, locale: moneyLocale })}
@@ -288,7 +288,7 @@ export async function DashboardHome({
             <Link
               href="/dashboard/invoices"
               prefetch={true}
-              className="group rounded-xl bg-sky-400/15 p-3.5 backdrop-blur-xs flex flex-col justify-between transition hover:bg-sky-400/25"
+              className="group rounded-xl bg-sky-400/20 p-3.5 flex flex-col justify-between transition hover:bg-sky-400/30"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs text-sky-200 font-bold">+{t("netPosition.receivables")}</span>
@@ -303,7 +303,7 @@ export async function DashboardHome({
             <Link
               href="/dashboard/debts"
               prefetch={true}
-              className="group rounded-xl bg-amber-400/15 p-3.5 backdrop-blur-xs flex flex-col justify-between transition hover:bg-amber-400/25"
+              className="group rounded-xl bg-amber-400/20 p-3.5 flex flex-col justify-between transition hover:bg-amber-400/30"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs text-amber-200 font-bold">−{t("netPosition.debts")}</span>

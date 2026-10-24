@@ -45,12 +45,12 @@ export function CreateDebtDialog({
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/60 transition-opacity"
             onClick={() => setIsOpen(false)}
           />
 
           {/* Dialog Body / Bottom Sheet */}
-          <div className="relative z-10 w-full max-w-lg max-h-[88vh] sm:max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl border-t sm:border border-neutral-200 bg-white p-5 pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:p-6 shadow-xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+          <div className="relative z-10 w-full max-w-lg max-h-[85dvh] sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-2xl border-t sm:border border-neutral-200 bg-white p-5 pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:p-6 shadow-xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-neutral-300 sm:hidden" />
             <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
               <div>
@@ -119,9 +119,11 @@ export function CreateDebtDialog({
                     step="0.01"
                     min="0.01"
                     name="amount"
+                    inputMode="decimal"
+                    dir="ltr"
                     required
                     placeholder="0.00"
-                    className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
+                    className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46] font-mono"
                   />
                 </div>
 

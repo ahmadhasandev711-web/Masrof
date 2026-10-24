@@ -49,9 +49,9 @@ export function InvoicePaymentsHistoryDialog({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
     >
-      <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+      <div className="relative w-full max-w-lg max-h-[85dvh] flex flex-col rounded-2xl bg-white p-6 shadow-xl overscroll-contain">
         <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
           <h3 className="text-lg font-semibold text-neutral-900">
             {t("paymentHistory")} — {invoice.invoiceNumber}
@@ -61,7 +61,7 @@ export function InvoicePaymentsHistoryDialog({
             onClick={onClose}
             className="text-neutral-400 hover:text-neutral-600"
           >
-            
+            ✕
           </button>
         </div>
 

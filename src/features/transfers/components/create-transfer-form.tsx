@@ -112,7 +112,10 @@ export function CreateTransferForm({
             type="number"
             step="0.01"
             min="0.01"
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right"
+            inputMode="decimal"
+            dir="ltr"
+            placeholder="0.00"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-start font-mono text-base font-bold"
             required
             disabled={!canTransfer}
           />

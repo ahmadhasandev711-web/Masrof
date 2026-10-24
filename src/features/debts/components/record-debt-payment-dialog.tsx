@@ -64,7 +64,7 @@ export function RecordDebtPaymentDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/60 transition-opacity"
         onClick={onClose}
       />
 
@@ -80,9 +80,9 @@ export function RecordDebtPaymentDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
           >
-            
+            ✕
           </button>
         </div>
 
@@ -133,10 +133,12 @@ export function RecordDebtPaymentDialog({
               min="0.01"
               max={remainingMajor}
               name="amount"
+              inputMode="decimal"
+              dir="ltr"
               required
               value={amountInput}
               onChange={(e) => setAmountInput(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
+              className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono text-base font-bold text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
             />
           </div>
 

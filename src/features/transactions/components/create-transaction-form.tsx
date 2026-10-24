@@ -49,7 +49,7 @@ export function CreateTransactionForm({
   const [state, formAction, isPending] = useActionState(createTransactionAction, initialState);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [type, setType] = useState<"income" | "expense">("expense");
-  const [amount, setAmount] = useState("");
+  const amountInputRef = useRef<HTMLInputElement>(null);
   const [transactionDate, setTransactionDate] = useState(todayIsoDate());
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -86,7 +86,7 @@ export function CreateTransactionForm({
   useEffect(() => {
     if (!isPending && state.error === null && hasSubmitted) {
       formRef.current?.reset();
-      setAmount("");
+      if (amountInputRef.current) amountInputRef.current.value = "";
       setTransactionDate(todayIsoDate());
       setDescription("");
       setCategoryId(filteredCategories[0]?.id ?? "");
@@ -141,7 +141,9 @@ export function CreateTransactionForm({
       setAttachmentName(file.name);
 
       if (data.scan) {
-        if (data.scan.amount != null) setAmount(String(data.scan.amount));
+        if (data.scan.amount != null && amountInputRef.current) {
+          amountInputRef.current.value = String(data.scan.amount);
+        }
         if (data.scan.transactionDate) setTransactionDate(data.scan.transactionDate);
         if (data.scan.description) setDescription(data.scan.description);
         setType("expense");
@@ -238,15 +240,16 @@ export function CreateTransactionForm({
             {tForm("amount")}
           </label>
           <input
+            ref={amountInputRef}
             id="tx-amount"
             name="amount"
             type="number"
             step="0.01"
             min="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            inputMode="decimal"
+            dir="ltr"
             placeholder="0.00"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono text-base font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
             required
           />
         </div>
