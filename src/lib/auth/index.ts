@@ -1,5 +1,4 @@
 import { betterAuth } from "better-auth";
-import { expo } from "@better-auth/expo";
 import { phoneNumber } from "better-auth/plugins";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { mongoDb } from "@/lib/db/mongo-client";
@@ -60,7 +59,7 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins,
-  plugins: [expo(), phoneNumber()],
+  plugins: [phoneNumber()],
 
   database: mongodbAdapter(mongoDb),
 
