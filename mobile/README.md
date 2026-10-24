@@ -4,7 +4,7 @@
 
 ## موجة 3 — QA ثم APK
 
-1. **قائمة تحقق الجهاز:** [`../docs/mobile/wave3-device-qa-checklist.md`](../docs/mobile/wave3-device-qa-checklist.md)  
+1. **قائمة تحقق الجهاز:** [`WAVE3_DEVICE_QA_CHECKLIST.md`](./WAVE3_DEVICE_QA_CHECKLIST.md)  
 2. **رفع الشعار:** الإعدادات → شعار الفواتير (مالك المساحة فقط).  
 3. **Preview APK:** الأوامر في القائمة أو `npm run build:android` من هذا المجلد.
 
