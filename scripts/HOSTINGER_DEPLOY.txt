@@ -1,0 +1,10 @@
+Hostinger build env (add in panel if build still OOM/thread-limited):
+  NEXT_BUILD_CPUS=1
+
+Runtime env:
+  BETTER_AUTH_URL=https://sanadat.site
+  NEXT_PUBLIC_APP_URL=https://sanadat.site
+  MONGODB_URI=(Atlas same as Hostinger basics panel)
+
+Seeds: after Atlas drop, run npm run seed:categories && npm run seed:admin
+from a machine whose MONGODB_URI points to Atlas (not localhost).

@@ -60,7 +60,23 @@ const securityHeaders = [
     : []),
 ];
 
+// Hostinger (and similar) builders often report many CPUs but cap pthreads (~64).
+// Next defaults to one worker per CPU → "Resource temporarily unavailable" during
+// "Collecting page data". Cap workers via NEXT_BUILD_CPUS (default 2).
+const buildWorkerCpus = Math.max(
+  1,
+  Math.min(4, Number.parseInt(process.env.NEXT_BUILD_CPUS ?? "2", 10) || 2),
+);
+
 const nextConfig: NextConfig = {
+  experimental: {
+    cpus: buildWorkerCpus,
+    memoryBasedWorkersCount: false,
+    workerThreads: false,
+    staticGenerationRetryCount: 2,
+    staticGenerationMaxConcurrency: 2,
+    staticGenerationMinPagesPerWorker: 25,
+  },
   // Serwist injects a webpack config; this tells Next.js 16 we intentionally
   // use Turbopack in dev (Serwist is disabled there anyway).
   turbopack: {},
