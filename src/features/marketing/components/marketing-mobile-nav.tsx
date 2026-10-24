@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { NavIcon } from "@/components/ui/app-icons";
 
 type MarketingNavProps = {
   appName: string;
@@ -86,9 +87,9 @@ export function MarketingMobileNav({
           aria-label={menuLabel}
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className="rounded-lg border border-[#E4DFD3] px-3 py-1.5 text-sm text-[#065F46]"
+          className="inline-flex items-center justify-center rounded-lg border border-[#E4DFD3] p-2 text-[#065F46] transition hover:bg-[#F3F0E8]"
         >
-          
+          <NavIcon name="more" className="h-5 w-5" />
         </button>
       </div>
 

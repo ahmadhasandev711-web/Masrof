@@ -421,6 +421,7 @@ export function DashboardShell({
                   {tNav("admin")}
                 </Link>
               )}
+              <InstallPwaButton compact />
               <LocaleSwitcher />
               <SignOutButton compact />
             </div>

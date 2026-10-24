@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+import { NavIcon } from "@/components/ui/app-icons";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -78,9 +79,14 @@ export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
       <button
         type="button"
         onClick={() => (deferredPrompt ? handleNativeInstall() : setOpen((v) => !v))}
-        className="rounded-lg border border-[#065F46]/20 bg-[#ECFDF5] px-2 py-1.5 text-sm font-medium text-[#065F46] transition hover:bg-[#D1FAE5] sm:px-3"
+        aria-label={t("install")}
+        title={t("install")}
+        className={`inline-flex items-center justify-center rounded-lg border border-[#065F46]/20 bg-[#ECFDF5] text-sm font-medium text-[#065F46] transition hover:bg-[#D1FAE5] ${
+          compact ? "p-2" : "gap-1.5 px-3 py-1.5"
+        }`}
       >
-        {compact ? "" : t("install")}
+        <NavIcon name="smartphone" className={compact ? "h-5 w-5" : "h-4 w-4"} />
+        {!compact ? <span>{t("install")}</span> : null}
       </button>
 
       {open && !deferredPrompt && (
