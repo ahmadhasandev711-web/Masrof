@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CreateClientForm } from "@/features/clients/components/create-client-form";
 import { useTranslations } from "next-intl";
 
@@ -12,8 +13,15 @@ export function ClientCreationManager({
   canWrite: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
   const t = useTranslations("pages.clients");
   const tCommon = useTranslations("common");
+
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!isOpen) return;

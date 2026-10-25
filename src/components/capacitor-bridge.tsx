@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export function CapacitorBridge() {
+  const pathname = usePathname();
+
   useEffect(() => {
     // Only execute when running inside the native Capacitor iOS/Android shell
     const isNative =
@@ -15,10 +18,18 @@ export function CapacitorBridge() {
     document.documentElement.classList.add("is-native-app");
 
     // In native app, never show the marketing landing page "/"
-    if (window.location.pathname === "/" || window.location.pathname === "") {
+    if (pathname === "/" || pathname === "") {
       window.location.replace("/dashboard");
-      return;
     }
+  }, [pathname]);
+
+  useEffect(() => {
+    const isNative =
+      typeof window !== "undefined" &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Boolean((window as any).Capacitor?.isNativePlatform?.());
+
+    if (!isNative) return;
 
     let cleanupBackButton: (() => void) | undefined;
 
@@ -36,8 +47,22 @@ export function CapacitorBridge() {
         await StatusBar.setStyle({ style: Style.Light }).catch(() => {});
         await StatusBar.setBackgroundColor({ color: "#FBF9F4" }).catch(() => {});
 
-        // 3. Handle Android hardware/gesture back button smoothly
+        // 3. Handle Android hardware/gesture back button smoothly:
+        // If a bottom sheet or modal dialog is open, dismiss it first!
         const backHandler = await App.addListener("backButton", ({ canGoBack }) => {
+          const openDialog = document.querySelector('[role="dialog"][aria-modal="true"]');
+          if (openDialog) {
+            window.dispatchEvent(
+              new KeyboardEvent("keydown", {
+                key: "Escape",
+                code: "Escape",
+                keyCode: 27,
+                bubbles: true,
+              }),
+            );
+            return;
+          }
+
           if (canGoBack && window.history.length > 1) {
             window.history.back();
           } else {

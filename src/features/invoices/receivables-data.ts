@@ -1,5 +1,6 @@
-import "server-only";
+"server-only";
 
+import { cache } from "react";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { InvoiceModel } from "@/models/invoice";
@@ -13,34 +14,33 @@ export type WorkspaceReceivablesSummary = {
 };
 
 /**
- * Computes receivables and overdue statistics across a workspace in 2 fast indexed queries.
+ * Shared request-cached loader for active workspace invoices and their payments.
+ * When both `getWorkspaceReceivablesSummary` and `getOpenInvoicesRadar` run in the same request,
+ * they share this single database query instead of running duplicate round-trips.
  */
-export async function getWorkspaceReceivablesSummary(
-  workspaceId: string,
-): Promise<WorkspaceReceivablesSummary> {
+const getActiveInvoicesAndPayments = cache(async (workspaceId: string) => {
   if (!mongoose.Types.ObjectId.isValid(workspaceId)) {
     return {
-      totalOutstanding: 0,
-      unpaidCount: 0,
-      overdueAmount: 0,
-      overdueCount: 0,
+      invoices: [],
+      paidMap: new Map<string, number>(),
     };
   }
 
   await connectToDatabase();
+  const wsObjectId = new mongoose.Types.ObjectId(workspaceId);
 
   const [invoices, payments] = await Promise.all([
     InvoiceModel.find({
-      workspaceId,
+      workspaceId: wsObjectId,
       isArchived: false,
       status: { $ne: "cancelled" },
     })
-      .select("_id items dueDate status")
+      .select("_id invoiceNumber clientId items dueDate status shareToken isShareable")
       .lean(),
     InvoicePaymentModel.aggregate<{ _id: mongoose.Types.ObjectId; paidTotal: number }>([
       {
         $match: {
-          workspaceId: new mongoose.Types.ObjectId(workspaceId),
+          workspaceId: wsObjectId,
           isArchived: false,
         },
       },
@@ -56,6 +56,17 @@ export async function getWorkspaceReceivablesSummary(
   const paidMap = new Map<string, number>(
     payments.map((p) => [String(p._id), p.paidTotal]),
   );
+
+  return { invoices, paidMap };
+});
+
+/**
+ * Computes receivables and overdue statistics across a workspace in 2 fast indexed queries.
+ */
+export async function getWorkspaceReceivablesSummary(
+  workspaceId: string,
+): Promise<WorkspaceReceivablesSummary> {
+  const { invoices, paidMap } = await getActiveInvoicesAndPayments(workspaceId);
 
   const now = new Date();
   let totalOutstanding = 0;
@@ -112,41 +123,10 @@ export async function getOpenInvoicesRadar(
   workspaceId: string,
   limit = 4,
 ): Promise<InvoiceRadarItem[]> {
-  if (!mongoose.Types.ObjectId.isValid(workspaceId)) {
+  const { invoices, paidMap } = await getActiveInvoicesAndPayments(workspaceId);
+  if (invoices.length === 0) {
     return [];
   }
-
-  await connectToDatabase();
-
-  const wsObjectId = new mongoose.Types.ObjectId(workspaceId);
-
-  const [invoices, payments] = await Promise.all([
-    InvoiceModel.find({
-      workspaceId: wsObjectId,
-      isArchived: false,
-      status: { $ne: "cancelled" },
-    })
-      .select("_id invoiceNumber clientId items dueDate status shareToken isShareable")
-      .lean(),
-    InvoicePaymentModel.aggregate<{ _id: mongoose.Types.ObjectId; paidTotal: number }>([
-      {
-        $match: {
-          workspaceId: wsObjectId,
-          isArchived: false,
-        },
-      },
-      {
-        $group: {
-          _id: "$invoiceId",
-          paidTotal: { $sum: "$amount" },
-        },
-      },
-    ]),
-  ]);
-
-  const paidMap = new Map<string, number>(
-    payments.map((p) => [String(p._id), p.paidTotal]),
-  );
 
   const now = new Date();
   const unpaidInvoices: Array<{
@@ -196,6 +176,7 @@ export async function getOpenInvoicesRadar(
   if (sliced.length === 0) return [];
 
   const clientIds = Array.from(new Set(sliced.map((inv) => inv.clientId)));
+  const wsObjectId = new mongoose.Types.ObjectId(workspaceId);
   const clients = await import("@/models/client").then(({ ClientModel }) =>
     ClientModel.find({
       _id: { $in: clientIds },

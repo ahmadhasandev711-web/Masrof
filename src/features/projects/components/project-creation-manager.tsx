@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CreateProjectForm } from "@/features/projects/components/create-project-form";
 import type { ClientOption } from "@/features/clients/types";
 import { useTranslations } from "next-intl";
@@ -15,8 +16,15 @@ export function ProjectCreationManager({
   canWrite: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
   const t = useTranslations("pages.projects");
   const tCommon = useTranslations("common");
+
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!isOpen) return;

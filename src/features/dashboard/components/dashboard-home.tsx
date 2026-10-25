@@ -193,7 +193,7 @@ export async function DashboardHome({
         {/* Mobile Quick Action Buttons */}
         <div className="grid grid-cols-4 gap-2 text-center">
           <Link
-            href="/dashboard/invoices"
+            href="/dashboard/invoices?action=new"
             prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
@@ -206,7 +206,7 @@ export async function DashboardHome({
           </Link>
 
           <Link
-            href="/dashboard/transactions"
+            href="/dashboard/transactions?action=new-expense"
             prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
@@ -219,7 +219,7 @@ export async function DashboardHome({
           </Link>
 
           <Link
-            href="/dashboard/transactions"
+            href="/dashboard/transactions?action=new-income"
             prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
@@ -232,7 +232,7 @@ export async function DashboardHome({
           </Link>
 
           <Link
-            href="/dashboard/debts"
+            href="/dashboard/debts?action=new"
             prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
@@ -254,7 +254,7 @@ export async function DashboardHome({
         </div>
         <div className="flex items-center gap-2">
           <Link
-            href="/dashboard/invoices"
+            href="/dashboard/invoices?action=new"
             prefetch={true}
             className="inline-flex items-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#054d3a] transition active:scale-95"
           >
@@ -262,7 +262,7 @@ export async function DashboardHome({
             <span>{t("quickInvoice")}</span>
           </Link>
           <Link
-            href="/dashboard/transactions"
+            href="/dashboard/transactions?action=new-expense"
             prefetch={true}
             className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition active:scale-95"
           >

@@ -25,6 +25,7 @@ export function CreateTransactionForm({
   clients = [],
   projects = [],
   defaultProjectId,
+  initialType = "expense",
   ocrReceipts = false,
   aiCategory = false,
   onSuccess,
@@ -36,6 +37,7 @@ export function CreateTransactionForm({
   clients?: LinkOption[];
   projects?: LinkOption[];
   defaultProjectId?: string;
+  initialType?: "expense" | "income";
   ocrReceipts?: boolean;
   aiCategory?: boolean;
   onSuccess?: () => void;
@@ -48,7 +50,7 @@ export function CreateTransactionForm({
   const tAi = useTranslations("forms.transactionAi");
   const [state, formAction, isPending] = useActionState(createTransactionAction, initialState);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [type, setType] = useState<"income" | "expense">("expense");
+  const [type, setType] = useState<"income" | "expense">(initialType);
   const amountInputRef = useRef<HTMLInputElement>(null);
   const [transactionDate, setTransactionDate] = useState(todayIsoDate());
   const [description, setDescription] = useState("");

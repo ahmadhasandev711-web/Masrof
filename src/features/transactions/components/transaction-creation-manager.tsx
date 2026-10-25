@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CreateTransactionForm } from "@/features/transactions/components/create-transaction-form";
 import { CreateTransferForm } from "@/features/transfers/components/create-transfer-form";
 import { useTranslations } from "next-intl";
@@ -32,7 +33,23 @@ export function TransactionCreationManager({
 }) {
   const t = useTranslations("pages.transactions");
   const tCommon = useTranslations("common");
+  const searchParams = useSearchParams();
   const [modalType, setModalType] = useState<"transaction" | "transfer" | null>(null);
+  const [initialTxType, setInitialTxType] = useState<"expense" | "income">("expense");
+
+  useEffect(() => {
+    const action = searchParams.get("action");
+    const tab = searchParams.get("tab");
+    if (action === "transfer" || tab === "transfers") {
+      setModalType("transfer");
+    } else if (action === "new-income") {
+      setInitialTxType("income");
+      setModalType("transaction");
+    } else if (action === "new-expense" || action === "new") {
+      setInitialTxType("expense");
+      setModalType("transaction");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!modalType) return;
@@ -107,6 +124,7 @@ export function TransactionCreationManager({
                 clients={clients}
                 projects={projects}
                 defaultProjectId={defaultProjectId}
+                initialType={initialTxType}
                 ocrReceipts={ocrReceipts}
                 aiCategory={aiCategory}
                 onSuccess={() => setModalType(null)}

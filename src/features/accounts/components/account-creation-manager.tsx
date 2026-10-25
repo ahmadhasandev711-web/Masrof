@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CreateAccountForm } from "@/features/accounts/components/create-account-form";
 import type { SupportedCurrency } from "@/models/workspace";
 import { useTranslations } from "next-intl";
@@ -17,7 +18,14 @@ export function AccountCreationManager({
   canWrite?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
   const t = useTranslations("pages.accounts");
+
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!isOpen) return;

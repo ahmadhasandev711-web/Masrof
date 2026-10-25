@@ -4,10 +4,13 @@ const config: CapacitorConfig = {
   appId: "site.sanadat.app",
   appName: "سندات | Sanadat",
   webDir: "public",
+  backgroundColor: "#FBF9F4",
   server: {
     url: "https://sanadat.site/dashboard",
     cleartext: false,
     androidScheme: "https",
+    allowNavigation: ["sanadat.site", "*.sanadat.site"],
+    errorPath: "offline.html",
   },
   plugins: {
     SplashScreen: {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
@@ -23,8 +24,15 @@ export function InvoiceCreationManager({
   canWrite: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
   const t = useTranslations("pages.invoices");
   const tCommon = useTranslations("common");
+
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!isOpen) return;

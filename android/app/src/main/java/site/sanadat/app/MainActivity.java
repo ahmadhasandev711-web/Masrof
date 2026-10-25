@@ -1,6 +1,7 @@
 package site.sanadat.app;
 
 import android.os.Bundle;
+import android.webkit.CookieManager;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
@@ -20,6 +21,16 @@ public class MainActivity extends BridgeActivity {
                 controller.setAppearanceLightStatusBars(true);
                 controller.setAppearanceLightNavigationBars(true);
             }
+        } catch (Exception ignored) {
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            // Guarantee all session cookies are flushed from RAM to disk immediately
+            CookieManager.getInstance().flush();
         } catch (Exception ignored) {
         }
     }

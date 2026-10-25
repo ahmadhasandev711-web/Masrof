@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
 import { IdempotencyKeyInput } from "@/components/idempotency-key-input";
 import { useTranslations } from "next-intl";
@@ -19,9 +20,29 @@ export function CreateDebtDialog({
   currency: string;
 }) {
   const t = useTranslations("forms.debts");
+  const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(createDebtAction, initialState);
   const { idempotencyKey, regenerateIdempotencyKey } = useIdempotencyKey();
+
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsOpen(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsOpen(false);
+    }
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (state.success) {
@@ -42,7 +63,7 @@ export function CreateDebtDialog({
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/60 transition-opacity"

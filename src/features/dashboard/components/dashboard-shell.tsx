@@ -142,28 +142,28 @@ function QuickAddActionSheet({
 
   const quickActions = [
     {
-      href: "/dashboard/invoices",
+      href: "/dashboard/invoices?action=new",
       title: tNav("quickActions.newInvoiceTitle"),
       desc: tNav("quickActions.newInvoiceDesc"),
       icon: "invoices" as IconKey,
       bgColor: "bg-emerald-50 text-emerald-800",
     },
     {
-      href: "/dashboard/transactions",
+      href: "/dashboard/transactions?action=new-expense",
       title: tNav("quickActions.newTransactionTitle"),
       desc: tNav("quickActions.newTransactionDesc"),
       icon: "transactions" as IconKey,
       bgColor: "bg-rose-50 text-rose-800",
     },
     {
-      href: "/dashboard/debts",
+      href: "/dashboard/debts?action=new",
       title: tNav("quickActions.newDebtTitle"),
       desc: tNav("quickActions.newDebtDesc"),
       icon: "debts" as IconKey,
       bgColor: "bg-amber-50 text-amber-800",
     },
     {
-      href: "/dashboard/clients",
+      href: "/dashboard/clients?action=new",
       title: tNav("quickActions.newClientTitle"),
       desc: tNav("quickActions.newClientDesc"),
       icon: "clients" as IconKey,
