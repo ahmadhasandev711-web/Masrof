@@ -35,7 +35,6 @@ export function TransactionTabs({
       <Link
         href={buildHref("transactions")}
         scroll={false}
-        prefetch={true}
         className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs sm:text-sm font-bold transition ${
           activeTab === "transactions"
             ? "bg-[#065F46] text-white shadow-xs"
@@ -55,7 +54,6 @@ export function TransactionTabs({
       <Link
         href={buildHref("transfers")}
         scroll={false}
-        prefetch={true}
         className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs sm:text-sm font-bold transition ${
           activeTab === "transfers"
             ? "bg-blue-700 text-white shadow-xs"

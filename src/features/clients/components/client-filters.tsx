@@ -108,7 +108,6 @@ export function ClientFilters({
               key={tab.key}
               href={buildHref(tab.key)}
               scroll={false}
-              prefetch={true}
               className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition active:scale-95 ${
                 isActive
                   ? "bg-[#065F46] text-white shadow-xs"

@@ -168,6 +168,48 @@ export async function assertPlanFeature(
 }
 
 /**
+ * Derives the effective subscription from an ALREADY-AUTHORIZED workspace document.
+ * Callers must have obtained `workspace` through a membership-verified path
+ * (e.g. `listWorkspacesForUser` / `getWorkspaceAccess`); this performs no access check.
+ */
+export async function resolveWorkspaceSubscriptionFromDocument(
+  userId: string,
+  workspace: { ownerId: string; plan?: unknown; planStatus?: unknown; planExpiresAt?: unknown },
+): Promise<WorkspaceSubscriptionContext> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ws = workspace as any;
+
+  if (ws.plan && ws.plan !== "free") {
+    const effectivePlan = resolveEffectivePlan(
+      ws.plan as PlanId,
+      ws.planStatus ?? "active",
+      ws.planExpiresAt ?? null,
+    );
+    return {
+      plan: effectivePlan,
+      status: (ws.planStatus ?? "active") as UserSubscriptionView["status"],
+      expiresAt: ws.planExpiresAt ? new Date(ws.planExpiresAt).toISOString() : null,
+      isSuspended: ws.planStatus === "suspended",
+      isTeamMember: workspace.ownerId !== userId,
+      ownerId: workspace.ownerId,
+    };
+  }
+
+  if (ws.plan === "free") {
+    return {
+      plan: "free",
+      status: "active",
+      expiresAt: null,
+      isSuspended: false,
+      isTeamMember: workspace.ownerId !== userId,
+      ownerId: workspace.ownerId,
+    };
+  }
+
+  return getEffectiveSubscriptionForOwner(userId, workspace.ownerId);
+}
+
+/**
  * Workspace-scoped features (reports, OCR, import, team data…) inherit the
  * workspace's dedicated plan, or fallback to the workspace owner's plan for legacy workspaces.
  */
@@ -178,36 +220,7 @@ export const getEffectiveSubscriptionForWorkspace = cache(
   ): Promise<WorkspaceSubscriptionContext> {
     const { getWorkspaceAccess } = await import("@/features/workspaces/access");
     const access = await getWorkspaceAccess(userId, workspaceId);
-    const ws = access.workspace as any;
-
-    if (ws.plan && ws.plan !== "free") {
-      const effectivePlan = resolveEffectivePlan(
-        ws.plan as PlanId,
-        ws.planStatus ?? "active",
-        ws.planExpiresAt ?? null,
-      );
-      return {
-        plan: effectivePlan,
-        status: (ws.planStatus ?? "active") as UserSubscriptionView["status"],
-        expiresAt: ws.planExpiresAt ? new Date(ws.planExpiresAt).toISOString() : null,
-        isSuspended: ws.planStatus === "suspended",
-        isTeamMember: access.workspace.ownerId !== userId,
-        ownerId: access.workspace.ownerId,
-      };
-    }
-
-    if (ws.plan === "free") {
-      return {
-        plan: "free",
-        status: "active",
-        expiresAt: null,
-        isSuspended: false,
-        isTeamMember: access.workspace.ownerId !== userId,
-        ownerId: access.workspace.ownerId,
-      };
-    }
-
-    return getEffectiveSubscriptionForOwner(userId, access.workspace.ownerId);
+    return resolveWorkspaceSubscriptionFromDocument(userId, access.workspace);
   },
 );
 

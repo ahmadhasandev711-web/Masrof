@@ -112,19 +112,20 @@ export const listWorkspacesForUser = cache(async (userId: string) => {
 
   if (results.length === 0) return [];
 
-  const accessible: (WorkspaceDocument & { _id: Types.ObjectId })[] = [];
   const { workspaceHasTeamFeature } = await import("@/features/workspaces/members-data");
 
-  for (const item of results) {
-    if (item.role === "owner") {
-      accessible.push(item.workspace);
-    } else {
-      const hasTeam = await workspaceHasTeamFeature(item.workspace._id.toString());
-      if (hasTeam) {
-        accessible.push(item.workspace);
-      }
-    }
-  }
+  // Check team-feature access for non-owner memberships in parallel (order preserved)
+  // instead of awaiting each workspace sequentially.
+  const checks = await Promise.all(
+    results.map(async (item) => {
+      if (item.role === "owner") return true;
+      return workspaceHasTeamFeature(item.workspace._id.toString());
+    }),
+  );
+
+  const accessible: (WorkspaceDocument & { _id: Types.ObjectId })[] = results
+    .filter((_, index) => checks[index])
+    .map((item) => item.workspace);
 
   return accessible;
 });

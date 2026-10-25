@@ -155,7 +155,7 @@ export function EditInvoiceDialog({
       />
 
       {/* Modal Container */}
-      <div className="relative z-10 max-h-[85dvh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-[#E4DFD3] bg-[#FBF9F4] p-5 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 sm:p-7 overscroll-contain">
+      <div className="relative z-10 max-h-[85svh] will-change-transform w-full max-w-3xl overflow-y-auto rounded-3xl border border-[#E4DFD3] bg-[#FBF9F4] p-5 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 sm:p-7 overscroll-contain">
         <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
           <div>
             <h2 className="text-base font-bold text-neutral-900 sm:text-lg">

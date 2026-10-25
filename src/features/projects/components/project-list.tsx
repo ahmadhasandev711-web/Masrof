@@ -104,7 +104,6 @@ export function ProjectList({
               <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <Link
                   href={`/dashboard/projects/${id}`}
-                  prefetch={true}
                   className="font-bold text-neutral-900 text-base sm:text-lg hover:text-[#065F46] transition truncate"
                 >
                   {project.name}
@@ -159,7 +158,6 @@ export function ProjectList({
 
                 <Link
                   href={`/dashboard/projects/${id}`}
-                  prefetch={true}
                   className="inline-flex items-center gap-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition active:scale-95"
                 >
                   <span>{tProjects("details")}</span>

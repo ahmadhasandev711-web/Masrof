@@ -1,7 +1,7 @@
 import { ClientRedirect } from "@/components/client-redirect";
 import { requireSession } from "@/features/auth/session";
 import { getCurrentWorkspaceContext } from "@/features/workspaces/current";
-import { getEffectiveSubscriptionForWorkspace, getUserSubscription } from "@/features/subscriptions/data";
+import { resolveWorkspaceSubscriptionFromDocument, getUserSubscription } from "@/features/subscriptions/data";
 import { AccountSuspendedScreen } from "@/features/subscriptions/components/account-suspended-screen";
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
 import { isAdminEmail } from "@/lib/admin";
@@ -28,9 +28,11 @@ export default async function DashboardLayout({
     return <ClientRedirect href="/onboarding" />;
   }
 
-  const workspaceSubscription = await getEffectiveSubscriptionForWorkspace(
+  // activeWorkspace comes from listWorkspacesForUser (membership-verified, team-feature gated),
+  // so we derive the plan from it directly instead of re-running the access queries.
+  const workspaceSubscription = await resolveWorkspaceSubscriptionFromDocument(
     session.user.id,
-    activeWorkspace._id.toString(),
+    activeWorkspace,
   );
 
   return (

@@ -45,9 +45,9 @@ export function LiquidityHeroCard({
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#065F46] via-[#044E3A] to-[#022C22] p-5 sm:p-7 text-white shadow-lg">
-      {/* Decorative background glow */}
-      <div className="pointer-events-none absolute -end-12 -top-12 h-48 w-48 rounded-full bg-emerald-400/10 blur-2xl" />
-      <div className="pointer-events-none absolute -start-12 -bottom-12 h-48 w-48 rounded-full bg-teal-400/10 blur-2xl" />
+      {/* Decorative background glow (radial gradients — no GPU-heavy blur filter) */}
+      <div className="pointer-events-none absolute -end-12 -top-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(52,211,153,0.16),transparent_70%)]" />
+      <div className="pointer-events-none absolute -start-12 -bottom-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(45,212,191,0.16),transparent_70%)]" />
 
       <div className="relative z-10 flex flex-col gap-5">
         {/* Top Header Row */}

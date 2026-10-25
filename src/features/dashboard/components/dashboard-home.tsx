@@ -138,13 +138,13 @@ export async function DashboardHome({
           {isOwner && (receivablesMinor > 0 || debtsMinor > 0) && (
             <div className="mt-3.5 rounded-2xl bg-black/30 p-3">
               <div className="grid grid-cols-2 gap-2 text-[11px]">
-                <Link href="/dashboard/invoices" prefetch={true} className="flex flex-col min-w-0">
+                <Link href="/dashboard/invoices" className="flex flex-col min-w-0">
                   <span className="text-sky-200 truncate">+{t("netPosition.receivables")}</span>
                   <span className="font-bold text-white font-mono text-xs mt-0.5 truncate">
                     {formatMoney(receivablesMinor, { currency, locale: moneyLocale })}
                   </span>
                 </Link>
-                <Link href="/dashboard/debts" prefetch={true} className="flex flex-col min-w-0">
+                <Link href="/dashboard/debts" className="flex flex-col min-w-0">
                   <span className="text-amber-200 truncate">−{t("netPosition.debts")}</span>
                   <span className="font-bold text-white font-mono text-xs mt-0.5 truncate">
                     {formatMoney(debtsMinor, { currency, locale: moneyLocale })}
@@ -194,7 +194,6 @@ export async function DashboardHome({
         <div className="grid grid-cols-4 gap-2 text-center">
           <Link
             href="/dashboard/invoices?action=new"
-            prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
@@ -207,7 +206,6 @@ export async function DashboardHome({
 
           <Link
             href="/dashboard/transactions?action=new-expense"
-            prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-700">
@@ -220,7 +218,6 @@ export async function DashboardHome({
 
           <Link
             href="/dashboard/transactions?action=new-income"
-            prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
@@ -233,7 +230,6 @@ export async function DashboardHome({
 
           <Link
             href="/dashboard/debts?action=new"
-            prefetch={true}
             className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
@@ -255,7 +251,6 @@ export async function DashboardHome({
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/invoices?action=new"
-            prefetch={true}
             className="inline-flex items-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#054d3a] transition active:scale-95"
           >
             <span>+</span>
@@ -263,7 +258,6 @@ export async function DashboardHome({
           </Link>
           <Link
             href="/dashboard/transactions?action=new-expense"
-            prefetch={true}
             className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition active:scale-95"
           >
             <span>+</span>
@@ -287,7 +281,6 @@ export async function DashboardHome({
             {/* 2. + مستحقات فواتير */}
             <Link
               href="/dashboard/invoices"
-              prefetch={true}
               className="group rounded-xl bg-sky-400/20 p-3.5 flex flex-col justify-between transition hover:bg-sky-400/30"
             >
               <div className="flex items-center justify-between">
@@ -302,7 +295,6 @@ export async function DashboardHome({
             {/* 3. − ديون والتزامات */}
             <Link
               href="/dashboard/debts"
-              prefetch={true}
               className="group rounded-xl bg-amber-400/20 p-3.5 flex flex-col justify-between transition hover:bg-amber-400/30"
             >
               <div className="flex items-center justify-between">
@@ -341,7 +333,7 @@ export async function DashboardHome({
             />
           </div>
           {balanceSummary.byCurrency.length > 1 && (
-            <Link href="/dashboard/accounts" prefetch={true} className="mt-2 inline-block text-xs text-[#065F46] hover:underline">
+            <Link href="/dashboard/accounts" className="mt-2 inline-block text-xs text-[#065F46] hover:underline">
               {t("manageCurrencies")}
             </Link>
           )}
@@ -379,7 +371,7 @@ export async function DashboardHome({
                 <p className="text-xs text-neutral-500">{t("radar.subtitle")}</p>
               </div>
             </div>
-            <Link href="/dashboard/invoices" prefetch={true} className="text-xs font-semibold text-sky-800 hover:underline">
+            <Link href="/dashboard/invoices" className="text-xs font-semibold text-sky-800 hover:underline">
               {t("receivables.viewInvoices")}
             </Link>
           </div>
@@ -441,7 +433,6 @@ export async function DashboardHome({
                   ) : (
                     <Link
                       href="/dashboard/plan"
-                      prefetch={true}
                       className="shrink-0 rounded-lg border border-neutral-200 px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50"
                     >
                        {t("radar.remindWhatsApp")}
@@ -474,7 +465,7 @@ export async function DashboardHome({
                 <p className="text-xs text-neutral-500">{t("ownerProfitability.subtitle")}</p>
               </div>
             </div>
-            <Link href="/dashboard/projects" prefetch={true} className="text-xs font-semibold text-[#065F46] hover:underline">
+            <Link href="/dashboard/projects" className="text-xs font-semibold text-[#065F46] hover:underline">
               {t("ownerProfitability.viewAllProjects")}
             </Link>
           </div>
@@ -546,7 +537,6 @@ export async function DashboardHome({
           </h2>
           <Link
             href="/dashboard/transactions"
-            prefetch={true}
             className="text-xs font-semibold text-[#065F46] hover:underline"
           >
             {t("viewAllTransactions")}
@@ -609,7 +599,6 @@ export async function DashboardHome({
       <div className="hidden sm:grid gap-3 sm:grid-cols-2">
         <Link
           href="/dashboard/transactions"
-          prefetch={true}
           className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
         >
           <h2 className="font-semibold text-neutral-900">{t("transactionsTitle")}</h2>
@@ -618,7 +607,6 @@ export async function DashboardHome({
 
         <Link
           href="/dashboard/accounts"
-          prefetch={true}
           className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
         >
           <h2 className="font-semibold text-neutral-900">{t("accountsTitle")}</h2>
@@ -627,7 +615,6 @@ export async function DashboardHome({
 
         <Link
           href="/dashboard/budgets"
-          prefetch={true}
           className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
         >
           <h2 className="font-semibold text-neutral-900">{t("budgetsTitle")}</h2>
@@ -636,7 +623,6 @@ export async function DashboardHome({
 
         <Link
           href="/dashboard/reports"
-          prefetch={true}
           className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
         >
           <h2 className="font-semibold text-neutral-900">{t("reportsTitle")}</h2>

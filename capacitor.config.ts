@@ -31,7 +31,9 @@ const config: CapacitorConfig = {
       backgroundColor: "#FBF9F4",
     },
     Keyboard: {
-      resize: "body",
+      // Android handles resize natively via windowSoftInputMode="adjustResize";
+      // JS-driven body resize would double-resize the page and cause jank.
+      resize: "none",
     },
   },
 };
