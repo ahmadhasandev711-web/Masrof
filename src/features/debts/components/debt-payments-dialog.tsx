@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { Modal } from "@/components/ui/modal";
 import { formatMoney } from "@/lib/money";
 import { getDebtPaymentsAction } from "@/features/debts/actions/get-debt-payments";
 import type { DebtItem, DebtPaymentItem } from "@/features/debts/types";
@@ -57,33 +58,16 @@ export function DebtPaymentsDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/60 transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Modal Card */}
-      <div className="relative z-10 native-bottom-sheet w-full max-w-xl max-h-[85svh] will-change-transform flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl overscroll-contain">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-          <div>
-            <h3 className="text-lg font-bold text-neutral-900">{t("historyTitle")}</h3>
-            <p className="mt-0.5 text-xs text-neutral-500">
-              {t("historySubtitle", { name: debt.name, creditor: debt.creditor })}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
-          >
-            ✕
-          </button>
-        </div>
-
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("historyTitle")}
+      subtitle={t("historySubtitle", { name: debt.name, creditor: debt.creditor })}
+      maxWidthClassName="max-w-xl"
+    >
+      <div className="flex flex-col gap-4">
         {/* Summary Mini Bar */}
-        <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-neutral-50 p-3 text-center text-xs">
+        <div className="grid grid-cols-3 gap-2 rounded-xl bg-neutral-50 p-3 text-center text-xs">
           <div>
             <span className="text-neutral-500">{t("totalLiabilities")}:</span>
             <p className="font-bold text-neutral-900">{formatMoney(debt.totalAmount, { currency })}</p>
@@ -144,7 +128,7 @@ export function DebtPaymentsDialog({
           )}
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-4 flex justify-end">
           <button
             type="button"
             onClick={onClose}
@@ -154,6 +138,6 @@ export function DebtPaymentsDialog({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

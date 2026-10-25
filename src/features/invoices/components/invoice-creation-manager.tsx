@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { Modal } from "@/components/ui/modal";
 import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
@@ -26,26 +27,13 @@ export function InvoiceCreationManager({
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
   const t = useTranslations("pages.invoices");
-  const tCommon = useTranslations("common");
 
   useEffect(() => {
     if (searchParams.get("action") === "new") {
       setIsOpen(true);
+      window.history.replaceState(null, "", window.location.pathname);
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setIsOpen(false);
-    }
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen]);
 
   if (!canWrite) return null;
 
@@ -62,49 +50,22 @@ export function InvoiceCreationManager({
         </button>
       </div>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true">
-          {/* Backdrop */}
-          <button
-            type="button"
-            className="fixed inset-0 bg-black/60 transition-opacity"
-            aria-label={tCommon("close")}
-            onClick={() => setIsOpen(false)}
-          />
-
-          {/* Modal / Bottom Sheet Container */}
-          <div className="relative z-10 native-bottom-sheet max-h-[85svh] will-change-transform sm:max-h-[92vh] w-full max-w-3xl overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-3xl border-t sm:border border-[#E4DFD3] bg-[#FBF9F4] p-5 pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:pb-7 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200 sm:p-7">
-            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-neutral-300 sm:hidden" />
-            <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
-              <div>
-                <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
-                  {t("newInvoiceTitle")}
-                </h2>
-                <p className="text-xs text-neutral-500">
-                  {t("newInvoiceSubtitle")}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
-                aria-label={tCommon("close")}
-              >
-                ✕
-              </button>
-            </div>
-
-            <CreateInvoiceForm
-              workspaceId={workspaceId}
-              clients={clients}
-              projects={projects}
-              defaultClientId={defaultClientId}
-              defaultProjectId={defaultProjectId}
-              onCancel={() => setIsOpen(false)}
-            />
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={t("newInvoiceTitle")}
+        subtitle={t("newInvoiceSubtitle")}
+        maxWidthClassName="max-w-3xl"
+      >
+        <CreateInvoiceForm
+          workspaceId={workspaceId}
+          clients={clients}
+          projects={projects}
+          defaultClientId={defaultClientId}
+          defaultProjectId={defaultProjectId}
+          onCancel={() => setIsOpen(false)}
+        />
+      </Modal>
     </>
   );
 }

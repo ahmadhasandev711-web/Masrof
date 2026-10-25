@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Modal } from "@/components/ui/modal";
 import { formatMoney, fromMinorUnits } from "@/lib/money";
 import { ArchiveTransactionButton } from "@/features/transactions/components/archive-transaction-button";
 import {
@@ -74,21 +75,6 @@ export function TransactionRow({
     accountId: transaction.accountId,
     categoryId: transaction.categoryId,
   };
-
-  if (isEditing) {
-    return (
-      <li className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
-        <EditTransactionForm
-          transaction={editable}
-          workspaceId={workspaceId}
-          accounts={accounts}
-          categories={categories}
-          onCancel={() => setIsEditing(false)}
-          onSuccess={() => setIsEditing(false)}
-        />
-      </li>
-    );
-  }
 
   return (
     <li className="flex flex-col gap-2.5 rounded-2xl border border-neutral-200/80 bg-white p-3.5 shadow-xs transition hover:border-neutral-300 sm:flex-row sm:items-center sm:justify-between sm:p-4">
@@ -179,6 +165,22 @@ export function TransactionRow({
           <ArchiveTransactionButton transactionId={transaction.id} workspaceId={workspaceId} />
         </div>
       </div>
+
+      <Modal
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        title={tForm("editTitle")}
+        maxWidthClassName="max-w-xl"
+      >
+        <EditTransactionForm
+          transaction={editable}
+          workspaceId={workspaceId}
+          accounts={accounts}
+          categories={categories}
+          onCancel={() => setIsEditing(false)}
+          onSuccess={() => setIsEditing(false)}
+        />
+      </Modal>
     </li>
   );
 }

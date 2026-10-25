@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 import { CreateSavingsGoalForm } from "@/features/savings-goals/components/create-savings-goal-form";
 import { useTranslations } from "next-intl";
@@ -13,7 +14,15 @@ export function SavingsGoalCreationManager({
   canWrite?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
   const t = useTranslations("forms.savingsGoal");
+
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsOpen(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, [searchParams]);
 
   if (!canWrite) return null;
 

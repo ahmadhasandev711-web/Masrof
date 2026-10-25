@@ -84,15 +84,15 @@ body {
     display: none !important;
   }
 
-  /* GPU-accelerated bottom-sheet positioning when virtual keyboard opens */
-  @media (max-width: 639px) {
-    .native-bottom-sheet {
-      max-height: calc(100svh - var(--kb-height, 0px) - env(safe-area-inset-top, 0px) - 1.25rem) !important;
-      margin-bottom: var(--kb-height, 0px) !important;
-      transition: margin-bottom 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-height 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-      contain: layout paint;
-      overscroll-behavior: contain;
-    }
+  /* Keyboard-safe form scrolling: static bottom padding matching keyboard height, zero transition reflow */
+  .kb-safe-scroll {
+    padding-bottom: calc(var(--kb-height, 0px) + max(2rem, env(safe-area-inset-bottom, 0px))) !important;
+    overscroll-behavior: contain;
+  }
+
+  /* Hide mobile bottom navigation bar when keyboard is open to avoid blocking focused fields */
+  .keyboard-is-open .mobile-bottom-nav {
+    display: none !important;
   }
 }
 

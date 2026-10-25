@@ -57,7 +57,7 @@ export function EditTransactionForm({
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-4 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4"
+      className="flex flex-col gap-4"
     >
       <input type="hidden" name="transactionId" value={transaction.id} />
       <input type="hidden" name="workspaceId" value={workspaceId} />

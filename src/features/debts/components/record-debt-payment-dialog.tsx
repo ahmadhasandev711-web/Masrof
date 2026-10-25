@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { Modal } from "@/components/ui/modal";
 import { formatMoney, fromMinorUnits } from "@/lib/money";
 import {
   recordDebtPaymentAction,
@@ -61,33 +62,16 @@ export function RecordDebtPaymentDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/60 transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Modal Card */}
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-          <div>
-            <h3 className="text-lg font-bold text-neutral-900">{t("recordPaymentTitle")}</h3>
-            <p className="mt-0.5 text-xs text-neutral-500">
-              {t("recordPaymentSubtitle", { name: debt.name, creditor: debt.creditor })}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
-          >
-            ✕
-          </button>
-        </div>
-
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("recordPaymentTitle")}
+      subtitle={t("recordPaymentSubtitle", { name: debt.name, creditor: debt.creditor })}
+      maxWidthClassName="max-w-lg"
+    >
+      <div className="flex flex-col gap-4">
         {/* Debt Snapshot Badge */}
-        <div className="mt-4 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs">
+        <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs">
           <div>
             <span className="font-semibold text-amber-900">{t("remainingToPay")}</span>
             <p className="mt-0.5 text-base font-bold text-amber-950">
@@ -224,6 +208,6 @@ export function RecordDebtPaymentDialog({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

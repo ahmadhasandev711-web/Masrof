@@ -41,12 +41,10 @@ export function EditClientForm({
   return (
     <form
       action={formAction}
-      className="flex w-full flex-col gap-4 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4"
+      className="flex w-full flex-col gap-4"
     >
       <input type="hidden" name="clientId" value={client._id} />
       <input type="hidden" name="workspaceId" value={workspaceId} />
-
-      <h3 className="font-semibold text-neutral-900">{tForm("editTitle")}</h3>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5 sm:col-span-2">

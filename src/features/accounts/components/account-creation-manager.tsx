@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { Modal } from "@/components/ui/modal";
 import { CreateAccountForm } from "@/features/accounts/components/create-account-form";
 import type { SupportedCurrency } from "@/models/workspace";
 import { useTranslations } from "next-intl";
@@ -20,25 +21,14 @@ export function AccountCreationManager({
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
   const t = useTranslations("pages.accounts");
+  const tForm = useTranslations("forms.account");
 
   useEffect(() => {
     if (searchParams.get("action") === "new") {
       setIsOpen(true);
+      window.history.replaceState(null, "", window.location.pathname);
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setIsOpen(false);
-    }
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen]);
 
   if (!canWrite) return null;
 
@@ -53,33 +43,21 @@ export function AccountCreationManager({
         <span>{t("newAccountBtn")}</span>
       </button>
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-          role="dialog"
-          aria-modal="true"
-        >
-          {/* Backdrop */}
-          <button
-            type="button"
-            className="fixed inset-0 bg-neutral-900/60 transition-opacity"
-            onClick={() => setIsOpen(false)}
-            aria-label="Close"
-          />
-
-          {/* Modal / Bottom Sheet Content */}
-          <div className="relative z-10 native-bottom-sheet w-full max-w-lg max-h-[85svh] will-change-transform sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-3xl border-t sm:border border-[#E4DFD3] bg-white pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:pb-6 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
-            <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-neutral-300 sm:hidden" />
-            <CreateAccountForm
-              workspaceId={workspaceId}
-              workspaceCurrency={workspaceCurrency}
-              canUseMultiCurrency={canUseMultiCurrency}
-              onSuccess={() => setIsOpen(false)}
-              onCancel={() => setIsOpen(false)}
-            />
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={tForm("title")}
+        maxWidthClassName="max-w-lg"
+      >
+        <CreateAccountForm
+          workspaceId={workspaceId}
+          workspaceCurrency={workspaceCurrency}
+          canUseMultiCurrency={canUseMultiCurrency}
+          hideHeader={true}
+          onSuccess={() => setIsOpen(false)}
+          onCancel={() => setIsOpen(false)}
+        />
+      </Modal>
     </>
   );
 }

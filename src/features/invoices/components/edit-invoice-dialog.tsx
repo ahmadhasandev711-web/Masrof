@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Modal } from "@/components/ui/modal";
 import { updateInvoiceAction } from "@/features/invoices/actions/update-invoice";
 import type { InvoiceListItem } from "@/features/invoices/types";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
@@ -56,21 +57,6 @@ export function EditInvoiceDialog({
         }))
       : [{ id: 1, description: "", amount: "" }]
   );
-
-  useEffect(() => {
-    if (!isOpen) return;
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   const availableProjects = projects.filter((p) => p.clientId === selectedClientId);
 
@@ -145,43 +131,20 @@ export function EditInvoiceDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true">
-      {/* Backdrop */}
-      <button
-        type="button"
-        className="fixed inset-0 bg-black/60 transition-opacity"
-        aria-label={tCommon("close")}
-        onClick={onClose}
-      />
-
-      {/* Modal Container */}
-      <div className="relative z-10 native-bottom-sheet max-h-[85svh] will-change-transform w-full max-w-3xl overflow-y-auto rounded-3xl border border-[#E4DFD3] bg-[#FBF9F4] p-5 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 sm:p-7 overscroll-contain">
-        <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
-          <div>
-            <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
-              {tInvoices("editInvoiceTitle", { number: invoice.invoiceNumber })}
-            </h2>
-            <p className="text-xs text-neutral-500">
-              {tInvoices("editInvoiceSubtitle")}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
-            aria-label={tCommon("close")}
-          >
-            ✕
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={tInvoices("editInvoiceTitle", { number: invoice.invoiceNumber })}
+      subtitle={tInvoices("editInvoiceSubtitle")}
+      maxWidthClassName="max-w-3xl"
+    >
+      {invoice.paidAmount > 0 && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900">
+          {tInvoices("paidAmountWarning", { amount: formatMoney(invoice.paidAmount) })}
         </div>
+      )}
 
-        {invoice.paidAmount > 0 && (
-          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900">
-            {tInvoices("paidAmountWarning", { amount: formatMoney(invoice.paidAmount) })}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-neutral-700">{tForm("client")}</label>
@@ -342,7 +305,6 @@ export function EditInvoiceDialog({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

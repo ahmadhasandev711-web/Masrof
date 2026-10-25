@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
+import { Modal } from "@/components/ui/modal";
 import { formatMoney } from "@/lib/money";
 import type { InvoiceListItem } from "@/features/invoices/types";
 import {
@@ -118,23 +119,14 @@ export function InvoiceShareDialog({
     : `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex native-bottom-sheet w-full max-w-md max-h-[85svh] will-change-transform flex-col gap-4 overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl overscroll-contain">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-neutral-900">{t("shareDialogTitle")}</h2>
-            <p className="mt-0.5 text-xs text-neutral-500">{t("shareDialogSubtitle")}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-600 text-lg leading-none p-1"
-          >
-            ✕
-          </button>
-        </div>
-
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={t("shareDialogTitle")}
+      subtitle={t("shareDialogSubtitle")}
+      maxWidthClassName="max-w-md"
+    >
+      <div className="flex flex-col gap-4">
         {/* Invoice Summary Pill */}
         <div className="rounded-xl border border-neutral-100 bg-neutral-50 p-3 text-xs flex justify-between items-center">
           <div>
@@ -240,6 +232,6 @@ export function InvoiceShareDialog({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -96,9 +96,13 @@ export function CapacitorBridge() {
               active.tagName === "TEXTAREA" ||
               active.tagName === "SELECT")
           ) {
-            setTimeout(() => {
-              active.scrollIntoView({ behavior: "smooth", block: "center" });
-            }, 50);
+            const rect = active.getBoundingClientRect();
+            // Visible bottom edge of viewport factoring in keyboard height and safety padding
+            const visibleBottom = window.innerHeight - info.keyboardHeight - 24;
+            // Only scroll gently if the focused field is actually occluded or pushed below the visible area
+            if (rect.bottom > visibleBottom || rect.top < 0) {
+              active.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
           }
         });
 

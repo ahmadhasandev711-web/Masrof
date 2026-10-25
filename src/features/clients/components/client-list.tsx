@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import { archiveClientAction } from "@/features/clients/actions/archive-client";
 import { EditClientForm } from "@/features/clients/components/edit-client-form";
+import { Modal } from "@/components/ui/modal";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ToastStack, useToasts } from "@/components/ui/toast";
 import type { ClientListItem } from "@/features/clients/types";
@@ -26,6 +27,7 @@ export function ClientList({
   const tEmpty = useTranslations("empty");
   const tNav = useTranslations("nav");
   const tClients = useTranslations("pages.clients");
+  const tClientForm = useTranslations("forms.client");
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<ClientListItem | null>(null);
@@ -77,7 +79,6 @@ export function ClientList({
       <ul className="flex flex-col gap-3.5">
         {clients.map((client) => {
           const id = client._id;
-          const editing = editingId === id;
           const cleanPhone = getCleanPhone(client.phone);
           const whatsappUrl = getWhatsAppUrl(client.phone);
 
@@ -86,18 +87,7 @@ export function ClientList({
               key={id}
               className="group relative overflow-hidden rounded-2xl border border-neutral-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:border-[#065F46]/40 hover:shadow-sm"
             >
-              {editing ? (
-                <EditClientForm
-                  client={client}
-                  workspaceId={workspaceId}
-                  onCancel={() => setEditingId(null)}
-                  onSuccess={() => {
-                    setEditingId(null);
-                    show(tCommon("savedClient"));
-                  }}
-                />
-              ) : (
-                <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3">
                   {/* Top Row: Name, Badges & Quick Contact Buttons */}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex flex-wrap items-center gap-2 min-w-0">
@@ -238,11 +228,35 @@ export function ClientList({
                     </div>
                   </div>
                 </div>
-              )}
             </li>
           );
         })}
       </ul>
+
+      {/* Full-Screen SaaS Edit Client Modal */}
+      {(() => {
+        const clientBeingEdited = clients.find((c) => c._id === editingId);
+        return (
+          <Modal
+            isOpen={clientBeingEdited !== undefined}
+            onClose={() => setEditingId(null)}
+            title={tClientForm("editTitle")}
+            maxWidthClassName="max-w-xl"
+          >
+            {clientBeingEdited && (
+              <EditClientForm
+                client={clientBeingEdited}
+                workspaceId={workspaceId}
+                onCancel={() => setEditingId(null)}
+                onSuccess={() => {
+                  setEditingId(null);
+                  show(tCommon("savedClient"));
+                }}
+              />
+            )}
+          </Modal>
+        );
+      })()}
 
       <ConfirmDialog
         open={archiveTarget !== null}

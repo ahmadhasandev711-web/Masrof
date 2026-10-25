@@ -22,12 +22,14 @@ export function CreateAccountForm({
   canUseMultiCurrency,
   onSuccess,
   onCancel,
+  hideHeader = false,
 }: {
   workspaceId: string;
   workspaceCurrency: SupportedCurrency;
   canUseMultiCurrency: boolean;
   onSuccess?: () => void;
   onCancel?: () => void;
+  hideHeader?: boolean;
 }) {
   const tForm = useTranslations("forms.account");
   const tCommon = useTranslations("common");
@@ -63,24 +65,26 @@ export function CreateAccountForm({
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+      className={hideHeader ? "flex flex-col gap-4" : "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"}
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <IdempotencyKeyInput value={idempotencyKey} />
 
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
-            aria-label={tCommon("cancel")}
-          >
-            ✕
-          </button>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+              aria-label={tCommon("cancel")}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      )}
 
       {accountType === "mobile_wallet" && (
         <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">

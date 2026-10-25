@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Modal } from "@/components/ui/modal";
 import { formatMoney, fromMinorUnits } from "@/lib/money";
 import {
   recordInvoicePaymentAction,
@@ -59,27 +60,15 @@ export function RecordPaymentDialog({
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 transition-opacity"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${t("recordPayment")} — ${invoice.invoiceNumber}`}
+      maxWidthClassName="max-w-lg"
     >
-      <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-          <h3 className="text-lg font-semibold text-neutral-900">
-            {t("recordPayment")} — {invoice.invoiceNumber}
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
-          >
-            ✕
-          </button>
-        </div>
-
+      <div className="flex flex-col gap-4">
         {/* Invoice Summary Box */}
-        <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-neutral-50 p-3 text-sm">
+        <div className="grid grid-cols-2 gap-3 rounded-xl bg-neutral-50 p-3 text-sm">
           <div>
             <span className="text-neutral-500">{t("total")}: </span>
             <span className="font-semibold text-neutral-900">
@@ -242,6 +231,6 @@ export function RecordPaymentDialog({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }
