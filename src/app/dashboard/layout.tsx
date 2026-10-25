@@ -35,6 +35,10 @@ export default async function DashboardLayout({
     activeWorkspace,
   );
 
+  if (workspaceSubscription.isSuspended) {
+    return <AccountSuspendedScreen />;
+  }
+
   return (
     <DashboardShell
       userName={session.user.name}

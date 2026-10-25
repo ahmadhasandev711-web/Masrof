@@ -10,7 +10,7 @@ export function ProjectSummaryCards({
   totalInvoiced,
   totalNetProfit,
   totalExpectedProfit,
-  currency = "EGP",
+  currency,
 }: {
   totalProjects: number;
   inProgressCount: number;
@@ -18,7 +18,7 @@ export function ProjectSummaryCards({
   totalInvoiced: number;
   totalNetProfit: number;
   totalExpectedProfit?: number;
-  currency?: string;
+  currency: string;
 }) {
   const t = useTranslations("pages.projects");
   const locale = useLocale();

@@ -57,3 +57,23 @@ export type PlanFeature =
 export function isPlanId(value: string): value is PlanId {
   return PLAN_IDS.includes(value as PlanId);
 }
+
+export function resolveEffectivePlan(
+  plan: PlanId,
+  status: string,
+  expiresAt: Date | null | undefined,
+): PlanId {
+  if (status === "suspended") {
+    return "free";
+  }
+
+  if (status === "cancelled") {
+    return "free";
+  }
+
+  if (expiresAt && expiresAt.getTime() < Date.now()) {
+    return "free";
+  }
+
+  return plan;
+}

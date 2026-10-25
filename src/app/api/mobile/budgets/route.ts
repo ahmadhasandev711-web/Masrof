@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { createBudget, listBudgetsWithProgress } from "@/features/budgets/data";
 import { createBudgetSchema } from "@/features/budgets/schemas";
+import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
   mobileErrorResponse,
@@ -45,6 +46,15 @@ export async function POST(request: Request) {
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
+
+    const featureError = await assertWorkspacePlanFeature(
+      session.user.id,
+      parsed.data.workspaceId,
+      "budgets",
+    );
+    if (featureError) {
+      return NextResponse.json({ error: featureError }, { status: 403 });
+    }
 
     const budget = await createBudget(parsed.data);
     revalidateTag(CACHE_TAGS.budgets, "max");

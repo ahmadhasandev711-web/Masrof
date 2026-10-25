@@ -23,6 +23,7 @@ export function EditInvoiceDialog({
   invoice,
   clients,
   projects = [],
+  currency,
   isOpen,
   onClose,
 }: {
@@ -30,6 +31,7 @@ export function EditInvoiceDialog({
   invoice: InvoiceListItem;
   clients: ComboboxClientItem[];
   projects?: ProjectOption[];
+  currency: string;
   isOpen: boolean;
   onClose: () => void;
 }) {
@@ -140,7 +142,7 @@ export function EditInvoiceDialog({
     >
       {invoice.paidAmount > 0 && (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900">
-          {tInvoices("paidAmountWarning", { amount: formatMoney(invoice.paidAmount) })}
+          {tInvoices("paidAmountWarning", { amount: formatMoney(invoice.paidAmount, { currency }) })}
         </div>
       )}
 
@@ -214,7 +216,7 @@ export function EditInvoiceDialog({
               <p className="text-sm font-medium text-neutral-700">{tForm("items")}</p>
               <span className="text-xs font-semibold text-neutral-600">
                 {tInvoices("newTotalCalculated", {
-                  amount: formatMoney(Math.round(totalCalculatedMajor * 100)),
+                  amount: formatMoney(Math.round(totalCalculatedMajor * 100), { currency }),
                 })}
               </span>
             </div>

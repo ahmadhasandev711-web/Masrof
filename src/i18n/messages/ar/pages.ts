@@ -182,9 +182,11 @@ const pages = {
  },
  backup: {
  title: "نسخ احتياطي",
+ ownerOnlyNotice: "تصدير واستعادة النسخ الاحتياطية مقتصر على مالك مساحة العمل فقط.",
  },
  import: {
  title: "استيراد كشف بنك",
+ viewOnlyNotice: "استيراد كشف الحساب مقصور على الأعضاء ذوي صلاحية التعديل.",
  },
  goals: {
  title: "أهداف الادخار",
@@ -236,6 +238,13 @@ const pages = {
  title: "إعدادات المساحة",
  ownerOnly: "تعديل هوية الفواتير متاح لمالك المساحة فقط.",
  newWorkspaceBtn: "+ مساحة عمل جديدة",
+ currencySectionTitle: "العملة الأساسية للمساحة",
+ currencySectionSubtitle: "العملة المعتمدة لحسابات وتقارير وفواتير هذه المساحة",
+ currencySelectLabel: "اختر العملة الأساسية",
+ currencyHelpNotice: "تغيير العملة الأساسية يقوم بتحديث الحسابات والالتزامات الأساسية المرتبطة بالمساحة تلقائياً.",
+ currencySaveBtn: "حفظ العملة الأساسية",
+ currencySavingBtn: "جارِ حفظ العملة...",
+ currencySuccessMessage: "تم تحديث العملة الأساسية للمساحة بنجاح.",
  },
  newWorkspace: {
  title: "مساحة عمل جديدة",

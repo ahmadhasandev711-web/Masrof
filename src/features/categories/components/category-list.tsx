@@ -23,6 +23,7 @@ function CategoryGroup({
   emptyLabel,
   systemBadgeLabel,
   locale,
+  canWrite = true,
 }: {
   title: string;
   headerIcon: ReactNode;
@@ -31,6 +32,7 @@ function CategoryGroup({
   emptyLabel: string;
   systemBadgeLabel: string;
   locale: AppLocale;
+  canWrite?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
@@ -66,9 +68,9 @@ function CategoryGroup({
                   <span className="rounded bg-neutral-200/70 px-1.5 py-0.5 text-[10px] text-neutral-500">
                     {systemBadgeLabel}
                   </span>
-                ) : (
+                ) : canWrite ? (
                   <ArchiveCategoryButton categoryId={id} workspaceId={workspaceId} />
-                )}
+                ) : null}
               </li>
             );
           })}
@@ -81,9 +83,11 @@ function CategoryGroup({
 export async function CategoryList({
   categories,
   workspaceId,
+  canWrite = true,
 }: {
   categories: CategoryItem[];
   workspaceId: string;
+  canWrite?: boolean;
 }) {
   const locale = (await getLocale()) as AppLocale;
   const [tCategory, tEmpty, tPages] = await Promise.all([
@@ -104,6 +108,7 @@ export async function CategoryList({
         emptyLabel={tEmpty("noCategories")}
         systemBadgeLabel={tPages("systemBadge")}
         locale={locale}
+        canWrite={canWrite}
       />
       <CategoryGroup
         title={tCategory("kindExpense")}
@@ -113,6 +118,7 @@ export async function CategoryList({
         emptyLabel={tEmpty("noCategories")}
         systemBadgeLabel={tPages("systemBadge")}
         locale={locale}
+        canWrite={canWrite}
       />
     </div>
   );

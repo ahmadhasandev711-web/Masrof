@@ -169,6 +169,7 @@ export default async function TransactionsPage({
             transfers={transfersResult.items}
             workspaceId={workspaceId}
             currency={activeWorkspace.currency}
+            canWrite={canWrite}
           />
 
           <TransactionPagination
@@ -200,6 +201,8 @@ export default async function TransactionsPage({
             accountCurrencies={accountCurrencies}
             accounts={accountOptions.map(({ id, name }) => ({ id, name }))}
             categories={categoryOptions}
+            workspaceCurrency={activeWorkspace.currency}
+            canWrite={canWrite}
           />
 
           {/* Pagination Bar */}

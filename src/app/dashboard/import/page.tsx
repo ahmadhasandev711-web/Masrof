@@ -4,6 +4,7 @@ import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { listAccountsForWorkspace } from "@/features/accounts/data";
 import { listCategoriesForWorkspace } from "@/features/categories/data";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { BankImportForm } from "@/features/import/components/bank-import-form";
 import { getLocale, getTranslations } from "next-intl/server";
 import { mapPlainCategoryToOption } from "@/features/categories/map-options";
@@ -17,7 +18,11 @@ export default async function BankImportPage() {
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
-  const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
+  const [{ plan }, access] = await Promise.all([
+    getWorkspacePlanContext(session.user.id, workspaceId),
+    getWorkspaceAccess(session.user.id, workspaceId),
+  ]);
+  const canWrite = access.membership.role !== "viewer";
 
   const locale = (await getLocale()) as AppLocale;
   const [accounts, categories] = await Promise.all([
@@ -32,7 +37,11 @@ export default async function BankImportPage() {
         <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
       </div>
 
-      {plan.bankImport ? (
+      {!canWrite ? (
+        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-600">
+          {t("viewOnlyNotice")}
+        </div>
+      ) : plan.bankImport ? (
         <BankImportForm
           workspaceId={workspaceId}
           accounts={accounts.map((a) => ({ id: a._id.toString(), name: a.name }))}

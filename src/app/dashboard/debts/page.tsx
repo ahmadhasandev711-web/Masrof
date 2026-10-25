@@ -2,8 +2,9 @@ import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { getDebtsForWorkspace, getDebtSummary } from "@/features/debts/data";
+import { getDebtsForWorkspace, calculateDebtSummaryFromDebts } from "@/features/debts/data";
 import { DebtsGate } from "@/features/debts/components/debts-gate";
 import { DebtsSummaryCards } from "@/features/debts/components/debts-summary";
 import { CreateDebtDialog } from "@/features/debts/components/create-debt-dialog";
@@ -16,7 +17,7 @@ export default async function DebtsPage() {
   if (redirect) return redirect;
 
   const workspaceId = activeWorkspace._id.toString();
-  const currency = activeWorkspace.currency || "EGP";
+  const currency = activeWorkspace.currency;
 
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
 
@@ -37,12 +38,15 @@ export default async function DebtsPage() {
     );
   }
 
-  // Load debts, summary, and accounts in parallel
-  const [debts, summary, accounts] = await Promise.all([
+  // Load debts, accounts, and access in parallel; compute summary in-memory with 0 redundant DB queries
+  const [debts, accounts, access] = await Promise.all([
     getDebtsForWorkspace(workspaceId),
-    getDebtSummary(workspaceId, currency),
     listAccountsForWorkspace(workspaceId),
+    getWorkspaceAccess(session.user.id, workspaceId),
   ]);
+
+  const canWrite = access.membership.role !== "viewer";
+  const summary = calculateDebtSummaryFromDebts(debts, currency);
 
   const accountOptions = accounts.map((acc) => ({
     _id: String(acc._id),
@@ -68,7 +72,7 @@ export default async function DebtsPage() {
           </p>
         </div>
 
-        <CreateDebtDialog workspaceId={workspaceId} currency={currency} />
+        {canWrite && <CreateDebtDialog workspaceId={workspaceId} currency={currency} />}
       </div>
 
       {/* Financial Summary */}
@@ -80,6 +84,7 @@ export default async function DebtsPage() {
         accounts={accountOptions}
         workspaceId={workspaceId}
         currency={currency}
+        canWrite={canWrite}
       />
     </div>
   );

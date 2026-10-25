@@ -5,7 +5,7 @@ import {
   getDebtsForWorkspace,
   getDebtSummary,
 } from "@/features/debts/data";
-import { assertPlanFeature } from "@/features/subscriptions/data";
+import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import {
   mobileErrorResponse,
   requireMobileSession,
@@ -22,6 +22,11 @@ export async function GET(request: Request) {
 
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
+
+  const featureError = await assertWorkspacePlanFeature(session.user.id, access.workspaceId, "debts");
+  if (featureError) {
+    return NextResponse.json({ error: featureError }, { status: 403 });
+  }
 
   try {
     const [items, summary] = await Promise.all([
@@ -55,7 +60,7 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertPlanFeature(session.user.id, "debts");
+    const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "debts");
     if (featureError) {
       return NextResponse.json({ error: featureError }, { status: 403 });
     }

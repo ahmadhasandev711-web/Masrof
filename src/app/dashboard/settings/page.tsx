@@ -3,6 +3,8 @@ import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { WorkspaceBrandingForm } from "@/features/workspaces/components/workspace-branding-form";
+import { WorkspaceCurrencyForm } from "@/features/workspaces/components/workspace-currency-form";
+import type { SupportedCurrency } from "@/models/workspace";
 import { getTranslations } from "next-intl/server";
 
 export default async function WorkspaceSettingsPage() {
@@ -25,16 +27,22 @@ export default async function WorkspaceSettingsPage() {
       </div>
 
       {isOwner ? (
-        <WorkspaceBrandingForm
-          workspaceId={workspaceId}
-          initial={{
-            businessName: activeWorkspace.businessName ?? "",
-            logoUrl: activeWorkspace.logoUrl ?? "",
-            taxId: activeWorkspace.taxId ?? "",
-            businessPhone: activeWorkspace.businessPhone ?? "",
-            businessAddress: activeWorkspace.businessAddress ?? "",
-          }}
-        />
+        <>
+          <WorkspaceCurrencyForm
+            workspaceId={workspaceId}
+            currentCurrency={(activeWorkspace.currency as SupportedCurrency) || "EGP"}
+          />
+          <WorkspaceBrandingForm
+            workspaceId={workspaceId}
+            initial={{
+              businessName: activeWorkspace.businessName ?? "",
+              logoUrl: activeWorkspace.logoUrl ?? "",
+              taxId: activeWorkspace.taxId ?? "",
+              businessPhone: activeWorkspace.businessPhone ?? "",
+              businessAddress: activeWorkspace.businessAddress ?? "",
+            }}
+          />
+        </>
       ) : (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {t("ownerOnly")}

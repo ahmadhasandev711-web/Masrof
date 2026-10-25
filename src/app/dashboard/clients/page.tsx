@@ -120,6 +120,7 @@ export default async function ClientsPage({
         clients={paginatedClients}
         workspaceId={workspaceId}
         currency={activeWorkspace.currency}
+        canWrite={canWrite}
       />
 
       {/* 5. In-Place Smooth Pagination */}

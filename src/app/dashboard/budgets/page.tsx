@@ -9,6 +9,7 @@ import { BudgetList } from "@/features/budgets/components/budget-list";
 import { RecurringExpenseCreationManager } from "@/features/recurring-expenses/components/recurring-expense-creation-manager";
 import { RecurringExpenseList } from "@/features/recurring-expenses/components/recurring-expense-list";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
 import {
   countRecurringExpensesForWorkspace,
@@ -42,6 +43,7 @@ export default async function BudgetsPage() {
     recurringCount,
     recurringLimit,
     locale,
+    access,
   ] = await Promise.all([
     listCategoriesForWorkspace(workspaceId, "expense"),
     listBudgetsWithProgress(workspaceId),
@@ -51,8 +53,10 @@ export default async function BudgetsPage() {
     countRecurringExpensesForWorkspace(workspaceId),
     getPlanQuantityLimit(subscription.plan, "maxRecurringExpenses"),
     getLocale(),
+    getWorkspaceAccess(session.user.id, workspaceId),
   ]);
 
+  const canWrite = access.membership.role !== "viewer";
   const recurringUsage = toQuantityUsage(recurringCount, recurringLimit);
 
   const totalBudgeted = budgets.reduce((sum, b) => sum + (b.amount || 0), 0);
@@ -85,7 +89,7 @@ export default async function BudgetsPage() {
             </h2>
             <p className="text-xs text-neutral-500">{activeWorkspace.name}</p>
           </div>
-          {plan.budgets && (
+          {plan.budgets && canWrite && (
             <BudgetCreationManager
               workspaceId={workspaceId}
               expenseCategories={categoryOptions}
@@ -156,6 +160,7 @@ export default async function BudgetsPage() {
             }))}
             workspaceId={workspaceId}
             currency={activeWorkspace.currency}
+            canWrite={canWrite}
           />
         ) : (
           <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">
@@ -178,7 +183,7 @@ export default async function BudgetsPage() {
               {tDashboard("budgets.recurringHint")}
             </p>
           </div>
-          {plan.recurringExpenses && !recurringUsage.atLimit && (
+          {plan.recurringExpenses && !recurringUsage.atLimit && canWrite && (
             <RecurringExpenseCreationManager
               workspaceId={workspaceId}
               accounts={accountOptions}
@@ -196,6 +201,7 @@ export default async function BudgetsPage() {
               workspaceName={activeWorkspace.name}
               userWhatsAppPhone={userWhatsAppPhone}
               canUseWhatsApp={plan.whatsappReminders}
+              canWrite={canWrite}
             />
           </>
         ) : (

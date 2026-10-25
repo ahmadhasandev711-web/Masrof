@@ -6,6 +6,7 @@ import { LiquidityHeroCard } from "@/features/accounts/components/liquidity-hero
 import { AccountList } from "@/features/accounts/components/account-list";
 import { ExchangeRatesForm } from "@/features/accounts/components/exchange-rates-form";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { parseExchangeRates } from "@/lib/currency";
 import { getIntlLocale, type AppLocale } from "@/i18n/config";
 import type { SupportedCurrency } from "@/models/workspace";
@@ -23,10 +24,12 @@ export default async function AccountsPage() {
   const workspaceId = activeWorkspace._id.toString();
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const baseCurrency = activeWorkspace.currency as SupportedCurrency;
-  const [accounts, balanceSummary] = await Promise.all([
+  const [accounts, balanceSummary, access] = await Promise.all([
     listAccountsForWorkspace(workspaceId),
     getWorkspaceBalanceSummary(workspaceId),
+    getWorkspaceAccess(session.user.id, workspaceId),
   ]);
+  const canWrite = access.membership.role !== "viewer";
   const exchangeRates = parseExchangeRates(activeWorkspace.exchangeRates);
 
   return (
@@ -38,11 +41,13 @@ export default async function AccountsPage() {
           <p className="text-xs text-neutral-500 mt-0.5">{activeWorkspace.name}</p>
         </div>
 
-        <AccountCreationManager
-          workspaceId={workspaceId}
-          workspaceCurrency={baseCurrency}
-          canUseMultiCurrency={plan.multiCurrency}
-        />
+        {canWrite && (
+          <AccountCreationManager
+            workspaceId={workspaceId}
+            workspaceCurrency={baseCurrency}
+            canUseMultiCurrency={plan.multiCurrency}
+          />
+        )}
       </div>
 
       {/* 2. Net Liquidity Hero Card */}
@@ -65,6 +70,7 @@ export default async function AccountsPage() {
         workspaceId={workspaceId}
         baseCurrency={baseCurrency}
         totalLiquidity={balanceSummary.convertedTotalMinor ?? 0}
+        canWrite={canWrite}
       />
 
       {/* 4. Collapsible Foreign Exchange Rates Section */}

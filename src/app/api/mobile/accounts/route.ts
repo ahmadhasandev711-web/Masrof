@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { listAccountsForWorkspace, createAccount } from "@/features/accounts/data";
+import { resolveAccountCurrency } from "@/lib/currency";
 import { createAccountSchema } from "@/features/accounts/schemas";
+import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { SupportedCurrency } from "@/models/workspace";
 import {
@@ -45,9 +47,23 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
+    const workspaceCurrency = access.workspace.currency as SupportedCurrency;
+    const requestedCurrency = resolveAccountCurrency(parsed.data.currency, workspaceCurrency);
+
+    if (requestedCurrency !== workspaceCurrency) {
+      const featureError = await assertWorkspacePlanFeature(
+        session.user.id,
+        parsed.data.workspaceId,
+        "multiCurrency",
+      );
+      if (featureError) {
+        return NextResponse.json({ error: featureError }, { status: 403 });
+      }
+    }
+
     const account = await createAccount(
-      parsed.data,
-      access.workspace.currency as SupportedCurrency,
+      { ...parsed.data, currency: requestedCurrency },
+      workspaceCurrency,
     );
 
     revalidateTag(CACHE_TAGS.accounts, "max");

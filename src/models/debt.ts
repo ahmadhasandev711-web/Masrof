@@ -1,4 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
+import { SUPPORTED_CURRENCIES } from "@/lib/currency/constants";
 
 const debtSchema = new Schema(
   {
@@ -9,7 +10,11 @@ const debtSchema = new Schema(
     totalAmount: { type: Number, required: true, min: 1 },
     /** Total amount paid towards this debt in minor units */
     paidAmount: { type: Number, required: true, min: 0, default: 0 },
-    currency: { type: String, required: true, default: "EGP" },
+    currency: {
+      type: String,
+      enum: SUPPORTED_CURRENCIES,
+      required: true,
+    },
     dueDate: { type: Date, default: null },
     status: {
       type: String,

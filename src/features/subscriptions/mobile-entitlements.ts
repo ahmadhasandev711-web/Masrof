@@ -3,8 +3,14 @@ import "server-only";
 import { getUserSubscription } from "@/features/subscriptions/data";
 import { getPlanConfig } from "@/features/subscriptions/plan-config-data";
 
-export async function getMobileEntitlements(userId: string) {
-  const subscription = await getUserSubscription(userId);
+export async function getMobileEntitlements(userId: string, workspaceId?: string) {
+  let subscription;
+  if (workspaceId) {
+    const { getEffectiveSubscriptionForWorkspace } = await import("@/features/subscriptions/data");
+    subscription = await getEffectiveSubscriptionForWorkspace(userId, workspaceId);
+  } else {
+    subscription = await getUserSubscription(userId);
+  }
   const config = await getPlanConfig(subscription.plan);
 
   return {

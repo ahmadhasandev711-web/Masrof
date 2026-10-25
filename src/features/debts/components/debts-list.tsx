@@ -15,11 +15,13 @@ export function DebtsList({
   accounts,
   workspaceId,
   currency,
+  canWrite = true,
 }: {
   debts: DebtItem[];
   accounts: { _id: string; name: string; currency?: string | null }[];
   workspaceId: string;
   currency: string;
+  canWrite?: boolean;
 }) {
   const t = useTranslations("forms.debts");
   const tCommon = useTranslations("common");
@@ -203,17 +205,19 @@ export function DebtsList({
                     >
                       {t("paymentsHistory")}
                     </button>
-                    <button
-                      type="button"
-                      disabled={isPending}
-                      onClick={() => setArchiveTargetDebt(debt)}
-                      className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:text-red-600"
-                    >
-                      {t("archive")}
-                    </button>
+                    {canWrite && (
+                      <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => setArchiveTargetDebt(debt)}
+                        className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:text-red-600"
+                      >
+                        {t("archive")}
+                      </button>
+                    )}
                   </div>
 
-                  {!isFullyPaid && (
+                  {!isFullyPaid && canWrite && (
                     <button
                       type="button"
                       onClick={() => setPaymentTargetDebt(debt)}

@@ -125,6 +125,7 @@ export default async function ProjectsPage({
         currency={activeWorkspace.currency}
         workspaceName={activeWorkspace.name}
         canUseWhatsApp={plan.whatsappReminders}
+        canWrite={canWrite}
       />
 
       {/* 5. In-Place Smooth Pagination */}

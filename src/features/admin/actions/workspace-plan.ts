@@ -100,7 +100,11 @@ export async function toggleAdminWorkspaceSuspendAction(
   const t = await getTranslations("admin.errors");
 
   try {
-    await setWorkspacePlan(workspaceId, suspend ? "free" : "pro", {
+    const { WorkspaceModel } = await import("@/models/workspace");
+    const ws = await WorkspaceModel.findById(workspaceId).lean();
+    const currentPlan = (ws?.plan as PlanId) || "free";
+
+    await setWorkspacePlan(workspaceId, currentPlan, {
       adminEmail: session.user.email,
       status: suspend ? "suspended" : "active",
       notes: suspend ? "تم تعليق المساحة بواسطة الأدمن" : "تم فك التعليق بواسطة الأدمن",

@@ -119,10 +119,12 @@ export function SavingsGoalList({
   goals,
   workspaceId,
   currency,
+  canWrite = true,
 }: {
   goals: SavingsGoalItem[];
   workspaceId: string;
   currency: string;
+  canWrite?: boolean;
 }) {
   const tEmpty = useTranslations("empty");
   const tDashboard = useTranslations("dashboard.alerts");
@@ -168,7 +170,7 @@ export function SavingsGoalList({
                   </p>
                 )}
               </div>
-              <ArchiveGoalButton goalId={goal._id} workspaceId={workspaceId} />
+              {canWrite && <ArchiveGoalButton goalId={goal._id} workspaceId={workspaceId} />}
             </div>
 
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
@@ -192,7 +194,7 @@ export function SavingsGoalList({
               </p>
             )}
 
-            <UpdateProgressForm goalId={goal._id} workspaceId={workspaceId} />
+            {canWrite && <UpdateProgressForm goalId={goal._id} workspaceId={workspaceId} />}
           </li>
         );
       })}

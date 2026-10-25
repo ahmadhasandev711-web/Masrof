@@ -60,7 +60,7 @@ export default async function CategoriesPage() {
         </div>
       </div>
 
-      <CategoryList categories={categories} workspaceId={workspaceId} />
+      <CategoryList categories={categories} workspaceId={workspaceId} canWrite={canWrite} />
     </div>
   );
 }

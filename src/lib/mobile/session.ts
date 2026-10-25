@@ -8,6 +8,7 @@ import {
   WorkspaceAccessDeniedError,
   WorkspaceWriteDeniedError,
   WorkspaceOwnerRequiredError,
+  WorkspaceSuspendedError,
 } from "@/features/workspaces/access";
 
 export type MobileSession = {
@@ -36,6 +37,16 @@ export async function requireMobileWorkspace(
   if (!workspaceId) {
     return NextResponse.json({ error: "workspaceIdRequired" }, { status: 400 });
   }
+  if (mode === "write") {
+    const { checkMemoryRateLimit } = await import("@/lib/rate-limit/memory");
+    const rate = checkMemoryRateLimit(`mobile-write:${userId}`, 120, 60_000);
+    if (!rate.ok) {
+      return NextResponse.json(
+        { error: "rateLimited", retryAfterSec: rate.retryAfterSec },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
+      );
+    }
+  }
   try {
     const workspace =
       mode === "write"
@@ -56,6 +67,12 @@ export function mobileErrorResponse(error: unknown) {
   }
   if (error instanceof WorkspaceOwnerRequiredError) {
     return NextResponse.json({ error: "ownerRequired" }, { status: 403 });
+  }
+  if (
+    error instanceof WorkspaceSuspendedError ||
+    (error instanceof Error && error.name === "SubscriptionSuspendedError")
+  ) {
+    return NextResponse.json({ error: "accountSuspended" }, { status: 403 });
   }
   if (error instanceof Error && "code" in error && typeof (error as { code: unknown }).code === "string") {
     return NextResponse.json({ error: (error as { code: string }).code }, { status: 400 });

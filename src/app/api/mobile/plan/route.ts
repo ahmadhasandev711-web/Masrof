@@ -18,13 +18,13 @@ export async function GET(request: Request) {
   try {
     const [context, entitlements] = await Promise.all([
       getWorkspacePlanContext(session.user.id, access.workspaceId),
-      getMobileEntitlements(session.user.id),
+      getMobileEntitlements(session.user.id, access.workspaceId),
     ]);
 
     return NextResponse.json({
       plan: entitlements.plan,
       showAds: entitlements.showAds,
-      isSuspended: entitlements.isSuspended,
+      isSuspended: entitlements.isSuspended || context.subscription.isSuspended,
       status: context.subscription.status,
       expiresAt: context.subscription.expiresAt ?? null,
       planName: context.plan.name,

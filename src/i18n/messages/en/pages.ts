@@ -182,9 +182,11 @@ const pages = {
  },
  backup: {
  title: "Backup",
+ ownerOnlyNotice: "Backup export and restore are restricted to the workspace owner.",
  },
  import: {
  title: "Bank statement import",
+ viewOnlyNotice: "Bank statement import is restricted to members with write access.",
  },
  goals: {
  title: "Savings goals",
@@ -236,6 +238,13 @@ const pages = {
  title: "Workspace settings",
  ownerOnly: "Only the workspace owner can edit invoice branding.",
  newWorkspaceBtn: "+ New workspace",
+ currencySectionTitle: "Workspace Base Currency",
+ currencySectionSubtitle: "Primary currency used for accounts, reports, and invoices in this workspace",
+ currencySelectLabel: "Select Base Currency",
+ currencyHelpNotice: "Changing the base currency automatically updates all primary accounts and liabilities linked to this workspace.",
+ currencySaveBtn: "Save Base Currency",
+ currencySavingBtn: "Saving currency...",
+ currencySuccessMessage: "Workspace base currency updated successfully.",
  },
  newWorkspace: {
  title: "New workspace",

@@ -19,10 +19,12 @@ export function TransferList({
   transfers,
   workspaceId,
   currency,
+  canWrite = true,
 }: {
   transfers: TransferListItem[];
   workspaceId: string;
   currency: string;
+  canWrite?: boolean;
 }) {
   const tEmpty = useTranslations("empty");
   const locale = useLocale();
@@ -52,6 +54,7 @@ export function TransferList({
             transfer={transfer}
             workspaceId={workspaceId}
             currency={currency}
+            canWrite={canWrite}
           />
         ))}
       </ul>
@@ -63,10 +66,12 @@ function TransferRow({
   transfer,
   workspaceId,
   currency,
+  canWrite = true,
 }: {
   transfer: TransferListItem;
   workspaceId: string;
   currency: string;
+  canWrite?: boolean;
 }) {
   const tTransfer = useTranslations("forms.transfer");
   const tCommon = useTranslations("common");
@@ -99,17 +104,19 @@ function TransferRow({
         <span className="font-mono text-base font-bold tabular-nums text-blue-700">
           {formatMoney(transfer.amount, { currency, locale })}
         </span>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => {
-            if (!confirm(tConfirm("deleteTransfer"))) return;
-            startTransition(() => archiveTransferAction(transfer._id, workspaceId));
-          }}
-          className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
-        >
-          {tCommon("cancel")}
-        </button>
+        {canWrite && (
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              if (!confirm(tConfirm("deleteTransfer"))) return;
+              startTransition(() => archiveTransferAction(transfer._id, workspaceId));
+            }}
+            className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+          >
+            {tCommon("cancel")}
+          </button>
+        )}
       </div>
     </li>
   );

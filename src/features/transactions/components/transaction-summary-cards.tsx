@@ -6,13 +6,13 @@ export function TransactionSummaryCards({
   totalExpense,
   net,
   totalCount,
-  currency = "EGP",
+  currency,
 }: {
   totalIncome: number;
   totalExpense: number;
   net: number;
   totalCount: number;
-  currency?: string;
+  currency: string;
 }) {
   const t = useTranslations("pages.transactions");
   const locale = useLocale();

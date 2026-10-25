@@ -5,10 +5,15 @@ import {
   listSavingsGoals,
   updateSavingsGoalProgress,
 } from "@/features/savings-goals/data";
+import { countSavingsGoalsForWorkspace } from "@/features/subscriptions/plan-usage";
 import {
   createSavingsGoalSchema,
   createUpdateGoalProgressSchema,
 } from "@/features/savings-goals/schemas";
+import {
+  assertWorkspacePlanFeature,
+  assertWorkspaceQuantityLimit,
+} from "@/features/subscriptions/data";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
   mobileErrorResponse,
@@ -52,6 +57,26 @@ export async function POST(request: Request) {
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
+
+    const featureError = await assertWorkspacePlanFeature(
+      session.user.id,
+      parsed.data.workspaceId,
+      "savingsGoals",
+    );
+    if (featureError) {
+      return NextResponse.json({ error: featureError }, { status: 403 });
+    }
+
+    const goalCount = await countSavingsGoalsForWorkspace(parsed.data.workspaceId);
+    const limitError = await assertWorkspaceQuantityLimit(
+      session.user.id,
+      parsed.data.workspaceId,
+      "maxSavingsGoals",
+      goalCount,
+    );
+    if (limitError) {
+      return NextResponse.json({ error: limitError }, { status: 403 });
+    }
 
     const goal = await createSavingsGoal(parsed.data);
     revalidateTag(CACHE_TAGS.goals, "max");

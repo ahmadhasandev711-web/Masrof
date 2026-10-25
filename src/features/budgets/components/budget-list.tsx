@@ -34,10 +34,12 @@ export async function BudgetList({
   budgets,
   workspaceId,
   currency,
+  canWrite = true,
 }: {
   budgets: BudgetItem[];
   workspaceId: string;
   currency: string;
+  canWrite?: boolean;
 }) {
   const [tEmpty, tForm, tDashboard, locale] = await Promise.all([
     getTranslations("empty"),
@@ -99,7 +101,7 @@ export async function BudgetList({
                   </span>
                 )}
               </div>
-              <ArchiveBudgetButton budgetId={id} workspaceId={workspaceId} />
+              {canWrite && <ArchiveBudgetButton budgetId={id} workspaceId={workspaceId} />}
             </div>
 
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100">

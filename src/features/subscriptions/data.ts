@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { UserSubscriptionModel } from "@/models/user-subscription";
-import { type PlanId, type PlanFeature } from "@/features/subscriptions/plans";
+import { resolveEffectivePlan, type PlanId, type PlanFeature } from "@/features/subscriptions/plans";
 import {
   getPlanConfig,
   getPlanQuantityLimit,
@@ -42,25 +42,7 @@ export class SubscriptionSuspendedError extends Error {
   }
 }
 
-export function resolveEffectivePlan(
-  plan: PlanId,
-  status: string,
-  expiresAt: Date | null | undefined,
-): PlanId {
-  if (status === "suspended") {
-    return "free";
-  }
-
-  if (status === "cancelled") {
-    return "free";
-  }
-
-  if (expiresAt && expiresAt.getTime() < Date.now()) {
-    return "free";
-  }
-
-  return plan;
-}
+export { resolveEffectivePlan } from "@/features/subscriptions/plans";
 
 export const getUserSubscription = cache(async (userId: string): Promise<UserSubscriptionView> => {
   const fallback: UserSubscriptionView = {
@@ -198,9 +180,9 @@ export async function resolveWorkspaceSubscriptionFromDocument(
   if (ws.plan === "free") {
     return {
       plan: "free",
-      status: "active",
+      status: (ws.planStatus ?? "active") as UserSubscriptionView["status"],
       expiresAt: null,
-      isSuspended: false,
+      isSuspended: ws.planStatus === "suspended",
       isTeamMember: workspace.ownerId !== userId,
       ownerId: workspace.ownerId,
     };

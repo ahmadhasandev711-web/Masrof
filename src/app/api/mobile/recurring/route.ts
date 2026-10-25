@@ -5,7 +5,12 @@ import {
   listRecurringExpenses,
   recordRecurringExpense,
 } from "@/features/recurring-expenses/data";
+import { countRecurringExpensesForWorkspace } from "@/features/subscriptions/plan-usage";
 import { createRecurringExpenseSchema } from "@/features/recurring-expenses/schemas";
+import {
+  assertWorkspacePlanFeature,
+  assertWorkspaceQuantityLimit,
+} from "@/features/subscriptions/data";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
   mobileErrorResponse,
@@ -41,6 +46,26 @@ export async function POST(request: Request) {
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
+
+    const featureError = await assertWorkspacePlanFeature(
+      session.user.id,
+      parsed.data.workspaceId,
+      "recurringExpenses",
+    );
+    if (featureError) {
+      return NextResponse.json({ error: featureError }, { status: 403 });
+    }
+
+    const recurringCount = await countRecurringExpensesForWorkspace(parsed.data.workspaceId);
+    const limitError = await assertWorkspaceQuantityLimit(
+      session.user.id,
+      parsed.data.workspaceId,
+      "maxRecurringExpenses",
+      recurringCount,
+    );
+    if (limitError) {
+      return NextResponse.json({ error: limitError }, { status: 403 });
+    }
 
     const recurring = await createRecurringExpense(parsed.data);
     revalidateTag(CACHE_TAGS.recurring, "max");

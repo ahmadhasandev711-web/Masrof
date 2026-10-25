@@ -34,6 +34,7 @@ export function RecurringExpenseList({
   workspaceName,
   userWhatsAppPhone,
   canUseWhatsApp,
+  canWrite = true,
 }: {
   items: RecurringExpenseListItem[];
   workspaceId: string;
@@ -41,6 +42,7 @@ export function RecurringExpenseList({
   workspaceName: string;
   userWhatsAppPhone: string | null;
   canUseWhatsApp: boolean;
+  canWrite?: boolean;
 }) {
   const tRecurring = useTranslations("forms.recurring");
   const tDashboard = useTranslations("dashboard.budgets");
@@ -72,6 +74,7 @@ export function RecurringExpenseList({
           workspaceName={workspaceName}
           userWhatsAppPhone={userWhatsAppPhone}
           canUseWhatsApp={canUseWhatsApp}
+          canWrite={canWrite}
           frequencyLabels={frequencyLabels}
           tRecurring={tRecurring}
           tWhatsapp={tWhatsapp}
@@ -92,6 +95,7 @@ function RecurringRow({
   workspaceName,
   userWhatsAppPhone,
   canUseWhatsApp,
+  canWrite = true,
   frequencyLabels,
   tRecurring,
   tWhatsapp,
@@ -106,6 +110,7 @@ function RecurringRow({
   workspaceName: string;
   userWhatsAppPhone: string | null;
   canUseWhatsApp: boolean;
+  canWrite?: boolean;
   frequencyLabels: { monthly: string; weekly: string };
   tRecurring: ReturnType<typeof useTranslations>;
   tWhatsapp: ReturnType<typeof useTranslations>;
@@ -158,44 +163,46 @@ function RecurringRow({
             <span className="font-mono tabular-nums">{formatDate(item.nextDueDate, locale)}</span>
           </p>
         </div>
-        <div className="flex shrink-0 flex-col gap-1">
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={handleRecordClick}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-60 ${
-              due
-                ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                : "border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
-            }`}
-          >
-            {tRecurring("recordNow")}
-          </button>
-          {canUseWhatsApp ? (
-            userWhatsAppPhone ? (
-              <WhatsAppReminderLink
-                phone={userWhatsAppPhone}
-                label={tWhatsapp("label")}
-                message={recurringExpenseReminderMessage(tWhatsappMessages, {
-                  description: item.description || item.categoryName,
-                  amountLabel: formatMoney(item.amount, formatOptions),
-                  dueDateLabel: formatDate(item.nextDueDate, locale),
-                  workspaceName,
-                })}
-              />
-            ) : (
-              <WhatsAppSettingsLink />
-            )
-          ) : null}
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => setStopConfirmOpen(true)}
-            className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-60"
-          >
-            {tRecurring("stop")}
-          </button>
-        </div>
+        {canWrite && (
+          <div className="flex shrink-0 flex-col gap-1">
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={handleRecordClick}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-60 ${
+                due
+                  ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                  : "border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+              }`}
+            >
+              {tRecurring("recordNow")}
+            </button>
+            {canUseWhatsApp ? (
+              userWhatsAppPhone ? (
+                <WhatsAppReminderLink
+                  phone={userWhatsAppPhone}
+                  label={tWhatsapp("label")}
+                  message={recurringExpenseReminderMessage(tWhatsappMessages, {
+                    description: item.description || item.categoryName,
+                    amountLabel: formatMoney(item.amount, formatOptions),
+                    dueDateLabel: formatDate(item.nextDueDate, locale),
+                    workspaceName,
+                  })}
+                />
+              ) : (
+                <WhatsAppSettingsLink />
+              )
+            ) : null}
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => setStopConfirmOpen(true)}
+              className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-60"
+            >
+              {tRecurring("stop")}
+            </button>
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

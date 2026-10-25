@@ -36,6 +36,7 @@ type TransactionRowProps = {
   currency: string;
   accounts: AccountOption[];
   categories: CategoryOption[];
+  canWrite?: boolean;
 };
 
 function formatDate(date: Date | string, locale: string = "ar") {
@@ -57,6 +58,7 @@ export function TransactionRow({
   currency,
   accounts,
   categories,
+  canWrite = true,
 }: TransactionRowProps) {
   const tForm = useTranslations("forms.transaction");
   const tShared = useTranslations("forms.shared");
@@ -154,16 +156,18 @@ export function TransactionRow({
         </span>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-1.5 ms-auto sm:ms-0">
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
-          >
-            {tForm("editTitle")}
-          </button>
-          <ArchiveTransactionButton transactionId={transaction.id} workspaceId={workspaceId} />
-        </div>
+        {canWrite && (
+          <div className="flex items-center gap-1.5 ms-auto sm:ms-0">
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
+            >
+              {tForm("editTitle")}
+            </button>
+            <ArchiveTransactionButton transactionId={transaction.id} workspaceId={workspaceId} />
+          </div>
+        )}
       </div>
 
       <Modal

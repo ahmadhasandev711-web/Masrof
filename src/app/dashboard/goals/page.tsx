@@ -5,6 +5,7 @@ import { listSavingsGoals } from "@/features/savings-goals/data";
 import { SavingsGoalCreationManager } from "@/features/savings-goals/components/savings-goal-creation-manager";
 import { SavingsGoalList } from "@/features/savings-goals/components/savings-goal-list";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
 import { countSavingsGoalsForWorkspace, toQuantityUsage } from "@/features/subscriptions/plan-usage";
 import { PlanUsageMeter } from "@/features/subscriptions/components/plan-usage-meter";
@@ -21,13 +22,15 @@ export default async function SavingsGoalsPage() {
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
 
-  const [{ plan, subscription }, goals, goalCount, locale] = await Promise.all([
+  const [{ plan, subscription }, goals, goalCount, locale, access] = await Promise.all([
     getWorkspacePlanContext(session.user.id, workspaceId),
     listSavingsGoals(workspaceId),
     countSavingsGoalsForWorkspace(workspaceId),
     getLocale(),
+    getWorkspaceAccess(session.user.id, workspaceId),
   ]);
 
+  const canWrite = access.membership.role !== "viewer";
   const goalLimit = await getPlanQuantityLimit(subscription.plan, "maxSavingsGoals");
   const usage = toQuantityUsage(goalCount, goalLimit);
 
@@ -48,7 +51,7 @@ export default async function SavingsGoalsPage() {
           <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
           <p className="text-sm text-neutral-500">{t("subtitle")}</p>
         </div>
-        {plan.savingsGoals && !usage.atLimit && (
+        {plan.savingsGoals && !usage.atLimit && canWrite && (
           <SavingsGoalCreationManager workspaceId={workspaceId} />
         )}
       </div>
@@ -106,6 +109,7 @@ export default async function SavingsGoalsPage() {
             }))}
             workspaceId={workspaceId}
             currency={activeWorkspace.currency}
+            canWrite={canWrite}
           />
         </>
       ) : (

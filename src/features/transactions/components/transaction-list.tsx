@@ -35,12 +35,16 @@ export async function TransactionList({
   accountCurrencies,
   accounts,
   categories,
+  workspaceCurrency,
+  canWrite = true,
 }: {
   transactions: TransactionItem[];
   workspaceId: string;
   accountCurrencies: Record<string, string>;
   accounts: AccountOption[];
   categories: CategoryOption[];
+  workspaceCurrency: string;
+  canWrite?: boolean;
 }) {
   const locale = (await getLocale()) as AppLocale;
   const tEmpty = await getTranslations("empty");
@@ -87,9 +91,10 @@ export async function TransactionList({
               attachmentName: tx.attachmentName ?? null,
             }}
             workspaceId={workspaceId}
-            currency={accountCurrencies[String(account._id)] ?? "EGP"}
+            currency={accountCurrencies[String(account._id)] ?? workspaceCurrency}
             accounts={accounts}
             categories={categories}
+            canWrite={canWrite}
           />
         );
       })}

@@ -19,11 +19,13 @@ export async function AccountList({
   workspaceId,
   baseCurrency,
   totalLiquidity = 0,
+  canWrite = true,
 }: {
   accounts: AccountListItem[];
   workspaceId: string;
   baseCurrency: SupportedCurrency;
   totalLiquidity?: number;
+  canWrite?: boolean;
 }) {
   const [tEmpty, tAccountType, tPages] = await Promise.all([
     getTranslations("empty"),
@@ -142,7 +144,7 @@ export async function AccountList({
                       <span className="hidden sm:inline">{tPages("transferFrom")}</span>
                     </Link>
 
-                    <ArchiveAccountButton accountId={id} workspaceId={workspaceId} />
+                    {canWrite && <ArchiveAccountButton accountId={id} workspaceId={workspaceId} />}
                   </div>
                 </div>
               </div>

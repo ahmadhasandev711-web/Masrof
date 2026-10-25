@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
+import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { archiveDebt } from "@/features/debts/data";
 
 export async function archiveDebtAction(
@@ -13,14 +13,16 @@ export async function archiveDebtAction(
   const session = await requireSession();
   const tErrors = await getTranslations("errors");
 
-  await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
   try {
+    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
     await archiveDebt(workspaceId, debtId);
     revalidatePath("/dashboard/debts");
     revalidatePath("/dashboard");
     return { success: true, error: null };
   } catch (err: unknown) {
+    if (isWorkspaceAuthorizationError(err)) {
+      return { success: false, error: tErrors("unauthorized") };
+    }
     return {
       success: false,
       error: err instanceof Error ? err.message : tErrors("unexpected"),

@@ -79,6 +79,18 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
+function sanitizeNotificationUrl(rawUrl: unknown): string {
+  if (
+    typeof rawUrl === "string" &&
+    rawUrl.startsWith("/") &&
+    !rawUrl.startsWith("//") &&
+    !rawUrl.includes("\\")
+  ) {
+    return rawUrl;
+  }
+  return "/dashboard";
+}
+
 self.addEventListener("push", (event) => {
   if (!event.data) return;
 
@@ -95,14 +107,15 @@ self.addEventListener("push", (event) => {
       body: data.body,
       icon: data.icon ?? "/icons/icon-192.png",
       badge: data.badge ?? "/icons/icon-192.png",
-      data: { url: data.url ?? "/dashboard" },
+      data: { url: sanitizeNotificationUrl(data.url) },
     }),
   );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data as { url?: string } | undefined)?.url ?? "/dashboard";
+  const rawUrl = (event.notification.data as { url?: string } | undefined)?.url;
+  const url = sanitizeNotificationUrl(rawUrl);
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {

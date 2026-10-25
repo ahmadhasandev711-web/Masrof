@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
+import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { archiveClient } from "@/features/clients/data";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
@@ -17,7 +17,14 @@ export async function archiveClientAction(
 ): Promise<ArchiveClientState> {
   const session = await requireSession();
   const tErrors = await getTranslations("errors");
-  await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
+  try {
+    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
+  } catch (error) {
+    if (isWorkspaceAuthorizationError(error)) {
+      return { error: tErrors("unauthorized") };
+    }
+    throw error;
+  }
 
   const archived = await archiveClient(clientId, workspaceId);
   if (!archived) {

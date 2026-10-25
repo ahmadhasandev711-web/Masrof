@@ -55,12 +55,14 @@ export function ProjectList({
   currency,
   workspaceName,
   canUseWhatsApp,
+  canWrite = true,
 }: {
   projects: ProjectListItem[];
   workspaceId: string;
   currency: string;
   workspaceName: string;
   canUseWhatsApp: boolean;
+  canWrite?: boolean;
 }) {
   const locale = useLocale();
   const tEmpty = useTranslations("empty");
@@ -149,12 +151,14 @@ export function ProjectList({
 
               {/* Action Buttons Top Right on Desktop */}
               <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <Link
-                  href={`/dashboard/invoices?projectId=${id}`}
-                  className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 px-3 py-1.5 text-xs font-semibold transition active:scale-95"
-                >
-                  <span>{tProjects("createInvoice")}</span>
-                </Link>
+                {canWrite && (
+                  <Link
+                    href={`/dashboard/invoices?projectId=${id}`}
+                    className="inline-flex items-center gap-1 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 px-3 py-1.5 text-xs font-semibold transition active:scale-95"
+                  >
+                    <span>{tProjects("createInvoice")}</span>
+                  </Link>
+                )}
 
                 <Link
                   href={`/dashboard/projects/${id}`}
@@ -179,7 +183,7 @@ export function ProjectList({
                   />
                 )}
 
-                <ArchiveProjectButton projectId={id} workspaceId={workspaceId} />
+                {canWrite && <ArchiveProjectButton projectId={id} workspaceId={workspaceId} />}
               </div>
             </div>
 

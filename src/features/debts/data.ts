@@ -9,6 +9,7 @@ import { DebtPaymentModel } from "@/models/debt-payment";
 import { TransactionModel } from "@/models/transaction";
 import { AccountModel } from "@/models/account";
 import { CategoryModel } from "@/models/category";
+import type { SupportedCurrency } from "@/lib/currency/constants";
 import type { DebtItem, DebtPaymentItem, DebtSummary } from "@/features/debts/types";
 import type { CreateDebtInput } from "@/features/debts/schemas";
 import {
@@ -77,7 +78,7 @@ export async function getDebtsForWorkspace(
       paidAmount: paid,
       remainingAmount: remaining,
       progressPercent: progress,
-      currency: doc.currency || "EGP",
+      currency: doc.currency,
       dueDate: doc.dueDate ? doc.dueDate.toISOString() : null,
       status: doc.status as "active" | "paid",
       category: doc.category || "",
@@ -87,9 +88,12 @@ export async function getDebtsForWorkspace(
   });
 }
 
+import { calculateDebtSummaryFromDebts } from "@/features/debts/calculations";
+export { calculateDebtSummaryFromDebts };
+
 export async function getDebtSummary(
   workspaceId: string,
-  currency: string = "EGP",
+  currency: string,
 ): Promise<DebtSummary> {
   await connectToDatabase();
 
@@ -100,31 +104,7 @@ export async function getDebtSummary(
     .select("totalAmount paidAmount status")
     .lean();
 
-  let totalLiabilities = 0;
-  let totalPaid = 0;
-  let activeCount = 0;
-  let paidCount = 0;
-
-  for (const debt of debts) {
-    totalLiabilities += debt.totalAmount ?? 0;
-    totalPaid += debt.paidAmount ?? 0;
-    if (debt.status === "paid") {
-      paidCount++;
-    } else {
-      activeCount++;
-    }
-  }
-
-  const remainingLiabilities = Math.max(0, totalLiabilities - totalPaid);
-
-  return {
-    totalLiabilities,
-    totalPaid,
-    remainingLiabilities,
-    activeCount,
-    paidCount,
-    currency,
-  };
+  return calculateDebtSummaryFromDebts(debts as any, currency);
 }
 
 export async function getDebtPayments(
@@ -169,7 +149,7 @@ export async function getDebtPayments(
   }));
 }
 
-export async function createDebt(input: CreateDebtInput & { currency?: string }): Promise<string> {
+export async function createDebt(input: CreateDebtInput & { currency: SupportedCurrency | string }): Promise<string> {
   await connectToDatabase();
 
   const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
@@ -185,7 +165,7 @@ export async function createDebt(input: CreateDebtInput & { currency?: string })
     creditor: input.creditor.trim(),
     totalAmount: totalAmountMinor,
     paidAmount: 0,
-    currency: input.currency || "EGP",
+    currency: input.currency as SupportedCurrency,
     dueDate: input.dueDate || null,
     status: "active",
     category: input.category?.trim() || "",

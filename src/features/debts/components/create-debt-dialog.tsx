@@ -62,50 +62,22 @@ export function CreateDebtDialog({
           <input type="hidden" name="workspaceId" value={workspaceId} />
           <IdempotencyKeyInput value={idempotencyKey} />
 
-          {/* Type: I owe / Owed to me */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-neutral-700">
-              {t("debtType")}
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50/50 p-2.5 text-xs font-medium text-neutral-800 transition has-[:checked]:border-rose-400 has-[:checked]:bg-rose-50 has-[:checked]:text-rose-900">
-                <input
-                  type="radio"
-                  name="type"
-                  value="payable"
-                  defaultChecked
-                  className="accent-rose-600"
-                />
-                <span>{t("typePayable")}</span>
-              </label>
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50/50 p-2.5 text-xs font-medium text-neutral-800 transition has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50 has-[:checked]:text-emerald-900">
-                <input
-                  type="radio"
-                  name="type"
-                  value="receivable"
-                  className="accent-[#065F46]"
-                />
-                <span>{t("typeReceivable")}</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Debt Name/Title */}
+          {/* Debt Name / Title */}
           <div>
             <label htmlFor="debt-name" className="mb-1 block text-xs font-semibold text-neutral-700">
-              {t("debtName")} <span className="text-rose-500">*</span>
+              {t("name")} <span className="text-rose-500">*</span>
             </label>
             <input
               id="debt-name"
               name="name"
               type="text"
               required
-              placeholder={t("debtNamePlaceholder")}
+              placeholder={t("namePlaceholder")}
               className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
             />
           </div>
 
-          {/* Creditor/Debtor Person or Entity */}
+          {/* Creditor Person or Entity */}
           <div>
             <label htmlFor="debt-creditor" className="mb-1 block text-xs font-semibold text-neutral-700">
               {t("creditor")} <span className="text-rose-500">*</span>
@@ -123,7 +95,7 @@ export function CreateDebtDialog({
           {/* Amount */}
           <div>
             <label htmlFor="debt-amount" className="mb-1 block text-xs font-semibold text-neutral-700">
-              {t("amount")} ({currency}) <span className="text-rose-500">*</span>
+              {t("totalAmount", { currency })} <span className="text-rose-500">*</span>
             </label>
             <input
               id="debt-amount"
@@ -146,6 +118,20 @@ export function CreateDebtDialog({
               id="debt-dueDate"
               name="dueDate"
               type="date"
+              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
+            />
+          </div>
+
+          {/* Category (Optional) */}
+          <div>
+            <label htmlFor="debt-category" className="mb-1 block text-xs font-semibold text-neutral-700">
+              {t("category")}
+            </label>
+            <input
+              id="debt-category"
+              name="category"
+              type="text"
+              placeholder={t("categoryPlaceholder")}
               className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
             />
           </div>

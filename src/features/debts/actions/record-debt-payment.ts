@@ -4,7 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertPlanFeature } from "@/features/subscriptions/data";
+import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { recordDebtPaymentSchema } from "@/features/debts/schemas";
 import {
   recordDebtPayment,
@@ -27,11 +27,6 @@ export async function recordDebtPaymentAction(
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
-  const featureError = await assertPlanFeature(session.user.id, "debts");
-  if (featureError) {
-    return { success: false, error: featureError };
-  }
-
   const parsed = recordDebtPaymentSchema(tValidation as any).safeParse({
     workspaceId: formData.get("workspaceId"),
     debtId: formData.get("debtId"),
@@ -51,6 +46,11 @@ export async function recordDebtPaymentAction(
   }
 
   await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+
+  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "debts");
+  if (featureError) {
+    return { success: false, error: featureError };
+  }
 
   try {
     await recordDebtPayment(

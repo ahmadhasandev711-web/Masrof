@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertPlanFeature } from "@/features/subscriptions/data";
+import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { createDebtSchema } from "@/features/debts/schemas";
 import { createDebt } from "@/features/debts/data";
 
@@ -20,11 +20,6 @@ export async function createDebtAction(
   const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
-
-  const featureError = await assertPlanFeature(session.user.id, "debts");
-  if (featureError) {
-    return { success: false, error: featureError };
-  }
 
   const parsed = createDebtSchema(tValidation as any).safeParse({
     workspaceId: formData.get("workspaceId"),
@@ -44,11 +39,17 @@ export async function createDebtAction(
     };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const workspace = await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+
+  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "debts");
+  if (featureError) {
+    return { success: false, error: featureError };
+  }
 
   try {
     await createDebt({
       ...parsed.data,
+      currency: workspace.currency,
     });
 
     revalidatePath("/dashboard/debts");

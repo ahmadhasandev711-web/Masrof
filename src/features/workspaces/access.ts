@@ -30,6 +30,23 @@ export class WorkspaceWriteDeniedError extends Error {
   }
 }
 
+export class WorkspaceSuspendedError extends Error {
+  constructor(workspaceId: string) {
+    super(`Workspace ${workspaceId} is suspended`);
+    this.name = "WorkspaceSuspendedError";
+  }
+}
+
+export function isWorkspaceAuthorizationError(error: unknown): boolean {
+  return (
+    error instanceof WorkspaceAccessDeniedError ||
+    error instanceof WorkspaceWriteDeniedError ||
+    error instanceof WorkspaceOwnerRequiredError ||
+    error instanceof WorkspaceSuspendedError ||
+    (error instanceof Error && error.name === "SubscriptionSuspendedError")
+  );
+}
+
 export type WorkspaceAccessContext = {
   workspace: WorkspaceDocument & { _id: Types.ObjectId };
   membership: { role: WorkspaceRole; userId: string };
@@ -96,6 +113,11 @@ export async function verifyWorkspaceWriteAccess(
   if (access.membership.role === "viewer") {
     throw new WorkspaceWriteDeniedError(workspaceId);
   }
+  if ((access.workspace as unknown as { planStatus?: string }).planStatus === "suspended") {
+    throw new WorkspaceSuspendedError(workspaceId);
+  }
+  const { assertUserNotSuspended } = await import("@/features/subscriptions/data");
+  await assertUserNotSuspended(userId);
   return access.workspace;
 }
 
@@ -114,5 +136,10 @@ export async function requireWorkspaceOwner(
   if (access.membership.role !== "owner") {
     throw new WorkspaceOwnerRequiredError(workspaceId);
   }
+  if ((access.workspace as unknown as { planStatus?: string }).planStatus === "suspended") {
+    throw new WorkspaceSuspendedError(workspaceId);
+  }
+  const { assertUserNotSuspended } = await import("@/features/subscriptions/data");
+  await assertUserNotSuspended(userId);
   return access;
 }

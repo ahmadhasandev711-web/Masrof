@@ -15,11 +15,13 @@ import { NavIcon } from "@/components/ui/app-icons";
 export function ClientList({
   clients,
   workspaceId,
-  currency = "EGP",
+  currency,
+  canWrite = true,
 }: {
   clients: ClientListItem[];
   workspaceId: string;
-  currency?: string;
+  currency: string;
+  canWrite?: boolean;
 }) {
   const locale = useLocale();
   const tCommon = useTranslations("common");
@@ -209,23 +211,25 @@ export function ClientList({
                       </Link>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(id)}
-                        className="font-medium text-neutral-500 transition hover:text-emerald-700"
-                      >
-                        {tCommon("edit")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setArchiveTarget(client)}
-                        disabled={isPending}
-                        className="font-medium text-neutral-400 transition hover:text-rose-600 disabled:opacity-60"
-                      >
-                        {tCommon("archive")}
-                      </button>
-                    </div>
+                    {canWrite && (
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(id)}
+                          className="font-medium text-neutral-500 transition hover:text-emerald-700"
+                        >
+                          {tCommon("edit")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setArchiveTarget(client)}
+                          disabled={isPending}
+                          className="font-medium text-neutral-400 transition hover:text-rose-600 disabled:opacity-60"
+                        >
+                          {tCommon("archive")}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
             </li>

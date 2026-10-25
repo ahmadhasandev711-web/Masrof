@@ -4,9 +4,10 @@ import { cache } from "react";
 import type { Types } from "mongoose";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { runInTransaction } from "@/lib/db/transaction";
-import { WorkspaceModel, type WorkspaceDocument } from "@/models/workspace";
+import { WorkspaceModel, type WorkspaceDocument, type SupportedCurrency } from "@/models/workspace";
 import { WorkspaceMembershipModel } from "@/models/workspace-membership";
 import { AccountModel } from "@/models/account";
+import { DebtModel } from "@/models/debt";
 import { toMinorUnits } from "@/lib/money";
 import type { CreateWorkspaceInput } from "@/features/workspaces/schemas";
 import {
@@ -160,4 +161,48 @@ export async function archiveWorkspace(workspaceId: string) {
     { isArchived: true },
     { returnDocument: "after" },
   ).lean();
+}
+
+/**
+ * Atomically updates the workspace base currency in MongoDB transaction:
+ * - Updates workspace.currency
+ * - Cleans up exchangeRates map if it previously had newCurrency as foreign
+ * - Updates all base accounts that were using the previous base currency to newCurrency
+ * - Updates debts using the old currency to newCurrency
+ */
+export async function updateWorkspaceBaseCurrency(
+  workspaceId: string,
+  newCurrency: SupportedCurrency,
+) {
+  const mongoose = await connectToDatabase();
+  return runInTransaction(mongoose, async (session) => {
+    const workspace = await WorkspaceModel.findById(workspaceId).session(session);
+    if (!workspace) throw new Error("Workspace not found");
+
+    const oldCurrency = workspace.currency;
+    if (oldCurrency === newCurrency) {
+      return workspace.toObject();
+    }
+
+    workspace.currency = newCurrency;
+    if (workspace.exchangeRates && workspace.exchangeRates.has(newCurrency)) {
+      workspace.exchangeRates.delete(newCurrency);
+    }
+    const sessionOptions = session ? { session } : {};
+    await workspace.save(sessionOptions);
+
+    await AccountModel.updateMany(
+      { workspaceId: workspace._id, currency: { $in: [oldCurrency, null] } },
+      { $set: { currency: newCurrency } },
+      sessionOptions,
+    );
+
+    await DebtModel.updateMany(
+      { workspaceId: workspace._id.toString(), currency: oldCurrency },
+      { $set: { currency: newCurrency } },
+      sessionOptions,
+    );
+
+    return workspace.toObject();
+  });
 }

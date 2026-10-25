@@ -7,14 +7,14 @@ export function InvoiceSummaryCards({
   totalRemaining,
   totalOverdue,
   totalCount,
-  currency = "EGP",
+  currency,
 }: {
   totalInvoiced: number;
   totalPaid: number;
   totalRemaining: number;
   totalOverdue: number;
   totalCount: number;
-  currency?: string;
+  currency: string;
 }) {
   const t = useTranslations("pages.invoices");
   const locale = useLocale();

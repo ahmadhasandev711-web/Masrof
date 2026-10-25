@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
+import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { BackupPanel } from "@/features/backup/components/backup-panel";
 import { getTranslations } from "next-intl/server";
 
@@ -13,7 +14,12 @@ export default async function BackupPage() {
   const { activeWorkspace, redirect } = await getActiveWorkspaceForPage(session.user.id);
   if (redirect) return redirect;
   const workspaceId = activeWorkspace._id.toString();
-  const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
+
+  const [access, { plan }] = await Promise.all([
+    getWorkspaceAccess(session.user.id, workspaceId),
+    getWorkspacePlanContext(session.user.id, workspaceId),
+  ]);
+  const isOwner = access.membership.role === "owner";
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -22,7 +28,11 @@ export default async function BackupPage() {
         <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
       </div>
 
-      {plan.workspaceBackup ? (
+      {!isOwner ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          {t("ownerOnlyNotice")}
+        </div>
+      ) : plan.workspaceBackup ? (
         <BackupPanel
           workspaceId={workspaceId}
           workspaceName={activeWorkspace.name}
