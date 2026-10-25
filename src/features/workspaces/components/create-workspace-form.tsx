@@ -11,7 +11,7 @@ import {
 import { getSuggestedCategoriesForType } from "@/features/categories/seed-data";
 import { resolveCategoryLabel } from "@/features/categories/labels";
 import { CategoryIcon } from "@/components/ui/app-icons";
-import type { WorkspaceType } from "@/models/workspace";
+import type { WorkspaceType } from "@/features/workspaces/constants";
 import type { AppLocale } from "@/i18n/config";
 import { useLocale, useTranslations } from "next-intl";
 

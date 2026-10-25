@@ -4,7 +4,7 @@ import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { WorkspaceBrandingForm } from "@/features/workspaces/components/workspace-branding-form";
 import { WorkspaceCurrencyForm } from "@/features/workspaces/components/workspace-currency-form";
-import type { SupportedCurrency } from "@/models/workspace";
+import type { SupportedCurrency } from "@/lib/currency/constants";
 import { getTranslations } from "next-intl/server";
 
 export default async function WorkspaceSettingsPage() {

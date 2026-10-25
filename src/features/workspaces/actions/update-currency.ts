@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { requireWorkspaceOwner } from "@/features/workspaces/access";
 import { updateWorkspaceBaseCurrency } from "@/features/workspaces/data";
-import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@/models/workspace";
+import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@/lib/currency/constants";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { z } from "zod";
 

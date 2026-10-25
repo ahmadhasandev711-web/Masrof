@@ -5,7 +5,7 @@ import {
   updateWorkspaceCurrencyAction,
   type UpdateCurrencyState,
 } from "@/features/workspaces/actions/update-currency";
-import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@/models/workspace";
+import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@/lib/currency/constants";
 import { useTranslations } from "next-intl";
 
 const initialState: UpdateCurrencyState = { error: null };

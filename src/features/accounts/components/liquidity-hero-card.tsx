@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
-import type { SupportedCurrency } from "@/models/workspace";
+import type { SupportedCurrency } from "@/lib/currency/constants";
 import { useTranslations } from "next-intl";
 import { AccountTypeIcon, NavIcon } from "@/components/ui/app-icons";
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 import { resolveAccountCurrency } from "@/lib/currency";
-import type { SupportedCurrency } from "@/models/workspace";
+import type { SupportedCurrency } from "@/lib/currency/constants";
 import { ArchiveAccountButton } from "@/features/accounts/components/archive-account-button";
 import { AccountTypeIcon, NavIcon } from "@/components/ui/app-icons";
 import { getTranslations } from "next-intl/server";

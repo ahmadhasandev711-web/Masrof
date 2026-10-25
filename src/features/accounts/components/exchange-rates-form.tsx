@@ -6,7 +6,7 @@ import {
   type UpdateExchangeRatesState,
 } from "@/features/workspaces/actions/update-exchange-rates";
 import { CURRENCY_LABELS } from "@/lib/currency";
-import type { SupportedCurrency } from "@/models/workspace";
+import type { SupportedCurrency } from "@/lib/currency/constants";
 import { useTranslations } from "next-intl";
 
 const initialState: UpdateExchangeRatesState = { error: null, success: false };

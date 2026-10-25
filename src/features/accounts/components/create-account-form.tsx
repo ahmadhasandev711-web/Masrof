@@ -9,7 +9,7 @@ import {
 } from "@/features/accounts/actions/create-account";
 import { MOBILE_WALLET_PRESETS } from "@/features/accounts/wallet-presets";
 import { CURRENCY_LABELS } from "@/lib/currency";
-import type { SupportedCurrency } from "@/models/workspace";
+import type { SupportedCurrency } from "@/lib/currency/constants";
 import { useTranslations } from "next-intl";
 
 const ACCOUNT_TYPE_VALUES = ["cash", "bank", "mobile_wallet", "credit_card", "savings", "other"] as const;

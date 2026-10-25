@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 import { CreateAccountForm } from "@/features/accounts/components/create-account-form";
-import type { SupportedCurrency } from "@/models/workspace";
+import type { SupportedCurrency } from "@/lib/currency/constants";
 import { useTranslations } from "next-intl";
 
 export function AccountCreationManager({
