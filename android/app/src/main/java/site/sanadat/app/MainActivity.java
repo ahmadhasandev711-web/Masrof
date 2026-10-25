@@ -11,9 +11,6 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            // Keep window content strictly within system windows (not underneath status/navigation bars)
-            WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-
             WindowInsetsControllerCompat controller =
                 WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
             if (controller != null) {

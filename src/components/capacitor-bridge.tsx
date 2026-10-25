@@ -70,8 +70,52 @@ export function CapacitorBridge() {
           }
         });
 
+        // 4. Handle soft keyboard smoothly without WebView reflow:
+        // Set --kb-height CSS variable so bottom sheets slide up smoothly via GPU-composited CSS
+        const { Keyboard } = await import("@capacitor/keyboard");
+
+        const updateKbHeight = (height: number) => {
+          document.documentElement.style.setProperty("--kb-height", `${height}px`);
+          if (height > 0) {
+            document.documentElement.classList.add("keyboard-is-open");
+          } else {
+            document.documentElement.classList.remove("keyboard-is-open");
+          }
+        };
+
+        const kbWillShow = await Keyboard.addListener("keyboardWillShow", (info) => {
+          updateKbHeight(info.keyboardHeight);
+        });
+
+        const kbDidShow = await Keyboard.addListener("keyboardDidShow", (info) => {
+          updateKbHeight(info.keyboardHeight);
+          const active = document.activeElement as HTMLElement | null;
+          if (
+            active &&
+            (active.tagName === "INPUT" ||
+              active.tagName === "TEXTAREA" ||
+              active.tagName === "SELECT")
+          ) {
+            setTimeout(() => {
+              active.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 50);
+          }
+        });
+
+        const kbWillHide = await Keyboard.addListener("keyboardWillHide", () => {
+          updateKbHeight(0);
+        });
+
+        const kbDidHide = await Keyboard.addListener("keyboardDidHide", () => {
+          updateKbHeight(0);
+        });
+
         cleanupBackButton = () => {
           backHandler.remove();
+          kbWillShow.remove();
+          kbDidShow.remove();
+          kbWillHide.remove();
+          kbDidHide.remove();
         };
       } catch (err) {
         console.warn("[CapacitorBridge] Native plugins init error:", err);

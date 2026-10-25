@@ -83,5 +83,16 @@ body {
   .is-native-app .marketing-nav-link {
     display: none !important;
   }
+
+  /* GPU-accelerated bottom-sheet positioning when virtual keyboard opens */
+  @media (max-width: 639px) {
+    .native-bottom-sheet {
+      max-height: calc(100svh - var(--kb-height, 0px) - env(safe-area-inset-top, 0px) - 1.25rem) !important;
+      margin-bottom: var(--kb-height, 0px) !important;
+      transition: margin-bottom 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-height 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      contain: layout paint;
+      overscroll-behavior: contain;
+    }
+  }
 }
 

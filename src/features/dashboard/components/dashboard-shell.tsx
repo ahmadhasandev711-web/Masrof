@@ -179,7 +179,7 @@ function QuickAddActionSheet({
         aria-label={tNav("quickActions.close")}
         onClick={onClose}
       />
-      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] shadow-2xl animate-in slide-in-from-bottom duration-200">
+      <div className="absolute native-bottom-sheet inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] shadow-2xl animate-in slide-in-from-bottom duration-200">
         <div className="mx-auto my-2.5 h-1.5 w-12 rounded-full bg-neutral-300" />
         <div className="flex items-center justify-between border-b border-[#E4DFD3] px-5 py-3">
           <p className="font-bold text-[#065F46] text-base">{tNav("quickActions.title")}</p>
@@ -255,7 +255,7 @@ function MobileMoreSheet({
         aria-label={tNav("closeMenu")}
         onClick={onClose}
       />
-      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] shadow-2xl animate-in slide-in-from-bottom duration-200">
+      <div className="absolute native-bottom-sheet inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[#E4DFD3] bg-[#FBF9F4] pb-[max(2rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))] shadow-2xl animate-in slide-in-from-bottom duration-200">
         <div className="mx-auto my-2.5 h-1.5 w-12 rounded-full bg-neutral-300" />
         <div className="sticky top-0 flex items-center justify-between border-b border-[#E4DFD3] bg-[#FBF9F4] px-5 py-3 z-10">
           <p className="font-bold text-[#065F46] text-base">{tNav("more")}</p>

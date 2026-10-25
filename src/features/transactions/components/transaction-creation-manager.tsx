@@ -100,7 +100,7 @@ export function TransactionCreationManager({
           />
 
           {/* Modal / Bottom Sheet Container */}
-          <div className="relative z-10 max-h-[85svh] will-change-transform sm:max-h-[90vh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-3xl border-t sm:border border-[#E4DFD3] bg-[#FBF9F4] p-5 pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:pb-6 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200 sm:p-6">
+          <div className="relative z-10 native-bottom-sheet max-h-[85svh] will-change-transform sm:max-h-[90vh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-3xl border-t sm:border border-[#E4DFD3] bg-[#FBF9F4] p-5 pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:pb-6 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200 sm:p-6">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-neutral-300 sm:hidden" />
             <div className="mb-4 flex items-center justify-between border-b border-[#E4DFD3] pb-3">
               <h2 className="text-base font-bold text-neutral-900 sm:text-lg">

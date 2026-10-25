@@ -119,7 +119,7 @@ export function InvoiceShareDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex w-full max-w-md max-h-[85svh] will-change-transform flex-col gap-4 overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl overscroll-contain">
+      <div className="flex native-bottom-sheet w-full max-w-md max-h-[85svh] will-change-transform flex-col gap-4 overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl overscroll-contain">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>

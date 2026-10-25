@@ -71,7 +71,7 @@ export function CreateDebtDialog({
           />
 
           {/* Dialog Body / Bottom Sheet */}
-          <div className="relative z-10 w-full max-w-lg max-h-[85svh] will-change-transform sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-2xl border-t sm:border border-neutral-200 bg-white p-5 pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:p-6 shadow-xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+          <div className="relative z-10 native-bottom-sheet w-full max-w-lg max-h-[85svh] will-change-transform sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-3xl sm:rounded-2xl border-t sm:border border-neutral-200 bg-white p-5 pb-[max(1.75rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))] sm:p-6 shadow-xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-neutral-300 sm:hidden" />
             <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
               <div>

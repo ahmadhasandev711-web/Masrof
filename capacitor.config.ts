@@ -21,7 +21,7 @@ const config: CapacitorConfig = {
       showSpinner: false,
     },
     SystemBars: {
-      insetsHandling: "native",
+      insetsHandling: "disable",
       style: "LIGHT",
       hidden: false,
     },
@@ -29,11 +29,6 @@ const config: CapacitorConfig = {
       overlaysWebView: false,
       style: "LIGHT",
       backgroundColor: "#FBF9F4",
-    },
-    Keyboard: {
-      // Android handles resize natively via windowSoftInputMode="adjustResize";
-      // JS-driven body resize would double-resize the page and cause jank.
-      resize: "none",
     },
   },
 };
