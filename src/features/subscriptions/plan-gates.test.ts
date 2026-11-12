@@ -38,9 +38,9 @@ describe("plan feature gates (freemium v8)", () => {
 
   it("caps Free quantities and sets Pro yearly billing to 2,500 EGP", () => {
     expect(DEFAULT_PLAN_CONFIGS.free.maxWorkspaces).toBe(1);
-    expect(DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth).toBe(3);
-    expect(DEFAULT_PLAN_CONFIGS.free.maxClients).toBe(5);
-    expect(DEFAULT_PLAN_CONFIGS.free.maxActiveProjects).toBe(2);
+    expect(DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth).toBe(2);
+    expect(DEFAULT_PLAN_CONFIGS.free.maxClients).toBe(3);
+    expect(DEFAULT_PLAN_CONFIGS.free.maxActiveProjects).toBe(1);
     expect(DEFAULT_PLAN_CONFIGS.free.maxSavingsGoals).toBe(0);
     expect(DEFAULT_PLAN_CONFIGS.free.maxRecurringExpenses).toBe(0);
 

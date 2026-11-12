@@ -53,24 +53,24 @@ describe("Strict Free Plan Limits Enforcement", () => {
     });
   });
 
-  describe("3. Monthly Invoices Limit (3 invoices / month on Free)", () => {
-    it("Free plan config specifies exactly 3 invoices per month", () => {
-      expect(DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth).toBe(3);
+  describe("3. Monthly Invoices Limit (2 invoices / month on Free)", () => {
+    it("Free plan config specifies exactly 2 invoices per month", () => {
+      expect(DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth).toBe(2);
     });
 
-    it("allows Free users to create invoices when under the 3 invoice limit", () => {
+    it("allows Free users to create invoices when under the 2 invoice limit", () => {
       const limit = DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth;
       expect(0 < limit).toBe(true);
-      expect(2 < limit).toBe(true);
-      expect(toQuantityUsage(2, limit).atLimit).toBe(false);
+      expect(1 < limit).toBe(true);
+      expect(toQuantityUsage(1, limit).atLimit).toBe(false);
     });
 
-    it("strictly blocks invoice creation when reaching 3 invoices in the month", () => {
+    it("strictly blocks invoice creation when reaching 2 invoices in the month", () => {
       const limit = DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth;
+      expect(2 < limit).toBe(false);
       expect(3 < limit).toBe(false);
-      expect(4 < limit).toBe(false);
+      expect(toQuantityUsage(2, limit).atLimit).toBe(true);
       expect(toQuantityUsage(3, limit).atLimit).toBe(true);
-      expect(toQuantityUsage(4, limit).atLimit).toBe(true);
     });
 
     it("Pro plan has unlimited invoices per month", () => {
@@ -81,31 +81,31 @@ describe("Strict Free Plan Limits Enforcement", () => {
     });
   });
 
-  describe("4. Clients & Projects Limit (5 clients and 2 active projects on Free)", () => {
-    it("Free plan config specifies max 5 clients", () => {
-      expect(DEFAULT_PLAN_CONFIGS.free.maxClients).toBe(5);
+  describe("4. Clients & Projects Limit (3 clients and 1 active project on Free)", () => {
+    it("Free plan config specifies max 3 clients", () => {
+      expect(DEFAULT_PLAN_CONFIGS.free.maxClients).toBe(3);
     });
 
-    it("allows creating clients under 5 and blocks at 5", () => {
+    it("allows creating clients under 3 and blocks at 3", () => {
       const limit = DEFAULT_PLAN_CONFIGS.free.maxClients;
-      expect(4 < limit).toBe(true);
-      expect(5 < limit).toBe(false);
-      expect(6 < limit).toBe(false);
-      expect(toQuantityUsage(4, limit).atLimit).toBe(false);
-      expect(toQuantityUsage(5, limit).atLimit).toBe(true);
-    });
-
-    it("Free plan config specifies max 2 active projects", () => {
-      expect(DEFAULT_PLAN_CONFIGS.free.maxActiveProjects).toBe(2);
-    });
-
-    it("allows creating active projects under 2 and blocks at 2", () => {
-      const limit = DEFAULT_PLAN_CONFIGS.free.maxActiveProjects;
-      expect(1 < limit).toBe(true);
-      expect(2 < limit).toBe(false);
+      expect(2 < limit).toBe(true);
       expect(3 < limit).toBe(false);
-      expect(toQuantityUsage(1, limit).atLimit).toBe(false);
-      expect(toQuantityUsage(2, limit).atLimit).toBe(true);
+      expect(4 < limit).toBe(false);
+      expect(toQuantityUsage(2, limit).atLimit).toBe(false);
+      expect(toQuantityUsage(3, limit).atLimit).toBe(true);
+    });
+
+    it("Free plan config specifies max 1 active project", () => {
+      expect(DEFAULT_PLAN_CONFIGS.free.maxActiveProjects).toBe(1);
+    });
+
+    it("allows creating active projects under 1 and blocks at 1", () => {
+      const limit = DEFAULT_PLAN_CONFIGS.free.maxActiveProjects;
+      expect(0 < limit).toBe(true);
+      expect(1 < limit).toBe(false);
+      expect(2 < limit).toBe(false);
+      expect(toQuantityUsage(0, limit).atLimit).toBe(false);
+      expect(toQuantityUsage(1, limit).atLimit).toBe(true);
     });
 
     it("Pro plan has unlimited clients and projects", () => {

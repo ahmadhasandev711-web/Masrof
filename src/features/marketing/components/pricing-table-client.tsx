@@ -1,18 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import type { LocalizedPlan } from "@/i18n/plans-localized";
-import { proHomepageYearlyLine } from "@/features/subscriptions/pro-pricing";
 
 export interface PricingTableProps {
   freePlan: LocalizedPlan;
   proPlan: LocalizedPlan;
-  yearlyPriceDisplay: string;
-  yearlyPeriodDisplay: string;
-  billingMonthly: string;
-  billingYearly: string;
-  yearlyDiscountBadge: string;
   featureMatrixTitle: string;
   featureMatrixSubtitle: string;
   freeForever: string;
@@ -57,11 +50,6 @@ export interface PricingTableProps {
 export function PricingTableClient({
   freePlan,
   proPlan,
-  yearlyPriceDisplay,
-  yearlyPeriodDisplay,
-  billingMonthly,
-  billingYearly,
-  yearlyDiscountBadge,
   featureMatrixTitle,
   featureMatrixSubtitle,
   freeForever,
@@ -171,17 +159,7 @@ export function PricingTableClient({
   return (
     <div className="space-y-16">
       {/* ========================================================= */}
-      {/* 1. ANNUAL BILLING BADGE                                   */}
-      {/* ========================================================= */}
-      <div className="flex flex-col items-center justify-center gap-2">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-4 py-1.5 text-xs sm:text-sm font-bold text-emerald-900 shadow-2xs">
-          <span>⚡</span>
-          <span>{yearlyDiscountBadge}</span>
-        </div>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 2. PRICING CARDS                                          */}
+      {/* PRICING CARDS                                             */}
       {/* ========================================================= */}
       <div className="grid gap-8 lg:grid-cols-2 max-w-4xl mx-auto">
         {/* Free Plan Card */}
@@ -237,12 +215,6 @@ export function PricingTableClient({
           </div>
 
           <div>
-            <div className="flex items-center justify-between">
-              <span className="inline-block rounded-md bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-900">
-                {isArabic ? "اشتراك سنوي شامل" : "Annual Plan"}
-              </span>
-            </div>
-
             <h2 className="mt-3 text-2xl font-bold text-emerald-950">
               {proPlan.name}
             </h2>
@@ -255,10 +227,6 @@ export function PricingTableClient({
                 {proPlan.periodDisplay}
               </span>
             </div>
-
-            <p className="mt-1 text-xs font-semibold text-emerald-700">
-              {proHomepageYearlyLine(isArabic ? "ar" : "en")}
-            </p>
 
             <p className="mt-4 text-sm text-neutral-700 leading-relaxed">
               {proPlan.description}

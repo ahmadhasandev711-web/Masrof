@@ -46,11 +46,6 @@ export default async function PricingPage() {
       <PricingTableClient
         freePlan={plans.free}
         proPlan={plans.pro}
-        yearlyPriceDisplay={tPricing("yearlyPriceDisplay")}
-        yearlyPeriodDisplay={tPricing("yearlyPeriodDisplay")}
-        billingMonthly={tPricing("billingMonthly")}
-        billingYearly={tPricing("billingYearly")}
-        yearlyDiscountBadge={tPricing("yearlyDiscountBadge")}
         featureMatrixTitle={tPricing("featureMatrixTitle")}
         featureMatrixSubtitle={tPricing("featureMatrixSubtitle")}
         freeForever={tPricing("freeForever")}

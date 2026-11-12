@@ -446,9 +446,6 @@ export default async function MarketingHomePage() {
                       </span>
                     </p>
                   </div>
-                  <div className="mt-1.5 inline-flex items-center rounded-md bg-emerald-100/90 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-                    {t("pricing.pro.yearlyOption")}
-                  </div>
                   <p className="mt-3 text-xs text-neutral-600 leading-relaxed">
                     {t("pricing.pro.desc")}
                   </p>

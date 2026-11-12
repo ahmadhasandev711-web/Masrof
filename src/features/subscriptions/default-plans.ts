@@ -4,7 +4,6 @@ import {
   PRO_YEARLY_EGP,
   formatBillingAmount,
   proMonthlyPeriod,
-  proPricePhrase,
 } from "@/features/subscriptions/pro-pricing";
 
 export type PlanFlags = {
@@ -67,8 +66,8 @@ export type PlanConfigDocument = {
   updatedBy?: string | null;
 };
 
-/** Freemium model v10: Pro is 250 EGP/month or $5/month, billed yearly at 2,500 EGP or $50. */
-export const PLAN_LIMITS_VERSION = 10;
+/** Freemium model v11: Free is 2 invoices, 3 clients, and 1 active project. Pro shows 250 EGP/month. */
+export const PLAN_LIMITS_VERSION = 11;
 
 export const PLAN_FLAG_KEYS = [
   "csvExport",
@@ -155,9 +154,9 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     priceYearly: 0,
     maxWorkspaces: 1,
     maxMembers: 1,
-    maxInvoicesPerMonth: 3,
-    maxClients: 5,
-    maxActiveProjects: 2,
+    maxInvoicesPerMonth: 2,
+    maxClients: 3,
+    maxActiveProjects: 1,
     maxSavingsGoals: 0,
     maxRecurringExpenses: 0,
     limitsVersion: PLAN_LIMITS_VERSION,
@@ -175,16 +174,16 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     featuresAr: [
       "مساحة عمل واحدة فقط",
       "حسابات وتصنيفات غير محدودة",
-      "حتى ٣ فواتير / شهر",
-      "حتى ٥ عملاء ومشروعان نشطان",
+      "حتى ٢ فواتير / شهر",
+      "حتى ٣ عملاء ومشروع واحد نشط",
       "تقارير شهرية أساسية",
       "يشمل إعلانات",
     ],
     featuresEn: [
       "1 single workspace",
       "Unlimited accounts & categories",
-      "Up to 3 invoices / month",
-      "Up to 5 clients & 2 active projects",
+      "Up to 2 invoices / month",
+      "Up to 3 clients & 1 active project",
       "Basic monthly reports",
       "Includes ads",
     ],
@@ -222,7 +221,6 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
       "OCR قراءة الإيصالات الذكية والتصنيف الآلي",
       "تصدير البيانات المتقدم (CSV, Excel, PDF)",
       "إدارة الديون والأقساط والالتزامات",
-      proPricePhrase("ar"),
     ],
     featuresEn: [
       "100% Ad-free experience",
@@ -232,7 +230,6 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
       "Smart receipt OCR & automated AI categorization",
       "Complete export suite (CSV, Excel & PDF)",
       "Debts & loan installment tracking",
-      proPricePhrase("en"),
     ],
     ctaAr: "الترقية إلى برو",
     ctaEn: "Upgrade to Pro",
