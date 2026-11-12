@@ -18,11 +18,13 @@ const invoiceTemplateSchema = new Schema(
     items: { type: [templateItemSchema], required: true, minlength: 1 },
     taxEnabled: { type: Boolean, required: true, default: false },
     taxRatePercent: { type: Number, min: 0, max: 100, default: 0 },
+    sortOrder: { type: Number, required: true, default: 0 },
     isArchived: { type: Boolean, required: true, default: false },
   },
   { timestamps: true },
 );
 
+invoiceTemplateSchema.index({ workspaceId: 1, isArchived: 1, sortOrder: 1 });
 invoiceTemplateSchema.index({ workspaceId: 1, isArchived: 1, name: 1 });
 
 export type InvoiceTemplateDocument = InferSchemaType<typeof invoiceTemplateSchema>;

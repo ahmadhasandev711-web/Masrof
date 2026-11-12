@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mobilePageSchema } from "./common";
+import { mobileListSchema, mobilePageSchema } from "./common";
 
 export const mobileInvoiceLineSchema = z.object({
   description: z.string(),
@@ -48,6 +48,13 @@ export const mobileInvoiceTemplateSchema = z.object({
   items: z.array(mobileInvoiceLineSchema),
   taxEnabled: z.boolean(),
   taxRatePercent: z.number(),
+  sortOrder: z.number().optional(),
 });
 
 export type MobileInvoiceTemplate = z.infer<typeof mobileInvoiceTemplateSchema>;
+
+export const mobileInvoiceTemplatesListResponseSchema = mobileListSchema(
+  mobileInvoiceTemplateSchema,
+).passthrough();
+
+export const mobileInvoiceTemplateCreatedSchema = mobileInvoiceTemplateSchema;

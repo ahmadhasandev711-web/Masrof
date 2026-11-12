@@ -9,7 +9,7 @@ import type { MobileTransaction } from "@contracts/mobile/transactions";
 import type { MobileBudget } from "@contracts/mobile/budgets";
 import type { MobileGoal } from "@contracts/mobile/goals";
 import type { MobileWorkspace, MobileBranding } from "@contracts/mobile/workspaces";
-import type { MobileInvoice } from "@contracts/mobile/invoices";
+import type { MobileInvoice, MobileInvoiceTemplate } from "@contracts/mobile/invoices";
 import { populatedName, serializeId } from "@/lib/mobile/session";
 
 export function toMobileWorkspace(item: {
@@ -183,6 +183,35 @@ export function toMobileInvoice(item: Record<string, unknown>): MobileInvoice {
       item.financialStatus != null ? String(item.financialStatus) : undefined,
     projectId: item.projectId == null ? null : asId(item.projectId),
     projectName: (item.projectName as string | null | undefined) ?? null,
+  };
+}
+
+export function toMobileInvoiceTemplate(
+  item: Record<string, unknown>,
+): MobileInvoiceTemplate {
+  const rawItems = Array.isArray(item.items) ? item.items : [];
+  return {
+    id: asId(item._id ?? item.id),
+    name: String(item.name ?? ""),
+    items: rawItems.map((raw) => {
+      const line = raw as Record<string, unknown>;
+      const amount = Number(line.amount ?? 0);
+      const quantity =
+        typeof line.quantity === "number" && line.quantity > 0 ? line.quantity : 1;
+      const unitPrice =
+        typeof line.unitPrice === "number" && line.unitPrice > 0
+          ? line.unitPrice
+          : amount;
+      return {
+        description: String(line.description ?? ""),
+        quantity,
+        unitPrice,
+        amount,
+      };
+    }),
+    taxEnabled: Boolean(item.taxEnabled),
+    taxRatePercent: Number(item.taxRatePercent ?? 0),
+    sortOrder: typeof item.sortOrder === "number" ? item.sortOrder : undefined,
   };
 }
 

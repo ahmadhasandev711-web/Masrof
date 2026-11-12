@@ -118,6 +118,14 @@ export default async function InvoicesPage({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {plan.clientsAndProjects && (
+            <Link
+              href="/dashboard/invoices/templates"
+              className="inline-flex min-h-11 items-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+            >
+              {t("manageTemplates")}
+            </Link>
+          )}
           {canWrite && !usage.atLimit && plan.clientsAndProjects && (
             <InvoiceCreationManager
               workspaceId={workspaceId}

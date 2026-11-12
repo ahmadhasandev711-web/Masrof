@@ -14,6 +14,7 @@
     "seed:posts": "tsx --env-file=.env.local scripts/seed-posts.ts",
     "seed:admin": "tsx --env-file=.env.local scripts/seed-admin.ts",
     "db:ping": "tsx --env-file=.env.local scripts/db-ping.ts",
+    "backfill:invoice-totals": "tsx --env-file=.env.local scripts/backfill-invoice-totals.ts",
     "deploy:fresh-checklist": "node scripts/fresh-database-deploy.mjs",
     "mobile:openapi": "tsx scripts/generate-mobile-openapi.ts"
   },

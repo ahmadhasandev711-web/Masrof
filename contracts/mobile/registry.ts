@@ -22,6 +22,8 @@ import {
   mobileInvoicesPageResponseSchema,
   mobileInvoiceCreatedSchema,
   mobileInvoicePaymentCreatedSchema,
+  mobileInvoiceTemplatesListResponseSchema,
+  mobileInvoiceTemplateCreatedSchema,
 } from "./invoices";
 import { mobileDebtsListResponseSchema, mobileDebtCreatedSchema } from "./debts";
 import { mobileBudgetsListResponseSchema } from "./budgets";
@@ -52,6 +54,8 @@ export const mobileContractSchemas = {
   MobileInvoicesPageResponse: mobileInvoicesPageResponseSchema,
   MobileInvoiceCreated: mobileInvoiceCreatedSchema,
   MobileInvoicePaymentCreated: mobileInvoicePaymentCreatedSchema,
+  MobileInvoiceTemplatesListResponse: mobileInvoiceTemplatesListResponseSchema,
+  MobileInvoiceTemplateCreated: mobileInvoiceTemplateCreatedSchema,
   MobileDebtsListResponse: mobileDebtsListResponseSchema,
   MobileDebtCreated: mobileDebtCreatedSchema,
   MobileBudgetsListResponse: mobileBudgetsListResponseSchema,
@@ -90,6 +94,9 @@ export const mobileOpenApiPaths: Array<{
   { path: "/api/mobile/invoices", method: "post", operationId: "createInvoice", summary: "Create invoice", responseSchema: "MobileInvoiceCreated" },
   { path: "/api/mobile/invoices", method: "patch", operationId: "updateInvoiceStatus", summary: "Update invoice status", responseSchema: "MobileOk" },
   { path: "/api/mobile/invoices/payments", method: "post", operationId: "recordInvoicePayment", summary: "Record invoice payment", responseSchema: "MobileInvoicePaymentCreated" },
+  { path: "/api/mobile/invoices/templates", method: "get", operationId: "listInvoiceTemplates", summary: "List invoice templates", responseSchema: "MobileInvoiceTemplatesListResponse" },
+  { path: "/api/mobile/invoices/templates", method: "post", operationId: "createInvoiceTemplate", summary: "Create invoice template", responseSchema: "MobileInvoiceTemplateCreated" },
+  { path: "/api/mobile/invoices/templates", method: "patch", operationId: "mutateInvoiceTemplate", summary: "Update, archive, or reorder invoice templates", responseSchema: "MobileOk" },
   { path: "/api/mobile/debts", method: "get", operationId: "listDebts", summary: "List debts", responseSchema: "MobileDebtsListResponse" },
   { path: "/api/mobile/debts", method: "post", operationId: "createDebt", summary: "Create debt", responseSchema: "MobileDebtCreated" },
   { path: "/api/mobile/budgets", method: "get", operationId: "listBudgets", summary: "List budgets", responseSchema: "MobileBudgetsListResponse" },

@@ -548,6 +548,79 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileError"
+  /api/mobile/invoices/templates:
+    get:
+      operationId: listInvoiceTemplates
+      summary: List invoice templates
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileInvoiceTemplatesListResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileInvoiceTemplatesListResponse"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    post:
+      operationId: createInvoiceTemplate
+      summary: Create invoice template
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileInvoiceTemplateCreated"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileInvoiceTemplateCreated"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: mutateInvoiceTemplate
+      summary: "Update, archive, or reorder invoice templates"
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
   /api/mobile/debts:
     get:
       operationId: listDebts
@@ -1560,6 +1633,93 @@ components:
           type: string
       required:
         - paymentId
+      additionalProperties: false
+    MobileInvoiceTemplatesListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    quantity:
+                      type: number
+                    unitPrice:
+                      type: number
+                    amount:
+                      type: number
+                  required:
+                    - description
+                    - quantity
+                    - unitPrice
+                    - amount
+                  additionalProperties: false
+              taxEnabled:
+                type: boolean
+              taxRatePercent:
+                type: number
+              sortOrder:
+                type: number
+            required:
+              - id
+              - name
+              - items
+              - taxEnabled
+              - taxRatePercent
+            additionalProperties: false
+      required:
+        - items
+      additionalProperties:
+{}
+    MobileInvoiceTemplateCreated:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              quantity:
+                type: number
+              unitPrice:
+                type: number
+              amount:
+                type: number
+            required:
+              - description
+              - quantity
+              - unitPrice
+              - amount
+            additionalProperties: false
+        taxEnabled:
+          type: boolean
+        taxRatePercent:
+          type: number
+        sortOrder:
+          type: number
+      required:
+        - id
+        - name
+        - items
+        - taxEnabled
+        - taxRatePercent
       additionalProperties: false
     MobileDebtsListResponse:
       type: object

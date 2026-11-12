@@ -11,4 +11,5 @@ export type InvoiceTemplateListItem = {
   items: InvoiceTemplateLineItem[];
   taxEnabled: boolean;
   taxRatePercent: number;
+  sortOrder: number;
 };
