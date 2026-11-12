@@ -1,18 +1,12 @@
 import { NextResponse } from "next/server";
 import { recordDebtPaymentSchema } from "@/features/debts/schemas";
+import { debtsService } from "@/features/debts/debts.service";
+import { DebtOverpaymentError } from "@/features/debts/debts.errors";
 import {
-  getDebtPayments,
-  recordDebtPayment,
-  DebtNotFoundError,
-  DebtAccountNotFoundError,
-  DebtOverpaymentError,
-} from "@/features/debts/data";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
-import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -30,10 +24,10 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   try {
-    const items = await getDebtPayments(access.workspaceId, debtId);
+    const items = await debtsService.listPayments(access.workspaceId, debtId);
     return NextResponse.json({ items });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }
 
@@ -54,39 +48,19 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "debts");
-    if (featureError) {
-      return NextResponse.json({ error: featureError }, { status: 403 });
+    const result = await debtsService.recordPayment(session.user.id, parsed.data);
+    if (!result.ok) {
+      if (result.error instanceof DebtOverpaymentError) {
+        return NextResponse.json(
+          { error: "overpayment", remainingAmount: result.error.remainingAmount },
+          { status: 400 },
+        );
+      }
+      return resultToResponse(result);
     }
 
-    const result = await recordDebtPayment(
-      {
-        workspaceId: parsed.data.workspaceId,
-        debtId: parsed.data.debtId,
-        accountId: parsed.data.accountId,
-        amount: parsed.data.amount,
-        paymentDate: parsed.data.paymentDate,
-        reference: parsed.data.reference,
-        notes: parsed.data.notes,
-        idempotencyKey: parsed.data.idempotencyKey,
-      },
-      session.user.id,
-    );
-
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json(result.value, { status: 201 });
   } catch (error) {
-    if (error instanceof DebtNotFoundError) {
-      return NextResponse.json({ error: "debtNotFound" }, { status: 404 });
-    }
-    if (error instanceof DebtAccountNotFoundError) {
-      return NextResponse.json({ error: "accountNotFound" }, { status: 404 });
-    }
-    if (error instanceof DebtOverpaymentError) {
-      return NextResponse.json(
-        { error: "overpayment", remainingAmount: error.remainingAmount },
-        { status: 400 },
-      );
-    }
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

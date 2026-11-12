@@ -5,11 +5,8 @@ import { auth } from "@/lib/auth";
 import {
   verifyWorkspaceAccess,
   verifyWorkspaceWriteAccess,
-  WorkspaceAccessDeniedError,
-  WorkspaceWriteDeniedError,
-  WorkspaceOwnerRequiredError,
-  WorkspaceSuspendedError,
 } from "@/features/workspaces/access";
+import { thrownToMobileResponse } from "@/server/kernel/http";
 
 export type MobileSession = {
   user: { id: string; name: string; email: string };
@@ -59,26 +56,7 @@ export async function requireMobileWorkspace(
 }
 
 export function mobileErrorResponse(error: unknown) {
-  if (error instanceof WorkspaceAccessDeniedError) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 403 });
-  }
-  if (error instanceof WorkspaceWriteDeniedError) {
-    return NextResponse.json({ error: "writeDenied" }, { status: 403 });
-  }
-  if (error instanceof WorkspaceOwnerRequiredError) {
-    return NextResponse.json({ error: "ownerRequired" }, { status: 403 });
-  }
-  if (
-    error instanceof WorkspaceSuspendedError ||
-    (error instanceof Error && error.name === "SubscriptionSuspendedError")
-  ) {
-    return NextResponse.json({ error: "accountSuspended" }, { status: 403 });
-  }
-  if (error instanceof Error && "code" in error && typeof (error as { code: unknown }).code === "string") {
-    return NextResponse.json({ error: (error as { code: string }).code }, { status: 400 });
-  }
-  console.error("[mobile-api]", error);
-  return NextResponse.json({ error: "unexpected" }, { status: 500 });
+  return thrownToMobileResponse(error);
 }
 
 export function serializeId(value: unknown): string {

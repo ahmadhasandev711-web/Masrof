@@ -1,17 +1,14 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireSession } from "@/features/auth/session";
-import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { archiveBudget } from "@/features/budgets/data";
+import { isWorkspaceAuthorizationError } from "@/features/workspaces/access";
+import { budgetsService } from "@/features/budgets/budgets.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function archiveBudgetAction(budgetId: string, workspaceId: string) {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
-    await archiveBudget(budgetId, workspaceId);
+    await runWorkspaceWrite(workspaceId, () => budgetsService.archive(budgetId, workspaceId));
 
     revalidateTag(CACHE_TAGS.budgets, "max");
     revalidatePath("/dashboard/budgets");

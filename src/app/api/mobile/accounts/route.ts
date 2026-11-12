@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { listAccountsForWorkspace, createAccount } from "@/features/accounts/data";
-import { resolveAccountCurrency } from "@/lib/currency";
 import { createAccountSchema } from "@/features/accounts/schemas";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
+import { accountsService } from "@/features/accounts/accounts.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { SupportedCurrency } from "@/models/workspace";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -21,7 +19,7 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  const accounts = await listAccountsForWorkspace(access.workspaceId);
+  const accounts = await accountsService.listForWorkspace(access.workspaceId);
   return NextResponse.json({
     items: accounts.map((account) => ({
       id: serializeId(account._id),
@@ -47,35 +45,28 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const workspaceCurrency = access.workspace.currency as SupportedCurrency;
-    const requestedCurrency = resolveAccountCurrency(parsed.data.currency, workspaceCurrency);
-
-    if (requestedCurrency !== workspaceCurrency) {
-      const featureError = await assertWorkspacePlanFeature(
-        session.user.id,
-        parsed.data.workspaceId,
-        "multiCurrency",
-      );
-      if (featureError) {
-        return NextResponse.json({ error: featureError }, { status: 403 });
-      }
-    }
-
-    const account = await createAccount(
-      { ...parsed.data, currency: requestedCurrency },
-      workspaceCurrency,
+    const result = await accountsService.create(
+      session.user.id,
+      parsed.data,
+      access.workspace.currency as SupportedCurrency,
     );
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
 
     revalidateTag(CACHE_TAGS.accounts, "max");
 
-    return NextResponse.json({
-      id: serializeId(account._id),
-      name: account.name,
-      type: account.type,
-      currency: account.currency,
-      balance: account.cachedBalance,
-    });
+    return NextResponse.json(
+      {
+        id: serializeId(result.value._id),
+        name: result.value.name,
+        type: result.value.type,
+        currency: result.value.currency,
+        balance: result.value.cachedBalance,
+      },
+      { status: 201 },
+    );
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

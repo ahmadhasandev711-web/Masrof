@@ -2,12 +2,9 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createClientSchema } from "@/features/clients/schemas";
-import { createClient } from "@/features/clients/data";
-import { countClientsForWorkspace } from "@/features/subscriptions/plan-usage";
+import { clientsService } from "@/features/clients/clients.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateClientState = {
@@ -18,7 +15,6 @@ export async function createClientAction(
   _prevState: CreateClientState,
   formData: FormData,
 ): Promise<CreateClientState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -34,25 +30,13 @@ export async function createClientAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
-
-  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "clientsAndProjects");
-  if (featureError) {
-    return { error: featureError };
-  }
-
-  const clientCount = await countClientsForWorkspace(parsed.data.workspaceId);
-  const limitError = await assertWorkspaceQuantityLimit(
-    session.user.id,
-    parsed.data.workspaceId,
-    "maxClients",
-    clientCount,
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    clientsService.create(userId, parsed.data),
   );
-  if (limitError) {
-    return { error: limitError };
-  }
 
-  await createClient(parsed.data);
+  if (!result.ok) {
+    return { error: result.error.message };
+  }
 
   revalidatePath("/dashboard/clients");
   revalidateTag(CACHE_TAGS.clients, "max");

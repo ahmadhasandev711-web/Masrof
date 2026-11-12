@@ -1,18 +1,14 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireSession } from "@/features/auth/session";
-import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { archiveProject } from "@/features/projects/data";
+import { isWorkspaceAuthorizationError } from "@/features/workspaces/access";
+import { projectsService } from "@/features/projects/projects.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function archiveProjectAction(projectId: string, workspaceId: string) {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
-    await archiveProject(projectId, workspaceId);
-
+    await runWorkspaceWrite(workspaceId, () => projectsService.archive(projectId, workspaceId));
     revalidatePath("/dashboard/projects");
     revalidateTag(CACHE_TAGS.projects, "max");
   } catch (error) {

@@ -2,12 +2,9 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createProjectSchema } from "@/features/projects/schemas";
-import { createProject } from "@/features/projects/data";
-import { countActiveProjectsForWorkspace } from "@/features/subscriptions/plan-usage";
+import { projectsService } from "@/features/projects/projects.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateProjectState = {
@@ -18,7 +15,6 @@ export async function createProjectAction(
   _prevState: CreateProjectState,
   formData: FormData,
 ): Promise<CreateProjectState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -40,27 +36,13 @@ export async function createProjectAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    projectsService.create(userId, parsed.data),
+  );
 
-  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "clientsAndProjects");
-  if (featureError) {
-    return { error: featureError };
+  if (!result.ok) {
+    return { error: result.error.message };
   }
-
-  if (parsed.data.status === "active") {
-    const activeCount = await countActiveProjectsForWorkspace(parsed.data.workspaceId);
-    const limitError = await assertWorkspaceQuantityLimit(
-      session.user.id,
-      parsed.data.workspaceId,
-      "maxActiveProjects",
-      activeCount,
-    );
-    if (limitError) {
-      return { error: limitError };
-    }
-  }
-
-  await createProject(parsed.data);
 
   revalidatePath("/dashboard/projects");
   revalidateTag(CACHE_TAGS.projects, "max");

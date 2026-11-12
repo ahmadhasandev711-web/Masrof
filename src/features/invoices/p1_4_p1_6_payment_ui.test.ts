@@ -4,46 +4,32 @@ vi.mock("server-only", () => ({}));
 
 import { recordInvoicePaymentAction } from "@/features/invoices/actions/record-payment";
 import { getInvoicePaymentsAction } from "@/features/invoices/actions/get-invoice-payments";
-import {
-  recordInvoicePayment,
-  getInvoicePayments,
-  InvoiceOverpaymentError,
-} from "@/features/invoices/payment-data";
+import { invoicesService } from "@/features/invoices/invoices.service";
+import { InvoiceOverpaymentError } from "@/features/invoices/invoices.errors";
 import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess, verifyWorkspaceAccess } from "@/features/workspaces/access";
+import { verifyWorkspaceAccess } from "@/features/workspaces/access";
+import { runWorkspaceWrite } from "@/server/kernel";
 
 vi.mock("@/features/auth/session", () => ({
   requireSession: vi.fn(),
 }));
 
 vi.mock("@/features/workspaces/access", () => ({
-  verifyWorkspaceWriteAccess: vi.fn().mockResolvedValue(undefined),
+  verifyWorkspaceWriteAccess: vi.fn().mockResolvedValue({ _id: "ws-1" }),
   verifyWorkspaceAccess: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("@/features/invoices/payment-data", () => ({
-  recordInvoicePayment: vi.fn(),
-  getInvoicePayments: vi.fn(),
-  InvoiceOverpaymentError: class extends Error {
-    readonly code = "invoiceOverpayment";
-    constructor() {
-      super("Overpayment");
-      this.name = "InvoiceOverpaymentError";
-    }
+vi.mock("@/features/invoices/invoices.service", () => ({
+  invoicesService: {
+    recordPayment: vi.fn(),
+    listPayments: vi.fn(),
   },
-  InvoiceCancelledError: class extends Error {
-    readonly code = "invoiceCancelledCannotPay";
-  },
-  AccountCurrencyMismatchError: class extends Error {
-    readonly code = "accountCurrencyMismatch";
-  },
-  InvalidPaymentReferenceError: class extends Error {
-    readonly code: string;
-    constructor(c: string) {
-      super(c);
-      this.code = c;
-    }
-  },
+}));
+
+vi.mock("@/server/kernel", () => ({
+  runWorkspaceWrite: vi.fn(async (_workspaceId: string, work: (ctx: { userId: string }) => unknown) => {
+    return work({ userId: "user-1" });
+  }),
 }));
 
 vi.mock("next-intl/server", () => ({
@@ -63,6 +49,9 @@ describe("P1.6 — recordInvoicePaymentAction", () => {
     vi.mocked(requireSession).mockResolvedValue({
       user: { id: "user-1", email: "user@example.com" },
     } as any);
+    vi.mocked(runWorkspaceWrite).mockImplementation(async (_workspaceId, work) =>
+      work({ userId: "user-1", workspaceId: "ws-1", workspace: {} as never }),
+    );
   });
 
   it("returns error on invalid input (e.g. missing amount or negative amount)", async () => {
@@ -77,12 +66,13 @@ describe("P1.6 — recordInvoicePaymentAction", () => {
     const result = await recordInvoicePaymentAction({ error: null }, formData);
     expect(result.success).toBe(false);
     expect(result.error).toBeTruthy();
-    expect(recordInvoicePayment).not.toHaveBeenCalled();
+    expect(invoicesService.recordPayment).not.toHaveBeenCalled();
   });
 
   it("successfully invokes domain service and returns success", async () => {
-    vi.mocked(recordInvoicePayment).mockResolvedValue({
-      _id: "pay-1",
+    vi.mocked(invoicesService.recordPayment).mockResolvedValue({
+      ok: true,
+      value: { _id: "pay-1" },
     } as any);
 
     const formData = new FormData();
@@ -97,8 +87,9 @@ describe("P1.6 — recordInvoicePaymentAction", () => {
     const result = await recordInvoicePaymentAction({ error: null }, formData);
     expect(result.success).toBe(true);
     expect(result.error).toBeNull();
-    expect(verifyWorkspaceWriteAccess).toHaveBeenCalledWith("user-1", "ws-1");
-    expect(recordInvoicePayment).toHaveBeenCalledWith(
+    expect(runWorkspaceWrite).toHaveBeenCalledWith("ws-1", expect.any(Function));
+    expect(invoicesService.recordPayment).toHaveBeenCalledWith(
+      "user-1",
       expect.objectContaining({
         workspaceId: "ws-1",
         invoiceId: "inv-1",
@@ -106,12 +97,14 @@ describe("P1.6 — recordInvoicePaymentAction", () => {
         amount: 250,
         idempotencyKey: "key-uuid-ok",
       }),
-      "user-1",
     );
   });
 
   it("handles domain error (e.g. InvoiceOverpaymentError) and returns localized error", async () => {
-    vi.mocked(recordInvoicePayment).mockRejectedValue(new InvoiceOverpaymentError(100));
+    vi.mocked(invoicesService.recordPayment).mockResolvedValue({
+      ok: false,
+      error: new InvoiceOverpaymentError(100),
+    });
 
     const formData = new FormData();
     formData.set("workspaceId", "ws-1");
@@ -144,7 +137,7 @@ describe("P1.6 — getInvoicePaymentsAction", () => {
         paymentDate: "2026-09-17T00:00:00.000Z",
       },
     ];
-    vi.mocked(getInvoicePayments).mockResolvedValue(mockPayments as any);
+    vi.mocked(invoicesService.listPayments).mockResolvedValue(mockPayments as any);
 
     const result = await getInvoicePaymentsAction("inv-1", "ws-1");
     expect(result.error).toBeNull();

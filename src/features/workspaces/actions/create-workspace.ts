@@ -3,9 +3,9 @@
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { createWorkspaceSchema } from "@/features/workspaces/schemas";
-import { createWorkspaceForUser } from "@/features/workspaces/data";
-import { assertCanCreateWorkspace } from "@/features/subscriptions/data";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
 import { setActiveWorkspaceId } from "@/features/workspaces/active-workspace";
+
 export type CreateWorkspaceState = {
   error: string | null;
   redirectTo?: string | null;
@@ -33,13 +33,12 @@ export async function createWorkspaceAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  const limitError = await assertCanCreateWorkspace(session.user.id);
-  if (limitError) {
-    return { error: limitError };
+  const result = await workspacesService.create(session.user.id, parsed.data);
+  if (!result.ok) {
+    return { error: result.error.message };
   }
 
-  const workspaceId = await createWorkspaceForUser(session.user.id, parsed.data);
-  await setActiveWorkspaceId(workspaceId);
+  await setActiveWorkspaceId(result.value);
 
   return { error: null, redirectTo: "/dashboard" };
 }

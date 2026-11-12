@@ -15,14 +15,15 @@ export function InvoicePrintToolbar({
 }) {
   const tReports = useTranslations("reports.export");
   const tCommon = useTranslations("common");
+  const tForm = useTranslations("forms.invoice");
   const base = `/print/invoice/${invoiceId}`;
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-3 print:hidden">
-      <div className="flex rounded-lg border border-neutral-300 bg-white p-1">
+      <div className="flex rounded-xl border border-neutral-300 bg-white p-1">
         <Link
           href={`${base}?format=a4`}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+          className={`min-h-11 rounded-lg px-4 py-2 text-sm font-semibold transition ${
             format === "a4"
               ? "bg-emerald-700 text-white"
               : "text-neutral-600 hover:bg-neutral-50"
@@ -32,20 +33,20 @@ export function InvoicePrintToolbar({
         </Link>
         <Link
           href={`${base}?format=pos`}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+          className={`min-h-11 rounded-lg px-4 py-2 text-sm font-semibold transition ${
             format === "pos"
               ? "bg-emerald-700 text-white"
               : "text-neutral-600 hover:bg-neutral-50"
           }`}
         >
-          POS
+          {tForm("printThermal80")}
         </Link>
       </div>
 
       <button
         type="button"
         onClick={() => window.print()}
-        className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+        className="min-h-11 rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800"
       >
         {tReports("printPdf")}
       </button>

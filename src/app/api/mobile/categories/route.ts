@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { listCategoriesForWorkspace, createCustomCategory } from "@/features/categories/data";
 import { createCategorySchema } from "@/features/categories/schemas";
+import { categoriesService } from "@/features/categories/categories.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CategoryKind } from "@/models/category";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 import { resolveCategoryLabel } from "@/features/categories/labels";
 import type { AppLocale } from "@/i18n/config";
 
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
   const localeParam = url.searchParams.get("locale");
   const locale: AppLocale = localeParam === "en" ? "en" : "ar";
 
-  const categories = await listCategoriesForWorkspace(
+  const categories = await categoriesService.listForWorkspace(
     access.workspaceId,
     kind === "income" || kind === "expense" ? kind : undefined,
   );
@@ -62,15 +62,22 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const category = await createCustomCategory(parsed.data);
+    const result = await categoriesService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
+
     revalidateTag(CACHE_TAGS.categories, "max");
-    return NextResponse.json({
-      id: serializeId(category._id),
-      name: category.name,
-      nameEn: category.nameEn ?? null,
-      kind: category.kind,
-    });
+    return NextResponse.json(
+      {
+        id: serializeId(result.value._id),
+        name: result.value.name,
+        nameEn: result.value.nameEn ?? null,
+        kind: result.value.kind,
+      },
+      { status: 201 },
+    );
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

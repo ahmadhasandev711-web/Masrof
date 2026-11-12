@@ -89,6 +89,25 @@ function BrandBlock({
   );
 }
 
+function financialStatusLabel(
+  status: InvoicePrintView["financialStatus"],
+  tForm: TFn,
+): string {
+  return tForm(`financialStatuses.${status}`);
+}
+
+function financialStatusBadgeClass(status: InvoicePrintView["financialStatus"]) {
+  switch (status) {
+    case "paid":
+    case "legacy_paid":
+      return "bg-emerald-50 text-emerald-800 border-emerald-200";
+    case "partially_paid":
+      return "bg-sky-50 text-sky-800 border-sky-200";
+    default:
+      return "bg-amber-50 text-amber-800 border-amber-200";
+  }
+}
+
 function InvoiceA4Layout({
   invoice,
   tForm,
@@ -104,17 +123,20 @@ function InvoiceA4Layout({
 }) {
   return (
     <article className="invoice-sheet invoice-sheet-a4 text-neutral-900">
-      <header className="flex items-start justify-between gap-8 border-b-2 border-neutral-800 pb-6">
+      <header className="flex flex-col justify-between gap-6 border-b-2 border-neutral-800 pb-6 sm:flex-row sm:items-start">
         <div>
-          <p className="text-xs font-semibold tracking-wide text-neutral-500">{tForm("title")}</p>
-          <div className="mt-2">
-            <BrandBlock invoice={invoice} tBrand={tBrand} />
-          </div>
+          <BrandBlock invoice={invoice} tBrand={tBrand} />
         </div>
-        <div className="min-w-[220px] rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm">
-          <p className="font-bold text-emerald-800">{invoice.invoiceNumber}</p>
+        <div className="min-w-[220px] shrink-0 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm">
+          <h2 className="font-bold text-emerald-800">{tForm("printTaxInvoiceTitle")}</h2>
+          <p className="mt-2 font-mono font-bold text-neutral-900">{invoice.invoiceNumber}</p>
+          <span
+            className={`mt-2 inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${financialStatusBadgeClass(invoice.financialStatus)}`}
+          >
+            {financialStatusLabel(invoice.financialStatus, tForm)}
+          </span>
           {invoice.projectName && (
-            <p className="mt-1 font-medium text-neutral-700">
+            <p className="mt-2 font-medium text-neutral-700">
               {tForm("project")}: {invoice.projectName}
             </p>
           )}
@@ -129,25 +151,14 @@ function InvoiceA4Layout({
         </div>
       </header>
 
-      <section className="mt-8 grid gap-6 sm:grid-cols-2">
-        <div className="rounded-lg border border-neutral-200 p-4">
-          <p className="text-xs font-semibold uppercase text-neutral-500">{tForm("client")}</p>
-          <p className="mt-2 text-xl font-semibold">{invoice.client.name}</p>
-          {(invoice.client.email || invoice.client.phone) && (
-            <p className="mt-2 text-sm text-neutral-600" dir="ltr">
-              {[invoice.client.email, invoice.client.phone].filter(Boolean).join(" · ")}
-            </p>
-          )}
-        </div>
-        <div className="rounded-lg border border-neutral-200 p-4">
-          <p className="text-xs font-semibold uppercase text-neutral-500">{tDashboard("from")}</p>
-          <p className="mt-2 text-lg font-semibold">{invoice.businessName}</p>
-          {invoice.taxId ? (
-            <p className="mt-1 text-sm text-neutral-600">
-              {tBrand("taxId")}: {invoice.taxId}
-            </p>
-          ) : null}
-        </div>
+      <section className="mt-8 rounded-xl border border-neutral-200 bg-neutral-50/50 p-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">{tForm("client")}</p>
+        <p className="mt-2 text-xl font-semibold">{invoice.client.name}</p>
+        {(invoice.client.email || invoice.client.phone) && (
+          <p className="mt-2 text-sm text-neutral-600" dir="ltr">
+            {[invoice.client.email, invoice.client.phone].filter(Boolean).join(" · ")}
+          </p>
+        )}
       </section>
 
       <section className="mt-10">
@@ -173,12 +184,28 @@ function InvoiceA4Layout({
         </table>
       </section>
 
-      <section className="mt-6 flex justify-end">
-        <div className="min-w-[280px] rounded-lg border-2 border-emerald-800 bg-emerald-50 px-6 py-4">
-          <div className="flex items-center justify-between gap-8 text-lg font-bold">
+      <section className="mt-6 border-t-2 border-neutral-800 pt-4">
+        <div className="ms-auto flex w-full max-w-xs flex-col gap-2 text-sm">
+          <div className="flex justify-between text-neutral-600">
             <span>{tForm("total")}</span>
-            <span className="text-emerald-900">
+            <span className="font-semibold font-mono text-neutral-900">
               {formatMoney(invoice.total, { currency: invoice.currency })}
+            </span>
+          </div>
+          {invoice.paidAmount > 0 && (
+            <div className="flex justify-between text-emerald-700">
+              <span>{tForm("paidAmount")}</span>
+              <span className="font-semibold font-mono">
+                {formatMoney(invoice.paidAmount, { currency: invoice.currency })}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between border-t border-neutral-200 pt-2 text-base font-bold text-neutral-900">
+            <span>{tForm("remainingAmount")}</span>
+            <span
+              className={`font-mono ${invoice.remainingAmount > 0 ? "text-amber-800" : "text-emerald-700"}`}
+            >
+              {formatMoney(invoice.remainingAmount, { currency: invoice.currency })}
             </span>
           </div>
         </div>
@@ -191,8 +218,21 @@ function InvoiceA4Layout({
         </section>
       )}
 
-      <footer className="mt-12 border-t border-neutral-200 pt-4 text-center text-xs text-neutral-400">
-        {tForm("thanks")} · {invoice.businessName} · {formatDate(new Date().toISOString())}
+      <section className="mt-16 grid grid-cols-2 gap-10 print:mt-20">
+        <div>
+          <p className="text-xs text-neutral-500">{tForm("supplierSignature")}</p>
+          <div className="mt-10 border-b border-neutral-400" aria-hidden />
+        </div>
+        <div>
+          <p className="text-xs text-neutral-500">{tForm("clientSignature")}</p>
+          <div className="mt-10 border-b border-neutral-400" aria-hidden />
+        </div>
+      </section>
+
+      <footer className="mt-10 border-t border-dashed border-neutral-300 pt-4 text-center text-xs text-neutral-400">
+        <p>{tForm("thanks")} · {invoice.businessName}</p>
+        <p className="mt-1">{tCommon("appName")} · {formatDate(new Date().toISOString())}</p>
+        <span className="sr-only">{tDashboard("from")}</span>
       </footer>
     </article>
   );

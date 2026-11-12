@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { createTransaction, listTransactions } from "@/features/transactions/data";
+import { transactionsService } from "@/features/transactions/transactions.service";
 import {
   createTransactionSchema,
   transactionFiltersSchema,
 } from "@/features/transactions/schemas";
 import {
-  mobileErrorResponse,
   populatedName,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 function mapTransaction(item: Record<string, unknown>) {
   return {
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   try {
-    const result = await listTransactions(parsed.data);
+    const result = await transactionsService.list(parsed.data);
     return NextResponse.json({
       items: result.items.map((item) => mapTransaction(item as unknown as Record<string, unknown>)),
       total: result.total,
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
       totalPages: result.totalPages,
     });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }
 
@@ -73,9 +73,13 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const id = await createTransaction(parsed.data, session.user.id);
-    return NextResponse.json({ id }, { status: 201 });
+    const result = await transactionsService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
+
+    return NextResponse.json({ id: result.value }, { status: 201 });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

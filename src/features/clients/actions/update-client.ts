@@ -2,10 +2,9 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { updateClientSchema } from "@/features/clients/schemas";
-import { updateClient } from "@/features/clients/data";
+import { clientsService } from "@/features/clients/clients.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type UpdateClientState = {
@@ -17,7 +16,6 @@ export async function updateClientAction(
   _prevState: UpdateClientState,
   formData: FormData,
 ): Promise<UpdateClientState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -33,16 +31,16 @@ export async function updateClientAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData"), success: false };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, () =>
+    clientsService.update(parsed.data.clientId, parsed.data.workspaceId, {
+      name: parsed.data.name,
+      email: parsed.data.email ?? null,
+      phone: parsed.data.phone ?? null,
+    }),
+  );
 
-  const updated = await updateClient(parsed.data.clientId, parsed.data.workspaceId, {
-    name: parsed.data.name,
-    email: parsed.data.email ?? null,
-    phone: parsed.data.phone ?? null,
-  });
-
-  if (!updated) {
-    return { error: tErrors("clientNotFound"), success: false };
+  if (!result.ok) {
+    return { error: result.error.message || tErrors(result.error.code as "clientNotFound"), success: false };
   }
 
   revalidatePath("/dashboard/clients");

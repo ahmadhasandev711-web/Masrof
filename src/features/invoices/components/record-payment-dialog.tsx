@@ -12,6 +12,9 @@ import type { InvoiceListItem } from "@/features/invoices/types";
 
 const initialState: RecordPaymentState = { error: null, success: false };
 
+const MOBILE_FIELD =
+  "rounded-lg border border-neutral-300 px-3 py-2.5 min-h-11 text-base";
+
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -116,10 +119,11 @@ export function RecordPaymentDialog({
               min="0.01"
               max={remainingMajor}
               inputMode="decimal"
+              enterKeyHint="done"
               dir="ltr"
               value={amountInput}
               onChange={(e) => setAmountInput(e.target.value)}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono text-base font-bold"
+              className={`${MOBILE_FIELD} text-start font-mono font-bold`}
               required
             />
           </div>
@@ -133,7 +137,7 @@ export function RecordPaymentDialog({
               id="payment-account"
               name="accountId"
               defaultValue={accounts[0]?._id ?? ""}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+              className={`${MOBILE_FIELD} text-right`}
               required
             >
               {accounts.map((acc) => (
@@ -155,7 +159,7 @@ export function RecordPaymentDialog({
                 name="paymentDate"
                 type="date"
                 defaultValue={todayIsoDate()}
-                className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+                className={`${MOBILE_FIELD} text-right`}
                 required
               />
             </div>
@@ -169,7 +173,7 @@ export function RecordPaymentDialog({
                 id="payment-method"
                 name="paymentMethod"
                 defaultValue="bank_transfer"
-                className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+                className={`${MOBILE_FIELD} text-right`}
               >
                 <option value="bank_transfer">{tMethods("bank_transfer")}</option>
                 <option value="cash">{tMethods("cash")}</option>
@@ -190,7 +194,7 @@ export function RecordPaymentDialog({
               name="reference"
               type="text"
               placeholder={t("referencePlaceholder")}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+              className={`${MOBILE_FIELD} text-right`}
             />
           </div>
 
@@ -203,7 +207,7 @@ export function RecordPaymentDialog({
               name="notes"
               type="text"
               placeholder={t("notesPlaceholderShort")}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+              className={`${MOBILE_FIELD} text-right`}
             />
           </div>
 

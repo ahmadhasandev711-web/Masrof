@@ -2,11 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { createDebtSchema } from "@/features/debts/schemas";
-import { createDebt } from "@/features/debts/data";
+import { debtsService } from "@/features/debts/debts.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 
 export type CreateDebtState = {
   success?: boolean;
@@ -17,7 +15,6 @@ export async function createDebtAction(
   _prevState: CreateDebtState,
   formData: FormData,
 ): Promise<CreateDebtState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -39,28 +36,19 @@ export async function createDebtAction(
     };
   }
 
-  const workspace = await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
-
-  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "debts");
-  if (featureError) {
-    return { success: false, error: featureError };
-  }
-
-  try {
-    await createDebt({
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId, workspace }) =>
+    debtsService.create(userId, {
       ...parsed.data,
       currency: workspace.currency,
-    });
+    }),
+  );
 
-    revalidatePath("/dashboard/debts");
-    revalidatePath("/dashboard");
-
-    return { success: true, error: null };
-  } catch (err: unknown) {
-    console.error("createDebtAction error:", err);
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : tErrors("unexpected"),
-    };
+  if (!result.ok) {
+    return { success: false, error: result.error.message };
   }
+
+  revalidatePath("/dashboard/debts");
+  revalidatePath("/dashboard");
+
+  return { success: true, error: null };
 }

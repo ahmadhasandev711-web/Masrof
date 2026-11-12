@@ -2,15 +2,10 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createRecurringExpenseSchema } from "@/features/recurring-expenses/schemas";
-import {
-  createRecurringExpense,
-  InvalidRecurringExpenseError,
-} from "@/features/recurring-expenses/data";
-import { countRecurringExpensesForWorkspace } from "@/features/subscriptions/plan-usage";
+import { InvalidRecurringExpenseError } from "@/features/recurring-expenses/recurring-expenses.repository";
+import { recurringExpensesService } from "@/features/recurring-expenses/recurring-expenses.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateRecurringState = { error: string | null };
@@ -19,7 +14,6 @@ export async function createRecurringExpenseAction(
   _prevState: CreateRecurringState,
   formData: FormData,
 ): Promise<CreateRecurringState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -42,31 +36,15 @@ export async function createRecurringExpenseAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
-
-  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "recurringExpenses");
-  if (featureError) {
-    return { error: featureError };
-  }
-
-  const recurringCount = await countRecurringExpensesForWorkspace(parsed.data.workspaceId);
-  const limitError = await assertWorkspaceQuantityLimit(
-    session.user.id,
-    parsed.data.workspaceId,
-    "maxRecurringExpenses",
-    recurringCount,
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    recurringExpensesService.create(userId, parsed.data),
   );
-  if (limitError) {
-    return { error: limitError };
-  }
 
-  try {
-    await createRecurringExpense(parsed.data);
-  } catch (error) {
-    if (error instanceof InvalidRecurringExpenseError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };
+  if (!result.ok) {
+    if (result.error instanceof InvalidRecurringExpenseError) {
+      return { error: tErrors(result.error.code as Parameters<typeof tErrors>[0]) };
     }
-    throw error;
+    return { error: result.error.message };
   }
 
   revalidateTag(CACHE_TAGS.recurring, "max");

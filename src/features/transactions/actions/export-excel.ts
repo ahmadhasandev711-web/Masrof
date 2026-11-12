@@ -3,8 +3,7 @@
 import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
-import { listTransactionsForExport } from "@/features/transactions/data";
+import { transactionsService } from "@/features/transactions/transactions.service";
 import { transactionFiltersSchema } from "@/features/transactions/schemas";
 import { createWorkbook, workbookToBase64 } from "@/lib/excel";
 import { fromMinorUnits } from "@/lib/money";
@@ -32,11 +31,6 @@ export async function exportTransactionsExcelAction(input: {
   const session = await requireSession();
   await verifyWorkspaceAccess(session.user.id, input.workspaceId);
 
-  const featureError = await assertWorkspacePlanFeature(session.user.id, input.workspaceId, "csvExport");
-  if (featureError) {
-    return { error: featureError };
-  }
-
   const filters = transactionFiltersSchema.parse({
     workspaceId: input.workspaceId,
     type: input.type || undefined,
@@ -48,11 +42,17 @@ export async function exportTransactionsExcelAction(input: {
     page: 1,
   });
 
-  const [tExport, tType, tErrors, { items, truncated }, workspace] = await Promise.all([
+  const exportResult = await transactionsService.listForExport(session.user.id, filters);
+  if (!exportResult.ok) {
+    return { error: exportResult.error.message };
+  }
+
+  const { items, truncated } = exportResult.value;
+
+  const [tExport, tType, tErrors, workspace] = await Promise.all([
     getTranslations("reports.exportLabels"),
     getTranslations("transactionType"),
     getTranslations("errors"),
-    listTransactionsForExport(filters),
     connectToDatabase().then(() =>
       WorkspaceModel.findById(input.workspaceId).select("name currency").lean(),
     ),

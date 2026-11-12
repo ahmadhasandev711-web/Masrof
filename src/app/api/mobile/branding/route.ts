@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { updateWorkspace } from "@/features/workspaces/data";
 import { updateWorkspaceBrandingSchema } from "@/features/workspaces/branding-schema";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
 import { requireWorkspaceOwner } from "@/features/workspaces/access";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -16,13 +16,7 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  return NextResponse.json({
-    businessName: access.workspace.businessName ?? "",
-    logoUrl: access.workspace.logoUrl ?? "",
-    taxId: access.workspace.taxId ?? "",
-    businessPhone: access.workspace.businessPhone ?? "",
-    businessAddress: access.workspace.businessAddress ?? "",
-  });
+  return NextResponse.json(workspacesService.getBranding(access.workspace));
 }
 
 export async function POST(request: Request) {
@@ -37,16 +31,13 @@ export async function POST(request: Request) {
     }
 
     await requireWorkspaceOwner(session.user.id, parsed.data.workspaceId);
-    await updateWorkspace(parsed.data.workspaceId, {
-      businessName: parsed.data.businessName ?? "",
-      logoUrl: parsed.data.logoUrl ?? "",
-      taxId: parsed.data.taxId ?? "",
-      businessPhone: parsed.data.businessPhone ?? "",
-      businessAddress: parsed.data.businessAddress ?? "",
-    });
+    const result = await workspacesService.updateBranding(parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

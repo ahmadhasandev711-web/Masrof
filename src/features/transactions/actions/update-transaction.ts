@@ -2,10 +2,12 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { createUpdateTransactionSchema } from "@/features/transactions/schemas";
-import { updateTransaction, InvalidTransactionReferenceError } from "@/features/transactions/data";
+import {
+  InvalidTransactionReferenceError,
+} from "@/features/transactions/transactions.repository";
+import { transactionsService } from "@/features/transactions/transactions.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type UpdateTransactionState = {
@@ -17,7 +19,6 @@ export async function updateTransactionAction(
   _prevState: UpdateTransactionState,
   formData: FormData,
 ): Promise<UpdateTransactionState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -37,15 +38,18 @@ export async function updateTransactionAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData"), success: false };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, () =>
+    transactionsService.update(parsed.data, parsed.data.workspaceId),
+  );
 
-  try {
-    await updateTransaction(parsed.data, parsed.data.workspaceId);
-  } catch (error) {
-    if (error instanceof InvalidTransactionReferenceError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]), success: false };
+  if (!result.ok) {
+    if (result.error instanceof InvalidTransactionReferenceError) {
+      return {
+        error: tErrors(result.error.code as Parameters<typeof tErrors>[0]),
+        success: false,
+      };
     }
-    throw error;
+    return { error: result.error.message, success: false };
   }
 
   revalidateTag(CACHE_TAGS.budgets, "max");

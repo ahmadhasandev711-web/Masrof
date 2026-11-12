@@ -1,23 +1,14 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import {
-  createRecurringExpense,
-  listRecurringExpenses,
-  recordRecurringExpense,
-} from "@/features/recurring-expenses/data";
-import { countRecurringExpensesForWorkspace } from "@/features/subscriptions/plan-usage";
 import { createRecurringExpenseSchema } from "@/features/recurring-expenses/schemas";
-import {
-  assertWorkspacePlanFeature,
-  assertWorkspaceQuantityLimit,
-} from "@/features/subscriptions/data";
+import { recurringExpensesService } from "@/features/recurring-expenses/recurring-expenses.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -29,7 +20,7 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  const items = await listRecurringExpenses(access.workspaceId, limit);
+  const items = await recurringExpensesService.listForWorkspace(access.workspaceId, limit);
   return NextResponse.json({ items });
 }
 
@@ -47,31 +38,15 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertWorkspacePlanFeature(
-      session.user.id,
-      parsed.data.workspaceId,
-      "recurringExpenses",
-    );
-    if (featureError) {
-      return NextResponse.json({ error: featureError }, { status: 403 });
+    const result = await recurringExpensesService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
     }
 
-    const recurringCount = await countRecurringExpensesForWorkspace(parsed.data.workspaceId);
-    const limitError = await assertWorkspaceQuantityLimit(
-      session.user.id,
-      parsed.data.workspaceId,
-      "maxRecurringExpenses",
-      recurringCount,
-    );
-    if (limitError) {
-      return NextResponse.json({ error: limitError }, { status: 403 });
-    }
-
-    const recurring = await createRecurringExpense(parsed.data);
     revalidateTag(CACHE_TAGS.recurring, "max");
-    return NextResponse.json({ id: serializeId(recurring._id) }, { status: 201 });
+    return NextResponse.json({ id: serializeId(result.value._id) }, { status: 201 });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }
 
@@ -92,11 +67,19 @@ export async function PATCH(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, body.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    await recordRecurringExpense(body.recurringId, access.workspaceId, session.user.id);
+    const result = await recurringExpensesService.record(
+      body.recurringId,
+      access.workspaceId,
+      session.user.id,
+    );
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
+
     revalidateTag(CACHE_TAGS.recurring, "max");
     revalidateTag(CACHE_TAGS.budgets, "max");
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

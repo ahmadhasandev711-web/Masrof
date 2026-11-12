@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { createClient, listClientsForWorkspace } from "@/features/clients/data";
 import { createClientSchema } from "@/features/clients/schemas";
+import { clientsService } from "@/features/clients/clients.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
-import { countClientsForWorkspace } from "@/features/subscriptions/plan-usage";
-import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -20,7 +18,7 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  const items = await listClientsForWorkspace(access.workspaceId);
+  const items = await clientsService.listForWorkspace(access.workspaceId);
   return NextResponse.json({ items });
 }
 
@@ -38,38 +36,22 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertWorkspacePlanFeature(
-      session.user.id,
-      parsed.data.workspaceId,
-      "clientsAndProjects",
-    );
-    if (featureError) {
-      return NextResponse.json({ error: featureError }, { status: 403 });
+    const result = await clientsService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
     }
 
-    const clientCount = await countClientsForWorkspace(parsed.data.workspaceId);
-    const limitError = await assertWorkspaceQuantityLimit(
-      session.user.id,
-      parsed.data.workspaceId,
-      "maxClients",
-      clientCount,
-    );
-    if (limitError) {
-      return NextResponse.json({ error: "planLimitReached", message: limitError }, { status: 403 });
-    }
-
-    const client = await createClient(parsed.data);
     revalidateTag(CACHE_TAGS.clients, "max");
     return NextResponse.json(
       {
-        id: serializeId(client._id),
-        name: client.name,
-        email: client.email ?? null,
-        phone: client.phone ?? null,
+        id: serializeId(result.value._id),
+        name: result.value.name,
+        email: result.value.email ?? null,
+        phone: result.value.phone ?? null,
       },
       { status: 201 },
     );
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

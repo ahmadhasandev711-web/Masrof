@@ -1,18 +1,16 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireSession } from "@/features/auth/session";
-import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { archiveCustomCategory } from "@/features/categories/data";
+import { isWorkspaceAuthorizationError } from "@/features/workspaces/access";
+import { categoriesService } from "@/features/categories/categories.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function archiveCategoryAction(categoryId: string, workspaceId: string) {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
-    await archiveCustomCategory(categoryId, workspaceId);
-
+    await runWorkspaceWrite(workspaceId, () =>
+      categoriesService.archive(categoryId, workspaceId),
+    );
     revalidatePath("/dashboard/categories");
     revalidateTag(CACHE_TAGS.categories, "max");
   } catch (error) {

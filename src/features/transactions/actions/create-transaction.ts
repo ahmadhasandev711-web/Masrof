@@ -2,10 +2,12 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { createTransactionSchema } from "@/features/transactions/schemas";
-import { createTransaction, InvalidTransactionReferenceError } from "@/features/transactions/data";
+import {
+  InvalidTransactionReferenceError,
+} from "@/features/transactions/transactions.repository";
+import { transactionsService } from "@/features/transactions/transactions.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateTransactionState = {
@@ -16,7 +18,6 @@ export async function createTransactionAction(
   _prevState: CreateTransactionState,
   formData: FormData,
 ): Promise<CreateTransactionState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -40,15 +41,15 @@ export async function createTransactionAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    transactionsService.create(userId, parsed.data),
+  );
 
-  try {
-    await createTransaction(parsed.data, session.user.id);
-  } catch (error) {
-    if (error instanceof InvalidTransactionReferenceError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };
+  if (!result.ok) {
+    if (result.error instanceof InvalidTransactionReferenceError) {
+      return { error: tErrors(result.error.code as Parameters<typeof tErrors>[0]) };
     }
-    throw error;
+    return { error: result.error.message };
   }
 
   revalidateTag(CACHE_TAGS.budgets, "max");

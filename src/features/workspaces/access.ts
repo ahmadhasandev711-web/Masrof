@@ -6,33 +6,34 @@ import { connectToDatabase } from "@/lib/db/mongoose";
 import { WorkspaceMembershipModel, type WorkspaceRole } from "@/models/workspace-membership";
 import { WorkspaceModel, type WorkspaceDocument } from "@/models/workspace";
 import { canWorkspaceWrite, isWorkspaceOwner } from "@/features/workspaces/roles";
+import { AppError } from "@/server/kernel/errors";
 
 export { canWorkspaceWrite, isWorkspaceOwner };
 
-export class WorkspaceAccessDeniedError extends Error {
+export class WorkspaceAccessDeniedError extends AppError {
   constructor(workspaceId: string) {
-    super(`User does not have access to workspace ${workspaceId}`);
+    super("unauthorized", `User does not have access to workspace ${workspaceId}`, 403);
     this.name = "WorkspaceAccessDeniedError";
   }
 }
 
-export class WorkspaceOwnerRequiredError extends Error {
+export class WorkspaceOwnerRequiredError extends AppError {
   constructor(workspaceId: string) {
-    super(`Owner role required for workspace ${workspaceId}`);
+    super("ownerRequired", `Owner role required for workspace ${workspaceId}`, 403);
     this.name = "WorkspaceOwnerRequiredError";
   }
 }
 
-export class WorkspaceWriteDeniedError extends Error {
+export class WorkspaceWriteDeniedError extends AppError {
   constructor(workspaceId: string) {
-    super(`Write access denied for workspace ${workspaceId}`);
+    super("writeDenied", `Write access denied for workspace ${workspaceId}`, 403);
     this.name = "WorkspaceWriteDeniedError";
   }
 }
 
-export class WorkspaceSuspendedError extends Error {
+export class WorkspaceSuspendedError extends AppError {
   constructor(workspaceId: string) {
-    super(`Workspace ${workspaceId} is suspended`);
+    super("accountSuspended", `Workspace ${workspaceId} is suspended`, 403);
     this.name = "WorkspaceSuspendedError";
   }
 }

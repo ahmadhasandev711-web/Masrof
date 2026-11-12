@@ -57,7 +57,7 @@ export default async function PrintInvoicePage({
   return (
     <main className="invoice-print-page text-neutral-900">
       <InvoicePrintFormatSync format={format} />
-      <div className="mx-auto w-fit max-w-full">
+      <div className="mx-auto w-full max-w-[210mm]">
         <InvoicePrintToolbar invoiceId={id} format={format} />
         <InvoicePrintDocument invoice={invoice} format={format} />
       </div>

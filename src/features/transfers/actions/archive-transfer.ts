@@ -1,17 +1,16 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireSession } from "@/features/auth/session";
-import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { archiveTransfer } from "@/features/transfers/data";
+import { isWorkspaceAuthorizationError } from "@/features/workspaces/access";
+import { transfersService } from "@/features/transfers/transfers.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function archiveTransferAction(transferId: string, workspaceId: string) {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
-    await archiveTransfer(transferId, workspaceId);
+    await runWorkspaceWrite(workspaceId, () =>
+      transfersService.archive(transferId, workspaceId),
+    );
 
     revalidateTag(CACHE_TAGS.transfers, "max");
     revalidatePath("/dashboard/transactions");

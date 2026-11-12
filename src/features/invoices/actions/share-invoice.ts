@@ -1,13 +1,8 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import {
-  getOrCreateInvoiceShareToken,
-  regenerateInvoiceShareToken,
-  toggleInvoiceShareable,
-} from "@/features/invoices/public-invoice-data";
+import { invoicesService } from "@/features/invoices/invoices.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function getOrCreateShareTokenAction(
@@ -15,18 +10,18 @@ export async function getOrCreateShareTokenAction(
   workspaceId: string,
 ): Promise<{ success: boolean; token: string | null; error: string | null }> {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
+    const result = await runWorkspaceWrite(workspaceId, () =>
+      invoicesService.getOrCreateShareToken(invoiceId, workspaceId),
+    );
 
-    const token = await getOrCreateInvoiceShareToken(invoiceId, workspaceId);
-    if (!token) {
+    if (!result.ok) {
       return { success: false, token: null, error: "تعذر توليد رابط المشاركة" };
     }
 
     revalidateTag(CACHE_TAGS.invoices, "max");
     revalidatePath("/dashboard/invoices");
 
-    return { success: true, token, error: null };
+    return { success: true, token: result.value, error: null };
   } catch (error) {
     return {
       success: false,
@@ -41,18 +36,18 @@ export async function regenerateShareTokenAction(
   workspaceId: string,
 ): Promise<{ success: boolean; token: string | null; error: string | null }> {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
+    const result = await runWorkspaceWrite(workspaceId, () =>
+      invoicesService.regenerateShareToken(invoiceId, workspaceId),
+    );
 
-    const token = await regenerateInvoiceShareToken(invoiceId, workspaceId);
-    if (!token) {
+    if (!result.ok) {
       return { success: false, token: null, error: "تعذر تجديد رابط المشاركة" };
     }
 
     revalidateTag(CACHE_TAGS.invoices, "max");
     revalidatePath("/dashboard/invoices");
 
-    return { success: true, token, error: null };
+    return { success: true, token: result.value, error: null };
   } catch (error) {
     return {
       success: false,
@@ -68,15 +63,14 @@ export async function toggleShareableAction(
   isShareable: boolean,
 ): Promise<{ success: boolean; error: string | null }> {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
-    const success = await toggleInvoiceShareable(invoiceId, workspaceId, isShareable);
+    const result = await runWorkspaceWrite(workspaceId, () =>
+      invoicesService.toggleShareable(invoiceId, workspaceId, isShareable),
+    );
 
     revalidateTag(CACHE_TAGS.invoices, "max");
     revalidatePath("/dashboard/invoices");
 
-    return { success, error: null };
+    return { success: result.ok ? result.value : false, error: null };
   } catch (error) {
     return {
       success: false,

@@ -2,12 +2,9 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { createAccountSchema } from "@/features/accounts/schemas";
-import { createAccount } from "@/features/accounts/data";
-import { resolveAccountCurrency } from "@/lib/currency";
+import { accountsService } from "@/features/accounts/accounts.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { SupportedCurrency } from "@/models/workspace";
 
@@ -19,7 +16,6 @@ export async function createAccountAction(
   _prevState: CreateAccountState,
   formData: FormData,
 ): Promise<CreateAccountState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -36,22 +32,17 @@ export async function createAccountAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  const workspace = await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
-  const workspaceCurrency = workspace.currency as SupportedCurrency;
-  const requestedCurrency = resolveAccountCurrency(parsed.data.currency, workspaceCurrency);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId, workspace }) =>
+    accountsService.create(
+      userId,
+      parsed.data,
+      workspace.currency as SupportedCurrency,
+    ),
+  );
 
-  if (requestedCurrency !== workspaceCurrency) {
-    const featureError = await assertWorkspacePlanFeature(
-      session.user.id,
-      parsed.data.workspaceId,
-      "multiCurrency",
-    );
-    if (featureError) {
-      return { error: featureError };
-    }
+  if (!result.ok) {
+    return { error: result.error.message };
   }
-
-  await createAccount({ ...parsed.data, currency: requestedCurrency }, workspaceCurrency);
 
   revalidatePath("/dashboard/accounts");
   revalidateTag(CACHE_TAGS.accounts, "max");

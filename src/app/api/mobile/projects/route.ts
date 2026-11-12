@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { createProject, listProjectsWithTotals } from "@/features/projects/data";
 import { createProjectSchema } from "@/features/projects/schemas";
+import { projectsService } from "@/features/projects/projects.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
-import { countActiveProjectsForWorkspace } from "@/features/subscriptions/plan-usage";
-import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -20,7 +18,7 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  const items = await listProjectsWithTotals(access.workspaceId);
+  const items = await projectsService.listWithTotals(access.workspaceId);
   return NextResponse.json({ items });
 }
 
@@ -38,39 +36,21 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertWorkspacePlanFeature(
-      session.user.id,
-      parsed.data.workspaceId,
-      "clientsAndProjects",
-    );
-    if (featureError) {
-      return NextResponse.json({ error: featureError }, { status: 403 });
+    const result = await projectsService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
     }
 
-    if (parsed.data.status === "active") {
-      const activeCount = await countActiveProjectsForWorkspace(parsed.data.workspaceId);
-      const limitError = await assertWorkspaceQuantityLimit(
-        session.user.id,
-        parsed.data.workspaceId,
-        "maxActiveProjects",
-        activeCount,
-      );
-      if (limitError) {
-        return NextResponse.json({ error: "planLimitReached", message: limitError }, { status: 403 });
-      }
-    }
-
-    const project = await createProject(parsed.data);
     revalidateTag(CACHE_TAGS.projects, "max");
     return NextResponse.json(
       {
-        id: serializeId(project._id),
-        name: project.name,
-        status: project.status,
+        id: serializeId(result.value._id),
+        name: result.value.name,
+        status: result.value.status,
       },
       { status: 201 },
     );
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

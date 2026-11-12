@@ -2,24 +2,24 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { cancelInvoice, InvalidInvoiceReferenceError } from "@/features/invoices/data";
+import { invoicesService } from "@/features/invoices/invoices.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function cancelInvoiceAction(invoiceId: string, workspaceId: string) {
-  const session = await requireSession();
   const tErrors = await getTranslations("errors");
 
-  await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
+  const result = await runWorkspaceWrite(workspaceId, () =>
+    invoicesService.cancel(invoiceId, workspaceId),
+  );
 
-  try {
-    await cancelInvoice(invoiceId, workspaceId);
-  } catch (error) {
-    if (error instanceof InvalidInvoiceReferenceError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };
+  if (!result.ok) {
+    const code = result.error.code as Parameters<typeof tErrors>[0];
+    try {
+      return { error: tErrors(code) };
+    } catch {
+      return { error: result.error.message };
     }
-    throw error;
   }
 
   revalidateTag(CACHE_TAGS.invoices, "max");

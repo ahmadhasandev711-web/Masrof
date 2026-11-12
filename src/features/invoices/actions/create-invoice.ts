@@ -2,12 +2,10 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import { createInvoiceSchema } from "@/features/invoices/schemas";
-import { createInvoice, InvalidInvoiceReferenceError } from "@/features/invoices/data";
-import { countInvoicesCreatedThisMonth } from "@/features/subscriptions/plan-usage";
+import { invoicesService } from "@/features/invoices/invoices.service";
+import { InvalidInvoiceReferenceError } from "@/features/invoices/invoices.errors";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateInvoiceState = {
@@ -34,7 +32,6 @@ export async function createInvoiceAction(
   _prevState: CreateInvoiceState,
   formData: FormData,
 ): Promise<CreateInvoiceState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -56,37 +53,22 @@ export async function createInvoiceAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
-
-  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "clientsAndProjects");
-  if (featureError) {
-    return { error: featureError };
-  }
-
-  const invoiceCount = await countInvoicesCreatedThisMonth(parsed.data.workspaceId);
-  const limitError = await assertWorkspaceQuantityLimit(
-    session.user.id,
-    parsed.data.workspaceId,
-    "maxInvoicesPerMonth",
-    invoiceCount,
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    invoicesService.create(userId, parsed.data),
   );
-  if (limitError) {
-    return { error: limitError };
+
+  if (!result.ok) {
+    if (result.error instanceof InvalidInvoiceReferenceError) {
+      return { error: tErrors(result.error.code as Parameters<typeof tErrors>[0]) };
+    }
+    return { error: result.error.message };
   }
 
-  try {
-    const invoice = await createInvoice(parsed.data);
-    revalidateTag(CACHE_TAGS.invoices, "max");
-    revalidatePath("/dashboard/invoices");
-    revalidatePath("/dashboard/clients");
-    return {
-      error: null,
-      redirectTo: `/print/invoice/${String(invoice._id)}?format=a4`,
-    };
-  } catch (error) {
-    if (error instanceof InvalidInvoiceReferenceError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };
-    }
-    throw error;
-  }
+  revalidateTag(CACHE_TAGS.invoices, "max");
+  revalidatePath("/dashboard/invoices");
+  revalidatePath("/dashboard/clients");
+  return {
+    error: null,
+    redirectTo: `/print/invoice/${String(result.value._id)}?format=a4`,
+  };
 }

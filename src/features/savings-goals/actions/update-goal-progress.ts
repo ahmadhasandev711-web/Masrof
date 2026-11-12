@@ -2,10 +2,9 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { createUpdateGoalProgressSchema } from "@/features/savings-goals/schemas";
-import { updateSavingsGoalProgress, SavingsGoalNotFoundError } from "@/features/savings-goals/data";
+import { savingsGoalsService } from "@/features/savings-goals/savings-goals.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type UpdateGoalProgressState = {
@@ -16,7 +15,6 @@ export async function updateGoalProgressAction(
   _prevState: UpdateGoalProgressState,
   formData: FormData,
 ): Promise<UpdateGoalProgressState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -30,15 +28,14 @@ export async function updateGoalProgressAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, () =>
+    savingsGoalsService.updateProgress(parsed.data),
+  );
 
-  try {
-    await updateSavingsGoalProgress(parsed.data);
-  } catch (error) {
-    if (error instanceof SavingsGoalNotFoundError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };
-    }
-    throw error;
+  if (!result.ok) {
+    return {
+      error: tErrors(result.error.code as Parameters<typeof tErrors>[0]) || result.error.message,
+    };
   }
 
   revalidateTag(CACHE_TAGS.goals, "max");

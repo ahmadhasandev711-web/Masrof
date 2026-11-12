@@ -1,5 +1,12 @@
 import "server-only";
 
+/**
+ * Members / invitations persistence and plan-seat helpers.
+ * Intentionally kept (not folded into the workspaces repository) to avoid
+ * subscription↔workspace circular imports and to keep invite flows stable.
+ * Product write orchestration lives in `workspaces.service.ts`.
+ */
+
 import crypto from "node:crypto";
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "@/lib/db/mongoose";

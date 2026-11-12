@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDashboardOverview } from "@/features/dashboard/data";
+import { dashboardRepository } from "@/features/dashboard/dashboard.repository";
 import { getDashboardAlerts } from "@/features/dashboard/alerts";
 import {
   mobileErrorResponse,
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   try {
     const [overview, alerts] = await Promise.all([
-      getDashboardOverview(access.workspaceId),
+      dashboardRepository.getOverview(access.workspaceId),
       getDashboardAlerts(access.workspaceId),
     ]);
 

@@ -1,16 +1,16 @@
 import "server-only";
 
-import mongoose from "mongoose";
-import crypto from "crypto";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { toPlain } from "@/lib/db/plain";
 import { InvoiceModel, type InvoiceStatus } from "@/models/invoice";
 import { InvoicePaymentModel } from "@/models/invoice-payment";
+import {
+  generateSecureShareToken,
+  invoicesRepository,
+} from "@/features/invoices/invoices.repository";
 import type { InvoiceFinancialStatus, PublicInvoiceView } from "@/features/invoices/types";
 
-export function generateSecureShareToken(): string {
-  return crypto.randomBytes(16).toString("hex");
-}
+export { generateSecureShareToken };
 
 /**
  * Gets an existing share token or securely generates and assigns a new one.
@@ -19,33 +19,7 @@ export async function getOrCreateInvoiceShareToken(
   invoiceId: string,
   workspaceId: string,
 ): Promise<string | null> {
-  if (
-    !mongoose.Types.ObjectId.isValid(invoiceId) ||
-    !mongoose.Types.ObjectId.isValid(workspaceId)
-  ) {
-    return null;
-  }
-
-  await connectToDatabase();
-
-  const invoice = await InvoiceModel.findOne({
-    _id: invoiceId,
-    workspaceId,
-    isArchived: false,
-  });
-
-  if (!invoice) return null;
-
-  if (invoice.shareToken) {
-    return invoice.shareToken;
-  }
-
-  const token = generateSecureShareToken();
-  invoice.shareToken = token;
-  invoice.isShareable = true;
-  await invoice.save();
-
-  return token;
+  return invoicesRepository.getOrCreateShareToken(invoiceId, workspaceId);
 }
 
 /**
@@ -55,30 +29,7 @@ export async function regenerateInvoiceShareToken(
   invoiceId: string,
   workspaceId: string,
 ): Promise<string | null> {
-  if (
-    !mongoose.Types.ObjectId.isValid(invoiceId) ||
-    !mongoose.Types.ObjectId.isValid(workspaceId)
-  ) {
-    return null;
-  }
-
-  await connectToDatabase();
-
-  const invoice = await InvoiceModel.findOne({
-    _id: invoiceId,
-    workspaceId,
-    isArchived: false,
-  });
-
-  if (!invoice) return null;
-
-  const newToken = generateSecureShareToken();
-  invoice.shareToken = newToken;
-  invoice.isShareable = true;
-  invoice.viewedAt = null; // Reset read status for new link
-  await invoice.save();
-
-  return newToken;
+  return invoicesRepository.regenerateShareToken(invoiceId, workspaceId);
 }
 
 /**
@@ -89,21 +40,7 @@ export async function toggleInvoiceShareable(
   workspaceId: string,
   isShareable: boolean,
 ): Promise<boolean> {
-  if (
-    !mongoose.Types.ObjectId.isValid(invoiceId) ||
-    !mongoose.Types.ObjectId.isValid(workspaceId)
-  ) {
-    return false;
-  }
-
-  await connectToDatabase();
-
-  const result = await InvoiceModel.updateOne(
-    { _id: invoiceId, workspaceId, isArchived: false },
-    { $set: { isShareable } },
-  );
-
-  return result.modifiedCount > 0;
+  return invoicesRepository.setShareable(invoiceId, workspaceId, isShareable);
 }
 
 /**
@@ -127,22 +64,25 @@ export async function getPublicInvoiceByToken(
   })
     .populate("clientId", "name email phone")
     .populate("projectId", "name")
-    .populate("workspaceId", "name businessName logoUrl taxId businessPhone businessAddress currency")
+    .populate(
+      "workspaceId",
+      "name businessName logoUrl taxId businessPhone businessAddress currency",
+    )
     .lean();
 
   if (!invoice) return null;
 
-  // Mark viewed asynchronously if first time
   if (!invoice.viewedAt) {
     InvoiceModel.updateOne(
       { _id: invoice._id, viewedAt: null },
       { $set: { viewedAt: new Date() } },
-    ).exec().catch((err) => {
-      console.error("[public-invoice] failed to update viewedAt:", err);
-    });
+    )
+      .exec()
+      .catch((err) => {
+        console.error("[public-invoice] failed to update viewedAt:", err);
+      });
   }
 
-  // Fetch payments for this invoice
   const payments = await InvoicePaymentModel.find({
     invoiceId: invoice._id,
     isArchived: false,
@@ -214,6 +154,8 @@ export async function getPublicInvoiceByToken(
     businessPhone: workspace?.businessPhone || null,
     businessAddress: workspace?.businessAddress || null,
     currency: workspace?.currency || "EGP",
-    viewedAt: invoice.viewedAt ? new Date(invoice.viewedAt).toISOString() : new Date().toISOString(),
+    viewedAt: invoice.viewedAt
+      ? new Date(invoice.viewedAt).toISOString()
+      : new Date().toISOString(),
   });
 }

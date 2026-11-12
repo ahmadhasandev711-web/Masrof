@@ -2,20 +2,25 @@
 
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { archiveDebt } from "@/features/debts/data";
+import { isWorkspaceAuthorizationError } from "@/features/workspaces/access";
+import { debtsService } from "@/features/debts/debts.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 
 export async function archiveDebtAction(
   workspaceId: string,
   debtId: string,
 ): Promise<{ success: boolean; error: string | null }> {
-  const session = await requireSession();
   const tErrors = await getTranslations("errors");
 
   try {
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-    await archiveDebt(workspaceId, debtId);
+    const result = await runWorkspaceWrite(workspaceId, () =>
+      debtsService.archive(workspaceId, debtId),
+    );
+
+    if (!result.ok) {
+      return { success: false, error: tErrors("debtNotFound") };
+    }
+
     revalidatePath("/dashboard/debts");
     revalidatePath("/dashboard");
     return { success: true, error: null };

@@ -2,16 +2,14 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
 import { recordDebtPaymentSchema } from "@/features/debts/schemas";
+import { debtsService } from "@/features/debts/debts.service";
 import {
-  recordDebtPayment,
-  DebtNotFoundError,
   DebtAccountNotFoundError,
+  DebtNotFoundError,
   DebtOverpaymentError,
-} from "@/features/debts/data";
+} from "@/features/debts/debts.errors";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type RecordDebtPaymentState = {
@@ -23,7 +21,6 @@ export async function recordDebtPaymentAction(
   _prevState: RecordDebtPaymentState,
   formData: FormData,
 ): Promise<RecordDebtPaymentState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -45,52 +42,29 @@ export async function recordDebtPaymentAction(
     };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    debtsService.recordPayment(userId, parsed.data),
+  );
 
-  const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "debts");
-  if (featureError) {
-    return { success: false, error: featureError };
-  }
-
-  try {
-    await recordDebtPayment(
-      {
-        workspaceId: parsed.data.workspaceId,
-        debtId: parsed.data.debtId,
-        accountId: parsed.data.accountId,
-        amount: parsed.data.amount,
-        paymentDate: parsed.data.paymentDate,
-        reference: parsed.data.reference,
-        notes: parsed.data.notes,
-        idempotencyKey: parsed.data.idempotencyKey,
-      },
-      session.user.id,
-    );
-
-    revalidateTag(CACHE_TAGS.accounts, "max");
-    revalidatePath("/dashboard/debts");
-    revalidatePath("/dashboard/transactions");
-    revalidatePath("/dashboard/accounts");
-    revalidatePath("/dashboard");
-
-    return { success: true, error: null };
-  } catch (err: unknown) {
-    if (err instanceof DebtNotFoundError) {
-      return { success: false, error: tErrors("debtNotFound") };
-    }
-    if (err instanceof DebtAccountNotFoundError) {
-      return { success: false, error: tErrors("accountNotFound") };
-    }
-    if (err instanceof DebtOverpaymentError) {
+  if (!result.ok) {
+    if (
+      result.error instanceof DebtNotFoundError ||
+      result.error instanceof DebtAccountNotFoundError ||
+      result.error instanceof DebtOverpaymentError
+    ) {
       return {
         success: false,
-        error: tErrors("debtOverpayment"),
+        error: tErrors(result.error.code as Parameters<typeof tErrors>[0]),
       };
     }
-    console.error("recordDebtPaymentAction error:", err);
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : tErrors("unexpected"),
-    };
+    return { success: false, error: result.error.message };
   }
+
+  revalidateTag(CACHE_TAGS.accounts, "max");
+  revalidatePath("/dashboard/debts");
+  revalidatePath("/dashboard/transactions");
+  revalidatePath("/dashboard/accounts");
+  revalidatePath("/dashboard");
+
+  return { success: true, error: null };
 }

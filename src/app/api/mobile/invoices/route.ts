@@ -1,22 +1,15 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import {
-  createInvoice,
-  InvoicePaidStatusNotAllowedError,
-  listInvoicesPaginated,
-  updateInvoiceStatus,
-} from "@/features/invoices/data";
+import { invoicesService } from "@/features/invoices/invoices.service";
 import { createInvoiceSchema } from "@/features/invoices/schemas";
 import { INVOICE_STATUSES } from "@/models/invoice";
 import { CACHE_TAGS } from "@/lib/cache-tags";
-import { countInvoicesCreatedThisMonth } from "@/features/subscriptions/plan-usage";
-import { assertWorkspacePlanFeature, assertWorkspaceQuantityLimit } from "@/features/subscriptions/data";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -30,7 +23,7 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  const result = await listInvoicesPaginated(access.workspaceId, page, pageSize);
+  const result = await invoicesService.listPaginated(access.workspaceId, page, pageSize);
   return NextResponse.json(result);
 }
 
@@ -48,37 +41,21 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertWorkspacePlanFeature(
-      session.user.id,
-      parsed.data.workspaceId,
-      "clientsAndProjects",
-    );
-    if (featureError) {
-      return NextResponse.json({ error: featureError }, { status: 403 });
+    const result = await invoicesService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
     }
 
-    const invoiceCount = await countInvoicesCreatedThisMonth(parsed.data.workspaceId);
-    const limitError = await assertWorkspaceQuantityLimit(
-      session.user.id,
-      parsed.data.workspaceId,
-      "maxInvoicesPerMonth",
-      invoiceCount,
-    );
-    if (limitError) {
-      return NextResponse.json({ error: "planLimitReached", message: limitError }, { status: 403 });
-    }
-
-    const invoice = await createInvoice(parsed.data);
     revalidateTag(CACHE_TAGS.invoices, "max");
     return NextResponse.json(
       {
-        id: serializeId(invoice._id),
-        invoiceNumber: invoice.invoiceNumber,
+        id: serializeId(result.value._id),
+        invoiceNumber: result.value.invoiceNumber,
       },
       { status: 201 },
     );
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }
 
@@ -92,7 +69,11 @@ export async function PATCH(request: Request) {
       invoiceId?: string;
       status?: string;
     };
-    if (!body.invoiceId || !body.status || !(INVOICE_STATUSES as readonly string[]).includes(body.status)) {
+    if (
+      !body.invoiceId ||
+      !body.status ||
+      !(INVOICE_STATUSES as readonly string[]).includes(body.status)
+    ) {
       return NextResponse.json({ error: "invalidData" }, { status: 400 });
     }
     if (body.status === "paid") {
@@ -102,17 +83,18 @@ export async function PATCH(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, body.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    await updateInvoiceStatus(
+    const result = await invoicesService.updateStatus(
       body.invoiceId,
       access.workspaceId,
       body.status as (typeof INVOICE_STATUSES)[number],
     );
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
+
     revalidateTag(CACHE_TAGS.invoices, "max");
     return NextResponse.json({ ok: true });
   } catch (error) {
-    if (error instanceof InvoicePaidStatusNotAllowedError) {
-      return NextResponse.json({ error: error.code }, { status: 400 });
-    }
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

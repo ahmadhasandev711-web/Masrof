@@ -76,6 +76,9 @@ export type InvoicePrintView = {
   dueDate: string | null;
   items: InvoiceLineItem[];
   total: number;
+  paidAmount: number;
+  remainingAmount: number;
+  financialStatus: InvoiceFinancialStatus;
   notes: string;
   status: InvoiceStatus;
   client: {

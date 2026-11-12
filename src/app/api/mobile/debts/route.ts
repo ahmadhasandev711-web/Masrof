@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
 import { createDebtSchema } from "@/features/debts/schemas";
+import { debtsService } from "@/features/debts/debts.service";
 import {
-  createDebt,
-  getDebtsForWorkspace,
-  getDebtSummary,
-} from "@/features/debts/data";
-import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
-import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -23,15 +18,15 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  const featureError = await assertWorkspacePlanFeature(session.user.id, access.workspaceId, "debts");
-  if (featureError) {
-    return NextResponse.json({ error: featureError }, { status: 403 });
+  const feature = await debtsService.requireAccess(session.user.id, access.workspaceId);
+  if (!feature.ok) {
+    return resultToResponse(feature);
   }
 
   try {
     const [items, summary] = await Promise.all([
-      getDebtsForWorkspace(access.workspaceId, status ? { status } : undefined),
-      getDebtSummary(access.workspaceId, access.workspace.currency),
+      debtsService.listForWorkspace(access.workspaceId, status ? { status } : undefined),
+      debtsService.getSummary(access.workspaceId, access.workspace.currency),
     ]);
 
     return NextResponse.json({
@@ -39,7 +34,7 @@ export async function GET(request: Request) {
       summary,
     });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }
 
@@ -60,18 +55,16 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertWorkspacePlanFeature(session.user.id, parsed.data.workspaceId, "debts");
-    if (featureError) {
-      return NextResponse.json({ error: featureError }, { status: 403 });
-    }
-
-    const id = await createDebt({
+    const result = await debtsService.create(session.user.id, {
       ...parsed.data,
       currency: access.workspace.currency,
     });
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
 
-    return NextResponse.json({ id }, { status: 201 });
+    return NextResponse.json({ id: result.value }, { status: 201 });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

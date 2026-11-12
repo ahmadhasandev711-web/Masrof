@@ -2,10 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { requireWorkspaceOwner } from "@/features/workspaces/access";
 import { updateWorkspaceBrandingSchema } from "@/features/workspaces/branding-schema";
-import { updateWorkspace } from "@/features/workspaces/data";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
+import { runWorkspaceOwnerWrite } from "@/server/kernel";
 
 export type UpdateBrandingState = { error: string | null; success?: boolean };
 
@@ -13,7 +12,6 @@ export async function updateWorkspaceBrandingAction(
   _prev: UpdateBrandingState,
   formData: FormData,
 ): Promise<UpdateBrandingState> {
-  const session = await requireSession();
   const tErrors = await getTranslations("errors");
 
   const parsed = updateWorkspaceBrandingSchema.safeParse({
@@ -29,15 +27,13 @@ export async function updateWorkspaceBrandingAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await requireWorkspaceOwner(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceOwnerWrite(parsed.data.workspaceId, () =>
+    workspacesService.updateBranding(parsed.data),
+  );
 
-  await updateWorkspace(parsed.data.workspaceId, {
-    businessName: parsed.data.businessName ?? "",
-    logoUrl: parsed.data.logoUrl ?? "",
-    taxId: parsed.data.taxId ?? "",
-    businessPhone: parsed.data.businessPhone ?? "",
-    businessAddress: parsed.data.businessAddress ?? "",
-  });
+  if (!result.ok) {
+    return { error: result.error.message };
+  }
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/invoices");

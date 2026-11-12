@@ -13,6 +13,7 @@ import { cancelInvoiceAction } from "@/features/invoices/actions/cancel-invoice"
 import { archiveInvoiceAction } from "@/features/invoices/actions/archive-invoice";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
 import { useTranslations, useLocale } from "next-intl";
+import { NavIcon } from "@/components/ui/app-icons";
 
 function formatDate(isoDate: string, locale = "ar") {
   const targetLocale = locale.startsWith("en") ? "en-US" : "ar-EG-u-nu-latn";
@@ -140,6 +141,7 @@ function InvoiceRow({
 
   const locale = useLocale();
   const tPages = useTranslations("pages.invoices");
+  const tCommon = useTranslations("common");
 
   const [isCancelling, startCancelTransition] = useTransition();
   const [isArchiving, startArchiveTransition] = useTransition();
@@ -330,7 +332,7 @@ function InvoiceRow({
         )}
 
         {/* Action Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-neutral-100">
+        <div className="flex flex-col gap-3 border-t border-neutral-100 pt-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           {/* Primary Actions (Record payment & Share) */}
           <div className="flex flex-wrap items-center gap-2">
             {invoice.status !== "cancelled" && invoice.financialStatus !== "paid" && (
@@ -358,39 +360,39 @@ function InvoiceRow({
             )}
           </div>
 
-          {/* Secondary Actions (Print Segmented Pill + Square Action Buttons) */}
-          <div className="flex items-center gap-2 ms-auto">
-            {/* Compact Print Pill */}
-            <div className="inline-flex items-center rounded-xl border border-neutral-200 bg-neutral-50 p-0.5 text-xs font-semibold">
+          {/* Secondary: print + manage */}
+          <div className="flex flex-col gap-2 sm:ms-auto sm:items-end">
+            <div className="inline-flex w-full items-center rounded-xl border border-neutral-200 bg-neutral-50 p-0.5 text-xs font-semibold sm:w-auto">
               <Link
                 href={`/print/invoice/${invoice._id}?format=a4`}
                 target="_blank"
-                title="A4 Print"
-                className="rounded-lg px-2.5 py-1 text-neutral-700 hover:bg-white hover:shadow-2xs transition"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 py-2 text-neutral-800 transition hover:bg-white hover:shadow-2xs sm:flex-none sm:px-4"
               >
                 A4
               </Link>
-              <span className="text-neutral-300">|</span>
+              <span className="text-neutral-300" aria-hidden>
+                |
+              </span>
               <Link
                 href={`/print/invoice/${invoice._id}?format=pos`}
                 target="_blank"
-                title="POS Receipt"
-                className="rounded-lg px-2 py-1 text-neutral-700 hover:bg-white hover:shadow-2xs transition"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 py-2 text-neutral-800 transition hover:bg-white hover:shadow-2xs sm:flex-none sm:px-4"
               >
-                POS
+                {tForm("printThermal80")}
               </Link>
             </div>
 
-            {/* Quick action buttons */}
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-2">
               {invoice.paidAmount > 0 && (
                 <button
                   type="button"
                   onClick={() => setIsHistoryOpen(true)}
-                  title={tForm("paymentHistory")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-xs text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
                 >
-                  
+                  <NavIcon name="inbox" className="h-4 w-4 shrink-0" />
+                  <span>{tForm("paymentHistory")}</span>
                 </button>
               )}
 
@@ -399,10 +401,10 @@ function InvoiceRow({
                   <button
                     type="button"
                     onClick={() => setIsEditOpen(true)}
-                    title={tPages("edit")}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 bg-white text-xs text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
                   >
-                    
+                    <NavIcon name="edit" className="h-4 w-4 shrink-0" />
+                    <span>{tPages("edit")}</span>
                   </button>
 
                   {invoice.status !== "cancelled" && (
@@ -415,10 +417,10 @@ function InvoiceRow({
                           setCancelConfirm(true);
                         }
                       }}
-                      title={tPages("cancel")}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50/60 text-xs text-amber-800 hover:bg-amber-100 transition"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100"
                     >
-                      
+                      <NavIcon name="ban" className="h-4 w-4 shrink-0" />
+                      <span>{tPages("cancel")}</span>
                     </button>
                   )}
 
@@ -431,10 +433,10 @@ function InvoiceRow({
                         setArchiveConfirm(true);
                       }
                     }}
-                    title={tPages("delete")}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50/60 text-xs text-rose-700 hover:bg-rose-100 transition"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-800 transition hover:bg-rose-100"
                   >
-                    
+                    <NavIcon name="trash" className="h-4 w-4 shrink-0" />
+                    <span>{tCommon("delete")}</span>
                   </button>
                 </>
               )}

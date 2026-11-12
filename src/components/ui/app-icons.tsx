@@ -40,7 +40,9 @@ export type NavIconKey =
   | "tag"
   | "phone"
   | "chat"
-  | "check";
+  | "check"
+  | "edit"
+  | "ban";
 
 type SvgProps = { className?: string; strokeWidth?: number };
 
@@ -260,6 +262,26 @@ export function NavIcon({ name, className = "h-5 w-5" }: { name: NavIconKey; cla
       return (
         <Svg className={className}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </Svg>
+      );
+    case "edit":
+      return (
+        <Svg className={className}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          />
+        </Svg>
+      );
+    case "ban":
+      return (
+        <Svg className={className}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+          />
         </Svg>
       );
     default:

@@ -3,7 +3,13 @@
 .invoice-print-page {
   min-height: 100vh;
   background: #f3f4f6;
-  padding: 1.5rem 1rem;
+  padding: 1rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .invoice-print-page {
+    padding: 1.5rem 1rem;
+  }
 }
 
 @media print {
@@ -28,17 +34,30 @@
 
 /* --- A4 (210 × 297 mm) --- */
 .invoice-sheet-a4 {
-  width: 210mm;
-  min-height: 297mm;
-  max-width: 100%;
-  padding: 16mm 18mm;
+  width: 100%;
+  max-width: 210mm;
+  min-height: auto;
+  padding: 1.25rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .invoice-sheet-a4 {
+    padding: 16mm 18mm;
+    min-height: 297mm;
+  }
 }
 
 @media print {
   html[data-invoice-format="a4"] .invoice-sheet-a4 {
     width: 100%;
+    max-width: none;
     min-height: auto;
     padding: 0;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
   }
 }
 
@@ -51,18 +70,13 @@
 }
 
 @media print {
-  html[data-invoice-format="pos"] .invoice-sheet-pos {
-    width: 80mm;
-    padding: 2mm;
+  html[data-invoice-format="pos"] {
+    @page {
+      size: 80mm auto;
+      margin: 2mm;
+    }
   }
-}
 
-@page {
-  size: A4;
-  margin: 12mm;
-}
-
-@media print {
   html[data-invoice-format="pos"] .invoice-sheet-pos {
     width: 80mm;
     padding: 2mm;

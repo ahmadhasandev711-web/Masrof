@@ -2,10 +2,10 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { createBudgetSchema } from "@/features/budgets/schemas";
-import { createBudget, InvalidBudgetCategoryError } from "@/features/budgets/data";
+import { InvalidBudgetCategoryError } from "@/features/budgets/budgets.repository";
+import { budgetsService } from "@/features/budgets/budgets.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CreateBudgetState = {
@@ -16,7 +16,6 @@ export async function createBudgetAction(
   _prevState: CreateBudgetState,
   formData: FormData,
 ): Promise<CreateBudgetState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -32,25 +31,15 @@ export async function createBudgetAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
-
-  const { assertWorkspacePlanFeature } = await import("@/features/subscriptions/data");
-  const featureError = await assertWorkspacePlanFeature(
-    session.user.id,
-    parsed.data.workspaceId,
-    "budgets",
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    budgetsService.create(userId, parsed.data),
   );
-  if (featureError) {
-    return { error: featureError };
-  }
 
-  try {
-    await createBudget(parsed.data);
-  } catch (error) {
-    if (error instanceof InvalidBudgetCategoryError) {
-      return { error: tErrors(error.code as Parameters<typeof tErrors>[0]) };
+  if (!result.ok) {
+    if (result.error instanceof InvalidBudgetCategoryError) {
+      return { error: tErrors(result.error.code as Parameters<typeof tErrors>[0]) };
     }
-    throw error;
+    return { error: result.error.message };
   }
 
   revalidateTag(CACHE_TAGS.budgets, "max");

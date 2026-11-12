@@ -1,20 +1,16 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { requireSession } from "@/features/auth/session";
-import { isWorkspaceAuthorizationError, verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
-import {
-  recordRecurringExpense,
-  archiveRecurringExpense,
-} from "@/features/recurring-expenses/data";
+import { isWorkspaceAuthorizationError } from "@/features/workspaces/access";
+import { recurringExpensesService } from "@/features/recurring-expenses/recurring-expenses.service";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export async function recordRecurringExpenseAction(recurringId: string, workspaceId: string) {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
-    await recordRecurringExpense(recurringId, workspaceId, session.user.id);
+    await runWorkspaceWrite(workspaceId, ({ userId }) =>
+      recurringExpensesService.record(recurringId, workspaceId, userId),
+    );
 
     revalidateTag(CACHE_TAGS.recurring, "max");
     revalidateTag(CACHE_TAGS.budgets, "max");
@@ -30,10 +26,9 @@ export async function recordRecurringExpenseAction(recurringId: string, workspac
 
 export async function archiveRecurringExpenseAction(recurringId: string, workspaceId: string) {
   try {
-    const session = await requireSession();
-    await verifyWorkspaceWriteAccess(session.user.id, workspaceId);
-
-    await archiveRecurringExpense(recurringId, workspaceId);
+    await runWorkspaceWrite(workspaceId, () =>
+      recurringExpensesService.archive(recurringId, workspaceId),
+    );
 
     revalidateTag(CACHE_TAGS.recurring, "max");
     revalidatePath("/dashboard/budgets");

@@ -2,16 +2,15 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { recordPaymentSchema } from "@/features/invoices/payment-schemas";
+import { invoicesService } from "@/features/invoices/invoices.service";
 import {
-  recordInvoicePayment,
-  InvoiceOverpaymentError,
-  InvoiceCancelledError,
   AccountCurrencyMismatchError,
   InvalidPaymentReferenceError,
-} from "@/features/invoices/payment-data";
+  InvoiceCancelledError,
+  InvoiceOverpaymentError,
+} from "@/features/invoices/invoices.errors";
+import { runWorkspaceWrite } from "@/server/kernel";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type RecordPaymentState = {
@@ -23,7 +22,6 @@ export async function recordInvoicePaymentAction(
   _prevState: RecordPaymentState,
   formData: FormData,
 ): Promise<RecordPaymentState> {
-  const session = await requireSession();
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
@@ -47,34 +45,33 @@ export async function recordInvoicePaymentAction(
     };
   }
 
-  await verifyWorkspaceWriteAccess(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    invoicesService.recordPayment(userId, parsed.data),
+  );
 
-  try {
-    await recordInvoicePayment(parsed.data, session.user.id);
-
-    revalidateTag(CACHE_TAGS.invoices, "max");
-    revalidateTag(CACHE_TAGS.accounts, "max");
-    revalidatePath("/dashboard/invoices");
-    revalidatePath("/dashboard/transactions");
-    revalidatePath("/dashboard/accounts");
-
-    return {
-      success: true,
-      error: null,
-    };
-  } catch (error) {
+  if (!result.ok) {
     if (
-      error instanceof InvoiceOverpaymentError ||
-      error instanceof InvoiceCancelledError ||
-      error instanceof AccountCurrencyMismatchError ||
-      error instanceof InvalidPaymentReferenceError
+      result.error instanceof InvoiceOverpaymentError ||
+      result.error instanceof InvoiceCancelledError ||
+      result.error instanceof AccountCurrencyMismatchError ||
+      result.error instanceof InvalidPaymentReferenceError
     ) {
-      const code = error.code as Parameters<typeof tErrors>[0];
       return {
         success: false,
-        error: tErrors(code),
+        error: tErrors(result.error.code as Parameters<typeof tErrors>[0]),
       };
     }
-    throw error;
+    return { success: false, error: result.error.message };
   }
+
+  revalidateTag(CACHE_TAGS.invoices, "max");
+  revalidateTag(CACHE_TAGS.accounts, "max");
+  revalidatePath("/dashboard/invoices");
+  revalidatePath("/dashboard/transactions");
+  revalidatePath("/dashboard/accounts");
+
+  return {
+    success: true,
+    error: null,
+  };
 }

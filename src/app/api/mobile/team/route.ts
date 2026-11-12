@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { listWorkspaceMembers, listPendingInvitations } from "@/features/workspaces/members-data";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -15,12 +15,9 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   try {
-    const [members, invitations] = await Promise.all([
-      listWorkspaceMembers(access.workspaceId),
-      listPendingInvitations(access.workspaceId),
-    ]);
-    return NextResponse.json({ members, invitations });
+    const team = await workspacesService.listTeam(access.workspaceId);
+    return NextResponse.json(team);
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

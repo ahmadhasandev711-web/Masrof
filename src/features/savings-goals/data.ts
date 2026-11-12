@@ -1,16 +1,17 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-import { connectToDatabase } from "@/lib/db/mongoose";
-import { SavingsGoalModel } from "@/models/savings-goal";
-import { toMinorUnits } from "@/lib/money";
-import { CACHE_TAGS } from "@/lib/cache-tags";
-import type { CreateSavingsGoalInput, UpdateGoalProgressInput } from "@/features/savings-goals/schemas";
-import {
-  findWorkspaceIdempotentId,
-  registerWorkspaceIdempotentResource,
-} from "@/lib/idempotency/workspace-resource";
+/**
+ * Compatibility barrel. Prefer `@/features/savings-goals/savings-goals.service` for writes
+ * and `@/features/savings-goals/savings-goals.repository` for persistence-only access.
+ */
+import { savingsGoalsRepository } from "@/features/savings-goals/savings-goals.repository";
+import { savingsGoalsService } from "@/features/savings-goals/savings-goals.service";
+import type {
+  CreateSavingsGoalInput,
+  UpdateGoalProgressInput,
+} from "@/features/savings-goals/schemas";
 
+/** @deprecated Prefer NotFoundError from the service layer. Kept for barrel callers. */
 export class SavingsGoalNotFoundError extends Error {
   readonly code: string;
   constructor(code: string) {
@@ -21,80 +22,25 @@ export class SavingsGoalNotFoundError extends Error {
 }
 
 export async function createSavingsGoal(input: CreateSavingsGoalInput) {
-  await connectToDatabase();
-
-  const existingId = await findWorkspaceIdempotentId(input.workspaceId, input.idempotencyKey);
-  if (existingId) {
-    const existing = await SavingsGoalModel.findOne({
-      _id: existingId,
-      workspaceId: input.workspaceId,
-    }).lean();
-    if (existing) return existing;
-  }
-
-  const goal = await SavingsGoalModel.create({
-    workspaceId: input.workspaceId,
-    name: input.name,
-    targetAmount: toMinorUnits(input.targetAmount),
-    deadline: input.deadline ?? null,
-  });
-
-  await registerWorkspaceIdempotentResource(
+  const existing = await savingsGoalsRepository.findByIdempotencyKey(
     input.workspaceId,
     input.idempotencyKey,
-    "savingsGoal",
-    goal._id.toString(),
   );
-
-  return goal.toObject();
+  if (existing) return existing;
+  return savingsGoalsRepository.create(input);
 }
 
 export async function updateSavingsGoalProgress(input: UpdateGoalProgressInput) {
-  await connectToDatabase();
-
-  const increment = toMinorUnits(input.amount);
-
-  const goal = await SavingsGoalModel.findOneAndUpdate(
-    { _id: input.goalId, workspaceId: input.workspaceId, isArchived: false },
-    { $inc: { currentAmount: increment } },
-    { returnDocument: "after" },
-  ).lean();
-
+  const goal = await savingsGoalsRepository.updateProgress(input);
   if (!goal) {
     throw new SavingsGoalNotFoundError("savingsGoalNotFound");
   }
-
   return goal;
 }
 
 export async function archiveSavingsGoal(goalId: string, workspaceId: string) {
-  await connectToDatabase();
-  return SavingsGoalModel.findOneAndUpdate(
-    { _id: goalId, workspaceId },
-    { isArchived: true },
-    { returnDocument: "after" },
-  ).lean();
+  return savingsGoalsRepository.archive(goalId, workspaceId);
 }
 
-export const listSavingsGoals = unstable_cache(
-  async (workspaceId: string) => {
-    await connectToDatabase();
-
-    const goals = await SavingsGoalModel.find({ workspaceId, isArchived: false })
-      .sort({ createdAt: 1 })
-      .lean();
-
-    return goals.map((goal) => {
-      const percentage =
-        goal.targetAmount > 0 ? Math.round((goal.currentAmount / goal.targetAmount) * 100) : 0;
-
-      return {
-        ...goal,
-        remaining: goal.targetAmount - goal.currentAmount,
-        percentage,
-      };
-    });
-  },
-  ["savings-goals-for-workspace"],
-  { revalidate: 30, tags: [CACHE_TAGS.goals] },
-);
+export const listSavingsGoals = (workspaceId: string) =>
+  savingsGoalsService.listForWorkspace(workspaceId);

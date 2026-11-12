@@ -1,37 +1,22 @@
 import { NextResponse } from "next/server";
-import {
-  createWorkspaceForUser,
-  listWorkspacesForUser,
-} from "@/features/workspaces/data";
 import { createWorkspaceSchema } from "@/features/workspaces/schemas";
-import { assertCanCreateWorkspace } from "@/features/subscriptions/data";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
 import { requireMobileSession } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
   if (session instanceof NextResponse) return session;
 
-  const workspaces = await listWorkspacesForUser(session.user.id);
-  const { WorkspaceMembershipModel } = await import("@/models/workspace-membership");
-  const memberships = await WorkspaceMembershipModel.find({
-    userId: session.user.id,
-    workspaceId: { $in: workspaces.map((w) => w._id) },
-  }).lean();
-  const roleMap = new Map(memberships.map((m) => [String(m.workspaceId), m.role]));
-
-  const items = workspaces.map((ws) => ({
-    id: String(ws._id),
-    name: ws.name,
-    type: ws.type,
-    currency: ws.currency,
-    businessName: ws.businessName ?? null,
-    role: (roleMap.get(String(ws._id)) ?? "owner") as "owner" | "admin" | "member" | "viewer",
-  }));
-
-  return NextResponse.json({
-    items,
-    activeWorkspaceId: items[0]?.id ?? null,
-  });
+  try {
+    const items = await workspacesService.listForUserWithRoles(session.user.id);
+    return NextResponse.json({
+      items,
+      activeWorkspaceId: items[0]?.id ?? null,
+    });
+  } catch (error) {
+    return thrownToMobileResponse(error);
+  }
 }
 
 export async function POST(request: Request) {
@@ -57,16 +42,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const limitError = await assertCanCreateWorkspace(session.user.id);
-    if (limitError) {
-      return NextResponse.json({ error: limitError }, { status: 403 });
+    const result = await workspacesService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
     }
 
-    const workspaceId = await createWorkspaceForUser(session.user.id, parsed.data);
-
-    return NextResponse.json({ workspaceId }, { status: 201 });
+    return NextResponse.json({ workspaceId: result.value }, { status: 201 });
   } catch (error) {
-    console.error("[mobile-workspaces-post]", error);
-    return NextResponse.json({ error: "unexpected" }, { status: 500 });
+    return thrownToMobileResponse(error);
   }
 }

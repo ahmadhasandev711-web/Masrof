@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
 
+vi.mock("server-only", () => ({}));
+
 const paymentMocks = vi.hoisted(() => {
   class InvoiceOverpaymentError extends Error {
     readonly code = "invoiceOverpayment";
+    readonly status = 400;
     readonly remainingAmount: number;
     constructor(remainingAmount: number) {
       super(`Payment exceeds remaining ${remainingAmount}`);
@@ -14,7 +17,7 @@ const paymentMocks = vi.hoisted(() => {
 
   return {
     InvoiceOverpaymentError,
-    recordInvoicePayment: vi.fn(),
+    recordPayment: vi.fn(),
   };
 });
 
@@ -22,17 +25,24 @@ vi.mock("next/cache", () => ({
   revalidateTag: vi.fn(),
 }));
 
-vi.mock("@/features/invoices/payment-data", () => ({
-  ...paymentMocks,
-  InvoiceCancelledError: class extends Error {
-    readonly code = "invoiceCancelled";
+vi.mock("@/features/invoices/invoices.service", () => ({
+  invoicesService: {
+    recordPayment: paymentMocks.recordPayment,
   },
-  AccountCurrencyMismatchError: class extends Error {
-    readonly code = "accountCurrencyMismatch";
+}));
+
+vi.mock("@/server/kernel", () => ({
+  resultToResponse: (result: { ok: boolean; error?: { code: string; message: string; status?: number }; value?: unknown }) => {
+    if (!result.ok && result.error) {
+      return NextResponse.json(
+        { error: result.error.code, message: result.error.message },
+        { status: result.error.status ?? 400 },
+      );
+    }
+    return NextResponse.json(result.value);
   },
-  InvalidPaymentReferenceError: class extends Error {
-    readonly code = "invalidPaymentReference";
-  },
+  thrownToMobileResponse: () =>
+    NextResponse.json({ error: "unexpected" }, { status: 500 }),
 }));
 
 vi.mock("@/lib/mobile/session", () => ({
@@ -43,12 +53,12 @@ vi.mock("@/lib/mobile/session", () => ({
 }));
 
 import { POST } from "./route";
-import { recordInvoicePayment, InvoiceOverpaymentError } from "@/features/invoices/payment-data";
+import { invoicesService } from "@/features/invoices/invoices.service";
 import { requireMobileSession, requireMobileWorkspace } from "@/lib/mobile/session";
 
 const mockedSession = vi.mocked(requireMobileSession);
 const mockedWorkspace = vi.mocked(requireMobileWorkspace);
-const mockedRecord = vi.mocked(recordInvoicePayment);
+const mockedRecord = vi.mocked(invoicesService.recordPayment);
 
 function jsonRequest(body: unknown) {
   return new Request("http://localhost/api/mobile/invoices/payments", {
@@ -113,13 +123,14 @@ describe("POST /api/mobile/invoices/payments", () => {
       workspace: { _id: "ws-1" } as never,
       workspaceId: "ws-1",
     });
-    mockedRecord.mockResolvedValue({ _id: "pay-99" } as never);
+    mockedRecord.mockResolvedValue({ ok: true, value: { _id: "pay-99" } } as never);
 
     const res = await POST(jsonRequest(validBody));
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.paymentId).toBe("pay-99");
     expect(mockedRecord).toHaveBeenCalledWith(
+      "user-1",
       expect.objectContaining({
         workspaceId: "ws-1",
         invoiceId: "inv-1",
@@ -127,7 +138,6 @@ describe("POST /api/mobile/invoices/payments", () => {
         amount: 100,
         idempotencyKey: "idem-1",
       }),
-      "user-1",
     );
   });
 
@@ -139,7 +149,10 @@ describe("POST /api/mobile/invoices/payments", () => {
       workspace: { _id: "ws-1" } as never,
       workspaceId: "ws-1",
     });
-    mockedRecord.mockRejectedValue(new InvoiceOverpaymentError(50));
+    mockedRecord.mockResolvedValue({
+      ok: false,
+      error: new paymentMocks.InvoiceOverpaymentError(50),
+    } as never);
 
     const res = await POST(jsonRequest(validBody));
     expect(res.status).toBe(400);

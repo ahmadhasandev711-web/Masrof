@@ -18,6 +18,9 @@ type ItemRow = {
   amount: string;
 };
 
+const MOBILE_FIELD =
+  "rounded-lg border border-neutral-300 px-3 py-2.5 min-h-11 text-base";
+
 export function EditInvoiceDialog({
   workspaceId,
   invoice,
@@ -169,7 +172,7 @@ export function EditInvoiceDialog({
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
                 disabled={!selectedClientId || availableProjects.length === 0}
-                className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm disabled:opacity-50"
+                className={`${MOBILE_FIELD} text-right disabled:opacity-50`}
               >
                 <option value="">— {tShared("none")} —</option>
                 {availableProjects.map((p) => (
@@ -191,7 +194,7 @@ export function EditInvoiceDialog({
                 type="date"
                 value={issueDate}
                 onChange={(e) => setIssueDate(e.target.value)}
-                className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+                className={`${MOBILE_FIELD} text-right`}
                 required
               />
             </div>
@@ -205,7 +208,7 @@ export function EditInvoiceDialog({
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+                className={`${MOBILE_FIELD} text-right`}
               />
             </div>
           </div>
@@ -231,18 +234,19 @@ export function EditInvoiceDialog({
                   placeholder={tForm("itemDescriptionPlaceholder")}
                   value={row.description}
                   onChange={(e) => updateRow(row.id, "description", e.target.value)}
-                  className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+                  className={`${MOBILE_FIELD} text-right`}
                   required
                 />
                 <input
                   type="number"
                   inputMode="decimal"
+                  enterKeyHint="done"
                   step="0.01"
                   min="0.01"
                   placeholder="0.00"
                   value={row.amount}
                   onChange={(e) => updateRow(row.id, "amount", e.target.value)}
-                  className="rounded-lg border border-neutral-300 px-3 py-2 text-left text-sm font-mono"
+                  className={`${MOBILE_FIELD} text-left font-mono`}
                   dir="ltr"
                   required
                 />
@@ -250,10 +254,10 @@ export function EditInvoiceDialog({
                   type="button"
                   onClick={() => removeRow(row.id)}
                   disabled={rows.length <= 1}
-                  className="self-center rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-600 hover:bg-neutral-100 disabled:opacity-30"
+                  className="self-center min-h-11 rounded-lg border border-neutral-300 px-3 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-100 disabled:opacity-30"
                   aria-label={tForm("removeItem")}
                 >
-                  
+                  {tCommon("delete")}
                 </button>
               </div>
             ))}
@@ -279,7 +283,7 @@ export function EditInvoiceDialog({
               rows={2}
               maxLength={500}
               placeholder={tForm("notesPlaceholder")}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+              className={`${MOBILE_FIELD} text-right`}
             />
           </div>
 

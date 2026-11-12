@@ -2,7 +2,7 @@
 
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceAccess } from "@/features/workspaces/access";
-import { getDebtPayments } from "@/features/debts/data";
+import { debtsService } from "@/features/debts/debts.service";
 import type { DebtPaymentItem } from "@/features/debts/types";
 
 export async function getDebtPaymentsAction(
@@ -13,7 +13,7 @@ export async function getDebtPaymentsAction(
   await verifyWorkspaceAccess(session.user.id, workspaceId);
 
   try {
-    const payments = await getDebtPayments(workspaceId, debtId);
+    const payments = await debtsService.listPayments(workspaceId, debtId);
     return { success: true, payments, error: null };
   } catch (err: unknown) {
     return {

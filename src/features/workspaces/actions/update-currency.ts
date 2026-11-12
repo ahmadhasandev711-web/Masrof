@@ -2,9 +2,8 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { requireSession } from "@/features/auth/session";
-import { requireWorkspaceOwner } from "@/features/workspaces/access";
-import { updateWorkspaceBaseCurrency } from "@/features/workspaces/data";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
+import { runWorkspaceOwnerWrite } from "@/server/kernel";
 import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@/lib/currency/constants";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { z } from "zod";
@@ -23,7 +22,6 @@ export async function updateWorkspaceCurrencyAction(
   _prev: UpdateCurrencyState,
   formData: FormData,
 ): Promise<UpdateCurrencyState> {
-  const session = await requireSession();
   const tErrors = await getTranslations("errors");
 
   const parsed = schema.safeParse({
@@ -35,9 +33,16 @@ export async function updateWorkspaceCurrencyAction(
     return { error: tErrors("invalidData") };
   }
 
-  await requireWorkspaceOwner(session.user.id, parsed.data.workspaceId);
+  const result = await runWorkspaceOwnerWrite(parsed.data.workspaceId, () =>
+    workspacesService.updateCurrency(
+      parsed.data.workspaceId,
+      parsed.data.currency as SupportedCurrency,
+    ),
+  );
 
-  await updateWorkspaceBaseCurrency(parsed.data.workspaceId, parsed.data.currency as SupportedCurrency);
+  if (!result.ok) {
+    return { error: result.error.message };
+  }
 
   revalidatePath("/dashboard", "layout");
   revalidatePath("/dashboard/settings");

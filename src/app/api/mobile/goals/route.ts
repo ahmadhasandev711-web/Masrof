@@ -1,26 +1,17 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import {
-  createSavingsGoal,
-  listSavingsGoals,
-  updateSavingsGoalProgress,
-} from "@/features/savings-goals/data";
-import { countSavingsGoalsForWorkspace } from "@/features/subscriptions/plan-usage";
-import {
   createSavingsGoalSchema,
   createUpdateGoalProgressSchema,
 } from "@/features/savings-goals/schemas";
-import {
-  assertWorkspacePlanFeature,
-  assertWorkspaceQuantityLimit,
-} from "@/features/subscriptions/data";
+import { savingsGoalsService } from "@/features/savings-goals/savings-goals.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
-  mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -30,7 +21,7 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  const goals = await listSavingsGoals(access.workspaceId);
+  const goals = await savingsGoalsService.listForWorkspace(access.workspaceId);
   return NextResponse.json({
     items: goals.map((goal) => ({
       id: serializeId(goal._id),
@@ -58,31 +49,15 @@ export async function POST(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const featureError = await assertWorkspacePlanFeature(
-      session.user.id,
-      parsed.data.workspaceId,
-      "savingsGoals",
-    );
-    if (featureError) {
-      return NextResponse.json({ error: featureError }, { status: 403 });
+    const result = await savingsGoalsService.create(session.user.id, parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
     }
 
-    const goalCount = await countSavingsGoalsForWorkspace(parsed.data.workspaceId);
-    const limitError = await assertWorkspaceQuantityLimit(
-      session.user.id,
-      parsed.data.workspaceId,
-      "maxSavingsGoals",
-      goalCount,
-    );
-    if (limitError) {
-      return NextResponse.json({ error: limitError }, { status: 403 });
-    }
-
-    const goal = await createSavingsGoal(parsed.data);
     revalidateTag(CACHE_TAGS.goals, "max");
-    return NextResponse.json({ id: serializeId(goal._id) }, { status: 201 });
+    return NextResponse.json({ id: serializeId(result.value._id) }, { status: 201 });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }
 
@@ -100,10 +75,14 @@ export async function PATCH(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    await updateSavingsGoalProgress(parsed.data);
+    const result = await savingsGoalsService.updateProgress(parsed.data);
+    if (!result.ok) {
+      return resultToResponse(result);
+    }
+
     revalidateTag(CACHE_TAGS.goals, "max");
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return mobileErrorResponse(error);
+    return thrownToMobileResponse(error);
   }
 }

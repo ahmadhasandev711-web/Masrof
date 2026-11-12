@@ -19,6 +19,9 @@ type ProjectOption = { _id: string; name: string; clientId: string };
 
 const initialState: CreateInvoiceState = { error: null, redirectTo: null };
 
+const MOBILE_FIELD =
+  "rounded-lg border border-neutral-300 px-3 py-2.5 min-h-11 text-base";
+
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -113,7 +116,7 @@ export function CreateInvoiceForm({
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
             disabled={!selectedClientId || availableProjects.length === 0}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right disabled:bg-neutral-100 disabled:text-neutral-400"
+            className={`${MOBILE_FIELD} text-right disabled:bg-neutral-100 disabled:text-neutral-400`}
           >
             <option value="">{tForm("noProject")}</option>
             {availableProjects.map((project) => (
@@ -133,7 +136,7 @@ export function CreateInvoiceForm({
             name="issueDate"
             type="date"
             defaultValue={todayIsoDate()}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right"
+            className={`${MOBILE_FIELD} text-right`}
             required
           />
         </div>
@@ -146,7 +149,7 @@ export function CreateInvoiceForm({
             id="invoice-due-date"
             name="dueDate"
             type="date"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right"
+            className={`${MOBILE_FIELD} text-right`}
           />
         </div>
       </div>
@@ -162,7 +165,7 @@ export function CreateInvoiceForm({
               name={`itemDescription_${index}`}
               type="text"
               placeholder={tForm("itemDescriptionPlaceholder")}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+              className={`${MOBILE_FIELD} text-right`}
               required
             />
             <input
@@ -171,9 +174,10 @@ export function CreateInvoiceForm({
               step="0.01"
               min="0.01"
               inputMode="decimal"
+              enterKeyHint="done"
               dir="ltr"
               placeholder="0.00"
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono font-bold text-sm"
+              className={`${MOBILE_FIELD} text-start font-mono font-bold`}
               required
             />
             <button
@@ -204,7 +208,7 @@ export function CreateInvoiceForm({
           name="notes"
           rows={2}
           placeholder={tForm("notesPlaceholder")}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-right text-sm"
+          className={`${MOBILE_FIELD} text-right`}
         />
       </div>
 
