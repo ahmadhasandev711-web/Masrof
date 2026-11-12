@@ -1,6 +1,6 @@
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
-import { listAccountsForWorkspace, getWorkspaceBalanceSummary } from "@/features/accounts/data";
+import { accountsService } from "@/features/accounts/accounts.service";
 import { AccountCreationManager } from "@/features/accounts/components/account-creation-manager";
 import { LiquidityHeroCard } from "@/features/accounts/components/liquidity-hero-card";
 import { AccountList } from "@/features/accounts/components/account-list";
@@ -25,8 +25,8 @@ export default async function AccountsPage() {
   const { plan } = await getWorkspacePlanContext(session.user.id, workspaceId);
   const baseCurrency = activeWorkspace.currency as SupportedCurrency;
   const [accounts, balanceSummary, access] = await Promise.all([
-    listAccountsForWorkspace(workspaceId),
-    getWorkspaceBalanceSummary(workspaceId),
+    accountsService.listForWorkspace(workspaceId),
+    accountsService.getWorkspaceBalanceSummary(workspaceId),
     getWorkspaceAccess(session.user.id, workspaceId),
   ]);
   const canWrite = access.membership.role !== "viewer";

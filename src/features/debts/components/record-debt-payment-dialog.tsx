@@ -9,6 +9,7 @@ import {
   type RecordDebtPaymentState,
 } from "@/features/debts/actions/record-debt-payment";
 import type { DebtItem } from "@/features/debts/types";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 const initialState: RecordDebtPaymentState = { error: null, success: false };
 
@@ -122,7 +123,8 @@ export function RecordDebtPaymentDialog({
               required
               value={amountInput}
               onChange={(e) => setAmountInput(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono text-base font-bold text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
+              enterKeyHint="done"
+              className={`mt-1 block w-full ${MOBILE_FIELD} text-start font-mono font-bold text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 
@@ -135,7 +137,7 @@ export function RecordDebtPaymentDialog({
               name="accountId"
               required
               defaultValue={accounts[0]?._id}
-              className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
+              className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
             >
               {accounts.map((acc) => (
                 <option key={acc._id} value={acc._id}>
@@ -159,7 +161,7 @@ export function RecordDebtPaymentDialog({
                 name="paymentDate"
                 required
                 defaultValue={todayIsoDate()}
-                className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
+                className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
               />
             </div>
 
@@ -172,7 +174,7 @@ export function RecordDebtPaymentDialog({
                 type="text"
                 name="reference"
                 placeholder={t("referencePlaceholder")}
-                className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
+                className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
               />
             </div>
           </div>
@@ -186,7 +188,7 @@ export function RecordDebtPaymentDialog({
               type="text"
               name="notes"
               placeholder={t("paymentNotesPlaceholder")}
-              className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]"
+              className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 

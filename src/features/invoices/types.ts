@@ -3,6 +3,8 @@ import type { InvoiceDisplayStatus } from "@/features/invoices/status";
 
 export type InvoiceLineItem = {
   description: string;
+  quantity: number;
+  unitPrice: number;
   amount: number;
 };
 
@@ -14,6 +16,10 @@ export type InvoiceListItem = {
   issueDate: string;
   dueDate: string | null;
   items: InvoiceLineItem[];
+  subtotal: number;
+  taxEnabled: boolean;
+  taxRatePercent: number;
+  taxAmount: number;
   total: number;
   paidAmount: number;
   remainingAmount: number;
@@ -47,6 +53,10 @@ export type PublicInvoiceView = {
   issueDate: string;
   dueDate: string | null;
   items: InvoiceLineItem[];
+  subtotal: number;
+  taxEnabled: boolean;
+  taxRatePercent: number;
+  taxAmount: number;
   total: number;
   paidAmount: number;
   remainingAmount: number;
@@ -75,6 +85,10 @@ export type InvoicePrintView = {
   issueDate: string;
   dueDate: string | null;
   items: InvoiceLineItem[];
+  subtotal: number;
+  taxEnabled: boolean;
+  taxRatePercent: number;
+  taxAmount: number;
   total: number;
   paidAmount: number;
   remainingAmount: number;

@@ -10,6 +10,7 @@ import {
   createDebtAction,
   type CreateDebtState,
 } from "@/features/debts/actions/create-debt";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 const initialState: CreateDebtState = { error: null, success: false };
 
@@ -73,7 +74,7 @@ export function CreateDebtDialog({
               type="text"
               required
               placeholder={t("namePlaceholder")}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
+              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 
@@ -88,7 +89,7 @@ export function CreateDebtDialog({
               type="text"
               required
               placeholder={t("creditorPlaceholder")}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
+              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 
@@ -104,8 +105,10 @@ export function CreateDebtDialog({
               step="0.01"
               min="0.01"
               required
+              inputMode="decimal"
+              enterKeyHint="done"
               placeholder="0.00"
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
+              className={`w-full ${MOBILE_FIELD} bg-white text-start font-mono font-bold text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 
@@ -118,7 +121,7 @@ export function CreateDebtDialog({
               id="debt-dueDate"
               name="dueDate"
               type="date"
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
+              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 
@@ -132,7 +135,7 @@ export function CreateDebtDialog({
               name="category"
               type="text"
               placeholder={t("categoryPlaceholder")}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
+              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 
@@ -146,7 +149,7 @@ export function CreateDebtDialog({
               name="notes"
               rows={2}
               placeholder={t("notesPlaceholder")}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]"
+              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
             />
           </div>
 

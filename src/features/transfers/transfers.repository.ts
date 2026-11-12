@@ -8,7 +8,7 @@ import { toPlain } from "@/lib/db/plain";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { TransferModel } from "@/models/transfer";
 import { AccountModel } from "@/models/account";
-import { adjustAccountBalance } from "@/features/accounts/data";
+import { accountsRepository } from "@/features/accounts/accounts.repository";
 import { toMinorUnits } from "@/lib/money";
 import { AppError } from "@/server/kernel/errors";
 import type { CreateTransferInput } from "@/features/transfers/schemas";
@@ -142,8 +142,8 @@ export class TransfersRepository {
         { session },
       );
 
-      await adjustAccountBalance(input.fromAccountId, -amountMinor, session);
-      await adjustAccountBalance(input.toAccountId, amountMinor, session);
+      await accountsRepository.adjustBalance(input.fromAccountId, -amountMinor, session);
+      await accountsRepository.adjustBalance(input.toAccountId, amountMinor, session);
 
       return transfer._id.toString();
     });
@@ -163,8 +163,8 @@ export class TransfersRepository {
         throw new InvalidTransferError("transferNotFound");
       }
 
-      await adjustAccountBalance(String(existing.fromAccountId), existing.amount, session);
-      await adjustAccountBalance(String(existing.toAccountId), -existing.amount, session);
+      await accountsRepository.adjustBalance(String(existing.fromAccountId), existing.amount, session);
+      await accountsRepository.adjustBalance(String(existing.toAccountId), -existing.amount, session);
 
       existing.isArchived = true;
       await existing.save({ session });

@@ -1,13 +1,13 @@
 import { getDashboardHomeData } from "@/features/dashboard/alerts";
 import { DashboardAlerts } from "@/features/dashboard/components/dashboard-alerts";
-import { getMonthlyTrend } from "@/features/reports/data";
+import { reportsService } from "@/features/reports/reports.service";
 import { MonthlyTrendChart } from "@/features/reports/components/monthly-trend-chart";
 import {
   getWorkspaceReceivablesSummary,
   getOpenInvoicesRadar,
 } from "@/features/invoices/receivables-data";
-import { getDebtSummary } from "@/features/debts/data";
-import { listProjectsWithTotals } from "@/features/projects/data";
+import { debtsService } from "@/features/debts/debts.service";
+import { projectsService } from "@/features/projects/projects.service";
 import {
   dispatchDashboardEmailNotifications,
   dispatchDashboardPushNotifications,
@@ -17,7 +17,7 @@ import { formatMoney } from "@/lib/money";
 import { CurrencyBalancesSummary } from "@/features/accounts/components/currency-balances-summary";
 import { getIntlLocale, type AppLocale } from "@/i18n/config";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
-import { getRecentTransactions } from "@/features/transactions/data";
+import { transactionsService } from "@/features/transactions/transactions.service";
 import { invoiceShareWhatsAppMessage } from "@/features/whatsapp/messages";
 import { normalizeWhatsAppPhone } from "@/lib/whatsapp";
 import Link from "next/link";
@@ -58,13 +58,13 @@ export async function DashboardHome({
   ] = await Promise.all([
     getWorkspacePlanContext(userId, workspaceId),
     getDashboardHomeData(workspaceId),
-    getMonthlyTrend(workspaceId, 6, moneyLocale),
+    reportsService.getMonthlyTrend(workspaceId, 6, moneyLocale),
     getUserWhatsAppPhone(userId),
     getWorkspaceReceivablesSummary(workspaceId),
-    getRecentTransactions(workspaceId, 5, locale),
-    getDebtSummary(workspaceId, currency),
+    transactionsService.getRecent(workspaceId, 5, locale),
+    debtsService.getSummary(workspaceId, currency),
     getOpenInvoicesRadar(workspaceId, 4),
-    isOwner ? listProjectsWithTotals(workspaceId) : Promise.resolve([]),
+    isOwner ? projectsService.listWithTotals(workspaceId) : Promise.resolve([]),
   ]);
 
   const availableCashMinor =

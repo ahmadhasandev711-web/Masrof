@@ -3,10 +3,22 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { createInvoiceSchema } from "@/features/invoices/schemas";
-import { createInvoice, InvalidInvoiceReferenceError } from "@/features/invoices/data";
+import { invoicesService } from "@/features/invoices/invoices.service";
+import { InvalidInvoiceReferenceError } from "@/features/invoices/invoices.errors";
 import { ClientModel } from "@/models/client";
 import { ProjectModel } from "@/models/project";
 import { InvoiceModel } from "@/models/invoice";
+
+function unwrap<T>(result: { ok: true; value: T } | { ok: false; error: Error }): T {
+  if (!result.ok) throw result.error;
+  return result.value;
+}
+
+async function createInvoice(
+  ...args: Parameters<typeof invoicesService.createValidated>
+) {
+  return unwrap(await invoicesService.createValidated(...args));
+}
 
 vi.mock("@/lib/db/mongoose", () => ({
   connectToDatabase: vi.fn().mockResolvedValue(undefined),

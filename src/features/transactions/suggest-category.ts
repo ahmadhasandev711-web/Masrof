@@ -1,7 +1,7 @@
 import "server-only";
 
 import { connectToDatabase } from "@/lib/db/mongoose";
-import { listCategoriesForWorkspace } from "@/features/categories/data";
+import { categoriesService } from "@/features/categories/categories.service";
 import { SYSTEM_CATEGORIES } from "@/features/categories/seed-data";
 
 type CategoryRow = { id: string; name: string; kind: "income" | "expense"; slug?: string | null };
@@ -44,7 +44,7 @@ export async function suggestCategoryForTransaction(input: {
 }): Promise<CategorySuggestion | null> {
   await connectToDatabase();
 
-  const categories = (await listCategoriesForWorkspace(input.workspaceId)).filter(
+  const categories = (await categoriesService.listForWorkspace(input.workspaceId)).filter(
     (c) => c.kind === input.type,
   );
   if (categories.length === 0) return null;

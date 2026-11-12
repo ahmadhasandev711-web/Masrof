@@ -7,6 +7,8 @@ import {
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { toMobileTransfer } from "@/lib/mobile/serialize";
+import { mobileTransfersListResponseSchema } from "@contracts/mobile/transfers";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -22,7 +24,17 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   const result = await transfersService.listPaginated(access.workspaceId, page, pageSize);
-  return NextResponse.json(result);
+  return NextResponse.json(
+    mobileTransfersListResponseSchema.parse({
+      items: result.items.map((item) =>
+        toMobileTransfer(item as unknown as Record<string, unknown>),
+      ),
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages,
+    }),
+  );
 }
 
 export async function POST(request: Request) {

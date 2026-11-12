@@ -11,6 +11,8 @@ import {
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { toMobileGoal } from "@/lib/mobile/serialize";
+import { mobileGoalsListResponseSchema } from "@contracts/mobile/goals";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -22,17 +24,11 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   const goals = await savingsGoalsService.listForWorkspace(access.workspaceId);
-  return NextResponse.json({
-    items: goals.map((goal) => ({
-      id: serializeId(goal._id),
-      name: goal.name,
-      targetAmount: goal.targetAmount,
-      currentAmount: goal.currentAmount,
-      remaining: goal.remaining,
-      percentage: goal.percentage,
-      deadline: goal.deadline ?? null,
-    })),
-  });
+  return NextResponse.json(
+    mobileGoalsListResponseSchema.parse({
+      items: goals.map((goal) => toMobileGoal(goal as unknown as Record<string, unknown>)),
+    }),
+  );
 }
 
 export async function POST(request: Request) {

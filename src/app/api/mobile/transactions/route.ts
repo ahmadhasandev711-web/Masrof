@@ -5,31 +5,15 @@ import {
   transactionFiltersSchema,
 } from "@/features/transactions/schemas";
 import {
-  populatedName,
   requireMobileSession,
   requireMobileWorkspace,
-  serializeId,
 } from "@/lib/mobile/session";
+import { toMobileTransaction } from "@/lib/mobile/serialize";
+import {
+  mobileTransactionCreatedSchema,
+  mobileTransactionsPageResponseSchema,
+} from "@contracts/mobile/transactions";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
-
-function mapTransaction(item: Record<string, unknown>) {
-  return {
-    id: serializeId(item._id),
-    type: item.type,
-    amount: item.amount,
-    transactionDate: item.transactionDate,
-    description: item.description ?? "",
-    notes: item.notes ?? "",
-    accountId: serializeId(item.accountId),
-    accountName: populatedName(item.accountId),
-    categoryId: serializeId(item.categoryId),
-    categoryName: populatedName(item.categoryId),
-    clientId: item.clientId ? serializeId(item.clientId) : null,
-    clientName: populatedName(item.clientId),
-    projectId: item.projectId ? serializeId(item.projectId) : null,
-    projectName: populatedName(item.projectId),
-  };
-}
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -47,13 +31,17 @@ export async function GET(request: Request) {
 
   try {
     const result = await transactionsService.list(parsed.data);
-    return NextResponse.json({
-      items: result.items.map((item) => mapTransaction(item as unknown as Record<string, unknown>)),
-      total: result.total,
-      page: result.page,
-      pageSize: result.pageSize,
-      totalPages: result.totalPages,
-    });
+    return NextResponse.json(
+      mobileTransactionsPageResponseSchema.parse({
+        items: result.items.map((item) =>
+          toMobileTransaction(item as unknown as Record<string, unknown>),
+        ),
+        total: result.total,
+        page: result.page,
+        pageSize: result.pageSize,
+        totalPages: result.totalPages,
+      }),
+    );
   } catch (error) {
     return thrownToMobileResponse(error);
   }
@@ -78,7 +66,10 @@ export async function POST(request: Request) {
       return resultToResponse(result);
     }
 
-    return NextResponse.json({ id: result.value }, { status: 201 });
+    return NextResponse.json(
+      mobileTransactionCreatedSchema.parse({ id: result.value }),
+      { status: 201 },
+    );
   } catch (error) {
     return thrownToMobileResponse(error);
   }

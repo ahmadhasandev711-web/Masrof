@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getMobileEntitlements } from "@/features/subscriptions/mobile-entitlements";
+import { mobileEntitlementsResponseSchema } from "@contracts/mobile/entitlements";
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -9,12 +10,13 @@ export async function GET(request: Request) {
   }
 
   const entitlements = await getMobileEntitlements(session.user.id);
-  return NextResponse.json({
+  const body = mobileEntitlementsResponseSchema.parse({
     user: {
       id: session.user.id,
-      name: session.user.name,
-      email: session.user.email,
+      name: session.user.name ?? null,
+      email: session.user.email ?? null,
     },
     ...entitlements,
   });
+  return NextResponse.json(body);
 }

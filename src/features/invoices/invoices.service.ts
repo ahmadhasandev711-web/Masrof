@@ -1,6 +1,5 @@
 import "server-only";
 
-import { toMinorUnits } from "@/lib/money";
 import type {
   CreateInvoiceInput,
   UpdateInvoiceInput,
@@ -107,9 +106,16 @@ export class InvoicesService {
       return err(new InvalidInvoiceReferenceError("invoiceNotFound"));
     }
 
-    const newTotal = input.items.reduce((sum, item) => sum + toMinorUnits(item.amount), 0);
+    const { computeInvoiceTotals, lineFromMajorInput } = await import(
+      "@/features/invoices/invoice-line-math"
+    );
+    const lines = input.items.map((item) => lineFromMajorInput(item));
+    const money = computeInvoiceTotals(lines, {
+      taxEnabled: input.taxEnabled,
+      taxRatePercent: input.taxRatePercent,
+    });
     const existingPaid = await this.repo.sumPaymentsForInvoice(invoice._id, input.workspaceId);
-    if (newTotal < existingPaid) {
+    if (money.total < existingPaid) {
       return err(new InvalidInvoiceReferenceError("totalLessThanPaid"));
     }
 
@@ -217,6 +223,10 @@ export class InvoicesService {
     branding: WorkspaceBrandingForPrint,
   ) {
     return this.repo.getForPrint(invoiceId, workspaceId, branding);
+  }
+
+  getPublicInvoiceByToken(token: string) {
+    return this.repo.getPublicInvoiceByToken(token);
   }
 }
 

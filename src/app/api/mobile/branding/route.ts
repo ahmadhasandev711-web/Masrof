@@ -7,6 +7,9 @@ import {
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
+import { toMobileBranding } from "@/lib/mobile/serialize";
+import { mobileBrandingSchema } from "@contracts/mobile/workspaces";
+import { mobileOkSchema } from "@contracts/mobile/common";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -16,7 +19,9 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
-  return NextResponse.json(workspacesService.getBranding(access.workspace));
+  return NextResponse.json(
+    mobileBrandingSchema.parse(toMobileBranding(workspacesService.getBranding(access.workspace))),
+  );
 }
 
 export async function POST(request: Request) {
@@ -36,7 +41,7 @@ export async function POST(request: Request) {
       return resultToResponse(result);
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(mobileOkSchema.parse({ ok: true }));
   } catch (error) {
     return thrownToMobileResponse(error);
   }

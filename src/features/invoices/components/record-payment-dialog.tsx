@@ -9,11 +9,9 @@ import {
   type RecordPaymentState,
 } from "@/features/invoices/actions/record-payment";
 import type { InvoiceListItem } from "@/features/invoices/types";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 const initialState: RecordPaymentState = { error: null, success: false };
-
-const MOBILE_FIELD =
-  "rounded-lg border border-neutral-300 px-3 py-2.5 min-h-11 text-base";
 
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);

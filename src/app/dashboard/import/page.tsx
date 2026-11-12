@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
-import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { listCategoriesForWorkspace } from "@/features/categories/data";
+import { accountsService } from "@/features/accounts/accounts.service";
+import { categoriesService } from "@/features/categories/categories.service";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { BankImportForm } from "@/features/import/components/bank-import-form";
@@ -26,8 +26,8 @@ export default async function BankImportPage() {
 
   const locale = (await getLocale()) as AppLocale;
   const [accounts, categories] = await Promise.all([
-    listAccountsForWorkspace(workspaceId),
-    listCategoriesForWorkspace(workspaceId, "expense"),
+    accountsService.listForWorkspace(workspaceId),
+    categoriesService.listForWorkspace(workspaceId, "expense"),
   ]);
 
   return (

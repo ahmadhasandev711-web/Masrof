@@ -1,7 +1,7 @@
 import { ClientRedirect } from "@/components/client-redirect";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { requireSession } from "@/features/auth/session";
-import { userHasAnyWorkspace } from "@/features/workspaces/data";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
 import { getPendingInvitationsForEmail } from "@/features/workspaces/members-data";
 import { CreateWorkspaceForm } from "@/features/workspaces/components/create-workspace-form";
 import { OnboardingInvitesPanel } from "@/features/workspaces/components/onboarding-invites-panel";
@@ -11,7 +11,7 @@ export default async function OnboardingPage() {
   const session = await requireSession();
   const t = await getTranslations("pages.onboarding");
 
-  const hasWorkspace = await userHasAnyWorkspace(session.user.id);
+  const hasWorkspace = await workspacesService.userHasAnyWorkspace(session.user.id);
   if (hasWorkspace) {
     return <ClientRedirect href="/dashboard" />;
   }

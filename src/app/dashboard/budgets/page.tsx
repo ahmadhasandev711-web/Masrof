@@ -1,9 +1,9 @@
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
-import { listCategoriesForWorkspace } from "@/features/categories/data";
-import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { listBudgetsWithProgress } from "@/features/budgets/data";
-import { listRecurringExpenses } from "@/features/recurring-expenses/data";
+import { categoriesService } from "@/features/categories/categories.service";
+import { accountsService } from "@/features/accounts/accounts.service";
+import { budgetsService } from "@/features/budgets/budgets.service";
+import { recurringExpensesService } from "@/features/recurring-expenses/recurring-expenses.service";
 import { BudgetCreationManager } from "@/features/budgets/components/budget-creation-manager";
 import { BudgetList } from "@/features/budgets/components/budget-list";
 import { RecurringExpenseCreationManager } from "@/features/recurring-expenses/components/recurring-expense-creation-manager";
@@ -45,10 +45,10 @@ export default async function BudgetsPage() {
     locale,
     access,
   ] = await Promise.all([
-    listCategoriesForWorkspace(workspaceId, "expense"),
-    listBudgetsWithProgress(workspaceId),
-    listAccountsForWorkspace(workspaceId),
-    listRecurringExpenses(workspaceId),
+    categoriesService.listForWorkspace(workspaceId, "expense"),
+    budgetsService.listWithProgress(workspaceId),
+    accountsService.listForWorkspace(workspaceId),
+    recurringExpensesService.listForWorkspace(workspaceId),
     getUserWhatsAppPhone(session.user.id),
     countRecurringExpensesForWorkspace(workspaceId),
     getPlanQuantityLimit(subscription.plan, "maxRecurringExpenses"),

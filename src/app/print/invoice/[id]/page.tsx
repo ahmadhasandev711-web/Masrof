@@ -3,7 +3,7 @@ import { ClientRedirect } from "@/components/client-redirect";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
-import { getInvoiceForPrint } from "@/features/invoices/data";
+import { invoicesService } from "@/features/invoices/invoices.service";
 import { parseInvoicePrintFormat } from "@/features/invoices/constants";
 import { InvoicePrintToolbar } from "@/features/invoices/components/invoice-print-toolbar";
 import { InvoicePrintDocument } from "@/features/invoices/components/invoice-print-document";
@@ -40,7 +40,7 @@ export default async function PrintInvoicePage({
   const rawParams = await searchParams;
   const format = parseInvoicePrintFormat(rawParams.format);
 
-  const invoice = await getInvoiceForPrint(id, workspaceId, {
+  const invoice = await invoicesService.getForPrint(id, workspaceId, {
     name: activeWorkspace.name,
     businessName: activeWorkspace.businessName,
     logoUrl: activeWorkspace.logoUrl,

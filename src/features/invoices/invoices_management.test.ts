@@ -2,19 +2,39 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+import { invoicesService } from "@/features/invoices/invoices.service";
 import {
-  cancelInvoice,
-  archiveInvoice,
-  updateInvoice,
-  updateInvoiceStatus,
   InvalidInvoiceReferenceError,
   InvoicePaidStatusNotAllowedError,
-} from "@/features/invoices/data";
+} from "@/features/invoices/invoices.errors";
 import { updateInvoiceSchema, invoiceFiltersSchema } from "@/features/invoices/schemas";
 import { ClientModel } from "@/models/client";
 import { ProjectModel } from "@/models/project";
 import { InvoiceModel } from "@/models/invoice";
 import { InvoicePaymentModel } from "@/models/invoice-payment";
+
+function unwrap<T>(result: { ok: true; value: T } | { ok: false; error: Error }): T {
+  if (!result.ok) throw result.error;
+  return result.value;
+}
+
+async function cancelInvoice(invoiceId: string, workspaceId: string) {
+  return unwrap(await invoicesService.cancel(invoiceId, workspaceId));
+}
+
+async function archiveInvoice(invoiceId: string, workspaceId: string) {
+  return unwrap(await invoicesService.archive(invoiceId, workspaceId));
+}
+
+async function updateInvoice(...args: Parameters<typeof invoicesService.update>) {
+  return unwrap(await invoicesService.update(...args));
+}
+
+async function updateInvoiceStatus(
+  ...args: Parameters<typeof invoicesService.updateStatus>
+) {
+  return unwrap(await invoicesService.updateStatus(...args));
+}
 
 vi.mock("@/lib/db/mongoose", () => ({
   connectToDatabase: vi.fn().mockResolvedValue(undefined),
@@ -231,7 +251,9 @@ describe("Invoices Management — Cancel, Archive, Update & Filters", () => {
         items: [{ description: "Design", amount: 500 }],
       });
 
-      expect(mockInvoiceDoc.items).toEqual([{ description: "Design", amount: 50000 }]);
+      expect(mockInvoiceDoc.items).toEqual([
+        { description: "Design", quantity: 1, unitPrice: 50000, amount: 50000 },
+      ]);
       expect(mockInvoiceDoc.status).toBe("sent"); // Uncancels if previously cancelled
       expect(mockInvoiceDoc.notes).toBe("Updated note");
       expect(saveMock).toHaveBeenCalled();

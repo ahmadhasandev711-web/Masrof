@@ -5,6 +5,8 @@ import {
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { toMobileDebt } from "@/lib/mobile/serialize";
+import { mobileDebtsListResponseSchema } from "@contracts/mobile/debts";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -29,10 +31,12 @@ export async function GET(request: Request) {
       debtsService.getSummary(access.workspaceId, access.workspace.currency),
     ]);
 
-    return NextResponse.json({
-      items,
-      summary,
-    });
+    return NextResponse.json(
+      mobileDebtsListResponseSchema.parse({
+        items: items.map((item) => toMobileDebt(item as unknown as Record<string, unknown>)),
+        summary,
+      }),
+    );
   } catch (error) {
     return thrownToMobileResponse(error);
   }

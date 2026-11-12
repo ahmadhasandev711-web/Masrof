@@ -9,6 +9,12 @@ import {
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { toMobileInvoice } from "@/lib/mobile/serialize";
+import {
+  mobileInvoiceCreatedSchema,
+  mobileInvoicesPageResponseSchema,
+} from "@contracts/mobile/invoices";
+import { mobileOkSchema } from "@contracts/mobile/common";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -24,7 +30,17 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   const result = await invoicesService.listPaginated(access.workspaceId, page, pageSize);
-  return NextResponse.json(result);
+  return NextResponse.json(
+    mobileInvoicesPageResponseSchema.parse({
+      items: result.items.map((item) =>
+        toMobileInvoice(item as unknown as Record<string, unknown>),
+      ),
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+      totalPages: result.totalPages,
+    }),
+  );
 }
 
 export async function POST(request: Request) {
@@ -48,10 +64,10 @@ export async function POST(request: Request) {
 
     revalidateTag(CACHE_TAGS.invoices, "max");
     return NextResponse.json(
-      {
+      mobileInvoiceCreatedSchema.parse({
         id: serializeId(result.value._id),
         invoiceNumber: result.value.invoiceNumber,
-      },
+      }),
       { status: 201 },
     );
   } catch (error) {
@@ -93,7 +109,7 @@ export async function PATCH(request: Request) {
     }
 
     revalidateTag(CACHE_TAGS.invoices, "max");
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(mobileOkSchema.parse({ ok: true }));
   } catch (error) {
     return thrownToMobileResponse(error);
   }

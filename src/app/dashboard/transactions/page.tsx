@@ -1,14 +1,14 @@
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { canWorkspaceWrite, getWorkspaceAccess } from "@/features/workspaces/access";
-import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { listCategoriesForWorkspace } from "@/features/categories/data";
-import { listTransactions } from "@/features/transactions/data";
+import { accountsService } from "@/features/accounts/accounts.service";
+import { categoriesService } from "@/features/categories/categories.service";
+import { transactionsService } from "@/features/transactions/transactions.service";
 import { resolveAccountCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/models/workspace";
-import { listTransfersPaginated, countTransfersForWorkspace } from "@/features/transfers/data";
-import { listClientsForWorkspace } from "@/features/clients/data";
-import { listProjectsForWorkspace } from "@/features/projects/data";
+import { transfersService } from "@/features/transfers/transfers.service";
+import { clientsService } from "@/features/clients/clients.service";
+import { projectsService } from "@/features/projects/projects.service";
 import { transactionFiltersSchema } from "@/features/transactions/schemas";
 import { TransactionCreationManager } from "@/features/transactions/components/transaction-creation-manager";
 import { TransactionSummaryCards } from "@/features/transactions/components/transaction-summary-cards";
@@ -71,15 +71,15 @@ export default async function TransactionsPage({
   });
 
   const [accounts, categories, transactionsResult, transfersResult, transfersCount, clients, projects] = await Promise.all([
-    listAccountsForWorkspace(workspaceId),
-    listCategoriesForWorkspace(workspaceId),
-    listTransactions(filters),
+    accountsService.listForWorkspace(workspaceId),
+    categoriesService.listForWorkspace(workspaceId),
+    transactionsService.list(filters),
     activeTab === "transfers"
-      ? listTransfersPaginated(workspaceId, Number(rawParams.page || 1), Number(rawParams.pageSize || 20))
+      ? transfersService.listPaginated(workspaceId, Number(rawParams.page || 1), Number(rawParams.pageSize || 20))
       : Promise.resolve({ items: [], total: 0, page: 1, pageSize: 20, totalPages: 1 }),
-    countTransfersForWorkspace(workspaceId),
-    listClientsForWorkspace(workspaceId),
-    listProjectsForWorkspace(workspaceId),
+    transfersService.countForWorkspace(workspaceId),
+    clientsService.listForWorkspace(workspaceId),
+    projectsService.listForWorkspace(workspaceId),
   ]);
 
   const accountOptions = accounts.map((a) => ({

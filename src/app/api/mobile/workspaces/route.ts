@@ -3,6 +3,11 @@ import { createWorkspaceSchema } from "@/features/workspaces/schemas";
 import { workspacesService } from "@/features/workspaces/workspaces.service";
 import { requireMobileSession } from "@/lib/mobile/session";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
+import { toMobileWorkspace } from "@/lib/mobile/serialize";
+import {
+  mobileCreateWorkspaceResponseSchema,
+  mobileWorkspacesListResponseSchema,
+} from "@contracts/mobile/workspaces";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -10,10 +15,11 @@ export async function GET(request: Request) {
 
   try {
     const items = await workspacesService.listForUserWithRoles(session.user.id);
-    return NextResponse.json({
-      items,
+    const body = mobileWorkspacesListResponseSchema.parse({
+      items: items.map(toMobileWorkspace),
       activeWorkspaceId: items[0]?.id ?? null,
     });
+    return NextResponse.json(body);
   } catch (error) {
     return thrownToMobileResponse(error);
   }
@@ -47,7 +53,10 @@ export async function POST(request: Request) {
       return resultToResponse(result);
     }
 
-    return NextResponse.json({ workspaceId: result.value }, { status: 201 });
+    return NextResponse.json(
+      mobileCreateWorkspaceResponseSchema.parse({ workspaceId: result.value }),
+      { status: 201 },
+    );
   } catch (error) {
     return thrownToMobileResponse(error);
   }

@@ -9,6 +9,8 @@ import { DebtPaymentsDialog } from "@/features/debts/components/debt-payments-di
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToasts, ToastStack } from "@/components/ui/toast";
 import type { DebtItem } from "@/features/debts/types";
+import { NavIcon } from "@/components/ui/app-icons";
+import { MOBILE_ACTION_BTN } from "@/components/ui/mobile-field";
 
 export function DebtsList({
   debts,
@@ -196,23 +198,25 @@ export function DebtsList({
                 </div>
 
                 {/* Card Actions */}
-                <div className="mt-5 flex items-center justify-between border-t border-neutral-100 pt-3">
-                  <div className="flex items-center gap-2">
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-neutral-100 pt-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setHistoryTargetDebt(debt)}
-                      className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
+                      className={`${MOBILE_ACTION_BTN} border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50`}
                     >
-                      {t("paymentsHistory")}
+                      <NavIcon name="inbox" className="h-4 w-4 shrink-0" />
+                      <span>{t("paymentsHistory")}</span>
                     </button>
                     {canWrite && (
                       <button
                         type="button"
                         disabled={isPending}
                         onClick={() => setArchiveTargetDebt(debt)}
-                        className="rounded-lg px-2 py-1.5 text-xs text-neutral-400 hover:text-red-600"
+                        className={`${MOBILE_ACTION_BTN} border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100 disabled:opacity-60`}
                       >
-                        {t("archive")}
+                        <NavIcon name="trash" className="h-4 w-4 shrink-0" />
+                        <span>{t("archive")}</span>
                       </button>
                     )}
                   </div>
@@ -221,7 +225,7 @@ export function DebtsList({
                     <button
                       type="button"
                       onClick={() => setPaymentTargetDebt(debt)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-[#065F46] px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-[#065F46]/90 active:scale-95"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-xs font-semibold text-white shadow-2xs hover:bg-[#065F46]/90 active:scale-95"
                     >
                       <span>{t("recordPaymentQuick")}</span>
                     </button>

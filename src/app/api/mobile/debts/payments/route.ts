@@ -6,6 +6,7 @@ import {
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { toMobileDebt } from "@/lib/mobile/serialize";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -25,7 +26,9 @@ export async function GET(request: Request) {
 
   try {
     const items = await debtsService.listPayments(access.workspaceId, debtId);
-    return NextResponse.json({ items });
+    return NextResponse.json({
+      items: items.map((item) => toMobileDebt(item as unknown as Record<string, unknown>)),
+    });
   } catch (error) {
     return thrownToMobileResponse(error);
   }

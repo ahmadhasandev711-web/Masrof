@@ -14,7 +14,8 @@
     "seed:posts": "tsx --env-file=.env.local scripts/seed-posts.ts",
     "seed:admin": "tsx --env-file=.env.local scripts/seed-admin.ts",
     "db:ping": "tsx --env-file=.env.local scripts/db-ping.ts",
-    "deploy:fresh-checklist": "node scripts/fresh-database-deploy.mjs"
+    "deploy:fresh-checklist": "node scripts/fresh-database-deploy.mjs",
+    "mobile:openapi": "tsx scripts/generate-mobile-openapi.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1106.0",

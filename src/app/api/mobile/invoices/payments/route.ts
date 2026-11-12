@@ -8,6 +8,7 @@ import {
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { mobileInvoicePaymentCreatedSchema } from "@contracts/mobile/invoices";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function POST(request: Request) {
@@ -49,7 +50,10 @@ export async function POST(request: Request) {
       payment && typeof payment === "object" && "_id" in payment
         ? serializeId((payment as { _id: unknown })._id)
         : "";
-    return NextResponse.json({ paymentId }, { status: 201 });
+    return NextResponse.json(
+      mobileInvoicePaymentCreatedSchema.parse({ paymentId }),
+      { status: 201 },
+    );
   } catch (error) {
     return thrownToMobileResponse(error);
   }

@@ -11,6 +11,7 @@ import { runInTransaction } from "@/lib/db/transaction";
 import { TransactionModel } from "@/models/transaction";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CreateRecurringExpenseInput } from "@/features/recurring-expenses/schemas";
+import type { RecurringExpenseListItem } from "@/features/recurring-expenses/types";
 import type { RecurringFrequency } from "@/models/recurring-expense";
 import { advanceDueDate } from "@/features/recurring-expenses/due-date";
 import { InvalidReferenceError } from "@/server/kernel/errors";
@@ -19,24 +20,14 @@ import {
   registerWorkspaceIdempotentResource,
 } from "@/lib/idempotency/workspace-resource";
 
+export type { RecurringExpenseListItem } from "@/features/recurring-expenses/types";
+
 export class InvalidRecurringExpenseError extends InvalidReferenceError {
   constructor(code: string) {
     super(code, code);
     this.name = "InvalidRecurringExpenseError";
   }
 }
-
-export type RecurringExpenseListItem = {
-  id: string;
-  amount: number;
-  description: string;
-  frequency: RecurringFrequency;
-  nextDueDate: string;
-  accountName: string;
-  categoryName: string;
-  categoryNameEn: string | null;
-  categorySlug: string | null;
-};
 
 type PopulatedAccount = { name?: string };
 type PopulatedCategory = {

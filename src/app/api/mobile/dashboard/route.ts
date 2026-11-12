@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mobileDashboardResponseSchema } from "@contracts/mobile/dashboard";
 import { dashboardRepository } from "@/features/dashboard/dashboard.repository";
 import { getDashboardAlerts } from "@/features/dashboard/alerts";
 import {
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
       getDashboardAlerts(access.workspaceId),
     ]);
 
-    return NextResponse.json({
+    const body = mobileDashboardResponseSchema.parse({
       workspace: {
         id: access.workspaceId,
         name: access.workspace.name,
@@ -36,6 +37,7 @@ export async function GET(request: Request) {
       dueRecurring: alerts.dueRecurring.length,
       receivableProjects: alerts.receivableProjects.length,
     });
+    return NextResponse.json(body);
   } catch (error) {
     return mobileErrorResponse(error);
   }

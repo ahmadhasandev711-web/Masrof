@@ -8,6 +8,8 @@ import {
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { toMobileRecurring } from "@/lib/mobile/serialize";
+import { mobileRecurringListResponseSchema } from "@contracts/mobile/recurring";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -21,7 +23,13 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   const items = await recurringExpensesService.listForWorkspace(access.workspaceId, limit);
-  return NextResponse.json({ items });
+  return NextResponse.json(
+    mobileRecurringListResponseSchema.parse({
+      items: items.map((item) =>
+        toMobileRecurring(item as unknown as Record<string, unknown>),
+      ),
+    }),
+  );
 }
 
 export async function POST(request: Request) {

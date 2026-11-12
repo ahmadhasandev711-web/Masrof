@@ -9,7 +9,8 @@ import {
   type EditableTransaction,
 } from "@/features/transactions/components/edit-transaction-form";
 import { useLocale, useTranslations } from "next-intl";
-import { CategoryIcon } from "@/components/ui/app-icons";
+import { CategoryIcon, NavIcon } from "@/components/ui/app-icons";
+import { MOBILE_ACTION_BTN } from "@/components/ui/mobile-field";
 import type { CategoryOption } from "@/features/categories/map-options";
 
 type AccountOption = { id: string; name: string };
@@ -157,13 +158,14 @@ export function TransactionRow({
 
         {/* Action Buttons */}
         {canWrite && (
-          <div className="flex items-center gap-1.5 ms-auto sm:ms-0">
+          <div className="ms-auto flex flex-wrap items-center gap-1.5 sm:ms-0">
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
+              className={`${MOBILE_ACTION_BTN} border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50`}
             >
-              {tForm("editTitle")}
+              <NavIcon name="edit" className="h-4 w-4 shrink-0" />
+              <span>{tForm("editTitle")}</span>
             </button>
             <ArchiveTransactionButton transactionId={transaction.id} workspaceId={workspaceId} />
           </div>

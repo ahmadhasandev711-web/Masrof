@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { formatMoney } from "@/lib/money";
 import { isOnOrBeforeToday } from "@/lib/dates";
-import type { RecurringExpenseListItem } from "@/features/recurring-expenses/data";
+import type { RecurringExpenseListItem } from "@/features/recurring-expenses/types";
 import {
   recordRecurringExpenseAction,
   archiveRecurringExpenseAction,

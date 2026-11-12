@@ -1,8 +1,8 @@
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
-import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { getWorkspaceSummary } from "@/features/transactions/data";
-import { getCategoryBreakdown, getMonthlyTrend } from "@/features/reports/data";
+import { accountsService } from "@/features/accounts/accounts.service";
+import { transactionsService } from "@/features/transactions/transactions.service";
+import { reportsService } from "@/features/reports/reports.service";
 import {
   resolveReportDateRange,
   REPORT_RANGE_PRESETS,
@@ -51,11 +51,11 @@ export default async function ReportsPage({
 
   const [summary, incomeBreakdownResult, expenseBreakdownResult, monthlyTrendResult, accounts] =
     await Promise.all([
-      getWorkspaceSummary(workspaceId, range),
-      getCategoryBreakdown(workspaceId, "income", range, locale),
-      getCategoryBreakdown(workspaceId, "expense", range, locale),
-      getMonthlyTrend(workspaceId, 6, moneyLocale),
-      listAccountsForWorkspace(workspaceId),
+      transactionsService.getWorkspaceSummary(workspaceId, range),
+      reportsService.getCategoryBreakdown(workspaceId, "income", range, locale),
+      reportsService.getCategoryBreakdown(workspaceId, "expense", range, locale),
+      reportsService.getMonthlyTrend(workspaceId, 6, moneyLocale),
+      accountsService.listForWorkspace(workspaceId),
     ]);
 
   const conversion = {

@@ -2,7 +2,7 @@ import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspaceAccess } from "@/features/workspaces/access";
 import { canWorkspaceWrite } from "@/features/workspaces/roles";
-import { listCategoriesForWorkspace } from "@/features/categories/data";
+import { categoriesService } from "@/features/categories/categories.service";
 import { CategoryCreationManager } from "@/features/categories/components/category-creation-manager";
 import { CategoryList } from "@/features/categories/components/category-list";
 import { getTranslations } from "next-intl/server";
@@ -15,7 +15,7 @@ export default async function CategoriesPage() {
 
   const workspaceId = activeWorkspace._id.toString();
   const [categories, access] = await Promise.all([
-    listCategoriesForWorkspace(workspaceId),
+    categoriesService.listForWorkspace(workspaceId),
     getWorkspaceAccess(session.user.id, workspaceId),
   ]);
 

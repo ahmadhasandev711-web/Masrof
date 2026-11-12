@@ -5,7 +5,7 @@ vi.mock("@/lib/db/mongoose", () => ({
   connectToDatabase: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { listProjectsWithTotals } from "@/features/projects/data";
+import { projectsRepository } from "@/features/projects/projects.repository";
 import { ProjectModel } from "@/models/project";
 import { TransactionModel } from "@/models/transaction";
 import { InvoiceModel } from "@/models/invoice";
@@ -43,7 +43,7 @@ describe("Slice P2.1 — listProjectsWithTotals & Profitability Math", () => {
   const validWsId = "507f191e810c19729de860ea";
 
   it("returns empty array when workspaceId is invalid", async () => {
-    const result = await listProjectsWithTotals("invalid-ws-id");
+    const result = await projectsRepository.listWithTotals("invalid-ws-id");
     expect(result).toEqual([]);
     expect(ProjectModel.find).not.toHaveBeenCalled();
   });
@@ -116,7 +116,7 @@ describe("Slice P2.1 — listProjectsWithTotals & Profitability Math", () => {
       }),
     } as any);
 
-    const results = await listProjectsWithTotals(validWsId);
+    const results = await projectsRepository.listWithTotals(validWsId);
 
     expect(results).toHaveLength(3);
 

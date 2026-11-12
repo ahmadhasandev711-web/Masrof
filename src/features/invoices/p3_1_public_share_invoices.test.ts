@@ -5,14 +5,30 @@ vi.mock("server-only", () => ({}));
 import mongoose from "mongoose";
 import {
   generateSecureShareToken,
-  getOrCreateInvoiceShareToken,
-  regenerateInvoiceShareToken,
-  toggleInvoiceShareable,
-  getPublicInvoiceByToken,
-} from "@/features/invoices/public-invoice-data";
+  invoicesRepository,
+} from "@/features/invoices/invoices.repository";
 import { invoiceShareWhatsAppMessage } from "@/features/whatsapp/messages";
 import { InvoiceModel } from "@/models/invoice";
 import { InvoicePaymentModel } from "@/models/invoice-payment";
+
+const getOrCreateInvoiceShareToken = (
+  invoiceId: string,
+  workspaceId: string,
+) => invoicesRepository.getOrCreateShareToken(invoiceId, workspaceId);
+
+const regenerateInvoiceShareToken = (
+  invoiceId: string,
+  workspaceId: string,
+) => invoicesRepository.regenerateShareToken(invoiceId, workspaceId);
+
+const toggleInvoiceShareable = (
+  invoiceId: string,
+  workspaceId: string,
+  isShareable: boolean,
+) => invoicesRepository.setShareable(invoiceId, workspaceId, isShareable);
+
+const getPublicInvoiceByToken = (token: string) =>
+  invoicesRepository.getPublicInvoiceByToken(token);
 
 vi.mock("@/lib/db/mongoose", () => ({
   connectToDatabase: vi.fn().mockResolvedValue(undefined),

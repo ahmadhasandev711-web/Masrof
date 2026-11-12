@@ -13,7 +13,6 @@ import {
 } from "@/features/subscriptions/plan-config-data";
 import type { PlanQuantityLimitKey } from "@/features/subscriptions/default-plans";
 import { isUnlimitedQuantity } from "@/features/subscriptions/default-plans";
-import { listWorkspacesForUser } from "@/features/workspaces/data";
 import { countOwnedWorkspacesForUser, isUserActiveTeamMemberOfAnyWorkspace } from "@/features/workspaces/members-data";
 import {
   getLocalizedPlan,
@@ -152,7 +151,7 @@ export async function assertPlanFeature(
 /**
  * Derives the effective subscription from an ALREADY-AUTHORIZED workspace document.
  * Callers must have obtained `workspace` through a membership-verified path
- * (e.g. `listWorkspacesForUser` / `getWorkspaceAccess`); this performs no access check.
+ * (e.g. `workspacesService.listForUser` / `getWorkspaceAccess`); this performs no access check.
  */
 export async function resolveWorkspaceSubscriptionFromDocument(
   userId: string,

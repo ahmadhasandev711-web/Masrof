@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+/** Team payload is still opaque — contract is `z.unknown()` until members/invitations are stabilized. */
+import { mobileTeamResponseSchema } from "@contracts/mobile/team";
 import { workspacesService } from "@/features/workspaces/workspaces.service";
 import {
   requireMobileSession,
@@ -16,7 +18,8 @@ export async function GET(request: Request) {
 
   try {
     const team = await workspacesService.listTeam(access.workspaceId);
-    return NextResponse.json(team);
+    // Pass-through parse documents the contract without constraining shape yet.
+    return NextResponse.json(mobileTeamResponseSchema.parse(team));
   } catch (error) {
     return thrownToMobileResponse(error);
   }

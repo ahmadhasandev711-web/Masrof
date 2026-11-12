@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import type { Types } from "mongoose";
-import { listWorkspacesForUser } from "@/features/workspaces/data";
+import { workspacesService } from "@/features/workspaces/workspaces.service";
 import {
   getActiveWorkspaceId,
 } from "@/features/workspaces/active-workspace";
@@ -17,7 +17,7 @@ type ResolvedWorkspace = WorkspaceDocument & { _id: Types.ObjectId };
  * Cached per request via React `cache()` — layout + page share one DB round-trip.
  */
 export const getCurrentWorkspaceContext = cache(async (userId: string) => {
-  const workspaces = await listWorkspacesForUser(userId);
+  const workspaces = await workspacesService.listForUser(userId);
 
   if (workspaces.length === 0) {
     return { workspaces, activeWorkspace: null };

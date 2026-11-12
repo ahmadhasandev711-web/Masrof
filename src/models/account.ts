@@ -33,7 +33,7 @@ const accountSchema = new Schema(
     // unit (piastres for EGP, cents for USD...) — see lib/money.
     openingBalance: { type: Number, required: true, default: 0 },
 
-    // BALANCE STRATEGY (hybrid — see features/accounts/data.ts for the
+    // BALANCE STRATEGY (hybrid — see features/accounts/accounts.repository.ts for the
     // authoritative explanation):
     // `cachedBalance` is what every read (dashboard, account list) uses,
     // updated atomically alongside every transaction write. Transactions

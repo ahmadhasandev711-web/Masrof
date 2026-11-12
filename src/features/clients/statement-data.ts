@@ -6,7 +6,7 @@ import { toPlain } from "@/lib/db/plain";
 import { ClientModel } from "@/models/client";
 import { InvoiceModel } from "@/models/invoice";
 import { InvoicePaymentModel } from "@/models/invoice-payment";
-import type { WorkspaceBrandingForPrint } from "@/features/invoices/data";
+import type { WorkspaceBrandingForPrint } from "@/features/invoices/invoices.repository";
 
 export type StatementLedgerEntry = {
   id: string;

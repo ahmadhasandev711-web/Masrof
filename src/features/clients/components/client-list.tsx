@@ -11,6 +11,7 @@ import { ToastStack, useToasts } from "@/components/ui/toast";
 import type { ClientListItem } from "@/features/clients/types";
 import { useLocale, useTranslations } from "next-intl";
 import { NavIcon } from "@/components/ui/app-icons";
+import { MOBILE_ACTION_BTN } from "@/components/ui/mobile-field";
 
 export function ClientList({
   clients,
@@ -212,21 +213,23 @@ export function ClientList({
                     </div>
 
                     {canWrite && (
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
                           type="button"
                           onClick={() => setEditingId(id)}
-                          className="font-medium text-neutral-500 transition hover:text-emerald-700"
+                          className={`${MOBILE_ACTION_BTN} border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50`}
                         >
-                          {tCommon("edit")}
+                          <NavIcon name="edit" className="h-4 w-4 shrink-0" />
+                          <span>{tCommon("edit")}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setArchiveTarget(client)}
                           disabled={isPending}
-                          className="font-medium text-neutral-400 transition hover:text-rose-600 disabled:opacity-60"
+                          className={`${MOBILE_ACTION_BTN} border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100 disabled:opacity-60`}
                         >
-                          {tCommon("archive")}
+                          <NavIcon name="trash" className="h-4 w-4 shrink-0" />
+                          <span>{tCommon("archive")}</span>
                         </button>
                       </div>
                     )}

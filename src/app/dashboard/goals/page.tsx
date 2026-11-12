@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
-import { listSavingsGoals } from "@/features/savings-goals/data";
+import { savingsGoalsService } from "@/features/savings-goals/savings-goals.service";
 import { SavingsGoalCreationManager } from "@/features/savings-goals/components/savings-goal-creation-manager";
 import { SavingsGoalList } from "@/features/savings-goals/components/savings-goal-list";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
@@ -24,7 +24,7 @@ export default async function SavingsGoalsPage() {
 
   const [{ plan, subscription }, goals, goalCount, locale, access] = await Promise.all([
     getWorkspacePlanContext(session.user.id, workspaceId),
-    listSavingsGoals(workspaceId),
+    savingsGoalsService.listForWorkspace(workspaceId),
     countSavingsGoalsForWorkspace(workspaceId),
     getLocale(),
     getWorkspaceAccess(session.user.id, workspaceId),

@@ -8,6 +8,7 @@ import {
 import { ClientCombobox } from "@/features/clients/components/client-combobox";
 import { useTranslations } from "next-intl";
 import type { CategoryOption } from "@/features/categories/map-options";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 type AccountOption = { id: string; name: string };
 type LinkOption = { id: string; name: string; phone?: string | null };
@@ -249,9 +250,10 @@ export function CreateTransactionForm({
             step="0.01"
             min="0.01"
             inputMode="decimal"
+            enterKeyHint="done"
             dir="ltr"
             placeholder="0.00"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono text-base font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-start font-mono font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
             required
           />
         </div>
@@ -266,7 +268,7 @@ export function CreateTransactionForm({
             type="date"
             value={transactionDate}
             onChange={(e) => setTransactionDate(e.target.value)}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
             required
           />
         </div>
@@ -278,7 +280,7 @@ export function CreateTransactionForm({
           <select
             id="tx-account"
             name="accountId"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
             required
           >
             {accounts.map((account) => (
@@ -310,7 +312,7 @@ export function CreateTransactionForm({
             name="categoryId"
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
             required
           >
             {filteredCategories.map((category) => (
@@ -344,7 +346,7 @@ export function CreateTransactionForm({
             <select
               id="tx-project"
               name="projectId"
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right"
+              className={`${MOBILE_FIELD} text-right`}
               defaultValue={defaultProjectId ?? ""}
             >
               <option value="">{tShared("none")}</option>
@@ -386,7 +388,7 @@ export function CreateTransactionForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={tForm("descriptionPlaceholder")}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
           />
         </div>
 
@@ -399,7 +401,7 @@ export function CreateTransactionForm({
             name="notes"
             rows={2}
             placeholder={tForm("notesPlaceholder")}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
           />
         </div>
       </div>

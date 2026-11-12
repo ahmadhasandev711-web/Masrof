@@ -8,6 +8,8 @@ import {
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
+import { toMobileBudget } from "@/lib/mobile/serialize";
+import { mobileBudgetsListResponseSchema } from "@contracts/mobile/budgets";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -19,17 +21,13 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   const budgets = await budgetsService.listWithProgress(access.workspaceId);
-  return NextResponse.json({
-    items: budgets.map((budget) => ({
-      id: serializeId(budget._id),
-      name: budget.name,
-      amount: budget.amount,
-      spent: budget.spent,
-      remaining: budget.remaining,
-      percentage: budget.percentage,
-      categoryId: budget.categoryId ? serializeId(budget.categoryId) : null,
-    })),
-  });
+  return NextResponse.json(
+    mobileBudgetsListResponseSchema.parse({
+      items: budgets.map((budget) =>
+        toMobileBudget(budget as unknown as Record<string, unknown>),
+      ),
+    }),
+  );
 }
 
 export async function POST(request: Request) {

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getPublicInvoiceByToken } from "@/features/invoices/public-invoice-data";
+import { invoicesService } from "@/features/invoices/invoices.service";
 import { PublicInvoiceDocument } from "@/features/invoices/components/public-invoice-document";
 import "@/app/print/invoice/invoice-print.css";
 
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ token: string }>;
 }): Promise<Metadata> {
   const { token } = await params;
-  const invoice = await getPublicInvoiceByToken(token);
+  const invoice = await invoicesService.getPublicInvoiceByToken(token);
   if (!invoice) {
     return { title: "فاتورة غير موجودة" };
   }
@@ -31,7 +31,7 @@ export default async function PublicInvoicePage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const invoice = await getPublicInvoiceByToken(token);
+  const invoice = await invoicesService.getPublicInvoiceByToken(token);
 
   if (!invoice) {
     notFound();

@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceWriteAccess } from "@/features/workspaces/access";
 import { assertWorkspacePlanFeature } from "@/features/subscriptions/data";
-import { createTransaction } from "@/features/transactions/data";
+import { transactionsService } from "@/features/transactions/transactions.service";
 
 export type ImportBankCsvState = { error: string | null; imported: number };
 
@@ -107,21 +107,18 @@ export async function importBankCsvAction(
     const description = descIdx >= 0 ? cols[descIdx] ?? "" : tErrors("importBankDefault");
 
     try {
-      await createTransaction(
-        {
-          workspaceId,
-          accountId,
-          categoryId,
-          type: "expense",
-          amount,
-          transactionDate: date,
-          description: description.slice(0, 140),
-          notes: tErrors("importBankNotes"),
-          idempotencyKey: `csv:${importBatchId}:${lineIndex}`,
-        },
-        session.user.id,
-      );
-      imported++;
+      const result = await transactionsService.create(session.user.id, {
+        workspaceId,
+        accountId,
+        categoryId,
+        type: "expense",
+        amount,
+        transactionDate: date,
+        description: description.slice(0, 140),
+        notes: tErrors("importBankNotes"),
+        idempotencyKey: `csv:${importBatchId}:${lineIndex}`,
+      });
+      if (result.ok) imported++;
     } catch {
       // skip bad rows
     }

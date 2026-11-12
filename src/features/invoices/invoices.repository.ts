@@ -35,6 +35,7 @@ import type {
   InvoicePaymentListItem,
   InvoicePrintView,
   InvoiceSummary,
+  PublicInvoiceView,
 } from "@/features/invoices/types";
 import {
   AccountCurrencyMismatchError,
@@ -42,6 +43,12 @@ import {
   InvoiceCancelledError,
   InvoiceOverpaymentError,
 } from "@/features/invoices/invoices.errors";
+import {
+  computeInvoiceTotals,
+  lineFromMajorInput,
+  normalizeInvoiceLine,
+  resolveInvoiceTotals,
+} from "@/features/invoices/invoice-line-math";
 
 export type WorkspaceBrandingForPrint = {
   name: string;
@@ -67,7 +74,17 @@ function mapInvoiceListItem(
     invoiceNumber: string;
     issueDate: Date | string;
     dueDate?: Date | string | null;
-    items: { description: string; amount: number }[];
+    items: {
+      description: string;
+      amount: number;
+      quantity?: number | null;
+      unitPrice?: number | null;
+    }[];
+    subtotal?: number | null;
+    taxEnabled?: boolean | null;
+    taxRatePercent?: number | null;
+    taxAmount?: number | null;
+    total?: number | null;
     clientId: unknown;
     projectId?: unknown;
     notes?: string;
@@ -83,7 +100,8 @@ function mapInvoiceListItem(
     | { _id?: unknown; name?: string; phone?: string | null }
     | null;
   const project = invoice.projectId as { _id?: unknown; name?: string } | null;
-  const totalAmount = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+  const money = resolveInvoiceTotals(invoice);
+  const totalAmount = money.total;
   const status = (invoice.status ?? "sent") as InvoiceStatus;
   const remainingAmount = Math.max(0, totalAmount - paidAmount);
 
@@ -103,7 +121,11 @@ function mapInvoiceListItem(
     invoiceNumber: invoice.invoiceNumber,
     issueDate: new Date(invoice.issueDate).toISOString(),
     dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString() : null,
-    items: invoice.items.map((it) => ({ description: it.description, amount: it.amount })),
+    items: invoice.items.map((it) => normalizeInvoiceLine(it)),
+    subtotal: money.subtotal,
+    taxEnabled: money.taxEnabled,
+    taxRatePercent: money.taxRatePercent,
+    taxAmount: money.taxAmount,
     total: totalAmount,
     paidAmount,
     remainingAmount,
@@ -233,10 +255,11 @@ export class InvoicesRepository {
   ) {
     await connectToDatabase();
     const invoiceNumber = await this.nextInvoiceNumber(input.workspaceId, input.issueDate);
-    const items = input.items.map((item) => ({
-      description: item.description,
-      amount: toMinorUnits(item.amount),
-    }));
+    const items = input.items.map((item) => lineFromMajorInput(item));
+    const money = computeInvoiceTotals(items, {
+      taxEnabled: input.taxEnabled,
+      taxRatePercent: input.taxRatePercent,
+    });
 
     const invoice = await InvoiceModel.create({
       workspaceId: input.workspaceId,
@@ -246,6 +269,11 @@ export class InvoicesRepository {
       issueDate: input.issueDate,
       dueDate: input.dueDate ?? null,
       items,
+      subtotal: money.subtotal,
+      taxEnabled: money.taxEnabled,
+      taxRatePercent: money.taxRatePercent,
+      taxAmount: money.taxAmount,
+      total: money.total,
       notes: input.notes ?? "",
       status: "sent",
       paidAt: null,
@@ -343,10 +371,11 @@ export class InvoicesRepository {
     const invoice = await this.findActiveInvoiceDoc(input.invoiceId, input.workspaceId);
     if (!invoice) return null;
 
-    const newItems = input.items.map((item) => ({
-      description: item.description.trim(),
-      amount: toMinorUnits(item.amount),
-    }));
+    const newItems = input.items.map((item) => lineFromMajorInput(item));
+    const money = computeInvoiceTotals(newItems, {
+      taxEnabled: input.taxEnabled,
+      taxRatePercent: input.taxRatePercent,
+    });
 
     invoice.clientId = new mongoose.Types.ObjectId(input.clientId);
     invoice.projectId = validatedProjectId
@@ -357,6 +386,11 @@ export class InvoicesRepository {
     invoice.notes = input.notes ?? "";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     invoice.items = newItems as any;
+    invoice.subtotal = money.subtotal;
+    invoice.taxEnabled = money.taxEnabled;
+    invoice.taxRatePercent = money.taxRatePercent;
+    invoice.taxAmount = money.taxAmount;
+    invoice.total = money.total;
 
     if (invoice.status === "cancelled") {
       invoice.status = "sent";
@@ -420,12 +454,9 @@ export class InvoicesRepository {
       name?: string;
     } | null;
 
-    const items = invoice.items.map((item) => ({
-      description: item.description,
-      amount: item.amount,
-    }));
-
-    const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+    const items = invoice.items.map((item) => normalizeInvoiceLine(item));
+    const money = resolveInvoiceTotals(invoice);
+    const totalAmount = money.total;
     const status = (invoice.status ?? "sent") as InvoiceStatus;
 
     const paymentAgg = await InvoicePaymentModel.aggregate<{ paidTotal: number }>([
@@ -465,6 +496,10 @@ export class InvoicesRepository {
       issueDate: new Date(invoice.issueDate).toISOString(),
       dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString() : null,
       items,
+      subtotal: money.subtotal,
+      taxEnabled: money.taxEnabled,
+      taxRatePercent: money.taxRatePercent,
+      taxAmount: money.taxAmount,
       total: totalAmount,
       paidAmount,
       remainingAmount,
@@ -749,7 +784,7 @@ export class InvoicesRepository {
 
     if (!invoice) return null;
 
-    const invoiceTotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+    const invoiceTotal = resolveInvoiceTotals(invoice).total;
 
     const payments = await InvoicePaymentModel.find({
       invoiceId,
@@ -866,7 +901,19 @@ export class InvoicesRepository {
         return existingPayment.toObject();
       }
 
-      const invoiceTotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+      const invoiceTotal = resolveInvoiceTotals({
+        items: invoice.items.map((item) => ({
+          description: item.description,
+          amount: item.amount,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+        subtotal: invoice.subtotal,
+        taxEnabled: invoice.taxEnabled,
+        taxRatePercent: invoice.taxRatePercent,
+        taxAmount: invoice.taxAmount,
+        total: invoice.total,
+      }).total;
 
       const existingPayments = await InvoicePaymentModel.find({
         workspaceId: input.workspaceId,
@@ -937,7 +984,124 @@ export class InvoicesRepository {
       return payment.toObject();
     });
 
-    return toPlain(resultPayment as unknown) as InvoicePaymentListItem;
+      return toPlain(resultPayment as unknown) as InvoicePaymentListItem;
+  }
+
+  /**
+   * Retrieves public invoice details for client viewing without authentication.
+   * Safely marks the invoice as viewed if not previously viewed.
+   */
+  async getPublicInvoiceByToken(token: string): Promise<PublicInvoiceView | null> {
+    if (!token || typeof token !== "string" || token.length < 16) {
+      return null;
+    }
+
+    await connectToDatabase();
+
+    const invoice = await InvoiceModel.findOne({
+      shareToken: token,
+      isShareable: true,
+      isArchived: false,
+      status: { $ne: "cancelled" },
+    })
+      .populate("clientId", "name email phone")
+      .populate("projectId", "name")
+      .populate(
+        "workspaceId",
+        "name businessName logoUrl taxId businessPhone businessAddress currency",
+      )
+      .lean();
+
+    if (!invoice) return null;
+
+    if (!invoice.viewedAt) {
+      InvoiceModel.updateOne(
+        { _id: invoice._id, viewedAt: null },
+        { $set: { viewedAt: new Date() } },
+      )
+        .exec()
+        .catch((err) => {
+          console.error("[public-invoice] failed to update viewedAt:", err);
+        });
+    }
+
+    const payments = await InvoicePaymentModel.find({
+      invoiceId: invoice._id,
+      isArchived: false,
+    }).lean();
+
+    const paidAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+    const money = resolveInvoiceTotals(invoice);
+    const total = money.total;
+    const remainingAmount = Math.max(0, total - paidAmount);
+
+    let financialStatus: InvoiceFinancialStatus;
+    if (paidAmount >= total && total > 0) {
+      financialStatus = "paid";
+    } else if (paidAmount > 0) {
+      financialStatus = "partially_paid";
+    } else if (invoice.status === "paid") {
+      financialStatus = "legacy_paid";
+    } else {
+      financialStatus = "unpaid";
+    }
+
+    const client = invoice.clientId as {
+      name?: string;
+      email?: string | null;
+      phone?: string | null;
+    } | null;
+
+    const project = invoice.projectId as {
+      name?: string;
+    } | null;
+
+    const workspace = invoice.workspaceId as {
+      name?: string;
+      businessName?: string | null;
+      logoUrl?: string | null;
+      taxId?: string | null;
+      businessPhone?: string | null;
+      businessAddress?: string | null;
+      currency?: string;
+    } | null;
+
+    const displayName = (workspace?.businessName || "").trim() || workspace?.name || "";
+
+    return toPlain({
+      id: String(invoice._id),
+      shareToken: token,
+      invoiceNumber: invoice.invoiceNumber,
+      issueDate: new Date(invoice.issueDate).toISOString(),
+      dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString() : null,
+      items: invoice.items.map((item) => normalizeInvoiceLine(item)),
+      subtotal: money.subtotal,
+      taxEnabled: money.taxEnabled,
+      taxRatePercent: money.taxRatePercent,
+      taxAmount: money.taxAmount,
+      total,
+      paidAmount,
+      remainingAmount,
+      notes: invoice.notes || "",
+      status: (invoice.status ?? "sent") as InvoiceStatus,
+      financialStatus,
+      client: {
+        name: client?.name || "—",
+        email: client?.email ?? null,
+        phone: client?.phone ?? null,
+      },
+      projectName: project?.name ?? null,
+      workspaceName: workspace?.name || "",
+      businessName: displayName,
+      logoUrl: workspace?.logoUrl || null,
+      taxId: workspace?.taxId || null,
+      businessPhone: workspace?.businessPhone || null,
+      businessAddress: workspace?.businessAddress || null,
+      currency: workspace?.currency || "EGP",
+      viewedAt: invoice.viewedAt
+        ? new Date(invoice.viewedAt).toISOString()
+        : new Date().toISOString(),
+    });
   }
 }
 

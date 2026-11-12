@@ -8,6 +8,7 @@ import {
   type CreateClientState,
 } from "@/features/clients/actions/create-client";
 import { useTranslations } from "next-intl";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 const initialState: CreateClientState = { error: null };
 
@@ -60,7 +61,7 @@ export function CreateClientForm({
             name="name"
             type="text"
             placeholder={tForm("namePlaceholder")}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
             required
           />
         </div>
@@ -74,7 +75,7 @@ export function CreateClientForm({
             name="email"
             type="email"
             placeholder={tShared("optional")}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
           />
         </div>
 
@@ -87,7 +88,7 @@ export function CreateClientForm({
             name="phone"
             type="tel"
             placeholder={tShared("optional")}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
           />
         </div>
       </div>

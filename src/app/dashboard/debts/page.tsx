@@ -3,8 +3,9 @@ import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import { getWorkspaceAccess } from "@/features/workspaces/access";
-import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { getDebtsForWorkspace, calculateDebtSummaryFromDebts } from "@/features/debts/data";
+import { accountsService } from "@/features/accounts/accounts.service";
+import { calculateDebtSummaryFromDebts } from "@/features/debts/calculations";
+import { debtsService } from "@/features/debts/debts.service";
 import { DebtsGate } from "@/features/debts/components/debts-gate";
 import { DebtsSummaryCards } from "@/features/debts/components/debts-summary";
 import { CreateDebtDialog } from "@/features/debts/components/create-debt-dialog";
@@ -40,8 +41,8 @@ export default async function DebtsPage() {
 
   // Load debts, accounts, and access in parallel; compute summary in-memory with 0 redundant DB queries
   const [debts, accounts, access] = await Promise.all([
-    getDebtsForWorkspace(workspaceId),
-    listAccountsForWorkspace(workspaceId),
+    debtsService.listForWorkspace(workspaceId),
+    accountsService.listForWorkspace(workspaceId),
     getWorkspaceAccess(session.user.id, workspaceId),
   ]);
 

@@ -4,11 +4,12 @@ import { createCategorySchema } from "@/features/categories/schemas";
 import { categoriesService } from "@/features/categories/categories.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CategoryKind } from "@/models/category";
+import { requireMobileSession, requireMobileWorkspace } from "@/lib/mobile/session";
+import { toMobileCategory } from "@/lib/mobile/serialize";
 import {
-  requireMobileSession,
-  requireMobileWorkspace,
-  serializeId,
-} from "@/lib/mobile/session";
+  mobileCategoriesListResponseSchema,
+  mobileCategoryCreatedSchema,
+} from "@contracts/mobile/categories";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 import { resolveCategoryLabel } from "@/features/categories/labels";
 import type { AppLocale } from "@/i18n/config";
@@ -31,21 +32,18 @@ export async function GET(request: Request) {
     kind === "income" || kind === "expense" ? kind : undefined,
   );
 
-  return NextResponse.json({
-    items: categories.map((category) => ({
-      id: serializeId(category._id),
-      name: category.name,
-      nameEn: category.nameEn ?? null,
-      displayName: resolveCategoryLabel(
-        { name: category.name, nameEn: category.nameEn },
-        locale,
-      ),
-      slug: category.slug ?? null,
-      kind: category.kind,
-      icon: category.icon ?? null,
-      isSystem: Boolean(category.isSystem),
-    })),
+  const body = mobileCategoriesListResponseSchema.parse({
+    items: categories.map((category) =>
+      toMobileCategory({
+        ...category,
+        displayName: resolveCategoryLabel(
+          { name: category.name, nameEn: category.nameEn },
+          locale,
+        ),
+      }),
+    ),
   });
+  return NextResponse.json(body);
 }
 
 export async function POST(request: Request) {
@@ -69,12 +67,7 @@ export async function POST(request: Request) {
 
     revalidateTag(CACHE_TAGS.categories, "max");
     return NextResponse.json(
-      {
-        id: serializeId(result.value._id),
-        name: result.value.name,
-        nameEn: result.value.nameEn ?? null,
-        kind: result.value.kind,
-      },
+      mobileCategoryCreatedSchema.parse(toMobileCategory(result.value)),
       { status: 201 },
     );
   } catch (error) {

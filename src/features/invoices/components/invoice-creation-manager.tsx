@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 import { CreateInvoiceForm } from "@/features/invoices/components/create-invoice-form";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
+import type { InvoiceTemplateListItem } from "@/features/invoices/invoice-templates.types";
 import { useTranslations } from "next-intl";
 
 type ProjectOption = { _id: string; name: string; clientId: string };
@@ -13,6 +14,7 @@ export function InvoiceCreationManager({
   workspaceId,
   clients,
   projects = [],
+  templates = [],
   defaultClientId,
   defaultProjectId,
   canWrite,
@@ -20,6 +22,7 @@ export function InvoiceCreationManager({
   workspaceId: string;
   clients: ComboboxClientItem[];
   projects?: ProjectOption[];
+  templates?: InvoiceTemplateListItem[];
   defaultClientId?: string;
   defaultProjectId?: string;
   canWrite: boolean;
@@ -61,6 +64,7 @@ export function InvoiceCreationManager({
           workspaceId={workspaceId}
           clients={clients}
           projects={projects}
+          templates={templates}
           defaultClientId={defaultClientId}
           defaultProjectId={defaultProjectId}
           onCancel={() => setIsOpen(false)}

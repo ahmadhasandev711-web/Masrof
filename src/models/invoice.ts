@@ -6,6 +6,11 @@ export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 const invoiceItemSchema = new Schema(
   {
     description: { type: String, required: true, trim: true, maxlength: 200 },
+    /** Line quantity; omitted on legacy invoices (treated as 1). */
+    quantity: { type: Number, min: 0.0001, default: 1 },
+    /** Unit price in minor currency units; omitted on legacy invoices (treated as amount). */
+    unitPrice: { type: Number, min: 1 },
+    /** Line total in minor units (= quantity * unitPrice), kept for payments/reports. */
     amount: { type: Number, required: true, min: 1 },
   },
   { _id: false },
@@ -20,6 +25,13 @@ const invoiceSchema = new Schema(
     issueDate: { type: Date, required: true },
     dueDate: { type: Date, default: null },
     items: { type: [invoiceItemSchema], required: true, minlength: 1 },
+    /** Sum of line amounts (minor). Legacy docs may omit — derived from items. */
+    subtotal: { type: Number, min: 0 },
+    taxEnabled: { type: Boolean, required: true, default: false },
+    taxRatePercent: { type: Number, min: 0, max: 100, default: 0 },
+    taxAmount: { type: Number, min: 0, default: 0 },
+    /** Payable total = subtotal + taxAmount (minor). Legacy: sum of items. */
+    total: { type: Number, min: 0 },
     notes: { type: String, trim: true, maxlength: 500, default: "" },
     status: {
       type: String,

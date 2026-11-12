@@ -1,10 +1,10 @@
 import "server-only";
 
 import { cache } from "react";
-import { getDashboardOverview } from "@/features/dashboard/data";
-import { listBudgetsWithProgress } from "@/features/budgets/data";
-import { listDueRecurringExpenses } from "@/features/recurring-expenses/data";
-import { listReceivableProjects } from "@/features/projects/data";
+import { dashboardRepository } from "@/features/dashboard/dashboard.repository";
+import { budgetsService } from "@/features/budgets/budgets.service";
+import { recurringExpensesService } from "@/features/recurring-expenses/recurring-expenses.service";
+import { projectsService } from "@/features/projects/projects.service";
 
 export type BudgetWarning = {
   id: string;
@@ -15,11 +15,16 @@ export type BudgetWarning = {
   status: "warning" | "exceeded";
 };
 
+/** Dashboard home stats — cached per request (moved from dashboard/data barrel). */
+const getDashboardOverview = cache(async (workspaceId: string) =>
+  dashboardRepository.getOverview(workspaceId),
+);
+
 export const getDashboardAlerts = cache(async (workspaceId: string) => {
   const [budgets, dueRecurring, receivableProjects] = await Promise.all([
-    listBudgetsWithProgress(workspaceId),
-    listDueRecurringExpenses(workspaceId),
-    listReceivableProjects(workspaceId),
+    budgetsService.listWithProgress(workspaceId),
+    recurringExpensesService.listDue(workspaceId),
+    projectsService.listReceivable(workspaceId),
   ]);
 
   const budgetWarnings: BudgetWarning[] = budgets

@@ -1,7 +1,7 @@
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { canWorkspaceWrite, getWorkspaceAccess } from "@/features/workspaces/access";
-import { listClientsWithFinancials } from "@/features/clients/data";
+import { clientsService } from "@/features/clients/clients.service";
 import { ClientCreationManager } from "@/features/clients/components/client-creation-manager";
 import { ClientSummaryCards } from "@/features/clients/components/client-summary-cards";
 import { ClientFilters } from "@/features/clients/components/client-filters";
@@ -30,7 +30,7 @@ export default async function ClientsPage({
   const [{ subscription }, access, allClients, clientCount] = await Promise.all([
     getWorkspacePlanContext(session.user.id, workspaceId),
     getWorkspaceAccess(session.user.id, workspaceId),
-    listClientsWithFinancials(workspaceId),
+    clientsService.listWithFinancials(workspaceId),
     countClientsForWorkspace(workspaceId),
   ]);
   const canWrite = canWorkspaceWrite(access.membership.role);

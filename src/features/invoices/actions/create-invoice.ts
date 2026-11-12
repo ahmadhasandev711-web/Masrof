@@ -14,13 +14,21 @@ export type CreateInvoiceState = {
 };
 
 function parseItemsFromForm(formData: FormData) {
-  const items: { description: string; amount: string }[] = [];
+  const items: {
+    description: string;
+    quantity: string;
+    unitPrice: string;
+  }[] = [];
   let index = 0;
 
   while (formData.has(`itemDescription_${index}`)) {
+    const unitPrice =
+      String(formData.get(`itemUnitPrice_${index}`) ?? "").trim() ||
+      String(formData.get(`itemAmount_${index}`) ?? "");
     items.push({
       description: String(formData.get(`itemDescription_${index}`) ?? ""),
-      amount: String(formData.get(`itemAmount_${index}`) ?? ""),
+      quantity: String(formData.get(`itemQuantity_${index}`) ?? "1"),
+      unitPrice,
     });
     index += 1;
   }
@@ -46,6 +54,8 @@ export async function createInvoiceAction(
     dueDate: dueDateRaw || null,
     notes: formData.get("notes") || "",
     items: parseItemsFromForm(formData),
+    taxEnabled: formData.get("taxEnabled"),
+    taxRatePercent: formData.get("taxRatePercent") || 0,
     idempotencyKey: formData.get("idempotencyKey"),
   });
 

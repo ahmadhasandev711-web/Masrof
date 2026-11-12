@@ -1,8 +1,8 @@
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { canWorkspaceWrite, getWorkspaceAccess } from "@/features/workspaces/access";
-import { listClientsForWorkspace } from "@/features/clients/data";
-import { listProjectsWithTotals } from "@/features/projects/data";
+import { clientsService } from "@/features/clients/clients.service";
+import { projectsService } from "@/features/projects/projects.service";
 import { ProjectCreationManager } from "@/features/projects/components/project-creation-manager";
 import { ProjectSummaryCards } from "@/features/projects/components/project-summary-cards";
 import { ProjectFilters } from "@/features/projects/components/project-filters";
@@ -31,8 +31,8 @@ export default async function ProjectsPage({
   const [{ plan, subscription }, access, clients, allProjects, activeCount] = await Promise.all([
     getWorkspacePlanContext(session.user.id, workspaceId),
     getWorkspaceAccess(session.user.id, workspaceId),
-    listClientsForWorkspace(workspaceId),
-    listProjectsWithTotals(workspaceId),
+    clientsService.listForWorkspace(workspaceId),
+    projectsService.listWithTotals(workspaceId),
     countActiveProjectsForWorkspace(workspaceId),
   ]);
   const canWrite = canWorkspaceWrite(access.membership.role);

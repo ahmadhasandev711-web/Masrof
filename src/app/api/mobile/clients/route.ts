@@ -3,11 +3,12 @@ import { revalidateTag } from "next/cache";
 import { createClientSchema } from "@/features/clients/schemas";
 import { clientsService } from "@/features/clients/clients.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { requireMobileSession, requireMobileWorkspace } from "@/lib/mobile/session";
+import { toMobileClient } from "@/lib/mobile/serialize";
 import {
-  requireMobileSession,
-  requireMobileWorkspace,
-  serializeId,
-} from "@/lib/mobile/session";
+  mobileClientCreatedSchema,
+  mobileClientsListResponseSchema,
+} from "@contracts/mobile/clients";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -19,7 +20,10 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   const items = await clientsService.listForWorkspace(access.workspaceId);
-  return NextResponse.json({ items });
+  const body = mobileClientsListResponseSchema.parse({
+    items: items.map((item) => toMobileClient(item as Record<string, unknown>)),
+  });
+  return NextResponse.json(body);
 }
 
 export async function POST(request: Request) {
@@ -43,12 +47,7 @@ export async function POST(request: Request) {
 
     revalidateTag(CACHE_TAGS.clients, "max");
     return NextResponse.json(
-      {
-        id: serializeId(result.value._id),
-        name: result.value.name,
-        email: result.value.email ?? null,
-        phone: result.value.phone ?? null,
-      },
+      mobileClientCreatedSchema.parse(toMobileClient(result.value as Record<string, unknown>)),
       { status: 201 },
     );
   } catch (error) {

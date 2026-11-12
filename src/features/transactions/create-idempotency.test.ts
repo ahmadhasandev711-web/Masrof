@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { createTransaction } from "@/features/transactions/data";
+import { transactionsRepository } from "@/features/transactions/transactions.repository";
 import { TransactionModel } from "@/models/transaction";
 import { AccountModel } from "@/models/account";
 import { ClientModel } from "@/models/client";
@@ -72,7 +72,7 @@ describe("createTransaction idempotency", () => {
       session: vi.fn().mockResolvedValue({ _id: { toString: () => "txn-existing" } }),
     });
 
-    const id = await createTransaction(baseInput, "user-1");
+    const id = await transactionsRepository.create(baseInput, "user-1");
 
     expect(id).toBe("txn-existing");
     expect(TransactionModel.create).not.toHaveBeenCalled();
@@ -87,7 +87,7 @@ describe("createTransaction idempotency", () => {
       { _id: { toString: () => "txn-new" } },
     ]);
 
-    const id = await createTransaction(baseInput, "user-1");
+    const id = await transactionsRepository.create(baseInput, "user-1");
 
     expect(id).toBe("txn-new");
     expect(TransactionModel.create).toHaveBeenCalled();

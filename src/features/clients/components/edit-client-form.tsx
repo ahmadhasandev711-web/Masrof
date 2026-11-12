@@ -6,6 +6,7 @@ import {
   type UpdateClientState,
 } from "@/features/clients/actions/update-client";
 import { useTranslations } from "next-intl";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 type EditableClient = {
   _id: string;
@@ -53,7 +54,7 @@ export function EditClientForm({
             name="name"
             type="text"
             defaultValue={client.name}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} bg-white text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
             required
           />
         </div>
@@ -65,7 +66,7 @@ export function EditClientForm({
             type="email"
             defaultValue={client.email ?? ""}
             placeholder={tShared("optional")}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} bg-white text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
           />
         </div>
 
@@ -76,7 +77,7 @@ export function EditClientForm({
             type="tel"
             defaultValue={client.phone ?? ""}
             placeholder={tShared("optional")}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className={`${MOBILE_FIELD} bg-white text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
           />
         </div>
       </div>

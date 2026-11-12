@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { asIsoDate } from "@contracts/mobile/common";
+import { mobileReportsResponseSchema } from "@contracts/mobile/reports";
 import { reportsService } from "@/features/reports/reports.service";
 import { transactionsService } from "@/features/transactions/transactions.service";
 import {
@@ -39,15 +41,20 @@ export async function GET(request: Request) {
       reportsService.getMonthlyTrend(access.workspaceId, 6, "ar"),
     ]);
 
-    return NextResponse.json({
+    const body = mobileReportsResponseSchema.parse({
       preset,
-      range,
+      // Dates as ISO strings so JSON stays serializable (no Date instances)
+      range: {
+        from: asIsoDate(range.from),
+        to: asIsoDate(range.to),
+      },
       summary,
       expenseBreakdown,
       incomeBreakdown,
       trend,
       currency: access.workspace.currency,
     });
+    return NextResponse.json(body);
   } catch (error) {
     return mobileErrorResponse(error);
   }

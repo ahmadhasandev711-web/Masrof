@@ -197,7 +197,9 @@ export function PublicInvoiceDocument({
               <tr className="border-b-2 border-neutral-800 bg-neutral-100 text-neutral-700 text-xs font-semibold">
                 <th className="px-3 py-3 w-12 text-center">#</th>
                 <th className="px-3 py-3 text-start">{isEn ? "Description / Item" : "الوصف / البند"}</th>
-                <th className="px-3 py-3 text-end">{isEn ? "Amount" : "المبلغ"}</th>
+                <th className="px-3 py-3 text-end">{isEn ? "Qty" : "الكمية"}</th>
+                <th className="px-3 py-3 text-end">{isEn ? "Unit" : "السعر"}</th>
+                <th className="px-3 py-3 text-end">{isEn ? "Amount" : "الإجمالي"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
@@ -205,6 +207,10 @@ export function PublicInvoiceDocument({
                 <tr key={idx} className="hover:bg-neutral-50/50">
                   <td className="px-3 py-3 text-center text-xs text-neutral-400 font-mono">{idx + 1}</td>
                   <td className="px-3 py-3 font-medium text-neutral-900">{item.description}</td>
+                  <td className="px-3 py-3 text-end font-mono text-neutral-700">{item.quantity}</td>
+                  <td className="px-3 py-3 text-end font-mono text-neutral-700">
+                    {formatMoney(item.unitPrice, { currency, locale: isEn ? "en" : "ar" })}
+                  </td>
                   <td className="px-3 py-3 text-end font-semibold text-neutral-900 font-mono">
                     {formatMoney(item.amount, { currency, locale: isEn ? "en" : "ar" })}
                   </td>
@@ -217,6 +223,24 @@ export function PublicInvoiceDocument({
         {/* Totals & Settlement Summary */}
         <section className="mt-6 border-t-2 border-neutral-800 pt-4">
           <div className="flex flex-col items-end gap-1.5 text-xs sm:text-sm">
+            {invoice.taxEnabled && (
+              <>
+                <div className="flex w-64 justify-between text-neutral-600">
+                  <span>{isEn ? "Subtotal:" : "المجموع الفرعي:"}</span>
+                  <span className="font-mono">
+                    {formatMoney(invoice.subtotal, { currency, locale: isEn ? "en" : "ar" })}
+                  </span>
+                </div>
+                <div className="flex w-64 justify-between text-neutral-600">
+                  <span>
+                    {isEn ? "Tax" : "الضريبة"} ({invoice.taxRatePercent}%):
+                  </span>
+                  <span className="font-mono">
+                    {formatMoney(invoice.taxAmount, { currency, locale: isEn ? "en" : "ar" })}
+                  </span>
+                </div>
+              </>
+            )}
             <div className="flex w-64 justify-between text-neutral-600">
               <span>{isEn ? "Total:" : "الإجمالي:"}</span>
               <span className="font-semibold text-neutral-900 font-mono">

@@ -6,6 +6,7 @@ import {
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+import { mobilePlanResponseSchema } from "@contracts/mobile/entitlements";
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -21,15 +22,18 @@ export async function GET(request: Request) {
       getMobileEntitlements(session.user.id, access.workspaceId),
     ]);
 
-    return NextResponse.json({
+    const body = mobilePlanResponseSchema.parse({
       plan: entitlements.plan,
       showAds: entitlements.showAds,
       isSuspended: entitlements.isSuspended || context.subscription.isSuspended,
       status: context.subscription.status,
-      expiresAt: context.subscription.expiresAt ?? null,
+      expiresAt: context.subscription.expiresAt
+        ? new Date(context.subscription.expiresAt).toISOString()
+        : null,
       planName: context.plan.name,
       features: context.plan.features,
     });
+    return NextResponse.json(body);
   } catch (error) {
     return mobileErrorResponse(error);
   }

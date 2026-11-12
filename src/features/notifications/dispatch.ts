@@ -10,7 +10,7 @@ import { assertPlanFeature } from "@/features/subscriptions/data";
 import { sendPushToUser } from "@/lib/push";
 import type { AppLocale } from "@/i18n/config";
 import { DEFAULT_LOCALE } from "@/i18n/config";
-import type { RecurringExpenseListItem } from "@/features/recurring-expenses/data";
+import type { RecurringExpenseListItem } from "@/features/recurring-expenses/types";
 import {
   budgetWarningEmail,
   newsletterWelcomeEmail,

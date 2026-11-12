@@ -8,18 +8,17 @@ import { updateInvoiceAction } from "@/features/invoices/actions/update-invoice"
 import type { InvoiceListItem } from "@/features/invoices/types";
 import type { ComboboxClientItem } from "@/features/clients/components/client-combobox";
 import { ClientCombobox } from "@/features/clients/components/client-combobox";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, fromMinorUnits } from "@/lib/money";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 type ProjectOption = { _id: string; name: string; clientId: string };
 
 type ItemRow = {
   id: number;
   description: string;
-  amount: string;
+  quantity: string;
+  unitPrice: string;
 };
-
-const MOBILE_FIELD =
-  "rounded-lg border border-neutral-300 px-3 py-2.5 min-h-11 text-base";
 
 export function EditInvoiceDialog({
   workspaceId,
@@ -52,26 +51,38 @@ export function EditInvoiceDialog({
   const [issueDate, setIssueDate] = useState<string>(invoice.issueDate.slice(0, 10));
   const [dueDate, setDueDate] = useState<string>(invoice.dueDate ? invoice.dueDate.slice(0, 10) : "");
   const [notes, setNotes] = useState<string>(invoice.notes ?? "");
+  const [taxEnabled, setTaxEnabled] = useState(Boolean(invoice.taxEnabled));
+  const [taxRatePercent, setTaxRatePercent] = useState(
+    String(invoice.taxRatePercent || 14),
+  );
 
   const [rows, setRows] = useState<ItemRow[]>(() =>
     invoice.items && invoice.items.length > 0
       ? invoice.items.map((it, idx) => ({
           id: idx + 1,
           description: it.description,
-          amount: (it.amount / 100).toString(),
+          quantity: String(it.quantity ?? 1),
+          unitPrice: String(fromMinorUnits(it.unitPrice ?? it.amount)),
         }))
-      : [{ id: 1, description: "", amount: "" }]
+      : [{ id: 1, description: "", quantity: "1", unitPrice: "" }],
   );
 
   const availableProjects = projects.filter((p) => p.clientId === selectedClientId);
 
-  const totalCalculatedMajor = rows.reduce((sum, r) => {
-    const val = parseFloat(r.amount);
-    return isNaN(val) ? sum : sum + val;
+  const subtotalMajor = rows.reduce((sum, r) => {
+    const qty = parseFloat(r.quantity);
+    const price = parseFloat(r.unitPrice);
+    if (!Number.isFinite(qty) || !Number.isFinite(price)) return sum;
+    return sum + qty * price;
   }, 0);
+  const taxMajor = taxEnabled ? (subtotalMajor * (parseFloat(taxRatePercent) || 0)) / 100 : 0;
+  const totalCalculatedMajor = subtotalMajor + taxMajor;
 
   function addRow() {
-    setRows((current) => [...current, { id: Date.now() + Math.random(), description: "", amount: "" }]);
+    setRows((current) => [
+      ...current,
+      { id: Date.now() + Math.random(), description: "", quantity: "1", unitPrice: "" },
+    ]);
   }
 
   function removeRow(id: number) {
@@ -79,9 +90,9 @@ export function EditInvoiceDialog({
     setRows((current) => current.filter((r) => r.id !== id));
   }
 
-  function updateRow(id: number, field: "description" | "amount", value: string) {
+  function updateRow(id: number, field: keyof ItemRow, value: string) {
     setRows((current) =>
-      current.map((r) => (r.id === id ? { ...r, [field]: value } : r))
+      current.map((r) => (r.id === id ? { ...r, [field]: value } : r)),
     );
   }
 
@@ -96,7 +107,8 @@ export function EditInvoiceDialog({
 
     const parsedItems = rows.map((r) => ({
       description: r.description.trim(),
-      amount: parseFloat(r.amount),
+      quantity: parseFloat(r.quantity),
+      unitPrice: parseFloat(r.unitPrice),
     }));
 
     for (const item of parsedItems) {
@@ -104,7 +116,12 @@ export function EditInvoiceDialog({
         setError(tInvoices("itemDescriptionError"));
         return;
       }
-      if (isNaN(item.amount) || item.amount <= 0) {
+      if (
+        !Number.isFinite(item.quantity) ||
+        item.quantity <= 0 ||
+        !Number.isFinite(item.unitPrice) ||
+        item.unitPrice <= 0
+      ) {
         setError(tInvoices("itemAmountError"));
         return;
       }
@@ -121,6 +138,8 @@ export function EditInvoiceDialog({
           dueDate: dueDate ? new Date(dueDate) : null,
           notes: notes.trim(),
           items: parsedItems,
+          taxEnabled,
+          taxRatePercent: taxEnabled ? parseFloat(taxRatePercent) || 0 : 0,
         });
 
         if (res?.error) {
@@ -227,7 +246,7 @@ export function EditInvoiceDialog({
             {rows.map((row) => (
               <div
                 key={row.id}
-                className="grid gap-2 rounded-lg border border-neutral-200 bg-white/50 p-3 sm:grid-cols-[1fr_140px_auto]"
+                className="grid gap-2 rounded-lg border border-neutral-200 bg-white/50 p-3 sm:grid-cols-[1fr_88px_110px_auto]"
               >
                 <input
                   type="text"
@@ -243,9 +262,22 @@ export function EditInvoiceDialog({
                   enterKeyHint="done"
                   step="0.01"
                   min="0.01"
-                  placeholder="0.00"
-                  value={row.amount}
-                  onChange={(e) => updateRow(row.id, "amount", e.target.value)}
+                  placeholder={tForm("itemQuantity")}
+                  value={row.quantity}
+                  onChange={(e) => updateRow(row.id, "quantity", e.target.value)}
+                  className={`${MOBILE_FIELD} text-left font-mono`}
+                  dir="ltr"
+                  required
+                />
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  enterKeyHint="done"
+                  step="0.01"
+                  min="0.01"
+                  placeholder={tForm("itemUnitPrice")}
+                  value={row.unitPrice}
+                  onChange={(e) => updateRow(row.id, "unitPrice", e.target.value)}
                   className={`${MOBILE_FIELD} text-left font-mono`}
                   dir="ltr"
                   required
@@ -255,7 +287,6 @@ export function EditInvoiceDialog({
                   onClick={() => removeRow(row.id)}
                   disabled={rows.length <= 1}
                   className="self-center min-h-11 rounded-lg border border-neutral-300 px-3 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-100 disabled:opacity-30"
-                  aria-label={tForm("removeItem")}
                 >
                   {tCommon("delete")}
                 </button>
@@ -269,6 +300,43 @@ export function EditInvoiceDialog({
             >
               + {tForm("addItem")}
             </button>
+          </div>
+
+          <div className="rounded-lg border border-neutral-200 p-3">
+            <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-neutral-800">
+              <input
+                type="checkbox"
+                checked={taxEnabled}
+                onChange={(e) => setTaxEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border-neutral-300"
+              />
+              {tForm("enableTax")}
+            </label>
+            {taxEnabled && (
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                inputMode="decimal"
+                value={taxRatePercent}
+                onChange={(e) => setTaxRatePercent(e.target.value)}
+                className={`${MOBILE_FIELD} mt-2 max-w-[140px] text-start font-mono`}
+                aria-label={tForm("taxRate")}
+              />
+            )}
+            <div className="mt-2 space-y-1 text-xs text-neutral-600">
+              <div className="flex justify-between">
+                <span>{tForm("subtotal")}</span>
+                <span className="font-mono">{formatMoney(Math.round(subtotalMajor * 100), { currency })}</span>
+              </div>
+              {taxEnabled && (
+                <div className="flex justify-between">
+                  <span>{tForm("taxAmount")}</span>
+                  <span className="font-mono">{formatMoney(Math.round(taxMajor * 100), { currency })}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Notes */}

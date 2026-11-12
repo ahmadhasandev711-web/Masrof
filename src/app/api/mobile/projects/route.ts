@@ -3,11 +3,12 @@ import { revalidateTag } from "next/cache";
 import { createProjectSchema } from "@/features/projects/schemas";
 import { projectsService } from "@/features/projects/projects.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { requireMobileSession, requireMobileWorkspace } from "@/lib/mobile/session";
+import { toMobileProject } from "@/lib/mobile/serialize";
 import {
-  requireMobileSession,
-  requireMobileWorkspace,
-  serializeId,
-} from "@/lib/mobile/session";
+  mobileProjectCreatedSchema,
+  mobileProjectsListResponseSchema,
+} from "@contracts/mobile/projects";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function GET(request: Request) {
@@ -19,7 +20,10 @@ export async function GET(request: Request) {
   if (access instanceof NextResponse) return access;
 
   const items = await projectsService.listWithTotals(access.workspaceId);
-  return NextResponse.json({ items });
+  const body = mobileProjectsListResponseSchema.parse({
+    items: items.map((item) => toMobileProject(item as Record<string, unknown>)),
+  });
+  return NextResponse.json(body);
 }
 
 export async function POST(request: Request) {
@@ -43,11 +47,7 @@ export async function POST(request: Request) {
 
     revalidateTag(CACHE_TAGS.projects, "max");
     return NextResponse.json(
-      {
-        id: serializeId(result.value._id),
-        name: result.value.name,
-        status: result.value.status,
-      },
+      mobileProjectCreatedSchema.parse(toMobileProject(result.value as Record<string, unknown>)),
       { status: 201 },
     );
   } catch (error) {

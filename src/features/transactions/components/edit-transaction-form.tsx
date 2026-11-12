@@ -7,6 +7,7 @@ import {
 } from "@/features/transactions/actions/update-transaction";
 import { useTranslations } from "next-intl";
 import type { CategoryOption } from "@/features/categories/map-options";
+import { MOBILE_FIELD } from "@/components/ui/mobile-field";
 
 type AccountOption = { id: string; name: string };
 
@@ -96,8 +97,10 @@ export function EditTransactionForm({
             type="number"
             step="0.01"
             min="0.01"
+            inputMode="decimal"
+            enterKeyHint="done"
             defaultValue={transaction.amount}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-sm"
+            className={`${MOBILE_FIELD} bg-white text-right`}
             required
           />
         </div>
@@ -108,7 +111,7 @@ export function EditTransactionForm({
             name="transactionDate"
             type="date"
             defaultValue={transaction.transactionDate}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-sm"
+            className={`${MOBILE_FIELD} bg-white text-right`}
             required
           />
         </div>
@@ -118,7 +121,7 @@ export function EditTransactionForm({
           <select
             name="accountId"
             defaultValue={transaction.accountId}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-sm"
+            className={`${MOBILE_FIELD} bg-white text-right`}
             required
           >
             {accounts.map((account) => (
@@ -134,7 +137,7 @@ export function EditTransactionForm({
           <select
             name="categoryId"
             defaultValue={transaction.categoryId}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-sm"
+            className={`${MOBILE_FIELD} bg-white text-right`}
             required
           >
             {filteredCategories.map((category) => (
@@ -151,7 +154,7 @@ export function EditTransactionForm({
             name="description"
             type="text"
             defaultValue={transaction.description}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-sm"
+            className={`${MOBILE_FIELD} bg-white text-right`}
           />
         </div>
 
@@ -161,7 +164,7 @@ export function EditTransactionForm({
             name="notes"
             rows={2}
             defaultValue={transaction.notes}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-sm"
+            className={`${MOBILE_FIELD} bg-white text-right`}
           />
         </div>
       </div>

@@ -3,19 +3,32 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { recordPaymentSchema } from "@/features/invoices/payment-schemas";
+import { invoicesService } from "@/features/invoices/invoices.service";
 import {
-  recordInvoicePayment,
-  getInvoiceFinancialSummary,
   InvoiceOverpaymentError,
   InvoiceCancelledError,
   AccountCurrencyMismatchError,
-} from "@/features/invoices/payment-data";
+} from "@/features/invoices/invoices.errors";
 import { InvoiceModel } from "@/models/invoice";
 import { InvoicePaymentModel } from "@/models/invoice-payment";
 import { TransactionModel } from "@/models/transaction";
 import { AccountModel } from "@/models/account";
 import { CategoryModel } from "@/models/category";
 import { WorkspaceModel } from "@/models/workspace";
+import type { RecordPaymentInput } from "@/features/invoices/payment-schemas";
+
+function unwrap<T>(result: { ok: true; value: T } | { ok: false; error: Error }): T {
+  if (!result.ok) throw result.error;
+  return result.value;
+}
+
+async function recordInvoicePayment(input: RecordPaymentInput, userId: string) {
+  return unwrap(await invoicesService.recordPayment(userId, input));
+}
+
+function getInvoiceFinancialSummary(invoiceId: string, workspaceId: string) {
+  return invoicesService.getFinancialSummary(invoiceId, workspaceId);
+}
 
 const mockSession = {
   withTransaction: vi.fn(async (cb: () => Promise<void>) => {

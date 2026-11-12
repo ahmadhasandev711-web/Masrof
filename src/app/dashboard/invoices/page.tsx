@@ -2,10 +2,11 @@ import Link from "next/link";
 import { requireSession } from "@/features/auth/session";
 import { getActiveWorkspaceForPage } from "@/features/workspaces/page-gate";
 import { canWorkspaceWrite, getWorkspaceAccess } from "@/features/workspaces/access";
-import { listClientsForWorkspace } from "@/features/clients/data";
-import { listProjectsForWorkspace } from "@/features/projects/data";
-import { listAccountsForWorkspace } from "@/features/accounts/data";
-import { listInvoicesWithFilters } from "@/features/invoices/data";
+import { clientsService } from "@/features/clients/clients.service";
+import { projectsService } from "@/features/projects/projects.service";
+import { accountsService } from "@/features/accounts/accounts.service";
+import { invoicesService } from "@/features/invoices/invoices.service";
+import { invoiceTemplatesService } from "@/features/invoices/invoice-templates.service";
 import { invoiceFiltersSchema } from "@/features/invoices/schemas";
 import { getWorkspacePlanContext } from "@/features/subscriptions/data";
 import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
@@ -76,14 +77,16 @@ export default async function InvoicesPage({
     pageSize: rawParams.pageSize || 20,
   });
 
-  const [clients, projects, accounts, invoicesResult, invoiceCount, invoiceLimit] = await Promise.all([
-    listClientsForWorkspace(workspaceId),
-    listProjectsForWorkspace(workspaceId),
-    listAccountsForWorkspace(workspaceId),
-    listInvoicesWithFilters(filters),
-    countInvoicesCreatedThisMonth(workspaceId),
-    getPlanQuantityLimit(subscription.plan, "maxInvoicesPerMonth"),
-  ]);
+  const [clients, projects, accounts, invoicesResult, invoiceCount, invoiceLimit, templates] =
+    await Promise.all([
+      clientsService.listForWorkspace(workspaceId),
+      projectsService.listForWorkspace(workspaceId),
+      accountsService.listForWorkspace(workspaceId),
+      invoicesService.listWithFilters(filters),
+      countInvoicesCreatedThisMonth(workspaceId),
+      getPlanQuantityLimit(subscription.plan, "maxInvoicesPerMonth"),
+      invoiceTemplatesService.listForWorkspace(workspaceId),
+    ]);
 
   const usage = toQuantityUsage(invoiceCount, invoiceLimit);
 
@@ -120,6 +123,7 @@ export default async function InvoicesPage({
               workspaceId={workspaceId}
               clients={clientComboboxItems}
               projects={projectOptions}
+              templates={templates}
               defaultClientId={rawParams.clientId}
               defaultProjectId={rawParams.projectId}
               canWrite={canWrite}
