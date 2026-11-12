@@ -2,13 +2,17 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { PostModel } from "@/models/post";
 import { isAppLocale, LOCALE_COOKIE, type AppLocale } from "./config";
 
-export async function setLocaleAction(locale: AppLocale, pathname?: string) {
-  if (!isAppLocale(locale)) return;
+export type SetLocaleResult = { redirectTo?: string };
+
+export async function setLocaleAction(
+  locale: AppLocale,
+  pathname?: string,
+): Promise<SetLocaleResult> {
+  if (!isAppLocale(locale)) return {};
 
   const jar = await cookies();
   jar.set(LOCALE_COOKIE, locale, {
@@ -23,9 +27,11 @@ export async function setLocaleAction(locale: AppLocale, pathname?: string) {
     await connectToDatabase();
     const exists = await PostModel.exists({ slug, locale, isPublished: true });
     if (!exists) {
-      redirect("/blog");
+      revalidatePath("/", "layout");
+      return { redirectTo: "/blog" };
     }
   }
 
   revalidatePath("/", "layout");
+  return {};
 }

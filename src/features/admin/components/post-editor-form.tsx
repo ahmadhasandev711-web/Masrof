@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
@@ -28,7 +28,7 @@ type PostFormValues = {
   tags?: string[];
 };
 
-const initialState: PostActionState = { error: null };
+const initialState: PostActionState = { error: null, redirectTo: null };
 
 export function PostEditorForm({ post }: { post?: PostFormValues }) {
   const t = useTranslations("admin.posts");
@@ -43,6 +43,11 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(post?.slug));
   const categories = useMemo(() => getBlogCategories(locale), [locale]);
+
+  useEffect(() => {
+    if (!state.redirectTo) return;
+    window.location.assign(state.redirectTo);
+  }, [state.redirectTo]);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">

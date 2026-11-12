@@ -2,8 +2,8 @@ import "server-only";
 
 import { cache } from "react";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { auth, type Session } from "@/lib/auth";
+import { hostSafeRedirect } from "@/lib/navigation/host-safe-redirect";
 
 /**
  * Reads the current session from better-auth.
@@ -29,7 +29,7 @@ export async function requireSession(): Promise<Session> {
   const session = await getCurrentSession();
 
   if (!session) {
-    redirect("/login");
+    hostSafeRedirect("/login");
   }
 
   return session;

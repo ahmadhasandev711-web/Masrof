@@ -1,9 +1,9 @@
 import "server-only";
 
-import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
 import { requireSession } from "@/features/auth/session";
 import type { Session } from "@/lib/auth";
+import { hostSafeRedirect } from "@/lib/navigation/host-safe-redirect";
 
 export function getAdminEmails(): string[] {
   return (env.ADMIN_EMAILS ?? "")
@@ -20,7 +20,7 @@ export async function requireAdmin(): Promise<Session> {
   const session = await requireSession();
 
   if (!isAdminEmail(session.user.email)) {
-    redirect("/dashboard");
+    hostSafeRedirect("/dashboard");
   }
 
   return session;

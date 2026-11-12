@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
 const SESSION_COOKIE_OPTIONS = {
@@ -11,7 +10,9 @@ const SESSION_COOKIE_OPTIONS = {
   maxAge: 0,
 };
 
-export async function signOutAction() {
+export type SignOutResult = { ok: true };
+
+export async function signOutAction(): Promise<SignOutResult> {
   try {
     const headerStore = await headers();
     await auth.api.signOut({
@@ -36,5 +37,7 @@ export async function signOutAction() {
     });
   }
 
-  redirect("/login");
+  // Do not call next/navigation redirect — Hostinger reverse proxy breaks
+  // Next's internal redirect fetch. Client navigates with window.location.
+  return { ok: true };
 }
