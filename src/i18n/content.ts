@@ -3,6 +3,7 @@ import "server-only";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { HomepageContent, HomepageStep } from "@/features/marketing/content/defaults";
 import { getHomepageContent } from "@/features/marketing/content/data";
+import { proPricePhrase } from "@/features/subscriptions/pro-pricing";
 import type { AppLocale } from "./config";
 
 export async function getLocalizedHomepageContent(): Promise<HomepageContent> {
@@ -37,6 +38,12 @@ export async function getLocalizedHomepageContent(): Promise<HomepageContent> {
 export type FaqItem = { question: string; answer: string };
 
 export async function getLocalizedFaqItems(): Promise<FaqItem[]> {
+  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("faq");
-  return t.raw("items") as FaqItem[];
+  const proPrice = proPricePhrase(locale === "en" ? "en" : "ar");
+  const items = t.raw("items") as FaqItem[];
+  return items.map((item) => ({
+    question: item.question,
+    answer: item.answer.replaceAll("{proPrice}", proPrice),
+  }));
 }

@@ -36,7 +36,7 @@ describe("plan feature gates (freemium v8)", () => {
     expect(DEFAULT_PLAN_FLAGS.pro.savingsGoals).toBe(true);
   });
 
-  it("caps Free quantities and sets Pro to 250 EGP/year", () => {
+  it("caps Free quantities and sets Pro yearly billing to 2,500 EGP", () => {
     expect(DEFAULT_PLAN_CONFIGS.free.maxWorkspaces).toBe(1);
     expect(DEFAULT_PLAN_CONFIGS.free.maxInvoicesPerMonth).toBe(3);
     expect(DEFAULT_PLAN_CONFIGS.free.maxClients).toBe(5);
@@ -48,6 +48,6 @@ describe("plan feature gates (freemium v8)", () => {
     expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxInvoicesPerMonth)).toBe(true);
     expect(isUnlimitedQuantity(DEFAULT_PLAN_CONFIGS.pro.maxClients)).toBe(true);
     expect(DEFAULT_PLAN_CONFIGS.pro.maxMembers).toBe(5);
-    expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(250);
+    expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(2_500);
   });
 });

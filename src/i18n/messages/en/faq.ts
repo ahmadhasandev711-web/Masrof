@@ -9,7 +9,7 @@ const faq = {
  {
  question: "How does Sanadat pricing work?",
  answer:
- "Sanadat offers a free forever plan that includes one workspace, up to 3 invoices per month, 5 clients, and 2 active projects. The Pro plan gives you unlimited invoices, clients, projects, team of up to 5 members, and advanced reports for only 250 EGP/year.",
+ "Sanadat offers a free forever plan that includes one workspace, up to 3 invoices per month, 5 clients, and 2 active projects. The Pro plan gives you unlimited invoices, clients, projects, a team of up to 5 members, and advanced reports. Price: {proPrice}.",
  },
  {
  question: "How does Sanadat protect my financial data?",

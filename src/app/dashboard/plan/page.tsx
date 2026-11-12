@@ -12,6 +12,7 @@ import { getDateLocale } from "@/i18n/dates";
 import type { AppLocale } from "@/i18n/config";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getLocalizedPlan, getLocalizedPlanLabel } from "@/i18n/plans-localized";
+import { proPricePhrase } from "@/features/subscriptions/pro-pricing";
 
 function statusLabel(status: string, isSuspended: boolean, tCore: (key: "active" | "suspended" | "cancelled") => string) {
   if (isSuspended) return { text: tCore("suspended"), className: "text-red-600" };
@@ -122,7 +123,9 @@ export default async function MyPlanPage() {
       {subscription.plan === "free" && (
         <section className="rounded-2xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-6">
           <h2 className="font-semibold text-[#065F46]">{tDashboard("upgradeSection")}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[#1C1B1A]/70">{tDashboard("upgradeDescription")}</p>
+          <p className="mt-2 text-sm leading-relaxed text-[#1C1B1A]/70">
+            {tDashboard("upgradeDescription", { proPrice: proPricePhrase(locale === "en" ? "en" : "ar") })}
+          </p>
           <p className="mt-2 text-sm text-[#1C1B1A]/60">{tDashboard("upgradePaymentNote")}</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link

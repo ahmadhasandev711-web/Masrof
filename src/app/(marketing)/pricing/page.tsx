@@ -3,13 +3,15 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getAllLocalizedPlans } from "@/i18n/plans-localized";
 import { PricingTableClient } from "@/features/marketing/components/pricing-table-client";
 import { getSupportConfig } from "@/lib/support";
+import { proPricePhrase } from "@/features/subscriptions/pro-pricing";
 import type { AppLocale } from "@/i18n/config";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("plans.pricing");
   return {
     title: t("metaTitle"),
-    description: t("subtitle"),
+    description: t("subtitle", { proPrice: proPricePhrase(locale === "en" ? "en" : "ar") }),
   };
 }
 
@@ -37,7 +39,7 @@ export default async function PricingPage() {
           {tPricing("title")}
         </h1>
         <p className="mt-3 text-base sm:text-lg text-neutral-600 max-w-2xl mx-auto">
-          {tPricing("subtitle")}
+          {tPricing("subtitle", { proPrice: proPricePhrase(isArabic ? "ar" : "en") })}
         </p>
       </div>
 

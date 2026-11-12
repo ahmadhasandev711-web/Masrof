@@ -201,8 +201,8 @@ const homepage = {
  pro: {
  name: "Pro plan",
  price: "250",
- period: "EGP / year",
- yearlyOption: "Complete annual plan (250 EGP / yr)",
+ period: "EGP / month",
+ yearlyOption: "Billed yearly: 2,500 EGP or $50 · 2 months free",
  desc: "For agencies, studios, and freelancers who need complete, unlimited financial power and zero ads.",
  cta: "Upgrade to Pro now",
  features: [

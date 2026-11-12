@@ -25,8 +25,8 @@ describe("Single Workspace Policy & Team Exclusivity", () => {
     expect(toQuantityUsage(0, freeMax).atLimit).toBe(false);
   });
 
-  it("confirms Pro plan pricing is annual at 250 EGP with team capacity of 5", () => {
-    expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(250);
+  it("confirms Pro plan is billed yearly at 2,500 EGP with team capacity of 5", () => {
+    expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(2_500);
     expect(DEFAULT_PLAN_CONFIGS.pro.maxMembers).toBe(5);
     expect(DEFAULT_PLAN_CONFIGS.free.maxMembers).toBe(1);
   });

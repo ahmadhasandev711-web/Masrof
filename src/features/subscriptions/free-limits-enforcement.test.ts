@@ -118,9 +118,9 @@ describe("Strict Free Plan Limits Enforcement", () => {
     });
   });
 
-  describe("5. Pro Features & Yearly Pricing (250 EGP/year)", () => {
-    it("Pro price is exactly 250 EGP/year", () => {
-      expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(250);
+  describe("5. Pro Features & Yearly Pricing (2,500 EGP/year)", () => {
+    it("Pro is billed at 2,500 EGP/year", () => {
+      expect(DEFAULT_PLAN_CONFIGS.pro.priceYearly).toBe(2_500);
     });
 
     it("Free plan restricts budgets, recurring expenses, and savings goals to Pro", () => {

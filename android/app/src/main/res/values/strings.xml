@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">سندات | Sanadat</string>
-    <string name="title_activity_main">سندات | Sanadat</string>
-    <string name="package_name">site.sanadat.app</string>
-    <string name="custom_url_scheme">site.sanadat.app</string>
-</resources>

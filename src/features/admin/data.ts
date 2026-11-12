@@ -21,6 +21,7 @@ export async function getPostById(id: string) {
 
 import { type PlanId } from "@/features/subscriptions/plans";
 import { getPlanConfig } from "@/features/subscriptions/plan-config-data";
+import { PRO_YEARLY_EGP } from "@/features/subscriptions/pro-pricing";
 
 export type AdminStats = {
   workspacesTotal: number;
@@ -94,7 +95,7 @@ export async function getAdminStats(): Promise<AdminStats> {
 
   const gtvMinor = invoiceTotalAgg[0]?.totalMinor ?? 0;
   const proConfig = await getPlanConfig("pro");
-  const proYearlyEgp = proConfig.priceYearly ?? 250;
+  const proYearlyEgp = proConfig.priceYearly ?? PRO_YEARLY_EGP;
   const mrrEgp = Math.round((proUsersTotal * proYearlyEgp) / 12);
   const conversionRate = usersTotal > 0 ? Math.round((proUsersTotal / usersTotal) * 1000) / 10 : 0;
 

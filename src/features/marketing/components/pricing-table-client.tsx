@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { LocalizedPlan } from "@/i18n/plans-localized";
+import { proHomepageYearlyLine } from "@/features/subscriptions/pro-pricing";
 
 export interface PricingTableProps {
   freePlan: LocalizedPlan;
@@ -256,9 +257,7 @@ export function PricingTableClient({
             </div>
 
             <p className="mt-1 text-xs font-semibold text-emerald-700">
-              {isArabic
-                ? "٢٥٠ ج.م سنوياً فقط لكل ميزات النظام والفريق"
-                : "250 EGP / year for all system & team features"}
+              {proHomepageYearlyLine(isArabic ? "ar" : "en")}
             </p>
 
             <p className="mt-4 text-sm text-neutral-700 leading-relaxed">

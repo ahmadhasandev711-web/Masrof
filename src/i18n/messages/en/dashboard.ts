@@ -86,7 +86,7 @@ const dashboard = {
  "Save your number to open WhatsApp with a ready-made message for recurring expenses. Client payment reminders use the client's number from the Clients list.",
  upgradeSection: "Upgrade your plan",
  upgradeDescription:
- "Pro is $5/month (or $48/year): ad-free, higher limits, team, OCR, advanced reports, and exports.",
+ "Pro: {proPrice}. Ad-free, higher limits, team, OCR, advanced reports, and exports.",
  upgradePaymentNote: "Online payment is being prepared — contact us for manual upgrades for now.",
  viewPricing: "View pricing",
  whatsappUpgrade: "WhatsApp to upgrade",

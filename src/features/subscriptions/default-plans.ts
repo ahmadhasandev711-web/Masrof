@@ -1,4 +1,11 @@
 import { PLAN_IDS, type PlanId } from "@/features/subscriptions/plans";
+import {
+  PRO_MONTHLY_EGP,
+  PRO_YEARLY_EGP,
+  formatBillingAmount,
+  proMonthlyPeriod,
+  proPricePhrase,
+} from "@/features/subscriptions/pro-pricing";
 
 export type PlanFlags = {
   csvExport: boolean;
@@ -60,8 +67,8 @@ export type PlanConfigDocument = {
   updatedBy?: string | null;
 };
 
-/** Freemium model v8: Single workspace, Free (3 inv/5 cli/2 proj), Pro 250 EGP/yr (team 5, budgets/recurring/savings Pro only). */
-export const PLAN_LIMITS_VERSION = 8;
+/** Freemium model v10: Pro is 250 EGP/month or $5/month, billed yearly at 2,500 EGP or $50. */
+export const PLAN_LIMITS_VERSION = 10;
 
 export const PLAN_FLAG_KEYS = [
   "csvExport",
@@ -187,7 +194,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
   },
   pro: {
     planId: "pro",
-    priceYearly: 250,
+    priceYearly: PRO_YEARLY_EGP,
     maxWorkspaces: 1,
     maxMembers: 5,
     maxInvoicesPerMonth: UNLIMITED,
@@ -201,10 +208,10 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
     sortOrder: 1,
     nameAr: "سندات برو",
     nameEn: "Pro",
-    priceDisplayAr: "٢٥٠",
-    priceDisplayEn: "250",
-    periodDisplayAr: "ج.م / سنة",
-    periodDisplayEn: "EGP / year",
+    priceDisplayAr: formatBillingAmount(PRO_MONTHLY_EGP, "ar"),
+    priceDisplayEn: formatBillingAmount(PRO_MONTHLY_EGP, "en"),
+    periodDisplayAr: proMonthlyPeriod("EGP", "ar"),
+    periodDisplayEn: proMonthlyPeriod("EGP", "en"),
     descriptionAr: "منظومة مالية متكاملة بدون إعلانات وبلا حدود — للمستقلين، المكاتب، والشركات النشطة.",
     descriptionEn: "Complete, ad-free financial system with no limits — built for freelancers, agencies, and growing businesses.",
     featuresAr: [
@@ -215,7 +222,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
       "OCR قراءة الإيصالات الذكية والتصنيف الآلي",
       "تصدير البيانات المتقدم (CSV, Excel, PDF)",
       "إدارة الديون والأقساط والالتزامات",
-      "٢٥٠ ج.م سنوياً فقط",
+      proPricePhrase("ar"),
     ],
     featuresEn: [
       "100% Ad-free experience",
@@ -225,7 +232,7 @@ export const DEFAULT_PLAN_CONFIGS: Record<PlanId, Omit<PlanConfigDocument, "upda
       "Smart receipt OCR & automated AI categorization",
       "Complete export suite (CSV, Excel & PDF)",
       "Debts & loan installment tracking",
-      "250 EGP / year",
+      proPricePhrase("en"),
     ],
     ctaAr: "الترقية إلى برو",
     ctaEn: "Upgrade to Pro",

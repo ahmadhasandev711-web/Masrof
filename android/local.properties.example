@@ -1,3 +1,0 @@
-# Copy to local.properties (gitignored). Use forward slashes on Windows.
-# Prefer D: if C: is low on space.
-sdk.dir=D:/Android/Sdk
