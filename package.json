@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1106.0",
+    "@better-auth/expo": "^1.7.22",
     "@fontsource/cairo": "^5.2.7",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/markazi-text": "^5.2.9",

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { validationErrorCode } from "@/lib/mobile/validation";
 import { revalidateTag } from "next/cache";
 import { recordPaymentSchema } from "@/features/invoices/payment-schemas";
 import { invoicesService } from "@/features/invoices/invoices.service";
@@ -17,7 +18,8 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const parsed = recordPaymentSchema(() => "invalid").safeParse({
+    // Identity translator: the issue message is the `validation.*` key the app translates.
+    const parsed = recordPaymentSchema((key) => key).safeParse({
       workspaceId: body.workspaceId,
       invoiceId: body.invoiceId,
       accountId: body.accountId,
@@ -31,7 +33,10 @@ export async function POST(request: Request) {
     });
 
     if (!parsed.success) {
-      return NextResponse.json({ error: "invalidData" }, { status: 400 });
+      return NextResponse.json(
+        { error: validationErrorCode(parsed.error) },
+        { status: 400 },
+      );
     }
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");

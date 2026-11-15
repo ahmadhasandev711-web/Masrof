@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { validationErrorCode } from "@/lib/mobile/validation";
 import { revalidateTag } from "next/cache";
 import { createCategorySchema } from "@/features/categories/schemas";
 import { categoriesService } from "@/features/categories/categories.service";
@@ -9,7 +10,9 @@ import { toMobileCategory } from "@/lib/mobile/serialize";
 import {
   mobileCategoriesListResponseSchema,
   mobileCategoryCreatedSchema,
+  mobileCategoryPatchBodySchema,
 } from "@contracts/mobile/categories";
+import { mobileOkSchema } from "@contracts/mobile/common";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 import { resolveCategoryLabel } from "@/features/categories/labels";
 import type { AppLocale } from "@/i18n/config";
@@ -52,9 +55,13 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const parsed = createCategorySchema(() => "invalid").safeParse(body);
+    // Identity translator: the issue message is the `validation.*` key the app translates.
+    const parsed = createCategorySchema((key) => key).safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "invalidData" }, { status: 400 });
+      return NextResponse.json(
+        { error: validationErrorCode(parsed.error) },
+        { status: 400 },
+      );
     }
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
@@ -70,6 +77,29 @@ export async function POST(request: Request) {
       mobileCategoryCreatedSchema.parse(toMobileCategory(result.value)),
       { status: 201 },
     );
+  } catch (error) {
+    return thrownToMobileResponse(error);
+  }
+}
+
+export async function PATCH(request: Request) {
+  const session = await requireMobileSession(request);
+  if (session instanceof NextResponse) return session;
+
+  try {
+    const parsed = mobileCategoryPatchBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "invalidData" }, { status: 400 });
+    }
+
+    const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
+    if (access instanceof NextResponse) return access;
+
+    const result = await categoriesService.archive(parsed.data.categoryId, access.workspaceId);
+    if (!result.ok) return resultToResponse(result);
+
+    revalidateTag(CACHE_TAGS.categories, "max");
+    return NextResponse.json(mobileOkSchema.parse({ ok: true }));
   } catch (error) {
     return thrownToMobileResponse(error);
   }

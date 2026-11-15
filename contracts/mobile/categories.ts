@@ -25,3 +25,11 @@ export const mobileCategoryCreatedSchema = z.object({
 });
 
 export type MobileCategoryCreated = z.infer<typeof mobileCategoryCreatedSchema>;
+
+/** PATCH /api/mobile/categories — same `categoriesService.archive` the web uses (custom categories only). */
+export const mobileCategoryPatchBodySchema = z.object({
+  action: z.literal("archive"),
+  workspaceId: z.string().min(1),
+  categoryId: z.string().min(1),
+});
+export type MobileCategoryPatchBody = z.infer<typeof mobileCategoryPatchBodySchema>;

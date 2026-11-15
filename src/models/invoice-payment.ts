@@ -1,13 +1,8 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 
-export const PAYMENT_METHODS = [
-  "cash",
-  "bank_transfer",
-  "card",
-  "check",
-  "other",
-] as const;
-export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+import { PAYMENT_METHODS, type PaymentMethod } from "@contracts/shared/invoices";
+
+export { PAYMENT_METHODS, type PaymentMethod };
 
 const invoicePaymentSchema = new Schema(
   {

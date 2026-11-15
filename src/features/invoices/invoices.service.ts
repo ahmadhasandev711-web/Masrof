@@ -205,6 +205,10 @@ export class InvoicesService {
     return this.repo.getFinancialSummary(invoiceId, workspaceId);
   }
 
+  getListItem(invoiceId: string, workspaceId: string) {
+    return this.repo.getListItem(invoiceId, workspaceId);
+  }
+
   listForWorkspace(workspaceId: string) {
     return this.repo.listForWorkspace(workspaceId);
   }

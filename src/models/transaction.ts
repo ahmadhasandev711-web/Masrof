@@ -1,7 +1,8 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 
-export const TRANSACTION_TYPES = ["income", "expense"] as const;
-export type TransactionType = (typeof TRANSACTION_TYPES)[number];
+import { TRANSACTION_TYPES, type TransactionType } from "@contracts/shared/constants";
+
+export { TRANSACTION_TYPES, type TransactionType };
 
 /**
  * `amount` is ALWAYS stored as a positive integer in minor currency units.

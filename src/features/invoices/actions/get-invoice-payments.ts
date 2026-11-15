@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { invoicesService } from "@/features/invoices/invoices.service";
 import { requireSession } from "@/features/auth/session";
 import { verifyWorkspaceAccess } from "@/features/workspaces/access";
@@ -16,6 +17,7 @@ export async function getInvoicePaymentsAction(
     const payments = await invoicesService.listPayments(invoiceId, workspaceId);
     return { payments, error: null };
   } catch {
-    return { payments: [], error: "Failed to load payments" };
+    const tErrors = await getTranslations("errors");
+    return { payments: [], error: tErrors("paymentsLoadFailed") };
   }
 }

@@ -1,9 +1,2 @@
-import type { WorkspaceRole } from "@/models/workspace-membership";
-
-export function isWorkspaceOwner(role: WorkspaceRole): boolean {
-  return role === "owner";
-}
-
-export function canWorkspaceWrite(role: WorkspaceRole): boolean {
-  return role !== "viewer";
-}
+/** Role rules live in `contracts/shared/constants` (shared with the mobile app). */
+export { isWorkspaceOwner, canWorkspaceWrite } from "@contracts/shared/constants";

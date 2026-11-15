@@ -527,6 +527,24 @@ export class InvoicesRepository {
     };
   }
 
+  /** One invoice in the same shape as a list row (totals, paid, display status). */
+  async getListItem(invoiceId: string, workspaceId: string): Promise<InvoiceListItem | null> {
+    if (
+      !mongoose.Types.ObjectId.isValid(invoiceId) ||
+      !mongoose.Types.ObjectId.isValid(workspaceId)
+    ) {
+      return null;
+    }
+    await connectToDatabase();
+    const invoice = await InvoiceModel.findOne({ _id: invoiceId, workspaceId, isArchived: false })
+      .populate("clientId", "name phone")
+      .populate("projectId", "name")
+      .lean();
+    if (!invoice) return null;
+    const paid = await this.sumPaymentsForInvoice(invoice._id, workspaceId);
+    return toPlain(mapInvoiceListItem(invoice, paid));
+  }
+
   async listWithFilters(filters: InvoiceFilters): Promise<{
     items: InvoiceListItem[];
     total: number;

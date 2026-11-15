@@ -7,12 +7,11 @@ import {
   createAccountAction,
   type CreateAccountState,
 } from "@/features/accounts/actions/create-account";
-import { MOBILE_WALLET_PRESETS } from "@/features/accounts/wallet-presets";
+import { ACCOUNT_TYPES, MOBILE_WALLET_PRESETS } from "@contracts/shared/constants";
 import { CURRENCY_LABELS } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/currency/constants";
 import { useTranslations } from "next-intl";
 
-const ACCOUNT_TYPE_VALUES = ["cash", "bank", "mobile_wallet", "credit_card", "savings", "other"] as const;
 
 const initialState: CreateAccountState = { error: null };
 
@@ -131,7 +130,7 @@ export function CreateAccountForm({
             onChange={(e) => setAccountType(e.target.value)}
             className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
           >
-            {ACCOUNT_TYPE_VALUES.map((value) => (
+            {ACCOUNT_TYPES.map((value) => (
               <option key={value} value={value}>
                 {tAccountType(value)}
               </option>

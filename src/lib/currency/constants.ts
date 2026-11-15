@@ -1,5 +1,6 @@
-export const SUPPORTED_CURRENCIES = ["EGP", "USD", "EUR", "SAR", "AED"] as const;
-export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
+import { SUPPORTED_CURRENCIES, type SupportedCurrency } from "@contracts/shared/constants";
+
+export { SUPPORTED_CURRENCIES, type SupportedCurrency };
 
 export const CURRENCY_LABELS: Record<SupportedCurrency, string> = {
   EGP: "جنيه مصري",

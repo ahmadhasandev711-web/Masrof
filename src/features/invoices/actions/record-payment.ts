@@ -25,7 +25,7 @@ export async function recordInvoicePaymentAction(
   const tValidation = await getTranslations("validation");
   const tErrors = await getTranslations("errors");
 
-  const parsed = recordPaymentSchema(tValidation as any).safeParse({
+  const parsed = recordPaymentSchema(tValidation).safeParse({
     workspaceId: formData.get("workspaceId"),
     invoiceId: formData.get("invoiceId"),
     accountId: formData.get("accountId"),

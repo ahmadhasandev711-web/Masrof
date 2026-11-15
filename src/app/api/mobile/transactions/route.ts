@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { validationErrorCode } from "@/lib/mobile/validation";
 import { transactionsService } from "@/features/transactions/transactions.service";
 import {
   createTransactionSchema,
@@ -53,9 +54,13 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const parsed = createTransactionSchema(() => "invalid").safeParse(body);
+    // Identity translator: the issue message is the `validation.*` key the app translates.
+    const parsed = createTransactionSchema((key) => key).safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "invalidData" }, { status: 400 });
+      return NextResponse.json(
+        { error: validationErrorCode(parsed.error) },
+        { status: 400 },
+      );
     }
 
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");

@@ -183,6 +183,11 @@ export function toMobileInvoice(item: Record<string, unknown>): MobileInvoice {
       item.financialStatus != null ? String(item.financialStatus) : undefined,
     projectId: item.projectId == null ? null : asId(item.projectId),
     projectName: (item.projectName as string | null | undefined) ?? null,
+    displayStatus: item.displayStatus != null ? String(item.displayStatus) : undefined,
+    notes: typeof item.notes === "string" ? item.notes : undefined,
+    clientPhone: (item.clientPhone as string | null | undefined) ?? null,
+    shareToken: (item.shareToken as string | null | undefined) ?? null,
+    isShareable: typeof item.isShareable === "boolean" ? item.isShareable : undefined,
   };
 }
 

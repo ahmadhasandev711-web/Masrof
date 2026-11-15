@@ -1,15 +1,9 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 import { SUPPORTED_CURRENCIES } from "@/lib/currency/constants";
 
-export const ACCOUNT_TYPES = [
-  "cash",
-  "bank",
-  "mobile_wallet",
-  "credit_card",
-  "savings",
-  "other",
-] as const;
-export type AccountType = (typeof ACCOUNT_TYPES)[number];
+import { ACCOUNT_TYPES, type AccountType } from "@contracts/shared/constants";
+
+export { ACCOUNT_TYPES, type AccountType };
 
 const accountSchema = new Schema(
   {

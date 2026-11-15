@@ -1,8 +1,9 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 import { WORKSPACE_TYPES } from "@/models/workspace";
 
-export const CATEGORY_KINDS = ["income", "expense"] as const;
-export type CategoryKind = (typeof CATEGORY_KINDS)[number];
+import { CATEGORY_KINDS, type CategoryKind } from "@contracts/shared/constants";
+
+export { CATEGORY_KINDS, type CategoryKind };
 
 /**
  * CATEGORY ARCHITECTURE (analyzed before implementation):

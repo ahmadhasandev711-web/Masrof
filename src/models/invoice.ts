@@ -1,7 +1,8 @@
 import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
 
-export const INVOICE_STATUSES = ["draft", "sent", "paid", "cancelled"] as const;
-export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
+import { INVOICE_STATUSES, type InvoiceStatus } from "@contracts/shared/invoices";
+
+export { INVOICE_STATUSES, type InvoiceStatus };
 
 const invoiceItemSchema = new Schema(
   {

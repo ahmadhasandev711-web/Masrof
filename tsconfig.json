@@ -22,7 +22,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@contracts/mobile": ["./contracts/mobile/index.ts"],
-      "@contracts/mobile/*": ["./contracts/mobile/*"]
+      "@contracts/mobile/*": ["./contracts/mobile/*"],
+      "@contracts/shared": ["./contracts/shared/index.ts"],
+      "@contracts/shared/*": ["./contracts/shared/*"]
     }
   },
   "include": [
