@@ -1,0 +1,59 @@
+---
+description: Sanadat — rules for every task in the web and mobile repos
+alwaysApply: true
+---
+
+# Sanadat (سندات) — rules for every task
+
+Two repos, one product:
+- **Web** `sanadat/` — Next.js 16, mongoose, next-intl. The source of truth for every business rule.
+- **Mobile** `sanadat-mobile/` — Expo SDK 58, expo-router, React Query. Same features, same logic, store app.
+
+## 1. One logic, owned by the web
+- Business rules live in web services: `src/features/<module>/<module>.service.ts` → `<module>.repository.ts`.
+  The mobile app never re-implements a rule. It calls `/api/mobile/*`, and that route calls the **same service** the web server action calls.
+- Shared code lives in the web repo:
+  - `contracts/shared` — enums, money, zod input schemas, label resolvers.
+  - `contracts/mobile` — API request/response schemas + `registry.ts` (add an entry for every new route/method).
+  Edit them **only in the web repo**, then run `npm run sync:contract` in `sanadat-mobile`. Never hand-edit `sanadat-mobile/contracts/**`.
+- Validation schemas are factories that take a translator:
+  web actions pass `getTranslations("validation")`; mobile routes pass identity `(key) => key` and answer
+  `{ error: validationErrorCode(zodError) }` (`@/lib/mobile/validation`); the app turns it back into text with `validationTranslator(locale)`.
+- Services return `ok(...)` / `err(AppError)`. An error's `code` is a key of the web `errors.*` messages.
+  New keys go in **both** `src/i18n/messages/ar/core.ts` and `en/core.ts` (those files use 1-space indentation — keep it).
+  Mobile routes return service errors with `resultToResponse(result)`; thrown errors with `thrownToMobileResponse(error)`.
+- **Money** is stored as integer minor units. Forms send major numbers (500.75); the repository converts with `toMinorUnits`.
+  Display with `formatMoney(minor, …)`; prefill a form with `fromMinorUnits(minor)`.
+- Anything that moves money (account `cachedBalance`, invoice paid status) runs inside `runInTransaction` and uses `$inc` — never read-modify-write.
+- Write access: web `runWorkspaceWrite(workspaceId, …)`; mobile `requireMobileWorkspace(userId, workspaceId, "write")`;
+  UIs show write actions only when `canWorkspaceWrite(role)`.
+- Plan gates (`requirePlanFeature`, `requireQuantityLimit`) belong in services, never only in UI.
+- After a web write: `revalidateTag(CACHE_TAGS.<x>, "max")` + `revalidatePath(...)` (copy the neighbouring action).
+  After a mobile write: `qc.invalidateQueries` for **every** query the change affects (accounts, dashboard, transactions, invoices, clients, projects…).
+
+## 2. Web UI
+- Copy the patterns already in the module: server components for lists, small `"use client"` components for buttons/dialogs,
+  `Modal` from `@/components/ui/modal`, `MOBILE_FIELD` for inputs, `useActionState` for forms with `{ error, success }` state.
+- All text through `useTranslations` / `getTranslations`. No hard-coded strings.
+
+## 3. Mobile UI
+- Use `@/shared/ui`: `Screen` (`inStack` for stack screens), `Row`, `ListSection`, `Field`, `AmountInput` + `parseAmount`,
+  `SelectChips`, `Segmented`, `PrimaryButton`, `SecondaryButton` (`tone="danger"` for delete), `ActionSheet`, `FormError`,
+  `EmptyBlock`, `ErrorBlock`, `LoadingBlock`, `Pill`, `Amount`. Don't create new primitives when one exists.
+  Styles via `makeStyles` / `useTheme`; no hard-coded colours.
+- Text: `const { t, w, locale } = useLocale()`. Prefer `w.*` (the web's own strings, synced) for anything the web already words.
+  `fmt(template, vars)` fills `{placeholders}`. Never hard-code text.
+- RTL is owned by the app (`DirectionRoot`). Never touch `I18nManager`; never fake RTL with `row-reverse`.
+- Android `Alert` shows at most 3 buttons → use `ActionSheet` for menus.
+- Routes are files in `app/(app)/…` (there is **no** `src/app`). A route file only re-exports a screen from `features/<module>`.
+  Give it a title in `app/(app)/_layout.tsx` using `w.*`. For typed routes, add the new path to `.expo/types/router.d.ts`
+  next to its neighbours (four places: input object, output object, href string, plain path union).
+- API calls only through `mobileApi` in `shared/api/mobile.ts`.
+
+## 4. Workflow
+- Stay inside the task. No refactors, renames or "improvements" outside it. No new dependencies.
+- **Do not commit, push or switch branches.** Leave changes uncommitted for review.
+- Before you finish:
+  - web: `npx tsc --noEmit` and `npm test` — both pass;
+  - mobile: `npm run sync:contract` (if contracts changed), then `npx tsc --noEmit` — passes.
+- End with a short report **in Egyptian Arabic**: files changed, decisions you made, anything you were unsure of, manual test steps.
