@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { validationErrorCode } from "@/lib/mobile/validation";
 import { revalidateTag } from "next/cache";
-import { createAccountSchema } from "@/features/accounts/schemas";
+import { createAccountSchema, createUpdateAccountSchema } from "@/features/accounts/schemas";
 import { accountsService } from "@/features/accounts/accounts.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { SupportedCurrency } from "@/models/workspace";
@@ -81,8 +81,23 @@ export async function PATCH(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const result = await accountsService.archive(parsed.data.accountId, access.workspaceId);
-    if (!result.ok) return resultToResponse(result);
+    if (parsed.data.action === "update") {
+      const input = createUpdateAccountSchema((key) => key).safeParse({
+        ...parsed.data,
+        workspaceId: access.workspaceId,
+      });
+      if (!input.success) {
+        return NextResponse.json({ error: validationErrorCode(input.error) }, { status: 400 });
+      }
+      const result = await accountsService.update(input.data.accountId, access.workspaceId, {
+        name: input.data.name,
+        openingBalance: input.data.openingBalance,
+      });
+      if (!result.ok) return resultToResponse(result);
+    } else {
+      const result = await accountsService.archive(parsed.data.accountId, access.workspaceId);
+      if (!result.ok) return resultToResponse(result);
+    }
 
     revalidateTag(CACHE_TAGS.accounts, "max");
     return NextResponse.json(mobileOkSchema.parse({ ok: true }));

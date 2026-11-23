@@ -31,11 +31,23 @@ export function createAccountSchema(t: (key: AccountValidationKey) => string) {
   });
 }
 
-export const updateAccountSchema = z.object({
-  accountId: z.string().min(1),
-  workspaceId: z.string().min(1),
-  name: z.string().trim().min(2).max(60).optional(),
-});
+/**
+ * Edit an account's name and opening balance. A wrong opening balance would
+ * otherwise sit in every balance forever; the service moves the live balance
+ * by the difference only, so transactions stay untouched.
+ */
+export function createUpdateAccountSchema(t: (key: AccountValidationKey) => string) {
+  return z.object({
+    accountId: z.string().min(1),
+    workspaceId: z.string().min(1),
+    name: z.string().trim().min(2, t("accountNameMin2")).max(60),
+    openingBalance: z.coerce
+      .number()
+      .refine((val) => Number.isFinite(val), t("openingBalanceInvalid")),
+  });
+}
+
+export const updateAccountSchema = createUpdateAccountSchema((key) => key);
 
 export type CreateAccountInput = z.infer<ReturnType<typeof createAccountSchema>>;
 export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;

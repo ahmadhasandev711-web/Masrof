@@ -55,10 +55,22 @@ export class ClientsRepository {
     ).lean();
   }
 
+  /** Invoices still due (not paid, not cancelled) — they keep the client from being archived. */
+  async countOpenInvoices(clientId: string, workspaceId: string) {
+    if (!mongoose.Types.ObjectId.isValid(clientId)) return 0;
+    await connectToDatabase();
+    return InvoiceModel.countDocuments({
+      clientId,
+      workspaceId,
+      isArchived: false,
+      status: { $nin: ["paid", "cancelled"] },
+    });
+  }
+
   async archive(clientId: string, workspaceId: string) {
     await connectToDatabase();
     return ClientModel.findOneAndUpdate(
-      { _id: clientId, workspaceId },
+      { _id: clientId, workspaceId, isArchived: false },
       { isArchived: true },
       { returnDocument: "after" },
     ).lean();

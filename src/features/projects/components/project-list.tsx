@@ -31,7 +31,10 @@ function ArchiveProjectButton({
     <button
       onClick={() => {
         if (!confirm(tConfirm("archiveProject"))) return;
-        startTransition(() => archiveProjectAction(projectId, workspaceId));
+        startTransition(async () => {
+          const res = await archiveProjectAction(projectId, workspaceId);
+          if (res.error) window.alert(res.error);
+        });
       }}
       disabled={isPending}
       className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-60"

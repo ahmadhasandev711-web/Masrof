@@ -28,6 +28,7 @@ describe("ClientsService", () => {
     create: vi.fn(),
     update: vi.fn(),
     archive: vi.fn(),
+    countOpenInvoices: vi.fn(),
     listForWorkspace: vi.fn(),
     listWithFinancials: vi.fn(),
   };
@@ -36,6 +37,7 @@ describe("ClientsService", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    repo.countOpenInvoices.mockResolvedValue(0);
     vi.mocked(requirePlanFeature).mockResolvedValue(ok(undefined));
     vi.mocked(requireQuantityLimit).mockResolvedValue(ok(undefined));
     vi.mocked(countClientsForWorkspace).mockResolvedValue(0);
@@ -79,5 +81,13 @@ describe("ClientsService", () => {
     const result = await service.archive("missing", "ws1");
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toBeInstanceOf(NotFoundError);
+  });
+
+  it("refuses to archive a client with invoices still due", async () => {
+    repo.countOpenInvoices.mockResolvedValue(2);
+    const result = await service.archive("x", "ws1");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe("clientHasOpenInvoices");
+    expect(repo.archive).not.toHaveBeenCalled();
   });
 });

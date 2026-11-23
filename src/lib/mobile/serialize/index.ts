@@ -90,6 +90,7 @@ export function toMobileAccount(item: {
   currency?: string | null;
   cachedBalance?: number;
   balance?: number;
+  openingBalance?: number;
 }): MobileAccount {
   return {
     id: asId(item._id ?? item.id),
@@ -97,6 +98,7 @@ export function toMobileAccount(item: {
     type: item.type,
     currency: item.currency ?? null,
     balance: item.cachedBalance ?? item.balance ?? 0,
+    openingBalance: item.openingBalance ?? 0,
   };
 }
 

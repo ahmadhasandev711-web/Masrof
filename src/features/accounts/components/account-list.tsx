@@ -3,6 +3,8 @@ import { formatMoney } from "@/lib/money";
 import { resolveAccountCurrency } from "@/lib/currency";
 import type { SupportedCurrency } from "@/lib/currency/constants";
 import { ArchiveAccountButton } from "@/features/accounts/components/archive-account-button";
+import { EditAccountButton } from "@/features/accounts/components/edit-account-button";
+import { fromMinorUnits } from "@/lib/money";
 import { AccountTypeIcon, NavIcon } from "@/components/ui/app-icons";
 import { getTranslations } from "next-intl/server";
 
@@ -11,6 +13,7 @@ type AccountListItem = {
   name: string;
   type: string;
   cachedBalance: number;
+  openingBalance?: number;
   currency: string;
 };
 
@@ -144,6 +147,14 @@ export async function AccountList({
                       <span className="hidden sm:inline">{tPages("transferFrom")}</span>
                     </Link>
 
+                    {canWrite && (
+                      <EditAccountButton
+                        accountId={id}
+                        workspaceId={workspaceId}
+                        name={account.name}
+                        openingBalance={fromMinorUnits(account.openingBalance ?? 0)}
+                      />
+                    )}
                     {canWrite && <ArchiveAccountButton accountId={id} workspaceId={workspaceId} />}
                   </div>
                 </div>

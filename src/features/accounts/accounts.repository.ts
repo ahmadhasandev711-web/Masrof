@@ -8,6 +8,7 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
 import { AccountModel } from "@/models/account";
 import { TransactionModel } from "@/models/transaction";
 import { toMinorUnits } from "@/lib/money";
+import { runInTransaction } from "@/lib/db/transaction";
 import {
   resolveAccountCurrency,
   summarizeBalances,
@@ -115,17 +116,41 @@ export class AccountsRepository {
     return summary.convertedTotalMinor ?? summary.byCurrency[0]?.totalMinor ?? 0;
   }
 
-  async update(accountId: string, workspaceId: string, updates: { name?: string }) {
-    await connectToDatabase();
-    return AccountModel.findOneAndUpdate({ _id: accountId, workspaceId }, updates, {
-      returnDocument: "after",
-    }).lean();
+  /**
+   * Rename and/or correct the opening balance. The live balance moves by the
+   * difference in the same DB transaction, so recorded transactions keep their
+   * effect: balance = opening + income − expense ± transfers still holds.
+   */
+  async update(
+    accountId: string,
+    workspaceId: string,
+    updates: { name: string; openingBalance: number },
+  ) {
+    if (!mongoose.Types.ObjectId.isValid(accountId)) return null;
+    const mongooseInstance = await connectToDatabase();
+
+    return runInTransaction(mongooseInstance, async (session) => {
+      const account = await AccountModel.findOne({
+        _id: accountId,
+        workspaceId,
+        isArchived: false,
+      }).session(session);
+      if (!account) return null;
+
+      const openingMinor = toMinorUnits(updates.openingBalance);
+      const delta = openingMinor - account.openingBalance;
+      account.name = updates.name;
+      account.openingBalance = openingMinor;
+      account.cachedBalance = account.cachedBalance + delta;
+      await account.save({ session });
+      return account.toObject();
+    });
   }
 
   async archive(accountId: string, workspaceId: string) {
     await connectToDatabase();
     return AccountModel.findOneAndUpdate(
-      { _id: accountId, workspaceId },
+      { _id: accountId, workspaceId, isArchived: false },
       { isArchived: true },
       { returnDocument: "after" },
     ).lean();

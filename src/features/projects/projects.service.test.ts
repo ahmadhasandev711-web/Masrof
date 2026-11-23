@@ -27,6 +27,7 @@ describe("ProjectsService", () => {
     findByIdempotencyKey: vi.fn(),
     create: vi.fn(),
     archive: vi.fn(),
+    countOpenInvoices: vi.fn(),
     listForWorkspace: vi.fn(),
     listWithTotals: vi.fn(),
     listReceivable: vi.fn(),
@@ -35,6 +36,7 @@ describe("ProjectsService", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    repo.countOpenInvoices.mockResolvedValue(0);
     vi.mocked(requirePlanFeature).mockResolvedValue(ok(undefined));
     vi.mocked(requireQuantityLimit).mockResolvedValue(ok(undefined));
     vi.mocked(countActiveProjectsForWorkspace).mockResolvedValue(0);
@@ -71,5 +73,13 @@ describe("ProjectsService", () => {
     const result = await service.archive("x", "ws1");
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toBeInstanceOf(NotFoundError);
+  });
+
+  it("refuses to archive a project with invoices still due", async () => {
+    repo.countOpenInvoices.mockResolvedValue(2);
+    const result = await service.archive("x", "ws1");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe("projectHasOpenInvoices");
+    expect(repo.archive).not.toHaveBeenCalled();
   });
 });

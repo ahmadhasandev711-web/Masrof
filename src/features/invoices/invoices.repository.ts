@@ -224,6 +224,30 @@ export class InvoicesRepository {
     }).lean();
   }
 
+  async findClient(clientId: string, workspaceId: string, opts: { includeArchived?: boolean } = {}) {
+    await connectToDatabase();
+    return ClientModel.findOne({
+      _id: clientId,
+      workspaceId,
+      ...(opts.includeArchived ? {} : { isArchived: false }),
+    }).lean();
+  }
+
+  async findProjectForClient(
+    projectId: string,
+    workspaceId: string,
+    clientId: string,
+    opts: { includeArchived?: boolean } = {},
+  ) {
+    await connectToDatabase();
+    return ProjectModel.findOne({
+      _id: projectId,
+      workspaceId,
+      clientId,
+      ...(opts.includeArchived ? {} : { isArchived: false }),
+    }).lean();
+  }
+
   async findActiveProjectForClient(
     projectId: string,
     workspaceId: string,
@@ -394,6 +418,17 @@ export class InvoicesRepository {
 
     if (invoice.status === "cancelled") {
       invoice.status = "sent";
+    }
+
+    // The total may have moved: the status follows the payments actually
+    // recorded, the same rule recordPayment / voidPayment use.
+    const paidTotal = await this.sumPaymentsForInvoice(invoice._id, input.workspaceId);
+    if (paidTotal > 0 && paidTotal >= money.total) {
+      invoice.status = "paid";
+      invoice.paidAt = invoice.paidAt ?? new Date();
+    } else if (invoice.status === "paid") {
+      invoice.status = "sent";
+      invoice.paidAt = null;
     }
 
     await invoice.save();

@@ -38,7 +38,11 @@ export class AccountsService {
     return ok(created);
   }
 
-  async update(accountId: string, workspaceId: string, updates: { name?: string }) {
+  async update(
+    accountId: string,
+    workspaceId: string,
+    updates: { name: string; openingBalance: number },
+  ) {
     const updated = await this.repo.update(accountId, workspaceId, updates);
     if (!updated) return err(new NotFoundError("accountNotFound"));
     return ok(updated);

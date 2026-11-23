@@ -65,6 +65,7 @@ export default async function AccountsPage() {
           name: account.name,
           type: account.type,
           cachedBalance: account.cachedBalance,
+          openingBalance: account.openingBalance,
           currency: account.currency ?? baseCurrency,
         }))}
         workspaceId={workspaceId}

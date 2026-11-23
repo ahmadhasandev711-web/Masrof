@@ -205,16 +205,25 @@ async function assertReferencesBelongToWorkspace(
   accountId: string,
   categoryId: string,
   session: mongoose.ClientSession | null = null,
+  /**
+   * The transaction's current account/category. Keeping one that was archived
+   * since is allowed (so an old transaction can still be corrected); switching
+   * TO an archived one is not.
+   */
+  current?: { accountId: string; categoryId: string },
 ) {
+  const keepsAccount = current?.accountId === String(accountId);
+  const keepsCategory = current?.categoryId === String(categoryId);
+
   const account = await AccountModel.findOne({
     _id: accountId,
     workspaceId,
-    isArchived: false,
+    ...(keepsAccount ? {} : { isArchived: false }),
   }).session(session);
 
   const category = await CategoryModel.findOne({
     _id: categoryId,
-    isArchived: false,
+    ...(keepsCategory ? {} : { isArchived: false }),
     $or: [{ workspaceId: null }, { workspaceId }],
   }).session(session);
 
@@ -331,6 +340,7 @@ export class TransactionsRepository {
         input.accountId,
         input.categoryId,
         session,
+        { accountId: String(existing.accountId), categoryId: String(existing.categoryId) },
       );
 
       const newAmountMinorUnits = toMinorUnits(input.amount);

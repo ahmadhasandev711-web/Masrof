@@ -48,6 +48,9 @@ const forms = {
  currency: "Account currency",
  submit: "Add account",
  adding: "Adding...",
+ editTitle: "Edit account",
+ openingBalance: "Opening balance",
+ openingBalanceHint: "Fix it if it was mistyped when the account was added. The current balance moves by the difference; transactions stay as they are.",
  wallets: {
  vodafone: "Vodafone Cash",
  etisalat: "Etisalat Cash",

@@ -6,7 +6,7 @@ import {
   ProjectsRepository,
   projectsRepository,
 } from "@/features/projects/projects.repository";
-import { NotFoundError } from "@/server/kernel/errors";
+import { InvalidReferenceError, NotFoundError } from "@/server/kernel/errors";
 import { err, ok } from "@/server/kernel/result";
 import { requirePlanFeature, requireQuantityLimit } from "@/server/kernel/plan-policy";
 
@@ -58,7 +58,11 @@ export class ProjectsService {
     return ok(updated);
   }
 
+  /** Same rule as clients: no archiving while the project has invoices still due. */
   async archive(projectId: string, workspaceId: string) {
+    if ((await this.repo.countOpenInvoices(projectId, workspaceId)) > 0) {
+      return err(new InvalidReferenceError("projectHasOpenInvoices"));
+    }
     const archived = await this.repo.archive(projectId, workspaceId);
     if (!archived) return err(new NotFoundError("projectNotFound"));
     return ok(archived);

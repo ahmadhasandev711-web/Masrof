@@ -21,7 +21,12 @@ export async function archiveClientAction(
       clientsService.archive(clientId, workspaceId),
     );
     if (!result.ok) {
-      return { error: tErrors("clientNotFound") };
+      return {
+        error:
+          result.error.code === "clientHasOpenInvoices"
+            ? tErrors("clientHasOpenInvoices")
+            : tErrors("clientNotFound"),
+      };
     }
   } catch (error) {
     if (isWorkspaceAuthorizationError(error)) {

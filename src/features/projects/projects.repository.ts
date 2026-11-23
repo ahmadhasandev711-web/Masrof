@@ -63,10 +63,22 @@ export class ProjectsRepository {
     ).lean();
   }
 
+  /** Invoices still due (not paid, not cancelled) — they keep the project from being archived. */
+  async countOpenInvoices(projectId: string, workspaceId: string) {
+    if (!mongoose.Types.ObjectId.isValid(projectId)) return 0;
+    await connectToDatabase();
+    return InvoiceModel.countDocuments({
+      projectId,
+      workspaceId,
+      isArchived: false,
+      status: { $nin: ["paid", "cancelled"] },
+    });
+  }
+
   async archive(projectId: string, workspaceId: string) {
     await connectToDatabase();
     return ProjectModel.findOneAndUpdate(
-      { _id: projectId, workspaceId },
+      { _id: projectId, workspaceId, isArchived: false },
       { isArchived: true },
       { returnDocument: "after" },
     ).lean();

@@ -164,6 +164,8 @@ const core = {
  transactionLinkedToInvoicePayment: "العملية دي دفعة على فاتورة. صححها بإلغاء الدفعة من صفحة الفاتورة.",
  transactionLinkedToDebtPayment: "العملية دي سداد دين. صححها من صفحة الدين.",
  paymentNotFound: "الدفعة غير موجودة",
+ clientHasOpenInvoices: "العميل ده عنده فواتير لسه مستحقة. حصّلها أو ألغيها الأول، وبعدها أرشفه.",
+ projectHasOpenInvoices: "المشروع ده عليه فواتير لسه مستحقة. حصّلها أو ألغيها الأول، وبعدها أرشفه.",
  useRecordPayment: "حالة «مدفوعة» بتتسجل من خلال تسجيل دفعة، مش بتغيير الحالة",
  planLimitReached: "وصلت للحد المسموح في خطتك الحالية",
  planFeatureRequired: "الميزة دي مش متاحة في خطتك الحالية",

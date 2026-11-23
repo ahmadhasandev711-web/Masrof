@@ -258,5 +258,79 @@ describe("Invoices Management — Cancel, Archive, Update & Filters", () => {
       expect(mockInvoiceDoc.notes).toBe("Updated note");
       expect(saveMock).toHaveBeenCalled();
     });
+
+    function paidDoc(status: string) {
+      return {
+        _id: validInvId,
+        workspaceId: validWsId,
+        clientId: validClientId,
+        items: [],
+        status,
+        paidAt: status === "paid" ? new Date("2026-10-01") : null,
+        notes: "",
+        save: vi.fn().mockResolvedValue(undefined),
+        toObject: () => ({ _id: validInvId }),
+      };
+    }
+
+    it("reopens a paid invoice when its total is raised above what was paid", async () => {
+      (ClientModel.findOne as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue({ _id: validClientId, name: "Client A" }),
+      });
+      const doc = paidDoc("paid");
+      (InvoiceModel.findOne as any).mockResolvedValue(doc);
+      (InvoicePaymentModel.aggregate as any).mockResolvedValue([{ sum: 50000 }]); // 500 paid
+
+      await updateInvoice({
+        workspaceId: validWsId,
+        invoiceId: validInvId,
+        clientId: validClientId,
+        issueDate: new Date("2026-10-10"),
+        notes: "",
+        items: [{ description: "Design", amount: 800 }],
+      });
+
+      expect(doc.status).toBe("sent");
+      expect(doc.paidAt).toBeNull();
+    });
+
+    it("marks an invoice paid when its total is lowered to what was paid", async () => {
+      (ClientModel.findOne as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue({ _id: validClientId, name: "Client A" }),
+      });
+      const doc = paidDoc("sent");
+      (InvoiceModel.findOne as any).mockResolvedValue(doc);
+      (InvoicePaymentModel.aggregate as any).mockResolvedValue([{ sum: 50000 }]); // 500 paid
+
+      await updateInvoice({
+        workspaceId: validWsId,
+        invoiceId: validInvId,
+        clientId: validClientId,
+        issueDate: new Date("2026-10-10"),
+        notes: "",
+        items: [{ description: "Design", amount: 500 }],
+      });
+
+      expect(doc.status).toBe("paid");
+      expect(doc.paidAt).toBeInstanceOf(Date);
+    });
+
+    it("lets an invoice keep its archived client", async () => {
+      const lean = vi.fn().mockResolvedValue({ _id: validClientId, name: "Old client", isArchived: true });
+      (ClientModel.findOne as any).mockReturnValue({ lean });
+      (InvoiceModel.findOne as any).mockResolvedValue(paidDoc("sent"));
+      (InvoicePaymentModel.aggregate as any).mockResolvedValue([]);
+
+      await updateInvoice({
+        workspaceId: validWsId,
+        invoiceId: validInvId,
+        clientId: validClientId,
+        issueDate: new Date("2026-10-10"),
+        notes: "",
+        items: [{ description: "Design", amount: 500 }],
+      });
+
+      expect((ClientModel.findOne as any).mock.calls[0][0]).not.toHaveProperty("isArchived");
+    });
   });
 });

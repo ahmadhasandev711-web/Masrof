@@ -48,6 +48,9 @@ const forms = {
  currency: "عملة الحساب",
  submit: "إضافة الحساب",
  adding: "جارِ الإضافة...",
+ editTitle: "تعديل الحساب",
+ openingBalance: "الرصيد الافتتاحي",
+ openingBalanceHint: "غيّره لو كتبته غلط وقت الإضافة. الرصيد الحالي هيتعدل بالفرق، والحركات زي ما هي.",
  wallets: {
  vodafone: "فودافون كاش",
  etisalat: "اتصالات كاش",

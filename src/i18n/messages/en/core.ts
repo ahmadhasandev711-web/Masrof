@@ -164,6 +164,8 @@ const core = {
  transactionLinkedToInvoicePayment: "This is an invoice payment. Correct it by voiding the payment on the invoice.",
  transactionLinkedToDebtPayment: "This is a debt payment. Correct it from the debt.",
  paymentNotFound: "Payment not found",
+ clientHasOpenInvoices: "This client still has invoices due. Collect or cancel them first, then archive.",
+ projectHasOpenInvoices: "This project still has invoices due. Collect or cancel them first, then archive.",
  useRecordPayment: "“Paid” is set by recording a payment, not by changing the status",
  planLimitReached: "You've reached the limit of your current plan",
  planFeatureRequired: "This feature isn't included in your current plan",

@@ -6,7 +6,7 @@ import {
   ClientsRepository,
   clientsRepository,
 } from "@/features/clients/clients.repository";
-import { NotFoundError } from "@/server/kernel/errors";
+import { InvalidReferenceError, NotFoundError } from "@/server/kernel/errors";
 import { err, ok, type Result } from "@/server/kernel/result";
 import { requirePlanFeature, requireQuantityLimit } from "@/server/kernel/plan-policy";
 
@@ -43,7 +43,14 @@ export class ClientsService {
     return ok(updated);
   }
 
+  /**
+   * A client with invoices still due can't be archived: those invoices would
+   * drop out of receivables follow-up. Settle or cancel them first.
+   */
   async archive(clientId: string, workspaceId: string) {
+    if ((await this.repo.countOpenInvoices(clientId, workspaceId)) > 0) {
+      return err(new InvalidReferenceError("clientHasOpenInvoices"));
+    }
     const archived = await this.repo.archive(clientId, workspaceId);
     if (!archived) return err(new NotFoundError("clientNotFound"));
     return ok(archived);

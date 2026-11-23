@@ -84,27 +84,34 @@ export class InvoicesService {
   }
 
   async update(input: UpdateInvoiceInput) {
-    const client = await this.repo.findActiveClient(input.clientId, input.workspaceId);
+    const invoice = await this.repo.findActiveInvoiceDoc(input.invoiceId, input.workspaceId);
+    if (!invoice) {
+      return err(new InvalidInvoiceReferenceError("invoiceNotFound"));
+    }
+
+    // Keeping the invoice's own client/project is fine even if it was archived
+    // since; only switching to an archived one is refused.
+    const keepsClient = String(invoice.clientId) === input.clientId;
+    const client = await this.repo.findClient(input.clientId, input.workspaceId, {
+      includeArchived: keepsClient,
+    });
     if (!client) {
       return err(new InvalidInvoiceReferenceError("clientNotFoundShort"));
     }
 
     let validatedProjectId: string | null = null;
     if (input.projectId) {
-      const project = await this.repo.findActiveProjectForClient(
+      const keepsProject = invoice.projectId != null && String(invoice.projectId) === input.projectId;
+      const project = await this.repo.findProjectForClient(
         input.projectId,
         input.workspaceId,
         input.clientId,
+        { includeArchived: keepsProject },
       );
       if (!project) {
         return err(new InvalidInvoiceReferenceError("projectNotFoundShort"));
       }
       validatedProjectId = String(project._id);
-    }
-
-    const invoice = await this.repo.findActiveInvoiceDoc(input.invoiceId, input.workspaceId);
-    if (!invoice) {
-      return err(new InvalidInvoiceReferenceError("invoiceNotFound"));
     }
 
     const { computeInvoiceTotals, lineFromMajorInput } = await import(
