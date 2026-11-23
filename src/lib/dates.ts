@@ -8,12 +8,7 @@ export function isOnOrBeforeToday(date: Date | string, now = new Date()) {
   return startOfLocalDay(date).getTime() <= startOfLocalDay(now).getTime();
 }
 
-/** True when the calendar day is today or within the next `days` days (inclusive). */
-export function isOnOrBeforeDaysFromToday(date: Date | string, days: number, now = new Date()) {
-  const limit = startOfLocalDay(now);
-  limit.setDate(limit.getDate() + days);
-  return startOfLocalDay(date).getTime() <= limit.getTime();
-}
+export { isOnOrBeforeDaysFromToday } from "@contracts/shared/clients-projects";
 
 export function endOfLocalDay(date: Date | string) {
   const value = startOfLocalDay(date);

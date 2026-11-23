@@ -1,7 +1,7 @@
 import "server-only";
 
 import { countActiveProjectsForWorkspace } from "@/features/subscriptions/plan-usage";
-import type { CreateProjectInput } from "@/features/projects/schemas";
+import type { CreateProjectInput, UpdateProjectStatusInput } from "@/features/projects/schemas";
 import {
   ProjectsRepository,
   projectsRepository,
@@ -32,6 +32,30 @@ export class ProjectsService {
     if (existing) return ok(existing);
 
     return ok(await this.repo.create(input));
+  }
+
+  /**
+   * Move a project between active / completed / on hold. Re-activating counts
+   * against `maxActiveProjects`, same as creating an active project.
+   */
+  async updateStatus(userId: string, input: UpdateProjectStatusInput) {
+    const project = await this.repo.findActive(input.projectId, input.workspaceId);
+    if (!project) return err(new NotFoundError("projectNotFound"));
+
+    if (input.status === "active" && project.status !== "active") {
+      const activeCount = await countActiveProjectsForWorkspace(input.workspaceId);
+      const limit = await requireQuantityLimit(
+        userId,
+        input.workspaceId,
+        "maxActiveProjects",
+        activeCount,
+      );
+      if (!limit.ok) return limit;
+    }
+
+    const updated = await this.repo.updateStatus(input.projectId, input.workspaceId, input.status);
+    if (!updated) return err(new NotFoundError("projectNotFound"));
+    return ok(updated);
   }
 
   async archive(projectId: string, workspaceId: string) {

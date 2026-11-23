@@ -1,4 +1,5 @@
 import "server-only";
+import type { ProjectStatus } from "@/features/projects/constants";
 
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
@@ -46,6 +47,20 @@ export class ProjectsRepository {
       project._id.toString(),
     );
     return project.toObject();
+  }
+
+  async findActive(projectId: string, workspaceId: string) {
+    await connectToDatabase();
+    return ProjectModel.findOne({ _id: projectId, workspaceId, isArchived: false }).lean();
+  }
+
+  async updateStatus(projectId: string, workspaceId: string, status: ProjectStatus) {
+    await connectToDatabase();
+    return ProjectModel.findOneAndUpdate(
+      { _id: projectId, workspaceId, isArchived: false },
+      { status },
+      { returnDocument: "after" },
+    ).lean();
   }
 
   async archive(projectId: string, workspaceId: string) {

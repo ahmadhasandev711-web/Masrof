@@ -1,5 +1,6 @@
 "use client";
 
+import { normalizeWhatsAppPhone } from "@/lib/whatsapp";
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { formatMoney } from "@/lib/money";
@@ -56,14 +57,9 @@ export function ClientList({
   }
 
   function getWhatsAppUrl(rawPhone: string | null) {
-    const clean = getCleanPhone(rawPhone);
-    if (!clean) return null;
-    // Normalize Egyptian standard local number: 01xxxxxxxxx -> +201xxxxxxxxx
-    let normalized = clean.replace(/^[+]/, "");
-    if (normalized.startsWith("01") && normalized.length === 11) {
-      normalized = "2" + normalized;
-    }
-    return `https://wa.me/${normalized}`;
+    // One normalization rule for the whole product (contracts/shared/whatsapp).
+    const normalized = rawPhone ? normalizeWhatsAppPhone(rawPhone) : null;
+    return normalized ? `https://wa.me/${normalized}` : null;
   }
 
   if (clients.length === 0) {

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { formatMoney } from "@/lib/money";
 import { archiveProjectAction } from "@/features/projects/actions/archive-project";
+import { updateProjectStatusAction } from "@/features/projects/actions/update-project-status";
+import { PROJECT_STATUSES, type ProjectStatus } from "@/features/projects/constants";
 import {
   isReceivableReminderDue,
   projectRemainingAmount,
@@ -49,6 +51,59 @@ function formatDueDate(value: string | null, locale: string = "ar") {
   }).format(new Date(value));
 }
 
+const STATUS_STYLE: Record<ProjectStatus, string> = {
+  active: "bg-emerald-50 text-emerald-800 border border-emerald-200/80",
+  completed: "bg-blue-50 text-blue-800 border border-blue-200/80",
+  on_hold: "bg-neutral-100 text-neutral-600 border border-neutral-200",
+};
+
+/** Status badge that doubles as a picker for members who can write. */
+function ProjectStatusControl({
+  projectId,
+  workspaceId,
+  status,
+  canWrite,
+}: {
+  projectId: string;
+  workspaceId: string;
+  status: ProjectStatus;
+  canWrite: boolean;
+}) {
+  const tStatus = useTranslations("status");
+  const [isPending, startTransition] = useTransition();
+  const label = (s: ProjectStatus) => (s === "on_hold" ? tStatus("paused") : tStatus(s));
+
+  if (!canWrite) {
+    return (
+      <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${STATUS_STYLE[status]}`}>
+        {label(status)}
+      </span>
+    );
+  }
+
+  return (
+    <select
+      value={status}
+      disabled={isPending}
+      aria-label={label(status)}
+      onChange={(e) => {
+        const next = e.target.value as ProjectStatus;
+        startTransition(async () => {
+          const res = await updateProjectStatusAction({ workspaceId, projectId, status: next });
+          if (res.error) window.alert(res.error);
+        });
+      }}
+      className={`cursor-pointer rounded-full px-2.5 py-0.5 text-xs font-bold disabled:opacity-60 ${STATUS_STYLE[status]}`}
+    >
+      {PROJECT_STATUSES.map((s) => (
+        <option key={s} value={s}>
+          {label(s)}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function ProjectList({
   projects,
   workspaceId,
@@ -66,7 +121,6 @@ export function ProjectList({
 }) {
   const locale = useLocale();
   const tEmpty = useTranslations("empty");
-  const tStatus = useTranslations("status");
   const tDashboardAlerts = useTranslations("dashboard.alerts");
   const tWhatsapp = useTranslations("forms.whatsapp");
   const tWhatsappMessages = useTranslations("whatsapp");
@@ -92,7 +146,6 @@ export function ProjectList({
           project.expectedAmount != null
             ? formatMoney(project.expectedAmount, { currency, locale })
             : tShared("none");
-        const statusLabel = project.status === "on_hold" ? tStatus("paused") : tStatus(project.status);
         const remaining = projectRemainingAmount(project);
         const showClientReminder = isReceivableReminderDue(project);
 
@@ -118,17 +171,12 @@ export function ProjectList({
                   </span>
                 )}
 
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                    project.status === "active"
-                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200/80"
-                      : project.status === "completed"
-                      ? "bg-blue-50 text-blue-800 border border-blue-200/80"
-                      : "bg-neutral-100 text-neutral-600 border border-neutral-200"
-                  }`}
-                >
-                  {statusLabel}
-                </span>
+                <ProjectStatusControl
+                  projectId={id}
+                  workspaceId={workspaceId}
+                  status={project.status}
+                  canWrite={canWrite}
+                />
 
                 {project.profitMargin != null && (
                   <span

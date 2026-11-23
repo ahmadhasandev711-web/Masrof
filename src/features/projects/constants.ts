@@ -1,2 +1,2 @@
-export const PROJECT_STATUSES = ["active", "completed", "on_hold"] as const;
-export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+/** Project statuses live in `contracts/shared/clients-projects` (shared with the mobile app). */
+export { PROJECT_STATUSES, type ProjectStatus } from "@contracts/shared/clients-projects";

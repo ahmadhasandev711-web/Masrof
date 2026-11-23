@@ -9,8 +9,8 @@ import {
   mobileBrandingSchema,
 } from "./workspaces";
 import { mobileEntitlementsResponseSchema, mobilePlanResponseSchema } from "./entitlements";
-import { mobileClientsListResponseSchema, mobileClientCreatedSchema } from "./clients";
-import { mobileProjectsListResponseSchema, mobileProjectCreatedSchema } from "./projects";
+import { mobileClientStatementResponseSchema, mobileClientsListResponseSchema, mobileClientCreatedSchema } from "./clients";
+import { mobileProjectDetailsResponseSchema, mobileProjectsListResponseSchema, mobileProjectCreatedSchema } from "./projects";
 import { mobileAccountsListResponseSchema } from "./accounts";
 import { mobileCategoriesListResponseSchema, mobileCategoryCreatedSchema } from "./categories";
 import {
@@ -44,8 +44,10 @@ export const mobileContractSchemas = {
   MobilePlanResponse: mobilePlanResponseSchema,
   MobileClientsListResponse: mobileClientsListResponseSchema,
   MobileClientCreated: mobileClientCreatedSchema,
+  MobileClientStatementResponse: mobileClientStatementResponseSchema,
   MobileProjectsListResponse: mobileProjectsListResponseSchema,
   MobileProjectCreated: mobileProjectCreatedSchema,
+  MobileProjectDetailsResponse: mobileProjectDetailsResponseSchema,
   MobileAccountsListResponse: mobileAccountsListResponseSchema,
   MobileCategoriesListResponse: mobileCategoriesListResponseSchema,
   MobileCategoryCreated: mobileCategoryCreatedSchema,
@@ -82,8 +84,12 @@ export const mobileOpenApiPaths: Array<{
   { path: "/api/mobile/branding", method: "post", operationId: "updateBranding", summary: "Update branding", responseSchema: "MobileOk" },
   { path: "/api/mobile/clients", method: "get", operationId: "listClients", summary: "List clients", responseSchema: "MobileClientsListResponse" },
   { path: "/api/mobile/clients", method: "post", operationId: "createClient", summary: "Create client", responseSchema: "MobileClientCreated" },
+  { path: "/api/mobile/clients", method: "patch", operationId: "mutateClient", summary: "Update or archive a client", responseSchema: "MobileOk" },
+  { path: "/api/mobile/clients/{id}", method: "get", operationId: "getClientStatement", summary: "Client statement", responseSchema: "MobileClientStatementResponse" },
   { path: "/api/mobile/projects", method: "get", operationId: "listProjects", summary: "List projects", responseSchema: "MobileProjectsListResponse" },
   { path: "/api/mobile/projects", method: "post", operationId: "createProject", summary: "Create project", responseSchema: "MobileProjectCreated" },
+  { path: "/api/mobile/projects", method: "patch", operationId: "mutateProject", summary: "Change status or archive a project", responseSchema: "MobileOk" },
+  { path: "/api/mobile/projects/{id}", method: "get", operationId: "getProjectDetails", summary: "Project financial details", responseSchema: "MobileProjectDetailsResponse" },
   { path: "/api/mobile/accounts", method: "get", operationId: "listAccounts", summary: "List accounts", responseSchema: "MobileAccountsListResponse" },
   { path: "/api/mobile/accounts", method: "post", operationId: "createAccount", summary: "Create account", responseSchema: "MobileId" },
   { path: "/api/mobile/accounts", method: "patch", operationId: "archiveAccount", summary: "Archive account", responseSchema: "MobileOk" },
