@@ -753,6 +753,72 @@ export class InvoicesRepository {
     return result.modifiedCount > 0;
   }
 
+  /**
+   * Void a recorded payment — the only way to correct a wrong amount/account.
+   * In one DB transaction: archive the payment and its income transaction, take
+   * the amount back out of the account, and reopen the invoice if it was "paid".
+   * Returns false when the payment doesn't exist (or was already voided).
+   */
+  async voidPayment(paymentId: string, workspaceId: string): Promise<boolean> {
+    if (!mongoose.Types.ObjectId.isValid(paymentId)) return false;
+    const mongooseInstance = await connectToDatabase();
+
+    return runInTransaction(mongooseInstance, async (session) => {
+      const payment = await InvoicePaymentModel.findOne({
+        _id: paymentId,
+        workspaceId,
+        isArchived: false,
+      }).session(session);
+      if (!payment) return false;
+
+      payment.isArchived = true;
+      await payment.save({ session });
+
+      const transaction = await TransactionModel.findOne({
+        _id: payment.transactionId,
+        workspaceId,
+        isArchived: false,
+      }).session(session);
+      if (transaction) {
+        await AccountModel.findByIdAndUpdate(
+          transaction.accountId,
+          { $inc: { cachedBalance: -transaction.amount } },
+          { session },
+        );
+        transaction.isArchived = true;
+        await transaction.save({ session });
+      }
+
+      const invoice = await InvoiceModel.findOne({ _id: payment.invoiceId, workspaceId }).session(session);
+      if (invoice && invoice.status === "paid") {
+        const remaining = await InvoicePaymentModel.aggregate<{ sum: number }>([
+          { $match: { invoiceId: invoice._id, isArchived: false } },
+          { $group: { _id: null, sum: { $sum: "$amount" } } },
+        ]).session(session);
+        const paidTotal = remaining[0]?.sum ?? 0;
+        const total = resolveInvoiceTotals({
+          items: invoice.items.map((item) => ({
+            description: item.description,
+            amount: item.amount,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+          })),
+          subtotal: invoice.subtotal,
+          taxEnabled: invoice.taxEnabled,
+          taxRatePercent: invoice.taxRatePercent,
+          taxAmount: invoice.taxAmount,
+          total: invoice.total,
+        }).total;
+        if (paidTotal < total) {
+          invoice.status = "sent";
+          invoice.paidAt = null;
+          await invoice.save({ session });
+        }
+      }
+      return true;
+    });
+  }
+
   async listPayments(
     invoiceId: string,
     workspaceId: string,

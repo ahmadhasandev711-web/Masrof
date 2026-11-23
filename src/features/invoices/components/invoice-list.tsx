@@ -463,6 +463,7 @@ function InvoiceRow({
           invoice={invoice}
           workspaceId={workspaceId}
           currency={currency}
+          canWrite={canWrite}
         />
       )}
 

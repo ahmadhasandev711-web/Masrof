@@ -90,8 +90,12 @@ export function createTransactionSchema(t: (key: TransactionValidationKey) => st
   });
 }
 
+/**
+ * Editing creates nothing, so no idempotency key (the web edit form never sent
+ * one, and requiring it made every edit fail validation).
+ */
 export function createUpdateTransactionSchema(t: (key: TransactionValidationKey) => string) {
-  return createTransactionSchema(t).extend({
+  return createTransactionSchema(t).omit({ idempotencyKey: true }).extend({
     transactionId: z.string().min(1),
   });
 }

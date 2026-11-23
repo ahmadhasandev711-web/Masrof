@@ -148,3 +148,10 @@ export const mobileInvoiceTemplatesListResponseSchema = mobileListSchema(
 ).passthrough();
 
 export const mobileInvoiceTemplateCreatedSchema = mobileInvoiceTemplateSchema;
+
+/** PATCH /api/mobile/invoices/payments — void a wrong payment (invoicesService.voidPayment). */
+export const mobileInvoicePaymentPatchBodySchema = z.object({
+  action: z.literal("void"),
+  workspaceId: z.string().min(1),
+  paymentId: z.string().min(1),
+});

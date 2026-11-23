@@ -81,6 +81,9 @@ const forms = {
  submit: "Save transaction",
  needsAccount: "Add at least one account first.",
  editTitle: "Edit transaction",
+ linkedInvoicePayment: "Invoice #{number} payment",
+ linkedDebtPayment: "Debt payment",
+ linkedPaymentHint: "This was recorded by a payment. To correct it, void the payment from its page and record it again.",
  editSubmit: "Save changes",
  },
  transactionAi: {
@@ -296,6 +299,9 @@ const forms = {
  notesPlaceholderShort: "Any additional notes...",
  confirmPayment: "Confirm payment",
  noPaymentsRecorded: "No payments have been recorded for this invoice yet.",
+ voidPayment: "Void payment",
+ voidPaymentConfirm: "Voiding this payment takes the amount back out of the account and restores the invoice status. You can then record the correct payment. Continue?",
+ voidingPayment: "Voiding...",
  financialStatuses: {
  unpaid: "Unpaid",
  partially_paid: "Partially paid",

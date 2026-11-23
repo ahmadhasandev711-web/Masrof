@@ -161,6 +161,9 @@ const core = {
  phoneAlreadyUsed: "رقم الهاتف هذا مسجل بالفعل بحساب آخر",
  },
  errors: {
+ transactionLinkedToInvoicePayment: "العملية دي دفعة على فاتورة. صححها بإلغاء الدفعة من صفحة الفاتورة.",
+ transactionLinkedToDebtPayment: "العملية دي سداد دين. صححها من صفحة الدين.",
+ paymentNotFound: "الدفعة غير موجودة",
  useRecordPayment: "حالة «مدفوعة» بتتسجل من خلال تسجيل دفعة، مش بتغيير الحالة",
  planLimitReached: "وصلت للحد المسموح في خطتك الحالية",
  planFeatureRequired: "الميزة دي مش متاحة في خطتك الحالية",

@@ -10,6 +10,9 @@ import { AccountModel } from "@/models/account";
 import { CategoryModel } from "@/models/category";
 import { ClientModel } from "@/models/client";
 import { ProjectModel } from "@/models/project";
+import { InvoicePaymentModel } from "@/models/invoice-payment";
+import { InvoiceModel } from "@/models/invoice";
+import { DebtPaymentModel } from "@/models/debt-payment";
 import { toMinorUnits } from "@/lib/money";
 import { resolveAccountCurrency } from "@/lib/currency";
 import { transactionAccountCurrencyStages } from "@/lib/currency/transaction-pipeline";
@@ -110,6 +113,87 @@ function transactionReferenceLookupStages(): mongoose.PipelineStage[] {
       { $unset: resultField },
     ] as mongoose.PipelineStage[];
   });
+}
+
+/**
+ * Marks transactions that were booked by an invoice payment or a debt payment.
+ * Those belong to the payment: they're corrected by voiding the payment, not
+ * by editing/deleting the transaction (that left invoices "paid" with no money).
+ * Adds `linkedInvoiceId`, `linkedInvoiceNumber` and `linkedDebt`.
+ */
+function paymentLinkLookupStages(): mongoose.PipelineStage[] {
+  return [
+    {
+      $lookup: {
+        from: InvoicePaymentModel.collection.name,
+        let: { txId: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$transactionId", "$$txId"] }, isArchived: false } },
+          { $project: { invoiceId: 1 } },
+          {
+            $lookup: {
+              from: InvoiceModel.collection.name,
+              localField: "invoiceId",
+              foreignField: "_id",
+              pipeline: [{ $project: { invoiceNumber: 1 } }],
+              as: "invoice",
+            },
+          },
+        ],
+        as: "invoicePaymentRef",
+      },
+    },
+    {
+      $lookup: {
+        from: DebtPaymentModel.collection.name,
+        let: { txId: { $toString: "$_id" } },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$transactionId", "$$txId"] } } },
+          { $project: { _id: 1 } },
+        ],
+        as: "debtPaymentRef",
+      },
+    },
+    {
+      $set: {
+        linkedInvoiceId: { $arrayElemAt: ["$invoicePaymentRef.invoiceId", 0] },
+        linkedInvoiceNumber: {
+          $arrayElemAt: [{ $arrayElemAt: ["$invoicePaymentRef.invoice.invoiceNumber", 0] }, 0],
+        },
+        linkedDebt: { $gt: [{ $size: "$debtPaymentRef" }, 0] },
+      },
+    },
+    { $unset: ["invoicePaymentRef", "debtPaymentRef"] },
+  ];
+}
+
+/** Throws when a transaction belongs to an invoice or debt payment (see paymentLinkLookupStages). */
+async function assertNotPaymentTransaction(
+  transactionId: mongoose.Types.ObjectId,
+  workspaceId: string,
+  session: mongoose.ClientSession | null,
+) {
+  const invoicePayment = await InvoicePaymentModel.findOne({
+    workspaceId,
+    transactionId,
+    isArchived: false,
+  })
+    .select("_id")
+    .session(session)
+    .lean();
+  if (invoicePayment) {
+    throw new InvalidTransactionReferenceError("transactionLinkedToInvoicePayment");
+  }
+  const debtPayment = await DebtPaymentModel.findOne({
+    workspaceId,
+    transactionId: String(transactionId),
+  })
+    .select("_id")
+    .session(session)
+    .lean();
+  if (debtPayment) {
+    throw new InvalidTransactionReferenceError("transactionLinkedToDebtPayment");
+  }
 }
 
 /**
@@ -240,6 +324,8 @@ export class TransactionsRepository {
         throw new InvalidTransactionReferenceError("transactionNotFound");
       }
 
+      await assertNotPaymentTransaction(existing._id, workspaceId, session);
+
       await assertReferencesBelongToWorkspace(
         workspaceId,
         input.accountId,
@@ -287,6 +373,8 @@ export class TransactionsRepository {
       if (!existing) {
         throw new InvalidTransactionReferenceError("transactionNotFound");
       }
+
+      await assertNotPaymentTransaction(existing._id, workspaceId, session);
 
       await AccountModel.findByIdAndUpdate(
         existing.accountId,
@@ -342,6 +430,7 @@ export class TransactionsRepository {
         { $skip: skip },
         { $limit: filters.pageSize },
         ...transactionReferenceLookupStages(),
+        ...paymentLinkLookupStages(),
       ]),
       TransactionModel.countDocuments(query),
       TransactionModel.aggregate<{ _id: "income" | "expense"; sum: number }>([

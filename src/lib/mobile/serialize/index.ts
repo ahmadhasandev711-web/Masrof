@@ -139,6 +139,10 @@ export function toMobileTransaction(item: Record<string, unknown>): MobileTransa
     clientName: populatedName(item.clientId),
     projectId: item.projectId ? serializeId(item.projectId) : null,
     projectName: populatedName(item.projectId),
+    linkedInvoiceId: item.linkedInvoiceId ? serializeId(item.linkedInvoiceId) : null,
+    linkedInvoiceNumber:
+      typeof item.linkedInvoiceNumber === "string" ? item.linkedInvoiceNumber : null,
+    linkedDebt: Boolean(item.linkedDebt),
   };
 }
 

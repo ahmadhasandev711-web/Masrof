@@ -27,6 +27,9 @@ type TransactionItem = {
   categoryId: PopulatedRef | unknown;
   clientId?: PopulatedRef | unknown | null;
   projectId?: PopulatedRef | unknown | null;
+  linkedInvoiceId?: unknown;
+  linkedInvoiceNumber?: string | null;
+  linkedDebt?: boolean;
 };
 
 export async function TransactionList({
@@ -89,6 +92,8 @@ export async function TransactionList({
               projectName: project?.name ?? null,
               attachmentUrl: tx.attachmentUrl ?? null,
               attachmentName: tx.attachmentName ?? null,
+              linkedInvoiceNumber: tx.linkedInvoiceId ? (tx.linkedInvoiceNumber ?? "") : null,
+              linkedDebt: Boolean(tx.linkedDebt),
             }}
             workspaceId={workspaceId}
             currency={accountCurrencies[String(account._id)] ?? workspaceCurrency}

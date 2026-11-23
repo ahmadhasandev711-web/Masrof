@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { formatMoney, fromMinorUnits } from "@/lib/money";
@@ -32,6 +33,10 @@ type TransactionRowProps = {
     projectName?: string | null;
     attachmentUrl?: string | null;
     attachmentName?: string | null;
+    /** Set when an invoice payment booked this transaction (corrected from the invoice). */
+    linkedInvoiceNumber?: string | null;
+    /** Set when a debt payment booked this transaction. */
+    linkedDebt?: boolean;
   };
   workspaceId: string;
   currency: string;
@@ -157,7 +162,20 @@ export function TransactionRow({
         </span>
 
         {/* Action Buttons */}
-        {canWrite && (
+        {canWrite && (transaction.linkedInvoiceNumber != null || transaction.linkedDebt) ? (
+          <Link
+            href={transaction.linkedInvoiceNumber != null ? "/dashboard/invoices" : "/dashboard/debts"}
+            title={tForm("linkedPaymentHint")}
+            className={`${MOBILE_ACTION_BTN} ms-auto border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100 sm:ms-0`}
+          >
+            <NavIcon name={transaction.linkedInvoiceNumber != null ? "invoices" : "debts"} className="h-4 w-4 shrink-0" />
+            <span>
+              {transaction.linkedInvoiceNumber != null
+                ? tForm("linkedInvoicePayment", { number: transaction.linkedInvoiceNumber })
+                : tForm("linkedDebtPayment")}
+            </span>
+          </Link>
+        ) : canWrite && (
           <div className="ms-auto flex flex-wrap items-center gap-1.5 sm:ms-0">
             <button
               type="button"

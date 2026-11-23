@@ -14,6 +14,7 @@ import {
 } from "@/features/invoices/invoices.repository";
 import {
   InvalidInvoiceReferenceError,
+  InvalidPaymentReferenceError,
   InvoicePaidStatusNotAllowedError,
 } from "@/features/invoices/invoices.errors";
 import { isAppError } from "@/server/kernel/errors";
@@ -195,6 +196,12 @@ export class InvoicesService {
       if (isAppError(error)) return err(error);
       throw error;
     }
+  }
+
+  async voidPayment(paymentId: string, workspaceId: string) {
+    const voided = await this.repo.voidPayment(paymentId, workspaceId);
+    if (!voided) return err(new InvalidPaymentReferenceError("paymentNotFound"));
+    return ok(true);
   }
 
   listPayments(invoiceId: string, workspaceId: string) {

@@ -9,7 +9,11 @@ import {
   requireMobileWorkspace,
   serializeId,
 } from "@/lib/mobile/session";
-import { mobileInvoicePaymentCreatedSchema } from "@contracts/mobile/invoices";
+import {
+  mobileInvoicePaymentCreatedSchema,
+  mobileInvoicePaymentPatchBodySchema,
+} from "@contracts/mobile/invoices";
+import { mobileOkSchema } from "@contracts/mobile/common";
 import { resultToResponse, thrownToMobileResponse } from "@/server/kernel";
 
 export async function POST(request: Request) {
@@ -59,6 +63,30 @@ export async function POST(request: Request) {
       mobileInvoicePaymentCreatedSchema.parse({ paymentId }),
       { status: 201 },
     );
+  } catch (error) {
+    return thrownToMobileResponse(error);
+  }
+}
+
+/** Void a wrong payment (same service as the web's payments dialog). */
+export async function PATCH(request: Request) {
+  const session = await requireMobileSession(request);
+  if (session instanceof NextResponse) return session;
+
+  try {
+    const parsed = mobileInvoicePaymentPatchBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "invalidData" }, { status: 400 });
+    }
+    const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
+    if (access instanceof NextResponse) return access;
+
+    const result = await invoicesService.voidPayment(parsed.data.paymentId, access.workspaceId);
+    if (!result.ok) return resultToResponse(result);
+
+    revalidateTag(CACHE_TAGS.invoices, "max");
+    revalidateTag(CACHE_TAGS.accounts, "max");
+    return NextResponse.json(mobileOkSchema.parse({ ok: true }));
   } catch (error) {
     return thrownToMobileResponse(error);
   }

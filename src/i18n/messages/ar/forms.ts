@@ -81,6 +81,9 @@ const forms = {
  submit: "حفظ العملية",
  needsAccount: "لازم تضيف حساب واحد على الأقل الأول.",
  editTitle: "تعديل العملية",
+ linkedInvoicePayment: "دفعة فاتورة #{number}",
+ linkedDebtPayment: "سداد دين",
+ linkedPaymentHint: "العملية دي اتسجلت من دفعة. لتصحيحها ألغِ الدفعة من صفحتها وسجّلها من جديد.",
  editSubmit: "حفظ التعديلات",
  },
  transactionAi: {
@@ -296,6 +299,9 @@ const forms = {
  notesPlaceholderShort: "أي ملاحظات إضافية...",
  confirmPayment: "تأكيد تسجيل الدفعة",
  noPaymentsRecorded: "لم يتم تسجيل أي دفعات لهذه الفاتورة بعد.",
+ voidPayment: "إلغاء الدفعة",
+ voidPaymentConfirm: "إلغاء الدفعة دي هيرجّع المبلغ من الحساب ويرجّع حالة الفاتورة. تقدر بعدها تسجل الدفعة الصح. متأكد؟",
+ voidingPayment: "جارِ الإلغاء...",
  financialStatuses: {
  unpaid: "غير مدفوعة",
  partially_paid: "مدفوعة جزئياً",
