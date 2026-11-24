@@ -59,10 +59,15 @@ export default async function BudgetsPage() {
   const canWrite = access.membership.role !== "viewer";
   const recurringUsage = toQuantityUsage(recurringCount, recurringLimit);
 
+  const tConversion = await getTranslations("reports.conversion");
+  const conversionIncomplete = budgets.some((b) => b.conversionIncomplete);
   const totalBudgeted = budgets.reduce((sum, b) => sum + (b.amount || 0), 0);
-  const totalSpent = budgets.reduce((sum, b) => sum + (b.spent || 0), 0);
-  const totalRemaining = Math.max(0, totalBudgeted - totalSpent);
-  const overallPercentage = totalBudgeted > 0 ? Math.round((totalSpent / totalBudgeted) * 100) : 0;
+  const totalSpent = conversionIncomplete
+    ? null
+    : budgets.reduce((sum, b) => sum + (b.spent ?? 0), 0);
+  const totalRemaining = totalSpent == null ? null : Math.max(0, totalBudgeted - totalSpent);
+  const overallPercentage =
+    totalSpent == null || totalBudgeted <= 0 ? null : Math.round((totalSpent / totalBudgeted) * 100);
 
   const formatOptions = {
     currency: activeWorkspace.currency,
@@ -108,27 +113,29 @@ export default async function BudgetsPage() {
             <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
               <p className="text-xs font-medium text-neutral-500">{t("totalSpent")}</p>
               <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
-                {formatMoney(totalSpent, formatOptions)}
+                {totalSpent == null ? tConversion("unavailable") : formatMoney(totalSpent, formatOptions)}
               </p>
             </div>
             <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
               <p className="text-xs font-medium text-neutral-500">{t("totalRemaining")}</p>
               <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
-                {formatMoney(totalRemaining, formatOptions)}
+                {totalRemaining == null ? tConversion("unavailable") : formatMoney(totalRemaining, formatOptions)}
               </p>
             </div>
             <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
               <p className="text-xs font-medium text-neutral-500">{t("consumptionRate")}</p>
               <p
                 className={`mt-1 font-mono text-base font-bold tabular-nums sm:text-lg ${
-                  overallPercentage >= 100
-                    ? "text-red-600"
-                    : overallPercentage >= 80
-                      ? "text-amber-600"
-                      : "text-emerald-700"
+                  overallPercentage == null
+                    ? "text-neutral-500"
+                    : overallPercentage >= 100
+                      ? "text-red-600"
+                      : overallPercentage >= 80
+                        ? "text-amber-600"
+                        : "text-emerald-700"
                 }`}
               >
-                {overallPercentage}%
+                {overallPercentage == null ? tConversion("unavailable") : `${overallPercentage}%`}
               </p>
             </div>
           </div>
@@ -148,11 +155,13 @@ export default async function BudgetsPage() {
                     const cat = b.categoryId as unknown as {
                       _id: unknown;
                       name: string;
+                      nameEn?: string | null;
                       icon?: string | null;
                     };
                     return {
                       _id: String(cat._id),
                       name: cat.name,
+                      nameEn: cat.nameEn ?? null,
                       icon: cat.icon ?? null,
                     };
                   })()

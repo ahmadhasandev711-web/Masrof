@@ -55,7 +55,6 @@ const core = {
  invoices: "الفواتير",
  debts: "الديون والالتزامات",
  goals: "أهداف الادخار",
- import: "استيراد بنك",
  backup: "نسخ احتياطي",
  plan: "خطتي",
  settings: "إعدادات المساحة",
@@ -166,6 +165,7 @@ const core = {
  paymentNotFound: "الدفعة غير موجودة",
  clientHasOpenInvoices: "العميل ده عنده فواتير لسه مستحقة. حصّلها أو ألغيها الأول، وبعدها أرشفه.",
  projectHasOpenInvoices: "المشروع ده عليه فواتير لسه مستحقة. حصّلها أو ألغيها الأول، وبعدها أرشفه.",
+ projectClientLocked: "المشروع ده عليه فواتير، فمينفعش تغيّر عميله.",
  useRecordPayment: "حالة «مدفوعة» بتتسجل من خلال تسجيل دفعة، مش بتغيير الحالة",
  planLimitReached: "وصلت للحد المسموح في خطتك الحالية",
  planFeatureRequired: "الميزة دي مش متاحة في خطتك الحالية",
@@ -239,13 +239,6 @@ const core = {
  recurringExpenseNotFound: "المصروف المتكرر غير موجود",
  budgetCategoryInvalid: "التصنيف غير صالح لإنشاء ميزانية عليه",
  savingsGoalNotFound: "هدف الادخار غير موجود",
- importDataIncomplete: "البيانات ناقصة",
- importFileEmpty: "الملف فاضي أو فيه سطر واحد بس",
- importColumnsNotFound:
- "مش لاقي أعمدة التاريخ والمبلغ — استخدم رؤوس: date, description, amount",
- importBankDefault: "استيراد بنك",
- importBankNotes: "مستورد من كشف بنك",
- importNoRows: "مفيش صفوف اتستوردت — راجع تنسيق الملف",
  pushEnabled: "تم تفعيل إشعارات Push على هذا الجهاز.",
  pushDisabled: "تم إلغاء إشعارات Push على هذا الجهاز.",
  pushTestSent: "تم إرسال إشعار تجربة.",
@@ -317,6 +310,7 @@ const core = {
  noGoals: "لا توجد أهداف ادخار بعد",
  noInvoices: "لا توجد فواتير بعد",
  noTransfers: "لا توجد تحويلات بعد",
+ transfersHint: "يمكنك نقل الأموال بسهولة بين حساباتك البنكية والخزائن النقدية وتوثيقها هنا بنقرة واحدة.",
  },
 } as const;
 

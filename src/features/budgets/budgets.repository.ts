@@ -99,7 +99,7 @@ export class BudgetsRepository {
 
       const [budgets, perCategoryTotals] = await Promise.all([
         BudgetModel.find({ workspaceId, isArchived: false })
-          .populate("categoryId", "name icon")
+          .populate("categoryId", "name nameEn icon")
           .sort({ createdAt: 1 })
           .lean(),
         TransactionModel.aggregate<{
@@ -150,12 +150,12 @@ export class BudgetsRepository {
             : workspaceTotalSpent;
 
         const percentage =
-          spent != null && budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
+          spent == null ? null : budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
 
         return {
           ...budget,
-          spent: spent ?? 0,
-          remaining: spent != null ? budget.amount - spent : budget.amount,
+          spent,
+          remaining: spent == null ? null : budget.amount - spent,
           percentage,
           conversionIncomplete: !canConvertAll,
         };

@@ -16,7 +16,6 @@ describe("plan feature gates (freemium v8)", () => {
 
   it("keeps Free without Pro-only power features", () => {
     expect(DEFAULT_PLAN_FLAGS.free.csvExport).toBe(false);
-    expect(DEFAULT_PLAN_FLAGS.free.bankImport).toBe(false);
     expect(DEFAULT_PLAN_FLAGS.free.advancedReports).toBe(false);
     expect(DEFAULT_PLAN_FLAGS.free.ocrReceipts).toBe(false);
     expect(DEFAULT_PLAN_FLAGS.free.teamWorkspace).toBe(false);
@@ -25,7 +24,6 @@ describe("plan feature gates (freemium v8)", () => {
 
   it("gives Pro all advanced features and no ads", () => {
     expect(DEFAULT_PLAN_FLAGS.pro.noAds).toBe(true);
-    expect(DEFAULT_PLAN_FLAGS.pro.bankImport).toBe(true);
     expect(DEFAULT_PLAN_FLAGS.pro.advancedReports).toBe(true);
     expect(DEFAULT_PLAN_FLAGS.pro.teamWorkspace).toBe(true);
     expect(DEFAULT_PLAN_FLAGS.pro.ocrReceipts).toBe(true);

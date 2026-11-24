@@ -37,7 +37,8 @@ export function ArchiveBudgetButton({
         isPending={isPending}
         onConfirm={() => {
           startTransition(async () => {
-            await archiveBudgetAction(budgetId, workspaceId);
+            const res = await archiveBudgetAction(budgetId, workspaceId);
+            if (res.error) window.alert(res.error);
             setOpen(false);
           });
         }}

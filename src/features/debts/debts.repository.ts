@@ -171,6 +171,7 @@ export class DebtsRepository {
   async recordPayment(
     input: RecordDebtPaymentInput,
     userId: string,
+    copy: (debt: { name: string; creditor: string }) => { description: string; notes: string },
   ): Promise<{ paymentId: string; transactionId: string }> {
     await connectToDatabase();
 
@@ -229,6 +230,7 @@ export class DebtsRepository {
         throw new DebtOverpaymentError(remainingMinor);
       }
 
+      const labels = copy({ name: debt.name, creditor: debt.creditor });
       const createdTx = await TransactionModel.create(
         [
           {
@@ -238,8 +240,8 @@ export class DebtsRepository {
             type: "expense" as const,
             amount: amountMinor,
             transactionDate: input.paymentDate,
-            description: `سداد التزام: ${debt.name}`,
-            notes: input.notes?.trim() || `سداد للجهة: ${debt.creditor}`,
+            description: labels.description,
+            notes: input.notes?.trim() || labels.notes,
             createdBy: userId,
             idempotencyKey: input.idempotencyKey,
           },

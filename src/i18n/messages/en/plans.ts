@@ -40,7 +40,6 @@ const plans = {
  recurringExpenses: "Recurring expenses are available on the Pro plan only.",
  clientsAndProjects: "Clients and projects are available on Free (limited) and Pro.",
  savingsGoals: "Savings goals are available on the Pro plan only.",
- bankImport: "Bank statement import is available on the Pro plan.",
  advancedReports: "Advanced reports are available on the Pro plan.",
  workspaceBackup: "Backup and restore are available on the Pro plan.",
  pushNotifications: "Push notifications are available on the Pro plan.",

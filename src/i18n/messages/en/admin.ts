@@ -340,7 +340,6 @@ const admin = {
  recurringExpenses: "Recurring expenses",
  clientsAndProjects: "Clients & projects",
  savingsGoals: "Savings goals",
- bankImport: "Bank CSV import",
  advancedReports: "Advanced reports",
  workspaceBackup: "Workspace backup",
  pushNotifications: "Push notifications",

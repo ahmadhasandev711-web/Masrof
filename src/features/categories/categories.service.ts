@@ -25,6 +25,16 @@ export class CategoriesService {
     return ok(await this.repo.create(input));
   }
 
+  async update(
+    categoryId: string,
+    workspaceId: string,
+    updates: { name: string; nameEn?: string | null },
+  ) {
+    const updated = await this.repo.update(categoryId, workspaceId, updates);
+    if (!updated) return err(new NotFoundError("categoryNotFound"));
+    return ok(updated);
+  }
+
   async archive(categoryId: string, workspaceId: string) {
     const archived = await this.repo.archive(categoryId, workspaceId);
     if (!archived) return err(new NotFoundError("categoryNotFound"));

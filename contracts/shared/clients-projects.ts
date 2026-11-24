@@ -57,28 +57,56 @@ export type ProjectValidationKey =
   | "expectedAmountMin0"
   | "dueDateInvalid";
 
+const projectClientIdField = z
+  .string()
+  .optional()
+  .transform((v) => (v && v.length > 0 ? v : null));
+
+const projectNameField = (t: (key: ProjectValidationKey) => string) =>
+  z.string().trim().min(2, t("projectNameMin2")).max(140);
+
+const projectExpectedAmountField = (t: (key: ProjectValidationKey) => string) =>
+  z.coerce.number().min(0, t("expectedAmountMin0")).optional().nullable();
+
+const projectDueDateField = (t: (key: ProjectValidationKey) => string) =>
+  z.coerce.date({ message: t("dueDateInvalid") }).optional().nullable();
+
+const projectDescriptionField = z
+  .string()
+  .trim()
+  .max(500)
+  .optional()
+  .transform((v) => v ?? "");
+
 export function createProjectSchema(t: (key: ProjectValidationKey) => string) {
   return z.object({
     workspaceId: z.string().min(1),
-    clientId: z
-      .string()
-      .optional()
-      .transform((v) => (v && v.length > 0 ? v : null)),
-    name: z.string().trim().min(2, t("projectNameMin2")).max(140),
+    clientId: projectClientIdField,
+    name: projectNameField(t),
     status: z.enum(PROJECT_STATUSES, { message: t("projectStatusInvalid") }).default("active"),
-    expectedAmount: z.coerce.number().min(0, t("expectedAmountMin0")).optional().nullable(),
-    dueDate: z.coerce.date({ message: t("dueDateInvalid") }).optional().nullable(),
-    description: z
-      .string()
-      .trim()
-      .max(500)
-      .optional()
-      .transform((v) => v ?? ""),
+    expectedAmount: projectExpectedAmountField(t),
+    dueDate: projectDueDateField(t),
+    description: projectDescriptionField,
     idempotencyKey: idempotencyKeyField,
   });
 }
 
 export type CreateProjectInput = z.infer<ReturnType<typeof createProjectSchema>>;
+
+/** Edit name, client, amount, due date and description. Status stays on its own flow. */
+export function createUpdateProjectSchema(t: (key: ProjectValidationKey) => string) {
+  return z.object({
+    workspaceId: z.string().min(1),
+    projectId: z.string().min(1),
+    clientId: projectClientIdField,
+    name: projectNameField(t),
+    expectedAmount: projectExpectedAmountField(t),
+    dueDate: projectDueDateField(t),
+    description: projectDescriptionField,
+  });
+}
+
+export type UpdateProjectInput = z.infer<ReturnType<typeof createUpdateProjectSchema>>;
 
 export function updateProjectStatusSchema(t: (key: ProjectValidationKey) => string) {
   return z.object({

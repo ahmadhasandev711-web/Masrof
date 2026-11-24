@@ -72,6 +72,7 @@ export function CreateTransferForm({
             id="from-account"
             name="fromAccountId"
             className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right"
+            defaultValue={accounts[0]?.id ?? ""}
             required
             disabled={!canTransfer}
           >
@@ -91,6 +92,7 @@ export function CreateTransferForm({
             id="to-account"
             name="toAccountId"
             className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right"
+            defaultValue={accounts[1]?.id ?? accounts[0]?.id ?? ""}
             required
             disabled={!canTransfer}
           >

@@ -340,7 +340,6 @@ const admin = {
  recurringExpenses: "مصاريف متكررة",
  clientsAndProjects: "عملاء ومشاريع",
  savingsGoals: "أهداف ادخار",
- bankImport: "استيراد بنك CSV",
  advancedReports: "تقارير متقدمة",
  workspaceBackup: "نسخ احتياطي",
  pushNotifications: "إشعارات Push",

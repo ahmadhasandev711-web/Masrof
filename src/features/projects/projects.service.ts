@@ -1,7 +1,11 @@
 import "server-only";
 
 import { countActiveProjectsForWorkspace } from "@/features/subscriptions/plan-usage";
-import type { CreateProjectInput, UpdateProjectStatusInput } from "@/features/projects/schemas";
+import type {
+  CreateProjectInput,
+  UpdateProjectInput,
+  UpdateProjectStatusInput,
+} from "@/features/projects/schemas";
 import {
   ProjectsRepository,
   projectsRepository,
@@ -32,6 +36,39 @@ export class ProjectsService {
     if (existing) return ok(existing);
 
     return ok(await this.repo.create(input));
+  }
+
+  /**
+   * Rename and correct client, amount, due date or description.
+   * The client stays put once any non-archived invoice exists, because invoices
+   * are tied to both the project and that client.
+   */
+  async update(input: UpdateProjectInput) {
+    const project = await this.repo.findActive(input.projectId, input.workspaceId);
+    if (!project) return err(new NotFoundError("projectNotFound"));
+
+    const nextClientId = input.clientId;
+    const currentClientId = project.clientId ? String(project.clientId) : null;
+    if (nextClientId !== currentClientId) {
+      if ((await this.repo.countInvoices(input.projectId, input.workspaceId)) > 0) {
+        return err(new InvalidReferenceError("projectClientLocked"));
+      }
+    }
+
+    if (nextClientId) {
+      const client = await this.repo.findActiveClient(nextClientId, input.workspaceId);
+      if (!client) return err(new NotFoundError("clientNotFound"));
+    }
+
+    const updated = await this.repo.update(input.projectId, input.workspaceId, {
+      clientId: nextClientId,
+      name: input.name,
+      expectedAmount: input.expectedAmount ?? null,
+      dueDate: input.dueDate ?? null,
+      description: input.description,
+    });
+    if (!updated) return err(new NotFoundError("projectNotFound"));
+    return ok(updated);
   }
 
   /**

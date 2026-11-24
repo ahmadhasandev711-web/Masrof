@@ -57,9 +57,16 @@ describe("RecurringExpensesService", () => {
     expect(repo.create).not.toHaveBeenCalled();
   });
 
+  it("blocks archive without feature", async () => {
+    vi.mocked(requirePlanFeature).mockResolvedValue(err(new PlanFeatureError("rec")));
+    const result = await service.archive("u1", "r1", "ws1");
+    expect(result.ok).toBe(false);
+    expect(repo.archive).not.toHaveBeenCalled();
+  });
+
   it("NotFound on archive miss", async () => {
     repo.archive.mockResolvedValue(null);
-    const result = await service.archive("r1", "ws1");
+    const result = await service.archive("u1", "r1", "ws1");
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toBeInstanceOf(NotFoundError);
   });

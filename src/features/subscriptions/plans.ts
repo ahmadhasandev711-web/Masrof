@@ -16,7 +16,6 @@ export type PlanDefinition = {
   recurringExpenses: boolean;
   clientsAndProjects: boolean;
   savingsGoals: boolean;
-  bankImport: boolean;
   advancedReports: boolean;
   workspaceBackup: boolean;
   pushNotifications: boolean;
@@ -41,7 +40,6 @@ export type PlanFeature =
   | "recurringExpenses"
   | "clientsAndProjects"
   | "savingsGoals"
-  | "bankImport"
   | "advancedReports"
   | "workspaceBackup"
   | "pushNotifications"

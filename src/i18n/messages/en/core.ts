@@ -55,7 +55,6 @@ const core = {
  invoices: "Invoices",
  debts: "Debts & Liabilities",
  goals: "Savings goals",
- import: "Bank import",
  backup: "Backup",
  plan: "My plan",
  settings: "Workspace settings",
@@ -166,6 +165,7 @@ const core = {
  paymentNotFound: "Payment not found",
  clientHasOpenInvoices: "This client still has invoices due. Collect or cancel them first, then archive.",
  projectHasOpenInvoices: "This project still has invoices due. Collect or cancel them first, then archive.",
+ projectClientLocked: "This project has invoices, so its client can't be changed.",
  useRecordPayment: "“Paid” is set by recording a payment, not by changing the status",
  planLimitReached: "You've reached the limit of your current plan",
  planFeatureRequired: "This feature isn't included in your current plan",
@@ -239,13 +239,6 @@ const core = {
  recurringExpenseNotFound: "Recurring expense not found",
  budgetCategoryInvalid: "Invalid category for creating a budget",
  savingsGoalNotFound: "Savings goal not found",
- importDataIncomplete: "Incomplete data",
- importFileEmpty: "File is empty or has only one row",
- importColumnsNotFound:
- "Could not find date and amount columns — use headers: date, description, amount",
- importBankDefault: "Bank import",
- importBankNotes: "Imported from bank statement",
- importNoRows: "No rows were imported — check the file format",
  pushEnabled: "Push notifications enabled on this device.",
  pushDisabled: "Push notifications disabled on this device.",
  pushTestSent: "Test notification sent.",
@@ -317,6 +310,7 @@ const core = {
  noGoals: "No savings goals yet",
  noInvoices: "No invoices yet",
  noTransfers: "No transfers yet",
+ transfersHint: "Easily move money between bank accounts and cash vaults to track liquidity accurately.",
  },
 } as const;
 

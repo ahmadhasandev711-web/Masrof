@@ -205,6 +205,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: mutateClient
+      summary: Update or archive a client
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+  /api/mobile/clients/{id}:
+    get:
+      operationId: getClientStatement
+      summary: Client statement
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileClientStatementResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileClientStatementResponse"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
   /api/mobile/projects:
     get:
       operationId: listProjects
@@ -248,6 +297,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileProjectCreated"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: mutateProject
+      summary: "Update, change status, or archive a project"
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+  /api/mobile/projects/{id}:
+    get:
+      operationId: getProjectDetails
+      summary: Project financial details
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileProjectDetailsResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileProjectDetailsResponse"
         4XX:
           description: Client / auth / plan error
           content:
@@ -303,6 +401,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: archiveAccount
+      summary: Archive account
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
   /api/mobile/categories:
     get:
       operationId: listCategories
@@ -346,6 +468,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileCategoryCreated"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: archiveCategory
+      summary: Update or archive a custom category
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
         4XX:
           description: Client / auth / plan error
           content:
@@ -401,6 +547,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: mutateTransaction
+      summary: Update or delete a transaction
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
   /api/mobile/transfers:
     get:
       operationId: listTransfers
@@ -444,6 +614,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileId"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: archiveTransfer
+      summary: Cancel a transfer
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
         4XX:
           description: Client / auth / plan error
           content:
@@ -500,8 +694,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/MobileError"
     patch:
-      operationId: updateInvoiceStatus
-      summary: Update invoice status
+      operationId: mutateInvoice
+      summary: "Update, cancel, archive, or share an invoice"
       tags:
         - mobile
       responses:
@@ -517,6 +711,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileOk"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+  /api/mobile/invoices/{id}:
+    get:
+      operationId: getInvoice
+      summary: Invoice with payment history
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileInvoiceDetailResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileInvoiceDetailResponse"
         4XX:
           description: Client / auth / plan error
           content:
@@ -542,6 +761,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileInvoicePaymentCreated"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: voidInvoicePayment
+      summary: Void an invoice payment
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
         4XX:
           description: Client / auth / plan error
           content:
@@ -670,6 +913,79 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: archiveDebt
+      summary: Archive a debt
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+  /api/mobile/debts/payments:
+    get:
+      operationId: listDebtPayments
+      summary: List debt payments
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileDebtPaymentsResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileDebtPaymentsResponse"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    post:
+      operationId: recordDebtPayment
+      summary: Record a debt payment
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileDebtPaymentCreated"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileDebtPaymentCreated"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
   /api/mobile/budgets:
     get:
       operationId: listBudgets
@@ -713,6 +1029,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileId"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    patch:
+      operationId: archiveBudget
+      summary: Archive a budget
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileOk"
         4XX:
           description: Client / auth / plan error
           content:
@@ -770,7 +1110,7 @@ paths:
                 $ref: "#/components/schemas/MobileError"
     patch:
       operationId: updateGoalProgress
-      summary: Update goal progress
+      summary: Add goal progress or archive a goal
       tags:
         - mobile
       responses:
@@ -843,7 +1183,7 @@ paths:
                 $ref: "#/components/schemas/MobileError"
     patch:
       operationId: recordRecurring
-      summary: Record recurring expense
+      summary: Record a due expense or stop a recurring expense
       tags:
         - mobile
       responses:
@@ -909,6 +1249,80 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MobileReportsResponse"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+  /api/mobile/team:
+    get:
+      operationId: listTeam
+      summary: List workspace members
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileTeamResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileTeamResponse"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+  /api/mobile/backup:
+    get:
+      operationId: exportBackup
+      summary: Download a workspace backup
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileBackupExportResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileBackupExportResponse"
+        4XX:
+          description: Client / auth / plan error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileError"
+    post:
+      operationId: restoreBackup
+      summary: Restore a backup into a new workspace
+      tags:
+        - mobile
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileBackupRestoreResponse"
+        201:
+          description: Created (when applicable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileBackupRestoreResponse"
         4XX:
           description: Client / auth / plan error
           content:
@@ -1096,6 +1510,10 @@ components:
           type: boolean
         status:
           type: string
+          enum:
+            - active
+            - cancelled
+            - suspended
         expiresAt:
           type:
             - string
@@ -1103,11 +1521,13 @@ components:
         planName:
           type: string
         features:
-          type: object
-          propertyNames:
+          type: array
+          items:
             type: string
-          additionalProperties:
-{}
+        proPrice:
+          type: string
+        upgradeWhatsappUrl:
+          type: string
       required:
         - plan
         - showAds
@@ -1116,6 +1536,8 @@ components:
         - expiresAt
         - planName
         - features
+        - proPrice
+        - upgradeWhatsappUrl
       additionalProperties: false
     MobileClientsListResponse:
       type: object
@@ -1153,6 +1575,23 @@ components:
               - email
               - phone
             additionalProperties: false
+        usage:
+          type: object
+          properties:
+            used:
+              type: number
+            limit:
+              type: number
+            unlimited:
+              type: boolean
+            atLimit:
+              type: boolean
+          required:
+            - used
+            - limit
+            - unlimited
+            - atLimit
+          additionalProperties: false
       required:
         - items
       additionalProperties: false
@@ -1176,6 +1615,82 @@ components:
         - name
         - email
         - phone
+      additionalProperties: false
+    MobileClientStatementResponse:
+      type: object
+      properties:
+        client:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            email:
+              type:
+                - string
+                - null
+            phone:
+              type:
+                - string
+                - null
+          required:
+            - id
+            - name
+            - email
+            - phone
+          additionalProperties: false
+        totalInvoiced:
+          type: number
+        totalPaid:
+          type: number
+        currentOutstanding:
+          type: number
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              date:
+                type: string
+              type:
+                type: string
+                enum:
+                  - invoice
+                  - payment
+              numberOrRef:
+                type: string
+              description:
+                type: string
+              projectName:
+                type:
+                  - string
+                  - null
+              debit:
+                type: number
+              credit:
+                type: number
+              runningBalance:
+                type: number
+            required:
+              - id
+              - date
+              - type
+              - numberOrRef
+              - description
+              - projectName
+              - debit
+              - credit
+              - runningBalance
+            additionalProperties: false
+      required:
+        - client
+        - totalInvoiced
+        - totalPaid
+        - currentOutstanding
+        - entries
       additionalProperties: false
     MobileProjectsListResponse:
       type: object
@@ -1236,6 +1751,23 @@ components:
               - clientId
               - clientName
             additionalProperties: false
+        usage:
+          type: object
+          properties:
+            used:
+              type: number
+            limit:
+              type: number
+            unlimited:
+              type: boolean
+            atLimit:
+              type: boolean
+          required:
+            - used
+            - limit
+            - unlimited
+            - atLimit
+          additionalProperties: false
       required:
         - items
       additionalProperties: false
@@ -1252,6 +1784,179 @@ components:
         - id
         - name
         - status
+      additionalProperties: false
+    MobileProjectDetailsResponse:
+      type: object
+      properties:
+        project:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            status:
+              type: string
+            expectedAmount:
+              type:
+                - number
+                - null
+            dueDate:
+              type:
+                - string
+                - null
+            description:
+              type: string
+            clientId:
+              type:
+                - string
+                - null
+            createdAt:
+              type: string
+          required:
+            - id
+            - name
+            - status
+            - expectedAmount
+            - dueDate
+            - description
+            - clientId
+            - createdAt
+          additionalProperties: false
+        client:
+          anyOf:
+            - type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type:
+                    - string
+                    - null
+                phone:
+                  type:
+                    - string
+                    - null
+              required:
+                - id
+                - name
+                - email
+                - phone
+              additionalProperties: false
+            - type: null
+        summary:
+          type: object
+          properties:
+            expectedAmount:
+              type:
+                - number
+                - null
+            invoicedTotal:
+              type: number
+            incomeTotal:
+              type: number
+            expenseTotal:
+              type: number
+            netProfit:
+              type: number
+            profitMargin:
+              type:
+                - number
+                - null
+            isOverBudget:
+              type: boolean
+            collectionProgressPercent:
+              type: number
+            budgetBurnPercent:
+              type:
+                - number
+                - null
+          required:
+            - expectedAmount
+            - invoicedTotal
+            - incomeTotal
+            - expenseTotal
+            - netProfit
+            - profitMargin
+            - isOverBudget
+            - collectionProgressPercent
+            - budgetBurnPercent
+          additionalProperties: false
+        invoices:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              invoiceNumber:
+                type: string
+              issueDate:
+                type: string
+              dueDate:
+                type:
+                  - string
+                  - null
+              total:
+                type: number
+              paidAmount:
+                type: number
+              remainingAmount:
+                type: number
+              status:
+                type: string
+              financialStatus:
+                type: string
+            required:
+              - id
+              - invoiceNumber
+              - issueDate
+              - dueDate
+              - total
+              - paidAmount
+              - remainingAmount
+              - status
+              - financialStatus
+            additionalProperties: false
+        transactions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                enum:
+                  - income
+                  - expense
+              amount:
+                type: number
+              transactionDate:
+                type: string
+              description:
+                type: string
+              categoryName:
+                type: string
+              accountName:
+                type: string
+            required:
+              - id
+              - type
+              - amount
+              - transactionDate
+              - description
+              - categoryName
+              - accountName
+            additionalProperties: false
+      required:
+        - project
+        - client
+        - summary
+        - invoices
+        - transactions
       additionalProperties: false
     MobileAccountsListResponse:
       type: object
@@ -1272,6 +1977,8 @@ components:
                   - string
                   - null
               balance:
+                type: number
+              openingBalance:
                 type: number
             required:
               - id
@@ -1397,6 +2104,16 @@ components:
                 type:
                   - string
                   - null
+              linkedInvoiceId:
+                type:
+                  - string
+                  - null
+              linkedInvoiceNumber:
+                type:
+                  - string
+                  - null
+              linkedDebt:
+                type: boolean
             required:
               - id
               - type
@@ -1445,79 +2162,54 @@ components:
         - id
       additionalProperties: false
     MobileTransfersListResponse:
-      anyOf:
-        - type: object
-          properties:
-            items:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  amount:
-                    type: number
-                  transferDate:
-                    type: string
-                  fromAccountId:
-                    type: string
-                  toAccountId:
-                    type: string
-                  notes:
-                    type: string
-                required:
-                  - id
-                  - amount
-                additionalProperties: false
-          required:
-            - items
-          additionalProperties: false
-        - type: object
-          properties:
-            items:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  amount:
-                    type: number
-                  transferDate:
-                    type: string
-                  fromAccountId:
-                    type: string
-                  toAccountId:
-                    type: string
-                  notes:
-                    type: string
-                required:
-                  - id
-                  - amount
-                additionalProperties: false
-            total:
-              type: integer
-              minimum: 0
-              maximum: 9007199254740991
-            page:
-              type: integer
-              exclusiveMinimum: 0
-              maximum: 9007199254740991
-            pageSize:
-              type: integer
-              exclusiveMinimum: 0
-              maximum: 9007199254740991
-            totalPages:
-              type: integer
-              exclusiveMinimum: 0
-              maximum: 9007199254740991
-          required:
-            - items
-            - total
-            - page
-            - pageSize
-            - totalPages
-          additionalProperties: false
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              amount:
+                type: number
+              transferDate:
+                type: string
+              description:
+                type: string
+              fromAccountName:
+                type: string
+              toAccountName:
+                type: string
+              currency:
+                type: string
+            required:
+              - id
+              - amount
+            additionalProperties: false
+        total:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        page:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+        pageSize:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+        totalPages:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+        - totalPages
+      additionalProperties: false
     MobileInvoicesPageResponse:
       type: object
       properties:
@@ -1585,6 +2277,20 @@ components:
                 type:
                   - string
                   - null
+              displayStatus:
+                type: string
+              notes:
+                type: string
+              clientPhone:
+                type:
+                  - string
+                  - null
+              shareToken:
+                type:
+                  - string
+                  - null
+              isShareable:
+                type: boolean
             required:
               - id
               - invoiceNumber
@@ -1607,6 +2313,43 @@ components:
           type: integer
           exclusiveMinimum: 0
           maximum: 9007199254740991
+        summary:
+          type: object
+          properties:
+            totalInvoiced:
+              type: number
+            totalPaid:
+              type: number
+            totalRemaining:
+              type: number
+            totalOverdue:
+              type: number
+            count:
+              type: number
+          required:
+            - totalInvoiced
+            - totalPaid
+            - totalRemaining
+            - totalOverdue
+            - count
+          additionalProperties: false
+        usage:
+          type: object
+          properties:
+            used:
+              type: number
+            limit:
+              type: number
+            unlimited:
+              type: boolean
+            atLimit:
+              type: boolean
+          required:
+            - used
+            - limit
+            - unlimited
+            - atLimit
+          additionalProperties: false
       required:
         - items
         - total
@@ -1625,6 +2368,126 @@ components:
       required:
         - id
         - invoiceNumber
+      additionalProperties: false
+    MobileInvoiceDetailResponse:
+      type: object
+      properties:
+        invoice:
+          type: object
+          properties:
+            id:
+              type: string
+            invoiceNumber:
+              type: string
+            issueDate:
+              type: string
+            dueDate:
+              type:
+                - string
+                - null
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  description:
+                    type: string
+                  quantity:
+                    type: number
+                  unitPrice:
+                    type: number
+                  amount:
+                    type: number
+                required:
+                  - description
+                  - quantity
+                  - unitPrice
+                  - amount
+                additionalProperties: false
+            subtotal:
+              type: number
+            taxEnabled:
+              type: boolean
+            taxRatePercent:
+              type: number
+            taxAmount:
+              type: number
+            total:
+              type: number
+            paidAmount:
+              type: number
+            remainingAmount:
+              type: number
+            clientName:
+              type: string
+            clientId:
+              type: string
+            status:
+              type: string
+            financialStatus:
+              type: string
+            projectId:
+              type:
+                - string
+                - null
+            projectName:
+              type:
+                - string
+                - null
+            displayStatus:
+              type: string
+            notes:
+              type: string
+            clientPhone:
+              type:
+                - string
+                - null
+            shareToken:
+              type:
+                - string
+                - null
+            isShareable:
+              type: boolean
+          required:
+            - id
+            - invoiceNumber
+            - issueDate
+            - total
+          additionalProperties: false
+        payments:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              accountId:
+                type: string
+              accountName:
+                type: string
+              amount:
+                type: number
+              paymentDate:
+                type: string
+              paymentMethod:
+                type: string
+              reference:
+                type: string
+              notes:
+                type: string
+            required:
+              - id
+              - accountId
+              - accountName
+              - amount
+              - paymentDate
+              - paymentMethod
+              - reference
+              - notes
+            additionalProperties: false
+      required:
+        - invoice
+        - payments
       additionalProperties: false
     MobileInvoicePaymentCreated:
       type: object
@@ -1731,24 +2594,77 @@ components:
             properties:
               id:
                 type: string
-              _id:
-                type: string
-              title:
-                type: string
               name:
                 type: string
-              amount:
+              creditor:
+                type: string
+              totalAmount:
+                type: number
+              paidAmount:
                 type: number
               remainingAmount:
                 type: number
+              progressPercent:
+                type: number
+              currency:
+                type: string
+              dueDate:
+                type:
+                  - string
+                  - null
               status:
                 type: string
-            additionalProperties:
-{}
+                enum:
+                  - active
+                  - paid
+              category:
+                type: string
+              notes:
+                type: string
+            required:
+              - id
+              - name
+              - creditor
+              - totalAmount
+              - paidAmount
+              - remainingAmount
+              - progressPercent
+              - currency
+              - dueDate
+              - status
+              - category
+              - notes
+            additionalProperties: false
         summary:
-{}
+          type: object
+          properties:
+            totalLiabilities:
+              type: number
+            totalPaid:
+              type: number
+            remainingLiabilities:
+              type: number
+            activeCount:
+              type: integer
+              minimum: -9007199254740991
+              maximum: 9007199254740991
+            paidCount:
+              type: integer
+              minimum: -9007199254740991
+              maximum: 9007199254740991
+            currency:
+              type: string
+          required:
+            - totalLiabilities
+            - totalPaid
+            - remainingLiabilities
+            - activeCount
+            - paidCount
+            - currency
+          additionalProperties: false
       required:
         - items
+        - summary
       additionalProperties: false
     MobileDebtCreated:
       type: object
@@ -1757,6 +2673,48 @@ components:
           type: string
       required:
         - id
+      additionalProperties: false
+    MobileDebtPaymentsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              amount:
+                type: number
+              paymentDate:
+                type: string
+              accountName:
+                type: string
+              reference:
+                type: string
+              notes:
+                type: string
+            required:
+              - id
+              - amount
+              - paymentDate
+              - accountName
+              - reference
+              - notes
+            additionalProperties: false
+      required:
+        - items
+      additionalProperties: false
+    MobileDebtPaymentCreated:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        transactionId:
+          type: string
+      required:
+        - paymentId
+        - transactionId
       additionalProperties: false
     MobileBudgetsListResponse:
       type: object
@@ -1773,12 +2731,28 @@ components:
               amount:
                 type: number
               spent:
-                type: number
+                type:
+                  - number
+                  - null
               remaining:
-                type: number
+                type:
+                  - number
+                  - null
               percentage:
-                type: number
+                type:
+                  - number
+                  - null
+              conversionIncomplete:
+                type: boolean
               categoryId:
+                type:
+                  - string
+                  - null
+              categoryName:
+                type:
+                  - string
+                  - null
+              categoryIcon:
                 type:
                   - string
                   - null
@@ -1789,7 +2763,10 @@ components:
               - spent
               - remaining
               - percentage
+              - conversionIncomplete
               - categoryId
+              - categoryName
+              - categoryIcon
             additionalProperties: false
       required:
         - items
@@ -1827,6 +2804,23 @@ components:
               - percentage
               - deadline
             additionalProperties: false
+        usage:
+          type: object
+          properties:
+            used:
+              type: number
+            limit:
+              type: number
+            unlimited:
+              type: boolean
+            atLimit:
+              type: boolean
+          required:
+            - used
+            - limit
+            - unlimited
+            - atLimit
+          additionalProperties: false
       required:
         - items
       additionalProperties: false
@@ -1840,16 +2834,64 @@ components:
             properties:
               id:
                 type: string
-              _id:
-                type: string
-              name:
-                type: string
               amount:
                 type: number
-            additionalProperties:
-{}
+              description:
+                type: string
+              frequency:
+                type: string
+                enum:
+                  - monthly
+                  - weekly
+              nextDueDate:
+                type: string
+              accountName:
+                type: string
+              categoryName:
+                type: string
+              categoryNameEn:
+                type:
+                  - string
+                  - null
+              categorySlug:
+                type:
+                  - string
+                  - null
+            required:
+              - id
+              - amount
+              - description
+              - frequency
+              - nextDueDate
+              - accountName
+              - categoryName
+              - categoryNameEn
+              - categorySlug
+            additionalProperties: false
+        usage:
+          type: object
+          properties:
+            used:
+              type: number
+            limit:
+              type: number
+            unlimited:
+              type: boolean
+            atLimit:
+              type: boolean
+          required:
+            - used
+            - limit
+            - unlimited
+            - atLimit
+          additionalProperties: false
+        whatsappPhone:
+          type:
+            - string
+            - null
       required:
         - items
+        - whatsappPhone
       additionalProperties: false
     MobileDashboardResponse:
       type: object
@@ -1907,15 +2949,166 @@ components:
         preset:
           type: string
         range:
-{}
+          type: object
+          properties:
+            from:
+              type:
+                - string
+                - null
+            to:
+              type:
+                - string
+                - null
+          required:
+            - from
+            - to
+          additionalProperties: false
         summary:
-{}
+          type: object
+          properties:
+            missingRates:
+              type: array
+              items:
+                type: string
+            canConvertAll:
+              type: boolean
+            income:
+              type:
+                - number
+                - null
+            expense:
+              type:
+                - number
+                - null
+            net:
+              type:
+                - number
+                - null
+          required:
+            - missingRates
+            - canConvertAll
+            - income
+            - expense
+            - net
+          additionalProperties: false
         expenseBreakdown:
-{}
+          type: object
+          properties:
+            missingRates:
+              type: array
+              items:
+                type: string
+            canConvertAll:
+              type: boolean
+            rows:
+              type: array
+              items:
+                type: object
+                properties:
+                  categoryId:
+                    type: string
+                  name:
+                    type: string
+                  icon:
+                    type:
+                      - string
+                      - null
+                  total:
+                    type:
+                      - number
+                      - null
+                required:
+                  - categoryId
+                  - name
+                  - icon
+                  - total
+                additionalProperties: false
+          required:
+            - missingRates
+            - canConvertAll
+            - rows
+          additionalProperties: false
         incomeBreakdown:
-{}
+          type: object
+          properties:
+            missingRates:
+              type: array
+              items:
+                type: string
+            canConvertAll:
+              type: boolean
+            rows:
+              type: array
+              items:
+                type: object
+                properties:
+                  categoryId:
+                    type: string
+                  name:
+                    type: string
+                  icon:
+                    type:
+                      - string
+                      - null
+                  total:
+                    type:
+                      - number
+                      - null
+                required:
+                  - categoryId
+                  - name
+                  - icon
+                  - total
+                additionalProperties: false
+          required:
+            - missingRates
+            - canConvertAll
+            - rows
+          additionalProperties: false
         trend:
-{}
+          type: object
+          properties:
+            missingRates:
+              type: array
+              items:
+                type: string
+            canConvertAll:
+              type: boolean
+            months:
+              type: array
+              items:
+                type: object
+                properties:
+                  label:
+                    type: string
+                  year:
+                    type: integer
+                    minimum: -9007199254740991
+                    maximum: 9007199254740991
+                  month:
+                    type: integer
+                    minimum: -9007199254740991
+                    maximum: 9007199254740991
+                  income:
+                    type:
+                      - number
+                      - null
+                  expense:
+                    type:
+                      - number
+                      - null
+                required:
+                  - label
+                  - year
+                  - month
+                  - income
+                  - expense
+                additionalProperties: false
+          required:
+            - missingRates
+            - canConvertAll
+            - months
+          additionalProperties: false
         currency:
           type: string
       required:
@@ -1926,8 +3119,55 @@ components:
         - incomeBreakdown
         - trend
         - currency
-      additionalProperties:
-{}
+      additionalProperties: false
+    MobileTeamResponse:
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              email:
+                type: string
+              role:
+                type: string
+                enum:
+                  - owner
+                  - member
+                  - viewer
+            required:
+              - id
+              - name
+              - email
+              - role
+            additionalProperties: false
+      required:
+        - members
+      additionalProperties: false
+    MobileBackupExportResponse:
+      type: object
+      properties:
+        filename:
+          type: string
+        json:
+          type: string
+      required:
+        - filename
+        - json
+      additionalProperties: false
+    MobileBackupRestoreResponse:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+      required:
+        - workspaceId
+      additionalProperties: false
   securitySchemes:
     sessionCookie:
       type: apiKey

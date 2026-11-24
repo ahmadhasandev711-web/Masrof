@@ -5,4 +5,6 @@ export type TransferListItem = {
   description: string;
   fromAccountName: string;
   toAccountName: string;
+  /** Resolved currency of the two accounts (they are always the same). */
+  currency: string;
 };

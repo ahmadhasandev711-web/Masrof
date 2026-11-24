@@ -12,7 +12,6 @@ export type PlanFlags = {
   recurringExpenses: boolean;
   clientsAndProjects: boolean;
   savingsGoals: boolean;
-  bankImport: boolean;
   advancedReports: boolean;
   workspaceBackup: boolean;
   pushNotifications: boolean;
@@ -75,7 +74,6 @@ export const PLAN_FLAG_KEYS = [
   "recurringExpenses",
   "clientsAndProjects",
   "savingsGoals",
-  "bankImport",
   "advancedReports",
   "workspaceBackup",
   "pushNotifications",
@@ -106,7 +104,6 @@ const FREE_FLAGS: PlanFlags = {
   recurringExpenses: false,
   clientsAndProjects: true,
   savingsGoals: false,
-  bankImport: false,
   advancedReports: false,
   workspaceBackup: false,
   pushNotifications: false,
@@ -127,7 +124,6 @@ const PRO_FLAGS: PlanFlags = {
   recurringExpenses: true,
   clientsAndProjects: true,
   savingsGoals: true,
-  bankImport: true,
   advancedReports: true,
   workspaceBackup: true,
   pushNotifications: true,

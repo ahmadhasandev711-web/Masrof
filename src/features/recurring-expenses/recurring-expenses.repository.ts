@@ -149,7 +149,12 @@ export class RecurringExpensesRepository {
   }
 
   /** Records the expense as a transaction and advances nextDueDate atomically with idempotency. */
-  async record(recurringId: string, workspaceId: string, userId: string) {
+  async record(
+    recurringId: string,
+    workspaceId: string,
+    userId: string,
+    fallbackDescription: string,
+  ) {
     const mongooseInstance = await connectToDatabase();
 
     return await runInTransaction(mongooseInstance, async (session) => {
@@ -201,7 +206,7 @@ export class RecurringExpensesRepository {
             type: "expense" as const,
             amount: recurring.amount,
             transactionDate: currentDueDate,
-            description: recurring.description || "مصروف متكرر",
+            description: recurring.description?.trim() || fallbackDescription,
             notes: "",
             createdBy: userId,
           },

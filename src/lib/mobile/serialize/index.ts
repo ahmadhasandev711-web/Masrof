@@ -226,15 +226,32 @@ export function toMobileInvoiceTemplate(
   };
 }
 
+function minorOrNull(value: unknown): number | null {
+  if (value == null) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
 export function toMobileBudget(item: Record<string, unknown>): MobileBudget {
+  const category = item.categoryId;
+  const populated =
+    category && typeof category === "object"
+      ? (category as { _id?: unknown; name?: string; icon?: string | null })
+      : null;
   return {
     id: asId(item._id ?? item.id),
     name: String(item.name ?? ""),
     amount: Number(item.amount ?? 0),
-    spent: Number(item.spent ?? 0),
-    remaining: Number(item.remaining ?? 0),
-    percentage: Number(item.percentage ?? 0),
-    categoryId: item.categoryId ? asId(item.categoryId) : null,
+    spent: minorOrNull(item.spent),
+    remaining: minorOrNull(item.remaining),
+    percentage: minorOrNull(item.percentage),
+    conversionIncomplete: Boolean(item.conversionIncomplete),
+    categoryId: populated ? asId(populated._id) : category ? asId(category) : null,
+    categoryName: item.categoryName != null ? String(item.categoryName) : populated?.name ?? null,
+    categoryIcon:
+      item.categoryIcon != null
+        ? String(item.categoryIcon)
+        : populated?.icon ?? null,
   };
 }
 
@@ -271,8 +288,9 @@ export function toMobileTransfer(item: Record<string, unknown>) {
     id: asId(item._id ?? item.id),
     amount: Number(item.amount ?? 0),
     transferDate: asIsoDate(item.transferDate) ?? undefined,
-    fromAccountId: item.fromAccountId ? asId(item.fromAccountId) : undefined,
-    toAccountId: item.toAccountId ? asId(item.toAccountId) : undefined,
-    notes: item.notes != null ? String(item.notes) : undefined,
+    description: item.description != null ? String(item.description) : "",
+    fromAccountName: item.fromAccountName != null ? String(item.fromAccountName) : "",
+    toAccountName: item.toAccountName != null ? String(item.toAccountName) : "",
+    currency: item.currency != null ? String(item.currency) : undefined,
   };
 }

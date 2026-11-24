@@ -13,7 +13,9 @@ import { TransactionModel } from "@/models/transaction";
 import { TransferModel } from "@/models/transfer";
 import { InvoiceModel } from "@/models/invoice";
 import { SavingsGoalModel } from "@/models/savings-goal";
-import { BACKUP_VERSION, workspaceBackupSchema, type WorkspaceBackupManifest } from "@/features/backup/schemas";
+import { DebtModel } from "@/models/debt";
+import { DebtPaymentModel } from "@/models/debt-payment";
+import { BACKUP_VERSION, type WorkspaceBackupManifest } from "@/features/backup/schemas";
 
 function collectCategoryIds(docs: Array<Record<string, unknown>>, field = "categoryId") {
   const ids = new Set<string>();
@@ -45,6 +47,8 @@ export async function fetchWorkspaceBackupPayload(
     transfers,
     invoices,
     savingsGoals,
+    debts,
+    debtPayments,
   ] = await Promise.all([
     CategoryModel.find({ workspaceId, isSystem: false }).lean(),
     AccountModel.find({ workspaceId }).lean(),
@@ -56,6 +60,8 @@ export async function fetchWorkspaceBackupPayload(
     TransferModel.find({ workspaceId }).lean(),
     InvoiceModel.find({ workspaceId }).lean(),
     SavingsGoalModel.find({ workspaceId }).lean(),
+    DebtModel.find({ workspaceId }).lean(),
+    DebtPaymentModel.find({ workspaceId }).lean(),
   ]);
 
   const referencedCategoryIds = new Set<string>([
@@ -90,6 +96,8 @@ export async function fetchWorkspaceBackupPayload(
     transfers: toPlain(transfers),
     invoices: toPlain(invoices),
     savingsGoals: toPlain(savingsGoals),
+    debts: toPlain(debts),
+    debtPayments: toPlain(debtPayments),
   };
 
   return {
@@ -116,6 +124,8 @@ export async function fetchWorkspaceBackupPayload(
         transfers: collections.transfers.length,
         invoices: collections.invoices.length,
         savingsGoals: collections.savingsGoals.length,
+        debts: collections.debts.length,
+        debtPayments: collections.debtPayments.length,
       },
     },
   };
@@ -125,30 +135,4 @@ export function backupFilename(workspaceName: string) {
   const safeName = workspaceName.replace(/[^\p{L}\p{N}]+/gu, "-").slice(0, 40) || "workspace";
   const date = new Date().toISOString().slice(0, 10);
   return `sanadat-backup-${safeName}-${date}.json`;
-}
-
-export const BACKUP_MAX_BYTES = 12 * 1024 * 1024;
-
-export type BackupParseErrorCode = "backupTooLarge" | "backupInvalidJson" | "backupIncompatible";
-
-export function parseBackupJson(
-  raw: string,
-): WorkspaceBackupManifest | { errorCode: BackupParseErrorCode } {
-  if (raw.length > BACKUP_MAX_BYTES) {
-    return { errorCode: "backupTooLarge" };
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return { errorCode: "backupInvalidJson" };
-  }
-
-  const result = workspaceBackupSchema.safeParse(parsed);
-  if (!result.success) {
-    return { errorCode: "backupIncompatible" };
-  }
-
-  return result.data;
 }

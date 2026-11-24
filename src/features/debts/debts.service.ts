@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/config";
 import type { SupportedCurrency } from "@/lib/currency/constants";
 import type { CreateDebtInput, RecordDebtPaymentInput } from "@/features/debts/schemas";
 import {
@@ -39,12 +41,18 @@ export class DebtsService {
   async recordPayment(
     userId: string,
     input: RecordDebtPaymentInput,
+    locale: AppLocale = "ar",
   ): Promise<Result<{ paymentId: string; transactionId: string }>> {
     const feature = await this.requireAccess(userId, input.workspaceId);
     if (!feature.ok) return feature;
 
+    const t = await getTranslations({ locale, namespace: "forms.debts" });
+
     try {
-      const payment = await this.repo.recordPayment(input, userId);
+      const payment = await this.repo.recordPayment(input, userId, (debt) => ({
+        description: t("paymentTxDescription", { name: debt.name }),
+        notes: t("paymentTxNotes", { creditor: debt.creditor }),
+      }));
       return ok(payment);
     } catch (error) {
       if (isAppError(error)) return err(error);

@@ -25,10 +25,14 @@ export const mobilePlanResponseSchema = z.object({
   plan: z.string(),
   showAds: z.boolean(),
   isSuspended: z.boolean(),
-  status: z.string(),
+  status: z.enum(["active", "cancelled", "suspended"]),
   expiresAt: z.string().nullable(),
   planName: z.string(),
-  features: z.record(z.string(), z.unknown()),
+  /** Localized sentences for what this plan includes. */
+  features: z.array(z.string()),
+  /** Price phrase that fills `{proPrice}` in the upgrade sentence. */
+  proPrice: z.string(),
+  upgradeWhatsappUrl: z.string(),
 });
 
 export type MobilePlanResponse = z.infer<typeof mobilePlanResponseSchema>;

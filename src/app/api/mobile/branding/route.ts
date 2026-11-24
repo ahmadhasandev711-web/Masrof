@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { updateWorkspaceBrandingSchema } from "@/features/workspaces/branding-schema";
 import { workspacesService } from "@/features/workspaces/workspaces.service";
 import { requireWorkspaceOwner } from "@/features/workspaces/access";
@@ -41,6 +42,8 @@ export async function POST(request: Request) {
       return resultToResponse(result);
     }
 
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard/invoices");
     return NextResponse.json(mobileOkSchema.parse({ ok: true }));
   } catch (error) {
     return thrownToMobileResponse(error);

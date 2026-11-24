@@ -26,12 +26,19 @@ import {
   mobileInvoiceTemplateCreatedSchema,
   mobileInvoiceDetailResponseSchema,
 } from "./invoices";
-import { mobileDebtsListResponseSchema, mobileDebtCreatedSchema } from "./debts";
+import {
+  mobileDebtsListResponseSchema,
+  mobileDebtCreatedSchema,
+  mobileDebtPaymentsResponseSchema,
+  mobileDebtPaymentCreatedSchema,
+} from "./debts";
 import { mobileBudgetsListResponseSchema } from "./budgets";
 import { mobileGoalsListResponseSchema } from "./goals";
 import { mobileRecurringListResponseSchema } from "./recurring";
 import { mobileDashboardResponseSchema } from "./dashboard";
 import { mobileReportsResponseSchema } from "./reports";
+import { mobileTeamResponseSchema } from "./team";
+import { mobileBackupExportResponseSchema, mobileBackupRestoreResponseSchema } from "./backup";
 
 export const mobileContractSchemas = {
   MobileError: mobileErrorSchema,
@@ -62,11 +69,16 @@ export const mobileContractSchemas = {
   MobileInvoiceTemplateCreated: mobileInvoiceTemplateCreatedSchema,
   MobileDebtsListResponse: mobileDebtsListResponseSchema,
   MobileDebtCreated: mobileDebtCreatedSchema,
+  MobileDebtPaymentsResponse: mobileDebtPaymentsResponseSchema,
+  MobileDebtPaymentCreated: mobileDebtPaymentCreatedSchema,
   MobileBudgetsListResponse: mobileBudgetsListResponseSchema,
   MobileGoalsListResponse: mobileGoalsListResponseSchema,
   MobileRecurringListResponse: mobileRecurringListResponseSchema,
   MobileDashboardResponse: mobileDashboardResponseSchema,
   MobileReportsResponse: mobileReportsResponseSchema,
+  MobileTeamResponse: mobileTeamResponseSchema,
+  MobileBackupExportResponse: mobileBackupExportResponseSchema,
+  MobileBackupRestoreResponse: mobileBackupRestoreResponseSchema,
 } as const;
 
 export const mobileOpenApiPaths: Array<{
@@ -88,19 +100,20 @@ export const mobileOpenApiPaths: Array<{
   { path: "/api/mobile/clients/{id}", method: "get", operationId: "getClientStatement", summary: "Client statement", responseSchema: "MobileClientStatementResponse" },
   { path: "/api/mobile/projects", method: "get", operationId: "listProjects", summary: "List projects", responseSchema: "MobileProjectsListResponse" },
   { path: "/api/mobile/projects", method: "post", operationId: "createProject", summary: "Create project", responseSchema: "MobileProjectCreated" },
-  { path: "/api/mobile/projects", method: "patch", operationId: "mutateProject", summary: "Change status or archive a project", responseSchema: "MobileOk" },
+  { path: "/api/mobile/projects", method: "patch", operationId: "mutateProject", summary: "Update, change status, or archive a project", responseSchema: "MobileOk" },
   { path: "/api/mobile/projects/{id}", method: "get", operationId: "getProjectDetails", summary: "Project financial details", responseSchema: "MobileProjectDetailsResponse" },
   { path: "/api/mobile/accounts", method: "get", operationId: "listAccounts", summary: "List accounts", responseSchema: "MobileAccountsListResponse" },
   { path: "/api/mobile/accounts", method: "post", operationId: "createAccount", summary: "Create account", responseSchema: "MobileId" },
   { path: "/api/mobile/accounts", method: "patch", operationId: "archiveAccount", summary: "Archive account", responseSchema: "MobileOk" },
   { path: "/api/mobile/categories", method: "get", operationId: "listCategories", summary: "List categories", responseSchema: "MobileCategoriesListResponse" },
   { path: "/api/mobile/categories", method: "post", operationId: "createCategory", summary: "Create category", responseSchema: "MobileCategoryCreated" },
-  { path: "/api/mobile/categories", method: "patch", operationId: "archiveCategory", summary: "Archive custom category", responseSchema: "MobileOk" },
+  { path: "/api/mobile/categories", method: "patch", operationId: "archiveCategory", summary: "Update or archive a custom category", responseSchema: "MobileOk" },
   { path: "/api/mobile/transactions", method: "get", operationId: "listTransactions", summary: "List transactions", responseSchema: "MobileTransactionsPageResponse" },
   { path: "/api/mobile/transactions", method: "post", operationId: "createTransaction", summary: "Create transaction", responseSchema: "MobileTransactionCreated" },
   { path: "/api/mobile/transactions", method: "patch", operationId: "mutateTransaction", summary: "Update or delete a transaction", responseSchema: "MobileOk" },
   { path: "/api/mobile/transfers", method: "get", operationId: "listTransfers", summary: "List transfers", responseSchema: "MobileTransfersListResponse" },
   { path: "/api/mobile/transfers", method: "post", operationId: "createTransfer", summary: "Create transfer", responseSchema: "MobileId" },
+  { path: "/api/mobile/transfers", method: "patch", operationId: "archiveTransfer", summary: "Cancel a transfer", responseSchema: "MobileOk" },
   { path: "/api/mobile/invoices", method: "get", operationId: "listInvoices", summary: "List invoices", responseSchema: "MobileInvoicesPageResponse" },
   { path: "/api/mobile/invoices", method: "post", operationId: "createInvoice", summary: "Create invoice", responseSchema: "MobileInvoiceCreated" },
   { path: "/api/mobile/invoices", method: "patch", operationId: "mutateInvoice", summary: "Update, cancel, archive, or share an invoice", responseSchema: "MobileOk" },
@@ -112,14 +125,21 @@ export const mobileOpenApiPaths: Array<{
   { path: "/api/mobile/invoices/templates", method: "patch", operationId: "mutateInvoiceTemplate", summary: "Update, archive, or reorder invoice templates", responseSchema: "MobileOk" },
   { path: "/api/mobile/debts", method: "get", operationId: "listDebts", summary: "List debts", responseSchema: "MobileDebtsListResponse" },
   { path: "/api/mobile/debts", method: "post", operationId: "createDebt", summary: "Create debt", responseSchema: "MobileDebtCreated" },
+  { path: "/api/mobile/debts", method: "patch", operationId: "archiveDebt", summary: "Archive a debt", responseSchema: "MobileOk" },
+  { path: "/api/mobile/debts/payments", method: "get", operationId: "listDebtPayments", summary: "List debt payments", responseSchema: "MobileDebtPaymentsResponse" },
+  { path: "/api/mobile/debts/payments", method: "post", operationId: "recordDebtPayment", summary: "Record a debt payment", responseSchema: "MobileDebtPaymentCreated" },
   { path: "/api/mobile/budgets", method: "get", operationId: "listBudgets", summary: "List budgets", responseSchema: "MobileBudgetsListResponse" },
   { path: "/api/mobile/budgets", method: "post", operationId: "createBudget", summary: "Create budget", responseSchema: "MobileId" },
+  { path: "/api/mobile/budgets", method: "patch", operationId: "archiveBudget", summary: "Archive a budget", responseSchema: "MobileOk" },
   { path: "/api/mobile/goals", method: "get", operationId: "listGoals", summary: "List savings goals", responseSchema: "MobileGoalsListResponse" },
   { path: "/api/mobile/goals", method: "post", operationId: "createGoal", summary: "Create savings goal", responseSchema: "MobileId" },
-  { path: "/api/mobile/goals", method: "patch", operationId: "updateGoalProgress", summary: "Update goal progress", responseSchema: "MobileOk" },
+  { path: "/api/mobile/goals", method: "patch", operationId: "updateGoalProgress", summary: "Add goal progress or archive a goal", responseSchema: "MobileOk" },
   { path: "/api/mobile/recurring", method: "get", operationId: "listRecurring", summary: "List recurring expenses", responseSchema: "MobileRecurringListResponse" },
   { path: "/api/mobile/recurring", method: "post", operationId: "createRecurring", summary: "Create recurring expense", responseSchema: "MobileId" },
-  { path: "/api/mobile/recurring", method: "patch", operationId: "recordRecurring", summary: "Record recurring expense", responseSchema: "MobileOk" },
+  { path: "/api/mobile/recurring", method: "patch", operationId: "recordRecurring", summary: "Record a due expense or stop a recurring expense", responseSchema: "MobileOk" },
   { path: "/api/mobile/dashboard", method: "get", operationId: "getDashboard", summary: "Dashboard overview", responseSchema: "MobileDashboardResponse" },
   { path: "/api/mobile/reports", method: "get", operationId: "getReports", summary: "Reports snapshot", responseSchema: "MobileReportsResponse" },
+  { path: "/api/mobile/team", method: "get", operationId: "listTeam", summary: "List workspace members", responseSchema: "MobileTeamResponse" },
+  { path: "/api/mobile/backup", method: "get", operationId: "exportBackup", summary: "Download a workspace backup", responseSchema: "MobileBackupExportResponse" },
+  { path: "/api/mobile/backup", method: "post", operationId: "restoreBackup", summary: "Restore a backup into a new workspace", responseSchema: "MobileBackupRestoreResponse" },
 ];

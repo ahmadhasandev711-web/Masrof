@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { formatMoney } from "@/lib/money";
 import { archiveProjectAction } from "@/features/projects/actions/archive-project";
 import { updateProjectStatusAction } from "@/features/projects/actions/update-project-status";
@@ -11,6 +11,9 @@ import {
   projectRemainingAmount,
 } from "@/features/projects/utils";
 import type { ProjectListItem } from "@/features/projects/types";
+import type { ClientOption } from "@/features/clients/types";
+import { EditProjectForm } from "@/features/projects/components/edit-project-form";
+import { Modal } from "@/components/ui/modal";
 import { projectReceivableReminderMessage } from "@/features/whatsapp/messages";
 import { WhatsAppReminderLink } from "@/features/whatsapp/components/whatsapp-reminder-link";
 import { useLocale, useTranslations } from "next-intl";
@@ -110,6 +113,7 @@ function ProjectStatusControl({
 export function ProjectList({
   projects,
   workspaceId,
+  clients,
   currency,
   workspaceName,
   canUseWhatsApp,
@@ -117,6 +121,7 @@ export function ProjectList({
 }: {
   projects: ProjectListItem[];
   workspaceId: string;
+  clients: ClientOption[];
   currency: string;
   workspaceName: string;
   canUseWhatsApp: boolean;
@@ -129,6 +134,9 @@ export function ProjectList({
   const tWhatsappMessages = useTranslations("whatsapp");
   const tShared = useTranslations("forms.shared");
   const tProjects = useTranslations("pages.projects");
+  const tCommon = useTranslations("common");
+  const tForm = useTranslations("forms.project");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (projects.length === 0) {
     return (
@@ -234,6 +242,15 @@ export function ProjectList({
                   />
                 )}
 
+                {canWrite && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(id)}
+                    className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-500 transition hover:bg-emerald-50 hover:text-emerald-700"
+                  >
+                    {tCommon("edit")}
+                  </button>
+                )}
                 {canWrite && <ArchiveProjectButton projectId={id} workspaceId={workspaceId} />}
               </div>
             </div>
@@ -323,6 +340,28 @@ export function ProjectList({
           </div>
         );
       })}
+
+      {(() => {
+        const projectBeingEdited = projects.find((project) => project._id === editingId);
+        return (
+          <Modal
+            isOpen={projectBeingEdited !== undefined}
+            onClose={() => setEditingId(null)}
+            title={tForm("editTitle")}
+            maxWidthClassName="max-w-xl"
+          >
+            {projectBeingEdited && (
+              <EditProjectForm
+                project={projectBeingEdited}
+                workspaceId={workspaceId}
+                clients={clients}
+                onCancel={() => setEditingId(null)}
+                onSuccess={() => setEditingId(null)}
+              />
+            )}
+          </Modal>
+        );
+      })()}
     </div>
   );
 }

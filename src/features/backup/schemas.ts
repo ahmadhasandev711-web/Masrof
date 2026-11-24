@@ -26,6 +26,9 @@ export const workspaceBackupSchema = z.object({
     transfers: z.array(backupRecordSchema),
     invoices: z.array(backupRecordSchema),
     savingsGoals: z.array(backupRecordSchema),
+    /** Optional so backups exported before debts were included still restore. */
+    debts: z.array(backupRecordSchema).default([]),
+    debtPayments: z.array(backupRecordSchema).default([]),
   }),
   categoryIndex: z.array(
     z.object({
@@ -43,3 +46,29 @@ export const workspaceBackupSchema = z.object({
 });
 
 export type WorkspaceBackupManifest = z.infer<typeof workspaceBackupSchema>;
+
+export const BACKUP_MAX_BYTES = 12 * 1024 * 1024;
+
+export type BackupParseErrorCode = "backupTooLarge" | "backupInvalidJson" | "backupIncompatible";
+
+export function parseBackupJson(
+  raw: string,
+): WorkspaceBackupManifest | { errorCode: BackupParseErrorCode } {
+  if (raw.length > BACKUP_MAX_BYTES) {
+    return { errorCode: "backupTooLarge" };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { errorCode: "backupInvalidJson" };
+  }
+
+  const result = workspaceBackupSchema.safeParse(parsed);
+  if (!result.success) {
+    return { errorCode: "backupIncompatible" };
+  }
+
+  return result.data;
+}

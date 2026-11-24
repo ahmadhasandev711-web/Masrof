@@ -184,10 +184,6 @@ const pages = {
  title: "Backup",
  ownerOnlyNotice: "Backup export and restore are restricted to the workspace owner.",
  },
- import: {
- title: "Bank statement import",
- viewOnlyNotice: "Bank statement import is restricted to members with write access.",
- },
  goals: {
  title: "Savings goals",
  subtitle: "Set financial targets and track your savings progress step by step",

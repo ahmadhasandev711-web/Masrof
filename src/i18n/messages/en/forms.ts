@@ -183,6 +183,7 @@ const forms = {
  },
  project: {
  title: "Add new project",
+ editTitle: "Edit project",
  name: "Project name",
  namePlaceholder: "e.g. Al-Noor website design",
  client: "Client",
@@ -226,6 +227,7 @@ const forms = {
  nextDue: "Next due: ",
  stop: "Stop",
  stopping: "Stopping...",
+ txFallback: "Recurring expense",
  weekdays: {
  sunday: "Sunday",
  monday: "Monday",
@@ -238,6 +240,7 @@ const forms = {
  },
  category: {
  title: "Add category",
+ editTitle: "Edit category",
  name: "Category name",
  nameAr: "Name (Arabic)",
  nameArPlaceholder: "e.g. Office supplies",
@@ -380,16 +383,6 @@ const forms = {
  submit: "Save branding",
  saved: "Branding saved.",
  },
- import: {
- hint: "Paste CSV content from your bank statement. It must include date and amount columns, and preferably description.",
- account: "Account",
- expenseCategory: "Expense category",
- csvContent: "CSV content",
- csvPlaceholder: "date,description,amount\n2026-07-01,ATM withdrawal,-500",
- submit: "Import",
- importing: "Importing...",
- success: "Successfully imported {count} transactions.",
- },
  whatsapp: {
  phone: "WhatsApp number for reminders",
  phonePlaceholder: "01012345678",
@@ -489,6 +482,8 @@ const forms = {
  payFullBalance: "Pay full balance",
  deductFromAccount: "Deduct amount from account",
  autoExpenseHint: " This will be recorded as an expense and deducted from the selected account balance.",
+ paymentTxDescription: "Debt payment: {name}",
+ paymentTxNotes: "Payment to: {creditor}",
  paymentDate: "Payment Date",
  reference: "Receipt / Ref # (optional)",
  referencePlaceholder: "e.g. REF-98213",

@@ -183,6 +183,7 @@ const forms = {
  },
  project: {
  title: "إضافة مشروع جديد",
+ editTitle: "تعديل المشروع",
  name: "اسم المشروع",
  namePlaceholder: "مثال: تصميم موقع شركة النور",
  client: "العميل",
@@ -226,6 +227,7 @@ const forms = {
  nextDue: "الاستحقاق القادم: ",
  stop: "إيقاف",
  stopping: "جارِ الإيقاف...",
+ txFallback: "مصروف متكرر",
  weekdays: {
  sunday: "الأحد",
  monday: "الإثنين",
@@ -238,6 +240,7 @@ const forms = {
  },
  category: {
  title: "إضافة تصنيف",
+ editTitle: "تعديل التصنيف",
  name: "اسم التصنيف",
  nameAr: "الاسم (عربي)",
  nameArPlaceholder: "مثال: مصروف مكتب",
@@ -380,16 +383,6 @@ const forms = {
  submit: "حفظ الهوية",
  saved: "تم حفظ الهوية.",
  },
- import: {
- hint: "الصق محتوى CSV من كشف البنك. لازم يكون فيه أعمدة: date, amount, ويفضل description.",
- account: "الحساب",
- expenseCategory: "تصنيف المصروف",
- csvContent: "محتوى CSV",
- csvPlaceholder: "date,description,amount\n2026-07-01,ATM withdrawal,-500",
- submit: "استيراد",
- importing: "جارِ الاستيراد...",
- success: "تم استيراد {count} عملية بنجاح.",
- },
  whatsapp: {
  phone: "رقم واتساب للتذكيرات",
  phonePlaceholder: "01012345678",
@@ -489,6 +482,8 @@ const forms = {
  payFullBalance: "سداد كامل المتبقي",
  deductFromAccount: "خصم المبلغ من حساب",
  autoExpenseHint: " سيتم تسجيل العملية كمصروف تلقائياً وإنقاص رصيد الحساب المالي المحدد.",
+ paymentTxDescription: "سداد التزام: {name}",
+ paymentTxNotes: "سداد للجهة: {creditor}",
  paymentDate: "تاريخ السداد",
  reference: "رقم الإيصال / الحوالة (اختياري)",
  referencePlaceholder: "مثال: REF-98213",

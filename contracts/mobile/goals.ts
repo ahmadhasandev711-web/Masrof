@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { mobileListSchema } from "./common";
+import { mobileQuantityUsageSchema } from "./invoices";
 
 export const mobileGoalSchema = z.object({
   id: z.string(),
@@ -13,4 +14,13 @@ export const mobileGoalSchema = z.object({
 
 export type MobileGoal = z.infer<typeof mobileGoalSchema>;
 
-export const mobileGoalsListResponseSchema = mobileListSchema(mobileGoalSchema);
+/** Same list as the goals page, plus the maxSavingsGoals meter. */
+export const mobileGoalsListResponseSchema = mobileListSchema(mobileGoalSchema).extend({
+  usage: mobileQuantityUsageSchema.optional(),
+});
+
+export const mobileGoalArchiveBodySchema = z.object({
+  action: z.literal("archive"),
+  workspaceId: z.string().min(1),
+  goalId: z.string().min(1),
+});

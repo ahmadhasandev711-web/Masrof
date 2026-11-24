@@ -6,6 +6,7 @@ export type ProjectListItem = {
   status: ProjectStatus;
   expectedAmount: number | null;
   dueDate: string | null;
+  description: string;
   clientId: string | null;
   clientName: string | null;
   clientPhone: string | null;

@@ -108,6 +108,26 @@ export class CategoriesRepository {
   }
 
   /**
+   * Renames a custom category. Scoped to `{ _id, workspaceId, isSystem: false, isArchived: false }`
+   * so a system category, an archived one, or another workspace's category cannot be renamed.
+   * An empty English name is stored as null.
+   */
+  async update(
+    categoryId: string,
+    workspaceId: string,
+    updates: { name: string; nameEn?: string | null },
+  ) {
+    await connectToDatabase();
+    const trimmedEn = updates.nameEn?.trim() ?? "";
+
+    return CategoryModel.findOneAndUpdate(
+      { _id: categoryId, workspaceId, isSystem: false, isArchived: false },
+      { name: updates.name, nameEn: trimmedEn.length > 0 ? trimmedEn : null },
+      { returnDocument: "after" },
+    ).lean();
+  }
+
+  /**
    * Archives a custom category. Scoped to `{ _id, workspaceId, isSystem: false }`
    * so a request can never archive: (a) another workspace's category, or
    * (b) a shared system category — both checks happen in the same query,

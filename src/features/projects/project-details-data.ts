@@ -44,6 +44,7 @@ export type ProjectFinancialDetailsView = {
     expectedAmount: number | null;
     dueDate: string | null;
     description: string;
+    clientId: string | null;
     createdAt: string;
   };
   client: {
@@ -228,6 +229,7 @@ export async function getProjectFinancialDetails(
       expectedAmount,
       dueDate: project.dueDate ? new Date(project.dueDate).toISOString() : null,
       description: project.description || "",
+      clientId: project.clientId ? String(project.clientId) : null,
       createdAt: new Date(project.createdAt).toISOString(),
     },
     client: client

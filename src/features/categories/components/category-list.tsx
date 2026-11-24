@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ArchiveCategoryButton } from "@/features/categories/components/archive-category-button";
+import { EditCategoryButton } from "@/features/categories/components/edit-category-button";
 import { CategoryIcon, NavIcon } from "@/components/ui/app-icons";
 import { resolveCategoryLabel } from "@/features/categories/labels";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -69,7 +70,15 @@ function CategoryGroup({
                     {systemBadgeLabel}
                   </span>
                 ) : canWrite ? (
-                  <ArchiveCategoryButton categoryId={id} workspaceId={workspaceId} />
+                  <span className="inline-flex items-center gap-2">
+                    <EditCategoryButton
+                      categoryId={id}
+                      workspaceId={workspaceId}
+                      name={category.name}
+                      nameEn={category.nameEn ?? ""}
+                    />
+                    <ArchiveCategoryButton categoryId={id} workspaceId={workspaceId} />
+                  </span>
                 ) : null}
               </li>
             );

@@ -10,6 +10,8 @@ import { TransferModel } from "@/models/transfer";
 import { AccountModel } from "@/models/account";
 import { accountsRepository } from "@/features/accounts/accounts.repository";
 import { toMinorUnits } from "@/lib/money";
+import { resolveAccountCurrency } from "@/lib/currency";
+import { getWorkspaceExchangeContext } from "@/features/workspaces/exchange-context";
 import { AppError } from "@/server/kernel/errors";
 import type { CreateTransferInput } from "@/features/transfers/schemas";
 import type { TransferListItem } from "@/features/transfers/types";
@@ -55,9 +57,11 @@ async function assertAccountsInWorkspace(
     throw new InvalidTransferError("destinationAccountNotFound");
   }
 
-  const fromCurrency = fromAccount.currency ?? null;
-  const toCurrency = toAccount.currency ?? null;
-  if (fromCurrency && toCurrency && fromCurrency !== toCurrency) {
+  // A missing currency means the workspace currency, same as every balance read.
+  const { baseCurrency } = await getWorkspaceExchangeContext(workspaceId);
+  const fromCurrency = resolveAccountCurrency(fromAccount.currency, baseCurrency);
+  const toCurrency = resolveAccountCurrency(toAccount.currency, baseCurrency);
+  if (fromCurrency !== toCurrency) {
     throw new InvalidTransferError("transferSameCurrencyOnly");
   }
 
@@ -66,22 +70,23 @@ async function assertAccountsInWorkspace(
 
 async function queryTransfersPage(workspaceId: string, skip: number, limit: number) {
   await connectToDatabase();
+  const { baseCurrency } = await getWorkspaceExchangeContext(workspaceId);
 
   const [transfers, total] = await Promise.all([
     TransferModel.find({ workspaceId, isArchived: false })
       .sort({ transferDate: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("fromAccountId", "name")
-      .populate("toAccountId", "name")
+      .populate("fromAccountId", "name currency")
+      .populate("toAccountId", "name currency")
       .lean(),
     TransferModel.countDocuments({ workspaceId, isArchived: false }),
   ]);
 
   const items = toPlain(
     transfers.map((transfer): TransferListItem => {
-      const from = transfer.fromAccountId as { _id?: unknown; name?: string } | null;
-      const to = transfer.toAccountId as { _id?: unknown; name?: string } | null;
+      const from = transfer.fromAccountId as { _id?: unknown; name?: string; currency?: string | null } | null;
+      const to = transfer.toAccountId as { _id?: unknown; name?: string; currency?: string | null } | null;
 
       return {
         _id: String(transfer._id),
@@ -90,6 +95,7 @@ async function queryTransfersPage(workspaceId: string, skip: number, limit: numb
         description: transfer.description ?? "",
         fromAccountName: from?.name ?? "—",
         toAccountName: to?.name ?? "—",
+        currency: resolveAccountCurrency(from?.currency, baseCurrency),
       };
     }),
   );

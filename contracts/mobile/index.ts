@@ -15,3 +15,4 @@ export * from "./recurring";
 export * from "./dashboard";
 export * from "./reports";
 export * from "./team";
+export * from "./backup";

@@ -1,16 +1,17 @@
 import { formatMoney } from "@/lib/money";
+import { resolveCategoryLabel } from "@/features/categories/labels";
 import { ArchiveBudgetButton } from "@/features/budgets/components/archive-budget-button";
 import { getTranslations, getLocale } from "next-intl/server";
 
-type PopulatedCategory = { _id: unknown; name: string; icon?: string | null };
+type PopulatedCategory = { _id: unknown; name: string; nameEn?: string | null; icon?: string | null };
 
 type BudgetItem = {
   _id: unknown;
   name: string;
   amount: number;
-  spent: number;
-  remaining: number;
-  percentage: number;
+  spent: number | null;
+  remaining: number | null;
+  percentage: number | null;
   categoryId: PopulatedCategory | null;
 };
 
@@ -41,10 +42,11 @@ export async function BudgetList({
   currency: string;
   canWrite?: boolean;
 }) {
-  const [tEmpty, tForm, tDashboard, locale] = await Promise.all([
+  const [tEmpty, tForm, tDashboard, tConversion, locale] = await Promise.all([
     getTranslations("empty"),
     getTranslations("forms.budget"),
     getTranslations("dashboard.alerts"),
+    getTranslations("reports.conversion"),
     getLocale(),
   ]);
 
@@ -65,22 +67,34 @@ export async function BudgetList({
     <ul className="flex flex-col gap-3">
       {budgets.map((budget) => {
         const id = String(budget._id);
-        const clampedPercentage = Math.min(100, Math.max(0, budget.percentage));
+        const clampedPercentage =
+          budget.percentage == null ? 0 : Math.min(100, Math.max(0, budget.percentage));
+        const categoryLabel = budget.categoryId
+          ? resolveCategoryLabel(
+              { name: budget.categoryId.name, nameEn: budget.categoryId.nameEn },
+              locale,
+            )
+          : tForm("wholeWorkspace");
 
-        const alert = budgetAlert(budget.percentage, {
-          exceeded: tDashboard("budgetExceeded"),
-          nearLimit: tDashboard("budgetNearLimit"),
-        });
+        const alert =
+          budget.percentage == null
+            ? null
+            : budgetAlert(budget.percentage, {
+                exceeded: tDashboard("budgetExceeded"),
+                nearLimit: tDashboard("budgetNearLimit"),
+              });
 
         return (
           <li
             key={id}
             className={`rounded-xl border bg-white p-5 shadow-sm ${
-              budget.percentage >= 100
-                ? "border-red-200"
-                : budget.percentage >= 80
-                  ? "border-amber-200"
-                  : "border-neutral-200"
+              budget.percentage == null
+                ? "border-neutral-200"
+                : budget.percentage >= 100
+                  ? "border-red-200"
+                  : budget.percentage >= 80
+                    ? "border-amber-200"
+                    : "border-neutral-200"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -89,9 +103,7 @@ export async function BudgetList({
                   <p className="font-medium text-neutral-900">
                     {budget.categoryId?.icon ?? ""} {budget.name}
                   </p>
-                  <p className="text-xs text-neutral-500">
-                    {budget.categoryId ? budget.categoryId.name : tForm("wholeWorkspace")}
-                  </p>
+                  <p className="text-xs text-neutral-500">{categoryLabel}</p>
                 </div>
                 {alert && (
                   <span
@@ -106,23 +118,25 @@ export async function BudgetList({
 
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
               <div
-                className={`h-full ${progressBarColor(budget.percentage)}`}
+                className={`h-full ${progressBarColor(clampedPercentage)}`}
                 style={{ width: `${clampedPercentage}%` }}
               />
             </div>
 
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="font-mono tabular-nums text-neutral-500">
-                {formatMoney(budget.spent, formatOptions)} / {formatMoney(budget.amount, formatOptions)}
+                {budget.spent == null ? tConversion("unavailable") : formatMoney(budget.spent, formatOptions)}
+                {" / "}
+                {formatMoney(budget.amount, formatOptions)}
               </span>
               <span
                 className={`font-mono tabular-nums ${
-                  budget.percentage >= 100
+                  budget.percentage != null && budget.percentage >= 100
                     ? "font-semibold text-red-600"
                     : "font-medium text-neutral-600"
                 }`}
               >
-                {budget.percentage}%
+                {budget.percentage == null ? tConversion("unavailable") : `${budget.percentage}%`}
               </span>
             </div>
           </li>

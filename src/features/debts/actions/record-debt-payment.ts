@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/config";
 import { recordDebtPaymentSchema } from "@/features/debts/schemas";
 import { debtsService } from "@/features/debts/debts.service";
 import {
@@ -42,8 +43,9 @@ export async function recordDebtPaymentAction(
     };
   }
 
+  const locale = (await getLocale()) as AppLocale;
   const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
-    debtsService.recordPayment(userId, parsed.data),
+    debtsService.recordPayment(userId, parsed.data, locale),
   );
 
   if (!result.ok) {

@@ -105,7 +105,8 @@ function ArchiveGoalButton({ goalId, workspaceId }: { goalId: string; workspaceI
         isPending={isPending}
         onConfirm={() => {
           startTransition(async () => {
-            await archiveSavingsGoalAction(goalId, workspaceId);
+            const res = await archiveSavingsGoalAction(goalId, workspaceId);
+            if (res.error) window.alert(res.error);
             setOpen(false);
           });
         }}

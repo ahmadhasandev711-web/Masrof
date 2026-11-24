@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { validationErrorCode } from "@/lib/mobile/validation";
-import { createProjectSchema, updateProjectStatusSchema } from "@/features/projects/schemas";
+import {
+  createProjectSchema,
+  createUpdateProjectSchema,
+  updateProjectStatusSchema,
+} from "@/features/projects/schemas";
 import { projectsService } from "@/features/projects/projects.service";
 import { getEffectiveSubscriptionForWorkspace } from "@/features/subscriptions/data";
 import { getPlanQuantityLimit } from "@/features/subscriptions/plan-config-data";
@@ -91,7 +95,17 @@ export async function PATCH(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, body.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    if (body.action === "status") {
+    if (body.action === "update") {
+      const input = createUpdateProjectSchema((key) => key).safeParse({
+        ...body,
+        workspaceId: access.workspaceId,
+      });
+      if (!input.success) {
+        return NextResponse.json({ error: validationErrorCode(input.error) }, { status: 400 });
+      }
+      const result = await projectsService.update(input.data);
+      if (!result.ok) return resultToResponse(result);
+    } else if (body.action === "status") {
       const input = updateProjectStatusSchema((key) => key).safeParse({
         ...body,
         workspaceId: access.workspaceId,

@@ -37,14 +37,21 @@ export class SavingsGoalsService {
   }
 
   async updateProgress(
+    userId: string,
     input: UpdateGoalProgressInput,
   ): Promise<Result<NonNullable<Awaited<ReturnType<SavingsGoalsRepository["updateProgress"]>>>>> {
+    const feature = await requirePlanFeature(userId, input.workspaceId, "savingsGoals");
+    if (!feature.ok) return feature;
+
     const updated = await this.repo.updateProgress(input);
     if (!updated) return err(new NotFoundError("savingsGoalNotFound"));
     return ok(updated);
   }
 
-  async archive(goalId: string, workspaceId: string) {
+  async archive(userId: string, goalId: string, workspaceId: string) {
+    const feature = await requirePlanFeature(userId, workspaceId, "savingsGoals");
+    if (!feature.ok) return feature;
+
     const archived = await this.repo.archive(goalId, workspaceId);
     if (!archived) return err(new NotFoundError("savingsGoalNotFound"));
     return ok(archived);

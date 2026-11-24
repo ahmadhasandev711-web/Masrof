@@ -133,7 +133,10 @@ function RecurringRow({
       setRecordConfirmOpen(true);
       return;
     }
-    startTransition(() => recordRecurringExpenseAction(item.id, workspaceId));
+    startTransition(async () => {
+      const res = await recordRecurringExpenseAction(item.id, workspaceId);
+      if (res.error) window.alert(res.error);
+    });
   }
 
   return (
@@ -217,7 +220,8 @@ function RecurringRow({
         isPending={isPending}
         onConfirm={() => {
           startTransition(async () => {
-            await recordRecurringExpenseAction(item.id, workspaceId);
+            const res = await recordRecurringExpenseAction(item.id, workspaceId);
+            if (res.error) window.alert(res.error);
             setRecordConfirmOpen(false);
           });
         }}
@@ -234,7 +238,8 @@ function RecurringRow({
         isPending={isPending}
         onConfirm={() => {
           startTransition(async () => {
-            await archiveRecurringExpenseAction(item.id, workspaceId);
+            const res = await archiveRecurringExpenseAction(item.id, workspaceId);
+            if (res.error) window.alert(res.error);
             setStopConfirmOpen(false);
           });
         }}

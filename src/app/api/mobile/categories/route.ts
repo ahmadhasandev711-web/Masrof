@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { validationErrorCode } from "@/lib/mobile/validation";
 import { revalidateTag } from "next/cache";
-import { createCategorySchema } from "@/features/categories/schemas";
+import { createCategorySchema, createUpdateCategorySchema } from "@/features/categories/schemas";
 import { categoriesService } from "@/features/categories/categories.service";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CategoryKind } from "@/models/category";
@@ -95,8 +95,23 @@ export async function PATCH(request: Request) {
     const access = await requireMobileWorkspace(session.user.id, parsed.data.workspaceId, "write");
     if (access instanceof NextResponse) return access;
 
-    const result = await categoriesService.archive(parsed.data.categoryId, access.workspaceId);
-    if (!result.ok) return resultToResponse(result);
+    if (parsed.data.action === "update") {
+      const input = createUpdateCategorySchema((key) => key).safeParse({
+        ...parsed.data,
+        workspaceId: access.workspaceId,
+      });
+      if (!input.success) {
+        return NextResponse.json({ error: validationErrorCode(input.error) }, { status: 400 });
+      }
+      const result = await categoriesService.update(input.data.categoryId, access.workspaceId, {
+        name: input.data.name,
+        nameEn: input.data.nameEn,
+      });
+      if (!result.ok) return resultToResponse(result);
+    } else {
+      const result = await categoriesService.archive(parsed.data.categoryId, access.workspaceId);
+      if (!result.ok) return resultToResponse(result);
+    }
 
     revalidateTag(CACHE_TAGS.categories, "max");
     return NextResponse.json(mobileOkSchema.parse({ ok: true }));

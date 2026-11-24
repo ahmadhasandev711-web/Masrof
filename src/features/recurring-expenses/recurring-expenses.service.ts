@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/config";
 import { countRecurringExpensesForWorkspace } from "@/features/subscriptions/plan-usage";
 import type { CreateRecurringExpenseInput } from "@/features/recurring-expenses/schemas";
 import {
@@ -51,15 +53,32 @@ export class RecurringExpensesService {
     }
   }
 
-  async archive(recurringId: string, workspaceId: string) {
+  async archive(userId: string, recurringId: string, workspaceId: string) {
+    const feature = await requirePlanFeature(userId, workspaceId, "recurringExpenses");
+    if (!feature.ok) return feature;
+
     const archived = await this.repo.archive(recurringId, workspaceId);
     if (!archived) return err(new NotFoundError("recurringExpenseNotFound"));
     return ok(archived);
   }
 
-  async record(recurringId: string, workspaceId: string, userId: string) {
+  async record(
+    recurringId: string,
+    workspaceId: string,
+    userId: string,
+    locale: AppLocale = "ar",
+  ) {
+    const feature = await requirePlanFeature(userId, workspaceId, "recurringExpenses");
+    if (!feature.ok) return feature;
+
+    const t = await getTranslations({ locale, namespace: "forms.recurring" });
     try {
-      const txId = await this.repo.record(recurringId, workspaceId, userId);
+      const txId = await this.repo.record(
+        recurringId,
+        workspaceId,
+        userId,
+        t("txFallback"),
+      );
       return ok(txId);
     } catch (error) {
       const mapped = asRecurringResult<string | undefined>(error);

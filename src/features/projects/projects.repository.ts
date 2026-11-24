@@ -54,6 +54,48 @@ export class ProjectsRepository {
     return ProjectModel.findOne({ _id: projectId, workspaceId, isArchived: false }).lean();
   }
 
+  async findActiveClient(clientId: string, workspaceId: string) {
+    if (!mongoose.Types.ObjectId.isValid(clientId)) return null;
+    await connectToDatabase();
+    return ClientModel.findOne({ _id: clientId, workspaceId, isArchived: false }).select("_id").lean();
+  }
+
+  /** Every non-archived invoice on the project, paid or not. A client change is blocked while any exist. */
+  async countInvoices(projectId: string, workspaceId: string) {
+    if (!mongoose.Types.ObjectId.isValid(projectId)) return 0;
+    await connectToDatabase();
+    return InvoiceModel.countDocuments({
+      projectId,
+      workspaceId,
+      isArchived: false,
+    });
+  }
+
+  async update(
+    projectId: string,
+    workspaceId: string,
+    fields: {
+      clientId: string | null;
+      name: string;
+      expectedAmount: number | null;
+      dueDate: Date | null;
+      description: string;
+    },
+  ) {
+    await connectToDatabase();
+    return ProjectModel.findOneAndUpdate(
+      { _id: projectId, workspaceId, isArchived: false },
+      {
+        clientId: fields.clientId,
+        name: fields.name,
+        expectedAmount: fields.expectedAmount != null ? toMinorUnits(fields.expectedAmount) : null,
+        dueDate: fields.dueDate ?? null,
+        description: fields.description ?? "",
+      },
+      { returnDocument: "after" },
+    ).lean();
+  }
+
   async updateStatus(projectId: string, workspaceId: string, status: ProjectStatus) {
     await connectToDatabase();
     return ProjectModel.findOneAndUpdate(
@@ -106,7 +148,7 @@ export class ProjectsRepository {
 
     const [projects, txTotals, invoicedByProject, clients] = await Promise.all([
       ProjectModel.find({ workspaceId, isArchived: false })
-        .select("name status expectedAmount dueDate clientId")
+        .select("name status expectedAmount dueDate clientId description")
         .sort({ createdAt: -1 })
         .lean(),
       TransactionModel.aggregate<{
@@ -195,6 +237,7 @@ export class ProjectsRepository {
           status: project.status,
           expectedAmount: project.expectedAmount ?? null,
           dueDate: project.dueDate ? new Date(project.dueDate).toISOString() : null,
+          description: project.description ?? "",
           clientId: project.clientId ? String(project.clientId) : null,
           clientName: client?.name ?? null,
           clientPhone: client?.phone ?? null,

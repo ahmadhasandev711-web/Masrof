@@ -8,11 +8,22 @@ import {
   resolveReportDateRange,
   type ReportRangePreset,
 } from "@/features/reports/date-ranges";
+import type { CategoryBreakdownRow } from "@/features/reports/reports.repository";
+import { getIntlLocale, type AppLocale } from "@/i18n/config";
 import {
   mobileErrorResponse,
   requireMobileSession,
   requireMobileWorkspace,
 } from "@/lib/mobile/session";
+
+function toMobileCategoryRow(row: CategoryBreakdownRow) {
+  return {
+    categoryId: String(row.categoryId),
+    name: row.name,
+    icon: row.icon,
+    total: row.total,
+  };
+}
 
 export async function GET(request: Request) {
   const session = await requireMobileSession(request);
@@ -28,6 +39,8 @@ export async function GET(request: Request) {
   const access = await requireMobileWorkspace(session.user.id, workspaceId, "read");
   if (access instanceof NextResponse) return access;
 
+  const locale: AppLocale = url.searchParams.get("locale") === "en" ? "en" : "ar";
+
   try {
     const range = resolveReportDateRange(preset, {
       from: url.searchParams.get("from") ? new Date(url.searchParams.get("from")!) : undefined,
@@ -36,21 +49,26 @@ export async function GET(request: Request) {
 
     const [summary, expenseBreakdown, incomeBreakdown, trend] = await Promise.all([
       transactionsService.getWorkspaceSummary(access.workspaceId, range),
-      reportsService.getCategoryBreakdown(access.workspaceId, "expense", range),
-      reportsService.getCategoryBreakdown(access.workspaceId, "income", range),
-      reportsService.getMonthlyTrend(access.workspaceId, 6, "ar"),
+      reportsService.getCategoryBreakdown(access.workspaceId, "expense", range, locale),
+      reportsService.getCategoryBreakdown(access.workspaceId, "income", range, locale),
+      reportsService.getMonthlyTrend(access.workspaceId, 6, getIntlLocale(locale)),
     ]);
 
     const body = mobileReportsResponseSchema.parse({
       preset,
-      // Dates as ISO strings so JSON stays serializable (no Date instances)
       range: {
         from: asIsoDate(range.from),
         to: asIsoDate(range.to),
       },
       summary,
-      expenseBreakdown,
-      incomeBreakdown,
+      expenseBreakdown: {
+        ...expenseBreakdown,
+        rows: expenseBreakdown.rows.map(toMobileCategoryRow),
+      },
+      incomeBreakdown: {
+        ...incomeBreakdown,
+        rows: incomeBreakdown.rows.map(toMobileCategoryRow),
+      },
       trend,
       currency: access.workspace.currency,
     });

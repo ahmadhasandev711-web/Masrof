@@ -36,13 +36,23 @@ export const mobileProjectCreatedSchema = z.object({
 
 export type MobileProjectCreated = z.infer<typeof mobileProjectCreatedSchema>;
 
-/** PATCH /api/mobile/projects — projectsService.updateStatus / archive. */
+/** PATCH /api/mobile/projects — projectsService.update / updateStatus / archive. */
 export const mobileProjectPatchBodySchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("status"),
     workspaceId: z.string().min(1),
     projectId: z.string().min(1),
     status: z.string(),
+  }),
+  z.object({
+    action: z.literal("update"),
+    workspaceId: z.string().min(1),
+    projectId: z.string().min(1),
+    name: z.string(),
+    clientId: z.string().nullable().optional(),
+    expectedAmount: z.number().nullable().optional(),
+    dueDate: z.string().nullable().optional(),
+    description: z.string().optional(),
   }),
   z.object({ action: z.literal("archive"), workspaceId: z.string().min(1), projectId: z.string().min(1) }),
 ]);
@@ -57,6 +67,7 @@ export const mobileProjectDetailsResponseSchema = z.object({
     expectedAmount: z.number().nullable(),
     dueDate: z.string().nullable(),
     description: z.string(),
+    clientId: z.string().nullable(),
     createdAt: z.string(),
   }),
   client: z

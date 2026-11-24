@@ -15,6 +15,8 @@ import { TransactionModel } from "@/models/transaction";
 import { TransferModel } from "@/models/transfer";
 import { InvoiceModel } from "@/models/invoice";
 import { SavingsGoalModel } from "@/models/savings-goal";
+import { DebtModel } from "@/models/debt";
+import { DebtPaymentModel } from "@/models/debt-payment";
 import type { WorkspaceBackupManifest } from "@/features/backup/schemas";
 
 function asObjectId(value: string | null | undefined) {
@@ -25,6 +27,12 @@ function asObjectId(value: string | null | undefined) {
 function mapRef(value: string | null | undefined, map: Map<string, string>) {
   if (!value) return null;
   return map.get(value) ?? value;
+}
+
+function mappedId(value: unknown, map: Map<string, string>) {
+  const key = value == null ? "" : String(value);
+  if (!key) return key;
+  return map.get(key) ?? key;
 }
 
 function omitKeys<T extends Record<string, unknown>>(doc: T, keys: string[]) {
@@ -175,11 +183,16 @@ export async function restoreWorkspaceFromBackup(
         );
       }
 
+      const transactionMap = new Map<string, string>();
       if (manifest.collections.transactions.length > 0) {
         await TransactionModel.insertMany(
           manifest.collections.transactions.map((tx) => {
+            const oldId = String(tx._id ?? "");
+            const newId = new mongoose.Types.ObjectId();
+            if (oldId) transactionMap.set(oldId, String(newId));
             const doc = omitKeys(tx, ["_id", "__v"]);
             return {
+              _id: newId,
               ...doc,
               workspaceId: newWorkspaceId,
               accountId: asObjectId(mapRef(tx.accountId as string, accountMap)),
@@ -187,6 +200,33 @@ export async function restoreWorkspaceFromBackup(
               clientId: asObjectId(mapRef(tx.clientId as string | null, clientMap)),
               projectId: asObjectId(mapRef(tx.projectId as string | null, projectMap)),
               createdBy: userId,
+            };
+          }),
+          { session },
+        );
+      }
+
+      const debtMap = new Map<string, string>();
+      for (const debt of manifest.collections.debts) {
+        const oldId = String(debt._id ?? "");
+        const doc = omitKeys(debt, ["_id", "__v"]);
+        const [created] = await DebtModel.create(
+          [{ ...doc, workspaceId: String(newWorkspaceId) }],
+          { session },
+        );
+        if (oldId) debtMap.set(oldId, String(created._id));
+      }
+
+      if (manifest.collections.debtPayments.length > 0) {
+        await DebtPaymentModel.insertMany(
+          manifest.collections.debtPayments.map((payment) => {
+            const doc = omitKeys(payment, ["_id", "__v"]);
+            return {
+              ...doc,
+              workspaceId: String(newWorkspaceId),
+              debtId: mappedId(payment.debtId, debtMap),
+              accountId: mappedId(payment.accountId, accountMap),
+              transactionId: mappedId(payment.transactionId, transactionMap),
             };
           }),
           { session },

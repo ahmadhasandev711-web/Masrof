@@ -1,35 +1,7 @@
-import { z } from "zod";
-import { idempotencyKeyField } from "@/lib/idempotency/fields";
-
-type SavingsGoalValidationKey =
-  | "goalNameMin2"
-  | "targetAmountPositive"
-  | "deadlineInvalid"
-  | "amountPositive";
-
-type ValidationTranslator = (key: SavingsGoalValidationKey) => string;
-
-export function createSavingsGoalSchema(t: ValidationTranslator) {
-  return z.object({
-    workspaceId: z.string().min(1),
-    name: z.string().trim().min(2, t("goalNameMin2")).max(120),
-    targetAmount: z.coerce.number().positive(t("targetAmountPositive")),
-    deadline: z
-      .preprocess(
-        (val) => (val === "" || val == null ? undefined : val),
-        z.coerce.date({ message: t("deadlineInvalid") }).optional(),
-      ),
-    idempotencyKey: idempotencyKeyField,
-  });
-}
-
-export function createUpdateGoalProgressSchema(t: ValidationTranslator) {
-  return z.object({
-    workspaceId: z.string().min(1),
-    goalId: z.string().min(1),
-    amount: z.coerce.number().positive(t("amountPositive")),
-  });
-}
-
-export type CreateSavingsGoalInput = z.infer<ReturnType<typeof createSavingsGoalSchema>>;
-export type UpdateGoalProgressInput = z.infer<ReturnType<typeof createUpdateGoalProgressSchema>>;
+/** Savings-goal schemas live in `contracts/shared/schemas` (shared with the mobile app). */
+export {
+  createSavingsGoalSchema,
+  createUpdateGoalProgressSchema,
+  type CreateSavingsGoalInput,
+  type UpdateGoalProgressInput,
+} from "@contracts/shared/schemas";

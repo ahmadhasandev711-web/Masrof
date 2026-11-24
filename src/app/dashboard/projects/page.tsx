@@ -122,6 +122,7 @@ export default async function ProjectsPage({
       <ProjectList
         projects={paginatedProjects}
         workspaceId={workspaceId}
+        clients={clients}
         currency={activeWorkspace.currency}
         workspaceName={activeWorkspace.name}
         canUseWhatsApp={plan.whatsappReminders}

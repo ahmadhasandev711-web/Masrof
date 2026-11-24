@@ -28,8 +28,8 @@ export async function updateGoalProgressAction(
     return { error: parsed.error.issues[0]?.message ?? tErrors("invalidData") };
   }
 
-  const result = await runWorkspaceWrite(parsed.data.workspaceId, () =>
-    savingsGoalsService.updateProgress(parsed.data),
+  const result = await runWorkspaceWrite(parsed.data.workspaceId, ({ userId }) =>
+    savingsGoalsService.updateProgress(userId, parsed.data),
   );
 
   if (!result.ok) {

@@ -27,16 +27,19 @@ export const getDashboardAlerts = cache(async (workspaceId: string) => {
     projectsService.listReceivable(workspaceId),
   ]);
 
-  const budgetWarnings: BudgetWarning[] = budgets
-    .filter((budget) => budget.percentage >= 80)
-    .map((budget) => ({
-      id: String(budget._id),
-      name: budget.name,
-      percentage: budget.percentage,
-      spent: budget.spent,
-      amount: budget.amount,
-      status: budget.percentage >= 100 ? "exceeded" : "warning",
-    }));
+  const budgetWarnings: BudgetWarning[] = budgets.flatMap((budget) => {
+    if (budget.percentage == null || budget.spent == null || budget.percentage < 80) return [];
+    return [
+      {
+        id: String(budget._id),
+        name: budget.name,
+        percentage: budget.percentage,
+        spent: budget.spent,
+        amount: budget.amount,
+        status: budget.percentage >= 100 ? ("exceeded" as const) : ("warning" as const),
+      },
+    ];
+  });
 
   return { budgetWarnings, dueRecurring, receivableProjects };
 });

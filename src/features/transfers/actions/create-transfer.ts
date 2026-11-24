@@ -44,6 +44,7 @@ export async function createTransferAction(
   }
 
   revalidateTag(CACHE_TAGS.transfers, "max");
+  revalidateTag(CACHE_TAGS.accounts, "max");
   revalidatePath("/dashboard/transactions");
   revalidatePath("/dashboard/accounts");
   revalidatePath("/dashboard");

@@ -27,7 +27,6 @@ export function TransferList({
   canWrite?: boolean;
 }) {
   const tEmpty = useTranslations("empty");
-  const locale = useLocale();
 
   if (transfers.length === 0) {
     return (
@@ -36,11 +35,7 @@ export function TransferList({
           ⇄
         </div>
         <p className="font-bold text-neutral-900 text-base">{tEmpty("noTransfers")}</p>
-        <p className="mt-1 text-xs text-neutral-500 max-w-sm">
-          {locale === "ar"
-            ? "يمكنك نقل الأموال بسهولة بين حساباتك البنكية والخزائن النقدية وتوثيقها هنا بنقرة واحدة."
-            : "Easily move money between bank accounts and cash vaults to track liquidity accurately."}
-        </p>
+        <p className="mt-1 text-xs text-neutral-500 max-w-sm">{tEmpty("transfersHint")}</p>
       </div>
     );
   }
@@ -102,7 +97,7 @@ function TransferRow({
       </div>
       <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
         <span className="font-mono text-base font-bold tabular-nums text-blue-700">
-          {formatMoney(transfer.amount, { currency, locale })}
+          {formatMoney(transfer.amount, { currency: transfer.currency || currency, locale })}
         </span>
         {canWrite && (
           <button
@@ -110,7 +105,10 @@ function TransferRow({
             disabled={isPending}
             onClick={() => {
               if (!confirm(tConfirm("deleteTransfer"))) return;
-              startTransition(() => archiveTransferAction(transfer._id, workspaceId));
+              startTransition(async () => {
+                const res = await archiveTransferAction(transfer._id, workspaceId);
+                if (res.error) window.alert(res.error);
+              });
             }}
             className="rounded-lg px-2.5 py-1 text-xs font-semibold text-neutral-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
           >
