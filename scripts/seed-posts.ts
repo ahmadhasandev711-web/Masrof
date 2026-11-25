@@ -13,6 +13,10 @@ type SeedPost = {
   title: string;
   excerpt: string;
   content: string;
+  featuredImage: {
+    url: string;
+    alt: string;
+  };
   category: string;
   tags: string[];
   isPublished: boolean;
@@ -32,6 +36,10 @@ const POSTS: SeedPost[] = [
     title: "إزاي تعمل فاتورة احترافية للعميل في 30 ثانية وتحصّل مستحقاتك عبر واتساب",
     excerpt:
       "بطّل تضيع وقتك في تعديل فواتير Word و Excel ونسيان الدفعات الجزئية. دليلك لإصدار فاتورة احترافية ومشاركة رابطها وتحصيل فلوسك عبر واتساب بأسلوب راقٍ.",
+    featuredImage: {
+      url: "/images/blog/invoice-whatsapp.jpg",
+      alt: "فاتورة رقمية احترافية وتحصيل سريع للمستحقات عبر واتساب في سندات",
+    },
     category: "فريلانس",
     tags: ["فاتورة عميل", "برنامج فواتير", "تحصيل مستحقات", "واتساب", "فريلانس"],
     content: `## ليه فواتير الـ Word و Excel بتخسّرك وقت ومستحقات؟
@@ -73,6 +81,10 @@ const POSTS: SeedPost[] = [
     title: "How to Create a Professional Client Invoice in 30 Seconds and Collect via WhatsApp",
     excerpt:
       "Stop wasting time editing Word or Excel invoices and losing track of partial payments. Learn how to send clean invoices and collect faster via WhatsApp.",
+    featuredImage: {
+      url: "/images/blog/invoice-whatsapp.jpg",
+      alt: "Professional digital invoice and fast WhatsApp payment collection in Sanadat",
+    },
     category: "Freelance",
     tags: ["client invoice", "invoicing software", "whatsapp reminder", "freelance"],
     content: `## Why Word and Excel invoices slow down getting paid
@@ -114,6 +126,10 @@ Clients pay faster when your invoice is clear, itemized, and effortless to verif
     title: "إزاي تحسب صافي ربح كل مشروع (وليه الدخل الكبير مش معناه إنك كسبان)",
     excerpt:
       "ممكن تقفل مشروع بـ 40 ألف جنيه وتكتشف في الآخر إنك خسران أو طالع بالكاد بمجهودك. اتعلم إزاي تربط الفواتير والمصاريف والعملات بكل مشروع بدقة.",
+    featuredImage: {
+      url: "/images/blog/project-profit.jpg",
+      alt: "حساب صافي ربح كل مشروع ومقارنة الإيرادات بالمصروفات في سندات",
+    },
     category: "مشاريع صغيرة",
     tags: ["أرباح المشاريع", "حسابات مشاريع", "مصروفات المشروع", "تعدد العملات", "وكالة"],
     content: `## الوهم الكبير: "دخل لي 40 ألف من المشروع ده!"
@@ -158,6 +174,10 @@ Clients pay faster when your invoice is clear, itemized, and effortless to verif
     title: "How to Calculate Real Project Profitability (And Why High Revenue Doesn’t Mean Profit)",
     excerpt:
       "You can close a 40,000 EGP project and still barely break even. Learn how linking invoices, expenses, and multi-currency rates reveals real project profit.",
+    featuredImage: {
+      url: "/images/blog/project-profit.jpg",
+      alt: "Project profitability analysis comparing revenue, expenses, and net margin",
+    },
     category: "Small business",
     tags: ["project profitability", "agency finance", "expense tracking", "multi currency"],
     content: `## The revenue trap: "I closed a big project!"
@@ -201,6 +221,10 @@ Once you see which projects actually generate healthy margins and which ones dra
     title: "فوضى المستحقات والـ Excel: إزاي تدير كشوف حسابات العملاء وأرصدة المحافظ بدون لخبطة",
     excerpt:
       "فلوسك متوزعة بين فودافون كاش وإنستاباي والبنك والخزنة، وكل شوية عميل يسألك «أنا دفعت كام وباقي عليا كام؟». إليك النظام الصح لإدارة الأرصدة وكشوف الحساب.",
+    featuredImage: {
+      url: "/images/blog/client-ledger.jpg",
+      alt: "إدارة كشوف حسابات العملاء وأرصدة المحافظ والبنك بدون جداول إكسل",
+    },
     category: "مشاريع صغيرة",
     tags: ["كشف حساب عميل", "فودافون كاش", "إنستاباي", "بديل اكسل", "أرصدة الحسابات"],
     content: `## المشكلة اليومية: "الفلوس فين والعميل له إيه وعليه إيه؟"
@@ -243,6 +267,10 @@ Once you see which projects actually generate healthy margins and which ones dra
     title: "Ending Spreadsheet Chaos: Managing Client Statements, Wallets & Bank Balances in One Place",
     excerpt:
       "Money split across cash, mobile wallets, and bank accounts—plus clients asking what they paid and owe. Here is how to track balances and client statements cleanly.",
+    featuredImage: {
+      url: "/images/blog/client-ledger.jpg",
+      alt: "Unified client ledger and multi-wallet balances replacing scattered spreadsheets",
+    },
     category: "Small business",
     tags: ["client statement", "account balances", "excel alternative", "receivables"],
     content: `## The everyday mess: scattered wallets and manual statements
@@ -285,6 +313,10 @@ Every client should have one clear ledger showing:
     title: "الديون، الاشتراكات المنسية، وتقلب الدخل: نظام عملي لتأمين الكاش فلو الشهري",
     excerpt:
       "ليه الكاش بيخلص قبل آخر الشهر حتى لو دخلك كويس؟ تعرف على نظام بسيط يجمع الميزانيات الشهرية والمصروفات المتكررة والديون في مكان واحد.",
+    featuredImage: {
+      url: "/images/blog/cashflow-system.jpg",
+      alt: "نظام متابعة الديون والمصروفات المتكررة والميزانية الشهرية وتأمين الكاش فلو",
+    },
     category: "إدارة مالية",
     tags: ["إدارة الديون", "مصروفات متكررة", "ميزانية شهرية", "كاش فلو", "إدارة مالية"],
     content: `## المشكلة مش في قلة الدخل — المشكلة في "المفاجآت"
@@ -323,6 +355,10 @@ Every client should have one clear ledger showing:
     title: "Debts, Forgotten Subscriptions & Irregular Income: A Practical Monthly Cashflow System",
     excerpt:
       "Why does cash run out before month-end even with good income? A practical system uniting monthly budgets, recurring bills, debts, and savings goals.",
+    featuredImage: {
+      url: "/images/blog/cashflow-system.jpg",
+      alt: "Monthly cashflow control system uniting recurring bills, budgets, and debt tracking",
+    },
     category: "Personal finance",
     tags: ["debt tracking", "recurring expenses", "monthly budget", "cashflow"],
     content: `## It is rarely an income problem—it is a visibility problem
