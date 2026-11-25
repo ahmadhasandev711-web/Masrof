@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import { expo } from "@better-auth/expo";
-import { phoneNumber } from "better-auth/plugins";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { mongoDb } from "@/lib/db/mongo-client";
 import { env } from "@/lib/env";
+import { sanadatPhoneNumberPlugin } from "@/lib/auth/phone-number-plugin";
+import { normalizePhoneNumber } from "@/lib/phone";
 import { isAuthEmailConfigured, sendAuthEmail } from "@/lib/auth/emails";
 import { sendWelcomeNotification } from "@/features/notifications/dispatch";
 
@@ -60,7 +61,7 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins,
-  plugins: [expo(), phoneNumber()],
+  plugins: [expo(), sanadatPhoneNumberPlugin()],
 
   database: mongodbAdapter(mongoDb),
 
@@ -68,11 +69,20 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          if (user.phoneNumber) {
-            const existing = await mongoDb.collection("user").findOne({ phoneNumber: user.phoneNumber });
+          const rawPhone = (user as { phoneNumber?: string | null }).phoneNumber;
+          if (typeof rawPhone === "string" && rawPhone.trim().length > 0) {
+            const normalizedPhone = normalizePhoneNumber(rawPhone) ?? rawPhone.trim();
+            const existing = await mongoDb.collection("user").findOne({ phoneNumber: normalizedPhone });
             if (existing) {
               throw new Error("PHONE_NUMBER_ALREADY_EXISTS");
             }
+            return {
+              data: {
+                ...user,
+                phoneNumber: normalizedPhone,
+                phoneNumberVerified: false,
+              },
+            };
           }
         },
         after: async (user) => {
