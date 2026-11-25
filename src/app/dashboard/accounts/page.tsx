@@ -37,8 +37,8 @@ export default async function AccountsPage() {
       {/* 1. Header with Title & Quick Action Modal Button */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
-          <p className="text-xs text-neutral-500 mt-0.5">{activeWorkspace.name}</p>
+          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl dark:text-[#ECEAE4]">{t("title")}</h1>
+          <p className="text-xs text-neutral-500 mt-0.5 dark:text-[#9AA39F]">{activeWorkspace.name}</p>
         </div>
 
         {canWrite && (
@@ -76,17 +76,17 @@ export default async function AccountsPage() {
 
       {/* 4. Collapsible Foreign Exchange Rates Section */}
       {plan.multiCurrency ? (
-        <details className="group overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-xs">
-          <summary className="flex cursor-pointer items-center justify-between p-4 sm:p-5 font-semibold text-neutral-800 transition select-none hover:bg-neutral-50">
+        <details className="group overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+          <summary className="flex cursor-pointer items-center justify-between p-4 sm:p-5 font-semibold text-neutral-800 transition select-none hover:bg-neutral-50 dark:text-[#ECEAE4] dark:hover:bg-[#1E2824]">
             <div className="flex items-center gap-2">
               <span className="text-base">💱</span>
               <span className="text-sm sm:text-base">{t("exchangeRatesSection")}</span>
             </div>
-            <span className="text-xs text-neutral-400 transition-transform group-open:rotate-180">
+            <span className="text-xs text-neutral-400 transition-transform group-open:rotate-180 dark:text-[#66706B]">
               ▼
             </span>
           </summary>
-          <div className="border-t border-neutral-100 p-4 sm:p-6 bg-[#FBF9F4]/40">
+          <div className="border-t border-neutral-100 p-4 sm:p-6 bg-[#FBF9F4]/40 dark:border-[#26302C] dark:bg-[#0E1412]/50">
             <ExchangeRatesForm
               workspaceId={workspaceId}
               baseCurrency={baseCurrency}
@@ -95,9 +95,9 @@ export default async function AccountsPage() {
           </div>
         </details>
       ) : (
-        <div className="rounded-2xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-xs sm:text-sm text-[#1C1B1A]/70">
+        <div className="rounded-2xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-xs sm:text-sm text-[#1C1B1A]/70 dark:border-emerald-800/50 dark:bg-[#0F2E24]/60 dark:text-[#9AA39F]">
           {tFeatureGate("multiCurrency")}{" "}
-          <Link href="/pricing" className="font-medium text-[#065F46] hover:underline">
+          <Link href="/pricing" className="font-medium text-[#065F46] hover:underline dark:text-[#34D399]">
             {tPlan("viewPricing")}
           </Link>
           .

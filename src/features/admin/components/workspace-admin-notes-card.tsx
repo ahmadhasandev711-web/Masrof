@@ -62,14 +62,14 @@ export function WorkspaceAdminNotesCard({
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-xs flex flex-col gap-4">
-      <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+    <div className="rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-xs flex flex-col gap-4 dark:border-[#26302C] dark:bg-[#161E1B]">
+      <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-[#26302C]">
         <div>
-          <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2 dark:text-[#ECEAE4]">
             <span>📝</span>
             <span>{t("adminNotesTitle")}</span>
           </h3>
-          <p className="text-[11px] text-neutral-500 mt-0.5">{t("adminNotesHint")}</p>
+          <p className="text-[11px] text-neutral-500 mt-0.5 dark:text-[#9AA39F]">{t("adminNotesHint")}</p>
         </div>
 
         {/* Data Export Button */}
@@ -77,7 +77,7 @@ export function WorkspaceAdminNotesCard({
           type="button"
           disabled={isExporting}
           onClick={handleExportData}
-          className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 shadow-2xs transition disabled:opacity-50"
+          className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 shadow-2xs transition disabled:opacity-50 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
           title="تصدير نسخة احتياطية كاملة لبيانات هذه المساحة"
         >
           {isExporting ? t("exporting") : ` ${t("exportBackup")}`}
@@ -93,13 +93,13 @@ export function WorkspaceAdminNotesCard({
             setIsSaved(false);
           }}
           placeholder={t("adminNotesPlaceholder")}
-          className="w-full rounded-xl border border-neutral-300 p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-hidden focus:border-neutral-500"
+          className="w-full rounded-xl border border-neutral-300 bg-white p-3 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-hidden focus:border-neutral-500 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder-[#66706B] dark:focus:border-[#34D399]"
         />
 
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-neutral-400">
+          <span className="text-[11px] text-neutral-400 dark:text-[#66706B]">
             {isSaved ? (
-              <span className="text-emerald-700 font-bold"> {t("notesSaved")}</span>
+              <span className="text-emerald-700 font-bold dark:text-[#34D399]"> {t("notesSaved")}</span>
             ) : (
               `${notes.length} / 2000 حرف`
             )}
@@ -108,7 +108,7 @@ export function WorkspaceAdminNotesCard({
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-neutral-900 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-neutral-800 shadow-2xs transition disabled:opacity-50"
+            className="rounded-lg bg-neutral-900 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-neutral-800 shadow-2xs transition disabled:opacity-50 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
           >
             {isPending ? "جارِ الحفظ..." : t("saveNotes")}
           </button>

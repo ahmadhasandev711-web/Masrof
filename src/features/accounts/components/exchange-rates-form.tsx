@@ -29,17 +29,17 @@ export function ExchangeRatesForm({
   );
 
   return (
-    <form action={formAction} className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+    <form action={formAction} className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
       <input type="hidden" name="workspaceId" value={workspaceId} />
-      <h2 className="text-sm font-semibold text-neutral-800">{tForm("title")}</h2>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+      <h2 className="text-sm font-semibold text-neutral-800 dark:text-[#ECEAE4]">{tForm("title")}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-[#9AA39F]">
         {tForm("hint", { baseCurrency })}
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {foreignCurrencies.map((currency) => (
           <div key={currency} className="flex flex-col gap-1.5">
-            <label htmlFor={`rate_${currency}`} className="text-sm font-medium text-neutral-700">
+            <label htmlFor={`rate_${currency}`} className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("rateLabel", { currency, baseCurrency })}
             </label>
             <input
@@ -50,7 +50,7 @@ export function ExchangeRatesForm({
               min="0"
               defaultValue={currentRates[currency] ?? ""}
               placeholder={tForm("ratePlaceholder", { currencyLabel: CURRENCY_LABELS[currency] })}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-left"
+              className="rounded-lg border border-neutral-300 px-3 py-2 text-left dark:border-[#26302C]"
               dir="ltr"
             />
           </div>
@@ -60,13 +60,13 @@ export function ExchangeRatesForm({
       <button
         type="submit"
         disabled={isPending}
-        className="mt-4 rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60"
+        className="mt-4 rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
       >
         {isPending ? tCommon("saving") : tForm("submit")}
       </button>
 
-      {state.error && <p className="mt-2 text-sm text-red-600">{state.error}</p>}
-      {state.success && <p className="mt-2 text-sm text-emerald-700">{tForm("saved")}</p>}
+      {state.error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{state.error}</p>}
+      {state.success && <p className="mt-2 text-sm text-emerald-700 dark:text-[#34D399]">{tForm("saved")}</p>}
     </form>
   );
 }

@@ -194,50 +194,50 @@ export async function DashboardHome({
         <div className="grid grid-cols-4 gap-2 text-center">
           <Link
             href="/dashboard/invoices?action=new"
-            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
+            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95 dark:border-[#26302C] dark:bg-[#161E1B]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-[#0F2E24] dark:text-[#34D399]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full">{t("quickInvoice")}</span>
+            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full dark:text-[#ECEAE4]">{t("quickInvoice")}</span>
           </Link>
 
           <Link
             href="/dashboard/transactions?action=new-expense"
-            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
+            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95 dark:border-[#26302C] dark:bg-[#161E1B]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
               </svg>
             </div>
-            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full">{t("quickExpense")}</span>
+            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full dark:text-[#ECEAE4]">{t("quickExpense")}</span>
           </Link>
 
           <Link
             href="/dashboard/transactions?action=new-income"
-            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
+            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95 dark:border-[#26302C] dark:bg-[#161E1B]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
               </svg>
             </div>
-            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full">{t("quickIncome")}</span>
+            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full dark:text-[#ECEAE4]">{t("quickIncome")}</span>
           </Link>
 
           <Link
             href="/dashboard/debts?action=new"
-            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95"
+            className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-[#E4DFD3] bg-white p-2.5 shadow-xs transition active:scale-95 dark:border-[#26302C] dark:bg-[#161E1B]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full">{t("quickDebts")}</span>
+            <span className="text-[11px] font-semibold text-neutral-800 truncate w-full dark:text-[#ECEAE4]">{t("quickDebts")}</span>
           </Link>
         </div>
       </div>
@@ -245,20 +245,20 @@ export async function DashboardHome({
       {/* Desktop Header Title & Quick Action Bar */}
       <div className="hidden sm:flex sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">{workspaceName}</h1>
-          <p className="text-sm text-neutral-500">{t("workspaceSummary")}</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-[#ECEAE4]">{workspaceName}</h1>
+          <p className="text-sm text-neutral-500 dark:text-[#9AA39F]">{t("workspaceSummary")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/invoices?action=new"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#054d3a] transition active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#065F46] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#054d3a] transition active:scale-95 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
           >
             <span>+</span>
             <span>{t("quickInvoice")}</span>
           </Link>
           <Link
             href="/dashboard/transactions?action=new-expense"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs font-semibold text-neutral-700 shadow-xs hover:bg-neutral-50 transition active:scale-95 dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#ECEAE4] dark:hover:bg-[#1E2824]"
           >
             <span>+</span>
             <span>{t("quickExpense")}</span>
@@ -321,8 +321,8 @@ export async function DashboardHome({
 
       {/* Desktop 3-Card Summary (Accounts & Monthly Overview) */}
       <div className="hidden sm:grid sm:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 text-center shadow-sm">
-          <p className="text-xs text-[#1C1B1A]/45">{t("totalBalance")}</p>
+        <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 text-center shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+          <p className="text-xs text-[#1C1B1A]/45 dark:text-[#9AA39F]">{t("totalBalance")}</p>
           <div className="mt-1">
             <CurrencyBalancesSummary
               byCurrency={balanceSummary.byCurrency}
@@ -333,22 +333,22 @@ export async function DashboardHome({
             />
           </div>
           {balanceSummary.byCurrency.length > 1 && (
-            <Link href="/dashboard/accounts" className="mt-2 inline-block text-xs text-[#065F46] hover:underline">
+            <Link href="/dashboard/accounts" className="mt-2 inline-block text-xs text-[#065F46] hover:underline dark:text-[#34D399]">
               {t("manageCurrencies")}
             </Link>
           )}
         </div>
-        <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 text-center shadow-sm">
-          <p className="text-xs text-[#1C1B1A]/45">{t("monthIncome")}</p>
-          <p className="mt-1 font-bold text-[#065F46] font-mono">
+        <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 text-center shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+          <p className="text-xs text-[#1C1B1A]/45 dark:text-[#9AA39F]">{t("monthIncome")}</p>
+          <p className="mt-1 font-bold text-[#065F46] font-mono dark:text-[#34D399]">
             {monthSummary.income == null
               ? t("addExchangeRates")
               : formatMoney(monthSummary.income, { currency, locale: moneyLocale })}
           </p>
         </div>
-        <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 text-center shadow-sm">
-          <p className="text-xs text-[#1C1B1A]/45">{t("monthExpense")}</p>
-          <p className="mt-1 font-bold text-red-600 font-mono">
+        <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 text-center shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+          <p className="text-xs text-[#1C1B1A]/45 dark:text-[#9AA39F]">{t("monthExpense")}</p>
+          <p className="mt-1 font-bold text-red-600 font-mono dark:text-red-400">
             {monthSummary.expense == null
               ? t("addExchangeRates")
               : formatMoney(monthSummary.expense, { currency, locale: moneyLocale })}
@@ -358,20 +358,20 @@ export async function DashboardHome({
 
       {/* WhatsApp Receivables Radar */}
       {plan.clientsAndProjects && radarInvoices.length > 0 && (
-        <div className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 sm:p-5 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-sky-100">
+        <div className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 sm:p-5 shadow-xs dark:border-sky-900/60 dark:bg-sky-950/25">
+          <div className="flex items-center justify-between pb-3 border-b border-sky-100 dark:border-sky-900/50">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-100 text-sky-800">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-100 text-sky-800 dark:bg-sky-950/70 dark:text-sky-300">
                 <NavIcon name="invoices" className="h-4 w-4" />
               </span>
               <div>
-                <h2 className="font-bold text-neutral-900 text-sm sm:text-base">
+                <h2 className="font-bold text-neutral-900 text-sm sm:text-base dark:text-[#ECEAE4]">
                   {t("radar.title")}
                 </h2>
-                <p className="text-xs text-neutral-500">{t("radar.subtitle")}</p>
+                <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("radar.subtitle")}</p>
               </div>
             </div>
-            <Link href="/dashboard/invoices" className="text-xs font-semibold text-sky-800 hover:underline">
+            <Link href="/dashboard/invoices" className="text-xs font-semibold text-sky-800 hover:underline dark:text-sky-300">
               {t("receivables.viewInvoices")}
             </Link>
           </div>
@@ -398,23 +398,25 @@ export async function DashboardHome({
               return (
                 <div
                   key={inv.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200/80 bg-white p-3 shadow-xs hover:border-sky-300 transition"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200/80 bg-white p-3 shadow-xs hover:border-sky-300 transition dark:border-[#26302C] dark:bg-[#161E1B] dark:hover:border-sky-700"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-bold text-neutral-900 truncate">{inv.clientName}</p>
+                      <p className="text-xs font-bold text-neutral-900 truncate dark:text-[#ECEAE4]">{inv.clientName}</p>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          inv.isOverdue ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"
+                          inv.isOverdue
+                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
+                            : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
                         }`}
                       >
                         {inv.isOverdue ? t("radar.overdueBadge") : t("radar.dueSoonBadge")}
                       </span>
                     </div>
-                    <div className="mt-1 flex items-center gap-2 text-[11px] text-neutral-500 font-mono">
+                    <div className="mt-1 flex items-center gap-2 text-[11px] text-neutral-500 font-mono dark:text-[#9AA39F]">
                       <span>#{inv.invoiceNumber}</span>
                       <span>·</span>
-                      <span className="font-bold text-neutral-900">
+                      <span className="font-bold text-neutral-900 dark:text-[#ECEAE4]">
                         {formatMoney(inv.remainingAmount, { currency, locale: moneyLocale })}
                       </span>
                     </div>
@@ -433,7 +435,7 @@ export async function DashboardHome({
                   ) : (
                     <Link
                       href="/dashboard/plan"
-                      className="shrink-0 rounded-lg border border-neutral-200 px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50"
+                      className="shrink-0 rounded-lg border border-neutral-200 px-2.5 py-1 text-[11px] font-medium text-neutral-600 hover:bg-neutral-50 dark:border-[#26302C] dark:text-[#9AA39F] dark:hover:bg-[#1E2824]"
                     >
                        {t("radar.remindWhatsApp")}
                     </Link>
@@ -447,25 +449,25 @@ export async function DashboardHome({
 
       {/* Owner-Only Live Projects Profitability Widget (GR-5 / Tenant Privacy) */}
       {isOwner && plan.clientsAndProjects && topActiveProjects.length > 0 && (
-        <div className="rounded-2xl border border-emerald-200/80 bg-white p-4 sm:p-5 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+        <div className="rounded-2xl border border-emerald-200/80 bg-white p-4 sm:p-5 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+          <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-[#26302C]">
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800 dark:bg-[#0F2E24] dark:text-[#34D399]">
                 <NavIcon name="projects" className="h-4 w-4" />
               </span>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-bold text-neutral-900 text-sm sm:text-base">
+                  <h2 className="font-bold text-neutral-900 text-sm sm:text-base dark:text-[#ECEAE4]">
                     {t("ownerProfitability.title")}
                   </h2>
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-[#0F2E24] dark:text-[#34D399]">
                     {t("ownerProfitability.badge")}
                   </span>
                 </div>
-                <p className="text-xs text-neutral-500">{t("ownerProfitability.subtitle")}</p>
+                <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("ownerProfitability.subtitle")}</p>
               </div>
             </div>
-            <Link href="/dashboard/projects" className="text-xs font-semibold text-[#065F46] hover:underline">
+            <Link href="/dashboard/projects" className="text-xs font-semibold text-[#065F46] hover:underline dark:text-[#34D399]">
               {t("ownerProfitability.viewAllProjects")}
             </Link>
           </div>
@@ -476,19 +478,19 @@ export async function DashboardHome({
               return (
                 <div
                   key={project._id}
-                  className="flex flex-col justify-between rounded-xl border border-neutral-100 bg-[#FBF9F4] p-3.5 hover:border-emerald-300 transition"
+                  className="flex flex-col justify-between rounded-xl border border-neutral-100 bg-[#FBF9F4] p-3.5 hover:border-emerald-300 transition dark:border-[#26302C] dark:bg-[#1E2824] dark:hover:border-[#34D399]/50"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <p className="font-bold text-sm text-neutral-900 truncate">{project.name}</p>
+                      <p className="font-bold text-sm text-neutral-900 truncate dark:text-[#ECEAE4]">{project.name}</p>
                       {margin != null && (
                         <span
                           className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-mono font-bold ${
                             margin >= 50
-                              ? "bg-emerald-100 text-emerald-800"
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-[#0F2E24] dark:text-[#34D399]"
                               : margin > 0
-                                ? "bg-teal-100 text-teal-800"
-                                : "bg-rose-100 text-rose-800"
+                                ? "bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300"
+                                : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
                           }`}
                         >
                           {margin}% {t("ownerProfitability.profitMargin")}
@@ -496,23 +498,23 @@ export async function DashboardHome({
                       )}
                     </div>
                     {project.clientName && (
-                      <p className="text-xs text-neutral-400 truncate mt-0.5">{project.clientName}</p>
+                      <p className="text-xs text-neutral-400 truncate mt-0.5 dark:text-[#66706B]">{project.clientName}</p>
                     )}
                   </div>
 
-                  <div className="mt-3 pt-2.5 border-t border-neutral-200/60">
+                  <div className="mt-3 pt-2.5 border-t border-neutral-200/60 dark:border-[#26302C]">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-neutral-500">{t("ownerProfitability.netProfit")}</span>
+                      <span className="text-neutral-500 dark:text-[#9AA39F]">{t("ownerProfitability.netProfit")}</span>
                       <span
                         className={`font-mono font-bold ${
-                          project.netProfit >= 0 ? "text-emerald-800" : "text-rose-700"
+                          project.netProfit >= 0 ? "text-emerald-800 dark:text-[#34D399]" : "text-rose-700 dark:text-rose-400"
                         }`}
                       >
                         {project.netProfit >= 0 ? "+" : ""}
                         {formatMoney(project.netProfit, { currency, locale: moneyLocale })}
                       </span>
                     </div>
-                    <div className="mt-1 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
+                    <div className="mt-1 flex items-center justify-between text-[11px] text-neutral-400 font-mono dark:text-[#66706B]">
                       <span>
                         {t("ownerProfitability.revenue")}: {formatMoney(project.incomeTotal, { currency, locale: moneyLocale })}
                       </span>
@@ -529,44 +531,44 @@ export async function DashboardHome({
       )}
 
       {/* Recent Activity Feed */}
-      <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 shadow-sm">
-        <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
-          <h2 className="font-bold text-neutral-900 text-sm sm:text-base flex items-center gap-2">
-            <NavIcon name="transactions" className="h-4 w-4 text-[#065F46]" />
+      <div className="rounded-2xl border border-[#E4DFD3] bg-white p-4 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+        <div className="flex items-center justify-between pb-3 border-b border-neutral-100 dark:border-[#26302C]">
+          <h2 className="font-bold text-neutral-900 text-sm sm:text-base flex items-center gap-2 dark:text-[#ECEAE4]">
+            <NavIcon name="transactions" className="h-4 w-4 text-[#065F46] dark:text-[#34D399]" />
             <span>{t("recentTransactions")}</span>
           </h2>
           <Link
             href="/dashboard/transactions"
-            className="text-xs font-semibold text-[#065F46] hover:underline"
+            className="text-xs font-semibold text-[#065F46] hover:underline dark:text-[#34D399]"
           >
             {t("viewAllTransactions")}
           </Link>
         </div>
         {recentTransactions.length === 0 ? (
-          <div className="py-8 text-center text-xs text-neutral-400">
+          <div className="py-8 text-center text-xs text-neutral-400 dark:text-[#66706B]">
             {t("noRecentTransactions")}
           </div>
         ) : (
-          <div className="divide-y divide-neutral-100">
+          <div className="divide-y divide-neutral-100 dark:divide-[#26302C]">
             {recentTransactions.map((tx) => (
               <div key={tx._id} className="flex items-center justify-between py-3 gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm ${
                       tx.type === "income"
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-neutral-100 text-neutral-600"
+                        ? "bg-emerald-50 text-emerald-700 dark:bg-[#0F2E24] dark:text-[#34D399]"
+                        : "bg-neutral-100 text-neutral-600 dark:bg-[#1E2824] dark:text-[#9AA39F]"
                     }`}
                   >
                     <CategoryIcon slug={tx.categorySlug} kind={tx.type} className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-xs sm:text-sm font-semibold text-neutral-800">
+                    <p className="truncate text-xs sm:text-sm font-semibold text-neutral-800 dark:text-[#ECEAE4]">
                       {tx.description ||
                         tx.categoryName ||
                         (tx.type === "income" ? t("quickIncome") : t("quickExpense"))}
                     </p>
-                    <p className="text-[11px] text-neutral-400 truncate">
+                    <p className="text-[11px] text-neutral-400 truncate dark:text-[#66706B]">
                       {new Intl.DateTimeFormat(moneyLocale, {
                         month: "short",
                         day: "numeric",
@@ -577,7 +579,7 @@ export async function DashboardHome({
                 </div>
                 <span
                   className={`text-xs sm:text-sm font-bold font-mono shrink-0 ${
-                    tx.type === "income" ? "text-emerald-700" : "text-neutral-900"
+                    tx.type === "income" ? "text-emerald-700 dark:text-[#34D399]" : "text-neutral-900 dark:text-[#ECEAE4]"
                   }`}
                 >
                   {tx.type === "income" ? "+" : "-"}
@@ -599,34 +601,34 @@ export async function DashboardHome({
       <div className="hidden sm:grid gap-3 sm:grid-cols-2">
         <Link
           href="/dashboard/transactions"
-          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
+          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30 dark:border-[#26302C] dark:bg-[#161E1B] dark:hover:border-[#34D399]/40"
         >
-          <h2 className="font-semibold text-neutral-900">{t("transactionsTitle")}</h2>
-          <p className="mt-1 text-sm text-neutral-500">{t("transactionsDesc")}</p>
+          <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("transactionsTitle")}</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("transactionsDesc")}</p>
         </Link>
 
         <Link
           href="/dashboard/accounts"
-          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
+          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30 dark:border-[#26302C] dark:bg-[#161E1B] dark:hover:border-[#34D399]/40"
         >
-          <h2 className="font-semibold text-neutral-900">{t("accountsTitle")}</h2>
-          <p className="mt-1 text-sm text-neutral-500">{t("accountsDesc")}</p>
+          <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("accountsTitle")}</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("accountsDesc")}</p>
         </Link>
 
         <Link
           href="/dashboard/budgets"
-          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
+          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30 dark:border-[#26302C] dark:bg-[#161E1B] dark:hover:border-[#34D399]/40"
         >
-          <h2 className="font-semibold text-neutral-900">{t("budgetsTitle")}</h2>
-          <p className="mt-1 text-sm text-neutral-500">{t("budgetsDesc")}</p>
+          <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("budgetsTitle")}</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("budgetsDesc")}</p>
         </Link>
 
         <Link
           href="/dashboard/reports"
-          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30"
+          className="rounded-2xl border border-[#E4DFD3] bg-white p-5 shadow-sm transition hover:border-[#065F46]/30 dark:border-[#26302C] dark:bg-[#161E1B] dark:hover:border-[#34D399]/40"
         >
-          <h2 className="font-semibold text-neutral-900">{t("reportsTitle")}</h2>
-          <p className="mt-1 text-sm text-neutral-500">{t("reportsDesc")}</p>
+          <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("reportsTitle")}</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("reportsDesc")}</p>
         </Link>
       </div>
     </div>
@@ -636,13 +638,13 @@ export async function DashboardHome({
 export function DashboardHomeSkeleton() {
   return (
     <div className="flex w-full max-w-full flex-col gap-6 overflow-x-clip">
-      <div className="h-12 w-48 animate-pulse rounded-lg bg-[#E4DFD3]/70" />
+      <div className="h-12 w-48 animate-pulse rounded-lg bg-[#E4DFD3]/70 dark:bg-[#1E2824]" />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="h-24 animate-pulse rounded-2xl bg-[#E4DFD3]/50" />
-        <div className="h-24 animate-pulse rounded-2xl bg-[#E4DFD3]/50" />
-        <div className="h-24 animate-pulse rounded-2xl bg-[#E4DFD3]/50" />
+        <div className="h-24 animate-pulse rounded-2xl bg-[#E4DFD3]/50 dark:bg-[#1E2824]" />
+        <div className="h-24 animate-pulse rounded-2xl bg-[#E4DFD3]/50 dark:bg-[#1E2824]" />
+        <div className="h-24 animate-pulse rounded-2xl bg-[#E4DFD3]/50 dark:bg-[#1E2824]" />
       </div>
-      <div className="h-56 animate-pulse rounded-2xl bg-[#E4DFD3]/40" />
+      <div className="h-56 animate-pulse rounded-2xl bg-[#E4DFD3]/40 dark:bg-[#1E2824]" />
     </div>
   );
 }

@@ -8,9 +8,9 @@ export function Alert({
   variant?: "error" | "success" | "info";
 }) {
   const styles = {
-    error: "text-red-600",
-    success: "text-emerald-700",
-    info: "text-neutral-600",
+    error: "text-red-600 dark:text-red-400",
+    success: "text-emerald-700 dark:text-[#34D399]",
+    info: "text-neutral-600 dark:text-[#9AA39F]",
   };
 
   return (

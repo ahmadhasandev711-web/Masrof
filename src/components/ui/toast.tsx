@@ -41,15 +41,15 @@ export function ToastStack({
           role="status"
           className={
             toast.type === "error"
-              ? "flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-700 shadow-lg"
-              : "flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-emerald-700 shadow-lg"
+              ? "flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-700 shadow-lg dark:border-red-900/60 dark:bg-[#161E1B] dark:text-red-400"
+              : "flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-emerald-700 shadow-lg dark:border-emerald-900/60 dark:bg-[#161E1B] dark:text-[#34D399]"
           }
         >
           <span>{toast.message}</span>
           <button
             type="button"
             onClick={() => onDismiss(toast.id)}
-            className="shrink-0 text-neutral-400 transition hover:text-neutral-600"
+            className="shrink-0 text-neutral-400 transition hover:text-neutral-600 dark:text-[#66706B] dark:hover:text-[#ECEAE4]"
             aria-label="dismiss"
           >
             ✕

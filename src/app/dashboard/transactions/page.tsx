@@ -106,8 +106,8 @@ export default async function TransactionsPage({
       {/* 1. Header with Title & Quick Action Modals */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
-          <p className="text-xs text-neutral-500 mt-0.5">{activeWorkspace.name}</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-2xl">{t("title")}</h1>
+          <p className="text-xs text-neutral-500 dark:text-[#9AA39F] mt-0.5">{activeWorkspace.name}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -138,7 +138,7 @@ export default async function TransactionsPage({
               canWrite={canWrite}
             />
           ) : (
-            <span className="rounded-lg bg-neutral-100 px-3 py-1.5 text-xs text-neutral-600">
+            <span className="rounded-lg bg-neutral-100 dark:bg-[#1E2824] px-3 py-1.5 text-xs text-neutral-600 dark:text-[#9AA39F]">
               {t("viewerReadOnly")}
             </span>
           )}

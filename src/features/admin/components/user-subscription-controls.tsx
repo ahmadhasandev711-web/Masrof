@@ -43,7 +43,7 @@ export function UserSubscriptionControls({ userId, currentPlan, isSuspended }: P
                   run(() => updateUserPlanAction(userId, "pro"));
                 }
               }}
-              className="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-60 transition"
+              className="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-60 transition dark:border-violet-800/40 dark:bg-violet-950/30 dark:text-violet-300 dark:hover:bg-violet-950/50"
             >
               {t("upgrade")}
             </button>
@@ -56,7 +56,7 @@ export function UserSubscriptionControls({ userId, currentPlan, isSuspended }: P
                   run(() => cancelUserSubscriptionAction(userId));
                 }
               }}
-              className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-60 transition"
+              className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-60 transition dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300 dark:hover:bg-amber-950/50"
             >
               {t("cancelSubscription")}
             </button>
@@ -69,7 +69,7 @@ export function UserSubscriptionControls({ userId, currentPlan, isSuspended }: P
                 run(() => suspendUserAction(userId));
               }
             }}
-            className="rounded-lg border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700 hover:bg-red-100 disabled:opacity-60"
+            className="rounded-lg border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700 hover:bg-red-100 disabled:opacity-60 dark:border-red-800/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
           >
             {t("suspend")}
           </button>
@@ -79,7 +79,7 @@ export function UserSubscriptionControls({ userId, currentPlan, isSuspended }: P
           type="button"
           disabled={isPending}
           onClick={() => run(() => reactivateUserAction(userId, "free"))}
-          className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1.5 text-xs text-emerald-800 hover:bg-emerald-100 disabled:opacity-60"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1.5 text-xs text-emerald-800 hover:bg-emerald-100 disabled:opacity-60 dark:border-[#34D399]/30 dark:bg-[#10B981]/20 dark:text-[#34D399] dark:hover:bg-[#10B981]/30"
         >
           {t("reactivate")}
         </button>

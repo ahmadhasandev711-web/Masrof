@@ -28,11 +28,11 @@ export function MarkdownEditor({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium text-neutral-700">{t("fields.content")}</span>
+        <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.content")}</span>
         <button
           type="button"
           onClick={() => setShowPreview((v) => !v)}
-          className="text-xs font-medium text-violet-700 hover:underline"
+          className="text-xs font-medium text-violet-700 hover:underline dark:text-violet-400"
         >
           {showPreview ? t("editor.hidePreview") : t("editor.showPreview")}
         </button>
@@ -45,12 +45,12 @@ export function MarkdownEditor({
           onChange={(e) => setContent(e.target.value)}
           rows={18}
           required
-          className="min-h-[320px] rounded-lg border border-neutral-300 bg-white px-3 py-2 font-mono text-sm leading-relaxed text-neutral-900"
+          className="min-h-[320px] rounded-lg border border-neutral-300 bg-white px-3 py-2 font-mono text-sm leading-relaxed text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
         />
 
         {showPreview && (
           <div
-            className="prose prose-neutral min-h-[320px] max-w-none rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4 prose-headings:text-neutral-900 prose-a:text-violet-700"
+            className="prose prose-neutral dark:prose-invert min-h-[320px] max-w-none rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4 prose-headings:text-neutral-900 prose-a:text-violet-700 dark:border-[#26302C] dark:bg-[#161E1B] dark:prose-headings:text-[#ECEAE4] dark:prose-a:text-violet-400"
             dangerouslySetInnerHTML={{ __html: previewHtml }}
           />
         )}

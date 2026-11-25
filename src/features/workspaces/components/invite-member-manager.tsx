@@ -22,7 +22,7 @@ export function InviteMemberManager({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-xl bg-[#065F46] px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] active:scale-98"
+        className="flex items-center gap-2 rounded-xl bg-[#065F46] px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] active:scale-98 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
       >
         <span className="text-base font-bold leading-none">+</span>
         <span>{t("newInviteBtn")}</span>

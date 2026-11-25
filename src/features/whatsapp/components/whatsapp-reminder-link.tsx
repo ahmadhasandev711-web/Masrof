@@ -26,7 +26,7 @@ export function WhatsAppReminderLink({
     return (
       <span
         title={resolvedMissingHint}
-        className={`cursor-not-allowed text-xs text-neutral-300 ${className ?? ""}`}
+        className={`cursor-not-allowed text-xs text-neutral-300 dark:text-[#66706B] ${className ?? ""}`}
       >
         {resolvedLabel}
       </span>
@@ -52,7 +52,7 @@ export function WhatsAppReminderLink({
 export function WhatsAppSettingsLink() {
   const tWhatsapp = useTranslations("forms.whatsapp");
   return (
-    <Link href="/dashboard/plan#whatsapp" className="text-xs font-medium text-emerald-700 hover:underline">
+    <Link href="/dashboard/plan#whatsapp" className="text-xs font-medium text-emerald-700 dark:text-[#34D399] hover:underline">
       {tWhatsapp("settingsHint")}
     </Link>
   );

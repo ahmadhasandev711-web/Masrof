@@ -35,12 +35,12 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
       {/* Top Row: Plan selector & Quick Extension Buttons */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-2">
-          <label className="text-xs font-medium text-neutral-500">{t("plan")}:</label>
+          <label className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("plan")}:</label>
           <span
             className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold ${
               currentPlan === "pro"
-                ? "bg-violet-100 text-violet-800 border border-violet-200"
-                : "bg-neutral-100 text-neutral-700 border border-neutral-200"
+                ? "bg-violet-100 text-violet-800 border border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800/40"
+                : "bg-neutral-100 text-neutral-700 border border-neutral-200 dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:border-[#26302C]"
             }`}
           >
             {tPlans(currentPlan)}
@@ -82,7 +82,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
                   );
                 }
               }}
-              className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-60 transition"
+              className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-60 transition dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300 dark:hover:bg-amber-950/50"
               title={t("extendGraceHint")}
             >
               {t("extendGrace")}
@@ -100,7 +100,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
                   );
                 }
               }}
-              className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60 transition"
+              className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60 transition dark:border-[#34D399]/30 dark:bg-[#10B981]/20 dark:text-[#34D399] dark:hover:bg-[#10B981]/30"
             >
               {t("extendMonth")}
             </button>
@@ -117,7 +117,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
                   );
                 }
               }}
-              className="rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-60 transition"
+              className="rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-60 transition dark:border-violet-800/40 dark:bg-violet-950/30 dark:text-violet-300 dark:hover:bg-violet-950/50"
             >
               {t("extendYear")}
             </button>
@@ -125,7 +125,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
               type="button"
               disabled={isPending}
               onClick={() => setShowDatePicker((prev) => !prev)}
-              className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 transition"
+              className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 transition dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
             >
               {showDatePicker ? t("closeCustomDate") : t("customDate")}
             </button>
@@ -135,13 +135,13 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
 
       {/* Custom Date Picker Accordion */}
       {showDatePicker && currentPlan !== "free" && !isSuspended && (
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50/80 p-3">
-          <label className="text-xs font-medium text-neutral-600">{t("selectExpiryDate")}:</label>
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50/80 p-3 dark:border-[#26302C] dark:bg-[#1E2824]">
+          <label className="text-xs font-medium text-neutral-600 dark:text-[#9AA39F]">{t("selectExpiryDate")}:</label>
           <input
             type="date"
             value={customDate}
             onChange={(e) => setCustomDate(e.target.value)}
-            className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 text-xs text-neutral-800 focus:outline-hidden focus:border-violet-500"
+            className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 text-xs text-neutral-800 focus:outline-hidden focus:border-violet-500 dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#ECEAE4]"
           />
           <button
             type="button"
@@ -155,7 +155,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
                 );
               }
             }}
-            className="rounded-lg bg-neutral-900 px-3 py-1 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-50 transition"
+            className="rounded-lg bg-neutral-900 px-3 py-1 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-50 transition dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
           >
             {t("applyDate")}
           </button>
@@ -163,7 +163,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
       )}
 
       {/* Bottom Actions: Downgrade & Suspend/Reactivate */}
-      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100">
+      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100 dark:border-[#26302C]">
         {!isSuspended ? (
           <>
             {currentPlan !== "free" && (
@@ -180,7 +180,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
                     );
                   }
                 }}
-                className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-100 disabled:opacity-60 transition"
+                className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-100 disabled:opacity-60 transition dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300 dark:hover:bg-amber-950/50"
               >
                 {t("downgradeFree")}
               </button>
@@ -193,7 +193,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
                   run(() => toggleAdminWorkspaceSuspendAction(workspaceId, true));
                 }
               }}
-              className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-60 transition"
+              className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-60 transition dark:border-red-800/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
             >
               {t("suspendWorkspace")}
             </button>
@@ -203,7 +203,7 @@ export function WorkspacePlanControls({ workspaceId, currentPlan, isSuspended }:
             type="button"
             disabled={isPending}
             onClick={() => run(() => toggleAdminWorkspaceSuspendAction(workspaceId, false))}
-            className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60 transition"
+            className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60 transition dark:border-[#34D399]/30 dark:bg-[#10B981]/20 dark:text-[#34D399]"
           >
             {t("reactivateWorkspace")}
           </button>

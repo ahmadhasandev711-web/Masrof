@@ -45,11 +45,11 @@ export function ExportExcelButton({
         type="button"
         onClick={handleExport}
         disabled={isPending}
-        className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-60"
+        className="rounded-lg border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4] transition hover:bg-neutral-50 dark:hover:bg-[#26302C] disabled:opacity-60"
       >
         {isPending ? resolvedPendingLabel : resolvedLabel}
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

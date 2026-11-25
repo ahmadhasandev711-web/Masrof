@@ -67,58 +67,58 @@ export function DebtPaymentsDialog({
     >
       <div className="flex flex-col gap-4">
         {/* Summary Mini Bar */}
-        <div className="grid grid-cols-3 gap-2 rounded-xl bg-neutral-50 p-3 text-center text-xs">
+        <div className="grid grid-cols-3 gap-2 rounded-xl bg-neutral-50 dark:bg-[#1E2824] p-3 text-center text-xs">
           <div>
-            <span className="text-neutral-500">{t("totalLiabilities")}:</span>
-            <p className="font-bold text-neutral-900">{formatMoney(debt.totalAmount, { currency })}</p>
+            <span className="text-neutral-500 dark:text-[#9AA39F]">{t("totalLiabilities")}:</span>
+            <p className="font-bold text-neutral-900 dark:text-[#ECEAE4]">{formatMoney(debt.totalAmount, { currency })}</p>
           </div>
           <div>
-            <span className="text-emerald-700">{t("totalPaid")}:</span>
-            <p className="font-bold text-emerald-800">{formatMoney(debt.paidAmount, { currency })}</p>
+            <span className="text-emerald-700 dark:text-[#34D399]">{t("totalPaid")}:</span>
+            <p className="font-bold text-emerald-800 dark:text-[#34D399]">{formatMoney(debt.paidAmount, { currency })}</p>
           </div>
           <div>
-            <span className="text-amber-800">{t("remainingLiabilities")}:</span>
-            <p className="font-bold text-amber-900">{formatMoney(debt.remainingAmount, { currency })}</p>
+            <span className="text-amber-800 dark:text-amber-300">{t("remainingLiabilities")}:</span>
+            <p className="font-bold text-amber-900 dark:text-amber-300">{formatMoney(debt.remainingAmount, { currency })}</p>
           </div>
         </div>
 
         {/* Payments List */}
         <div className="mt-4 max-h-80 overflow-y-auto">
           {isLoading ? (
-            <div className="py-8 text-center text-sm text-neutral-400">{t("loadingPayments")}</div>
+            <div className="py-8 text-center text-sm text-neutral-400 dark:text-[#9AA39F]">{t("loadingPayments")}</div>
           ) : error ? (
-            <div className="py-6 text-center text-xs text-red-600">{error}</div>
+            <div className="py-6 text-center text-xs text-red-600 dark:text-rose-400">{error}</div>
           ) : payments.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-neutral-200 py-8 text-center">
+            <div className="rounded-xl border border-dashed border-neutral-200 dark:border-[#26302C] py-8 text-center">
               <span className="text-2xl">💳</span>
-              <p className="mt-2 text-xs font-medium text-neutral-500">
+              <p className="mt-2 text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">
                 {t("noPaymentsYet")}
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-neutral-100">
+            <div className="divide-y divide-neutral-100 dark:divide-[#26302C]">
               {payments.map((p) => (
                 <div key={p.id} className="flex items-center justify-between py-3 text-xs">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-neutral-900">
+                      <span className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">
                         {new Date(p.paymentDate).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
                           year: "numeric",
                           month: "short",
                           day: "numeric",
                         })}
                       </span>
-                      <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-600">
+                      <span className="rounded bg-neutral-100 dark:bg-[#1E2824] px-1.5 py-0.5 text-[10px] text-neutral-600 dark:text-[#9AA39F]">
                         {p.accountName}
                       </span>
                       {p.reference && (
-                        <span className="text-[10px] text-neutral-400">#{p.reference}</span>
+                        <span className="text-[10px] text-neutral-400 dark:text-[#66706B]">#{p.reference}</span>
                       )}
                     </div>
-                    {p.notes && <p className="mt-0.5 text-[11px] text-neutral-500">{p.notes}</p>}
+                    {p.notes && <p className="mt-0.5 text-[11px] text-neutral-500 dark:text-[#9AA39F]">{p.notes}</p>}
                   </div>
                   <div className="text-end">
-                    <span className="font-bold text-emerald-800">
+                    <span className="font-bold text-emerald-800 dark:text-[#34D399]">
                       {formatMoney(p.amount, { currency })}
                     </span>
                   </div>
@@ -132,7 +132,7 @@ export function DebtPaymentsDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-neutral-100 px-4 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
+            className="rounded-lg bg-neutral-100 dark:bg-[#1E2824] px-4 py-2 text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-200 dark:hover:bg-[#26302C]"
           >
             {t("close")}
           </button>

@@ -9,7 +9,6 @@ import { BlogPostCard } from "@/features/blog/components/blog-post-card";
 import { BlogFeaturedImage } from "@/features/blog/components/blog-featured-image";
 import { renderPostContent } from "@/features/blog/render";
 import { estimateReadingMinutes } from "@/features/blog/utils";
-import { AdSlot } from "@/features/marketing/components/ad-slot";
 import { NewsletterForm } from "@/features/marketing/components/newsletter-form";
 
 export const revalidate = 300;
@@ -48,9 +47,8 @@ export default async function BlogPostPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const [tPages, tMarketing, format] = await Promise.all([
+  const [tPages, format] = await Promise.all([
     getTranslations("pages.blog"),
-    getTranslations("marketing.adSlot"),
     getFormatter(),
   ]);
   const locale = (await getLocale()) as AppLocale;
@@ -131,14 +129,10 @@ export default async function BlogPostPage({
         </div>
       )}
 
-      <AdSlot placement="inline" />
-
       <div
         className="prose prose-neutral mt-10 max-w-none prose-headings:font-[family-name:var(--font-marketing-display)] prose-headings:text-[#1C1B1A] prose-p:leading-relaxed prose-p:text-[#1C1B1A]/80 prose-a:text-[#065F46] prose-img:rounded-xl"
         dangerouslySetInnerHTML={{ __html: html }}
       />
-
-      <AdSlot placement="articleEnd" label={tMarketing("articleEnd")} />
 
       {relatedPosts.length > 0 && (
         <section className="mt-12 border-t border-[#E4DFD3] pt-10">

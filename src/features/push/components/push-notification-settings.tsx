@@ -146,9 +146,9 @@ export function PushNotificationSettings({
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-6">
-      <h2 className="text-sm font-semibold text-neutral-800">{tPush("title")}</h2>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+    <div className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-[#26302C] dark:bg-[#161E1B]">
+      <h2 className="text-sm font-semibold text-neutral-800 dark:text-[#ECEAE4]">{tPush("title")}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-[#9AA39F]">
         {tPush("description")}
       </p>
 
@@ -159,7 +159,7 @@ export function PushNotificationSettings({
               type="button"
               onClick={handleTest}
               disabled={isPending || !canUsePush}
-              className="rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60"
+              className="rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
             >
               {tPush("sendTest")}
             </button>
@@ -167,7 +167,7 @@ export function PushNotificationSettings({
               type="button"
               onClick={handleUnsubscribe}
               disabled={isPending}
-              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60 dark:border-[#26302C] dark:text-[#ECEAE4] dark:hover:bg-[#1E2824]"
             >
               {tPush("unsubscribe")}
             </button>
@@ -177,20 +177,20 @@ export function PushNotificationSettings({
             type="button"
             onClick={handleSubscribe}
             disabled={isPending || !canUsePush}
-            className="rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60"
+            className="rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
           >
             {isPending ? tPush("enabling") : tPush("enable")}
           </button>
         )}
       </div>
 
-      <p className="mt-3 text-xs text-neutral-500">
+      <p className="mt-3 text-xs text-neutral-500 dark:text-[#9AA39F]">
         {tPush("devicesActive")} {subscriptionCount}
         {!vapidPublicKey ? ` · ${tPush("vapidNeeded")}` : ""}
         {!supported ? ` · ${tPush("browserUnsupported")}` : ""}
       </p>
-      {message && <p className="mt-2 text-sm text-emerald-700">{message}</p>}
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {message && <p className="mt-2 text-sm text-emerald-700 dark:text-[#34D399]">{message}</p>}
+      {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

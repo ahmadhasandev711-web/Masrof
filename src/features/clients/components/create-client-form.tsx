@@ -44,16 +44,16 @@ export function CreateClientForm({
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <IdempotencyKeyInput value={idempotencyKey} />
 
-      <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
+      <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{tForm("title")}</h2>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="client-name" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="client-name" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("name")}
           </label>
           <input
@@ -61,13 +61,13 @@ export function CreateClientForm({
             name="name"
             type="text"
             placeholder={tForm("namePlaceholder")}
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="client-email" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="client-email" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("email")}
           </label>
           <input
@@ -75,12 +75,12 @@ export function CreateClientForm({
             name="email"
             type="email"
             placeholder={tShared("optional")}
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="client-phone" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="client-phone" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("phone")}
           </label>
           <input
@@ -88,13 +88,13 @@ export function CreateClientForm({
             name="phone"
             type="tel"
             placeholder={tShared("optional")}
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
           />
         </div>
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -103,7 +103,7 @@ export function CreateClientForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-emerald-700 px-5 py-2 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
+          className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-5 py-2 font-medium text-white dark:text-[#04231A] transition hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("adding") : tForm("submit")}
         </button>
@@ -112,7 +112,7 @@ export function CreateClientForm({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-lg border border-neutral-300 px-4 py-2 font-medium text-neutral-700 transition hover:bg-neutral-100 disabled:opacity-60"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2 font-medium text-neutral-700 dark:text-[#ECEAE4] transition hover:bg-neutral-100 dark:hover:bg-[#1E2824] disabled:opacity-60"
           >
             {tCommon("cancel")}
           </button>

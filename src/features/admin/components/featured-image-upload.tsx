@@ -49,14 +49,14 @@ export function FeaturedImageUpload({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-4">
+    <div className="flex flex-col gap-3 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-4 dark:border-[#26302C] dark:bg-[#1E2824]">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-medium text-neutral-700">{t("fields.featuredImage")}</p>
+        <p className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.featuredImage")}</p>
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={isUploading}
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50 disabled:opacity-60 dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
         >
           {isUploading ? t("upload.uploading") : previewUrl ? t("upload.change") : t("upload.upload")}
         </button>
@@ -70,7 +70,7 @@ export function FeaturedImageUpload({
       </div>
 
       {previewUrl ? (
-        <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-neutral-200">
+        <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-neutral-200 dark:border-[#26302C]">
           <Image
             src={previewUrl}
             alt={alt || t("upload.defaultAlt")}
@@ -80,7 +80,7 @@ export function FeaturedImageUpload({
           />
         </div>
       ) : (
-        <div className="flex aspect-[16/9] items-center justify-center rounded-lg border border-neutral-200 bg-white text-sm text-neutral-400">
+        <div className="flex aspect-[16/9] items-center justify-center rounded-lg border border-neutral-200 bg-white text-sm text-neutral-400 dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#66706B]">
           {t("noImageOptional")}
         </div>
       )}
@@ -88,17 +88,17 @@ export function FeaturedImageUpload({
       <input type="hidden" name="featuredImageUrl" value={previewUrl} />
 
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium text-neutral-700">{t("fields.featuredImageAlt")}</span>
+        <span className="font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.featuredImageAlt")}</span>
         <input
           name="featuredImageAlt"
           value={alt}
           onChange={(e) => setAlt(e.target.value)}
           placeholder={t("upload.altPlaceholder")}
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900"
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B]"
         />
       </label>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

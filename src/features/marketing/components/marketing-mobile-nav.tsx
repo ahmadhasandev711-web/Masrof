@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { NavIcon } from "@/components/ui/app-icons";
 
 type MarketingNavProps = {
@@ -15,6 +16,7 @@ type MarketingNavProps = {
   startFree: string;
   menuLabel: string;
   closeMenu: string;
+  allowDark?: boolean;
 };
 
 export function MarketingMobileNav({
@@ -27,6 +29,7 @@ export function MarketingMobileNav({
   startFree,
   menuLabel,
   closeMenu,
+  allowDark = false,
 }: MarketingNavProps) {
   const [open, setOpen] = useState(false);
 
@@ -53,28 +56,30 @@ export function MarketingMobileNav({
   return (
     <>
       <nav className="hidden items-center gap-3 text-sm sm:flex sm:gap-5">
-        <Link href="/pricing" className="text-[#1C1B1A]/70 transition hover:text-[#065F46]">
+        <Link href="/pricing" className={`text-[#1C1B1A]/70 transition hover:text-[#065F46] ${allowDark ? "dark:text-[#9AA39F] dark:hover:text-[#34D399]" : ""}`}>
           {pricing}
         </Link>
-        <Link href="/faq" className="text-[#1C1B1A]/70 transition hover:text-[#065F46]">
+        <Link href="/faq" className={`text-[#1C1B1A]/70 transition hover:text-[#065F46] ${allowDark ? "dark:text-[#9AA39F] dark:hover:text-[#34D399]" : ""}`}>
           {faq}
         </Link>
-        <Link href="/support" className="text-[#1C1B1A]/70 transition hover:text-[#065F46]">
+        <Link href="/support" className={`text-[#1C1B1A]/70 transition hover:text-[#065F46] ${allowDark ? "dark:text-[#9AA39F] dark:hover:text-[#34D399]" : ""}`}>
           {support}
         </Link>
+        {allowDark ? <ThemeSwitcher /> : null}
         <LocaleSwitcher />
-        <Link href="/login" className="text-[#1C1B1A]/70 transition hover:text-[#065F46]">
+        <Link href="/login" className={`text-[#1C1B1A]/70 transition hover:text-[#065F46] ${allowDark ? "dark:text-[#9AA39F] dark:hover:text-[#34D399]" : ""}`}>
           {login}
         </Link>
         <Link
           href="/register"
-          className="rounded-lg bg-[#065F46] px-4 py-2 font-medium text-white transition hover:bg-[#054d3a]"
+          className="rounded-lg bg-[#065F46] px-4 py-2 font-medium text-white transition hover:bg-[#054d3a] dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
         >
           {startFree}
         </Link>
       </nav>
 
       <div className="flex items-center gap-2 sm:hidden">
+        {allowDark ? <ThemeSwitcher /> : null}
         <LocaleSwitcher />
         <Link
           href="/register"
@@ -101,13 +106,13 @@ export function MarketingMobileNav({
             aria-label={closeMenu}
             onClick={() => setOpen(false)}
           />
-          <div className="absolute inset-x-0 top-0 max-h-[85vh] overflow-y-auto rounded-b-2xl border-b border-[#E4DFD3] bg-[#FBF9F4] pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#E4DFD3] px-4 py-3">
-              <p className="font-semibold text-[#065F46]">{appName}</p>
+          <div className={`absolute inset-x-0 top-0 max-h-[85vh] overflow-y-auto rounded-b-2xl border-b border-[#E4DFD3] bg-[#FBF9F4] pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-2xl ${allowDark ? "dark:border-[#26302C] dark:bg-[#161E1B]" : ""}`}>
+            <div className={`flex items-center justify-between border-b border-[#E4DFD3] px-4 py-3 ${allowDark ? "dark:border-[#26302C]" : ""}`}>
+              <p className={`font-semibold text-[#065F46] ${allowDark ? "dark:text-[#34D399]" : ""}`}>{appName}</p>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100"
+                className={`rounded-lg px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 ${allowDark ? "dark:text-[#9AA39F] dark:hover:bg-[#1E2824]" : ""}`}
               >
                 {closeMenu}
               </button>
@@ -118,7 +123,7 @@ export function MarketingMobileNav({
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-3 text-base text-[#1C1B1A]/80 hover:bg-[#F3F0E8] hover:text-[#065F46]"
+                  className={`rounded-lg px-3 py-3 text-base text-[#1C1B1A]/80 hover:bg-[#F3F0E8] hover:text-[#065F46] ${allowDark ? "dark:text-[#ECEAE4] dark:hover:bg-[#1E2824] dark:hover:text-[#34D399]" : ""}`}
                 >
                   {link.label}
                 </Link>

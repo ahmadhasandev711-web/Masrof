@@ -153,8 +153,8 @@ export function ClientCombobox({
       {!isOpen && selectedClient ? (
         <div
           onClick={() => !disabled && setIsOpen(true)}
-          className={`flex items-center justify-between rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right transition hover:border-emerald-600 ${
-            disabled ? "cursor-not-allowed bg-neutral-100 opacity-60" : "cursor-pointer"
+          className={`flex items-center justify-between rounded-lg border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-3 py-2 text-right transition hover:border-emerald-600 dark:hover:border-[#34D399] ${
+            disabled ? "cursor-not-allowed bg-neutral-100 dark:bg-[#161E1B] opacity-60" : "cursor-pointer"
           }`}
           role="combobox"
           aria-expanded={isOpen}
@@ -162,15 +162,15 @@ export function ClientCombobox({
           onKeyDown={handleKeyDown}
         >
           <div className="flex min-w-0 items-center gap-2">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-800">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-[#0F2E24] text-xs font-semibold text-emerald-800 dark:text-[#34D399]">
               {selectedClient.name.trim().charAt(0) || "?"}
             </span>
             <div className="min-w-0 truncate">
-              <span className="font-medium text-neutral-900">
+              <span className="font-medium text-neutral-900 dark:text-[#ECEAE4]">
                 {selectedClient.name}
               </span>
               {selectedClient.phone && (
-                <span className="ms-2 inline-flex items-center rounded-md bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600 dir-ltr">
+                <span className="ms-2 inline-flex items-center rounded-md bg-neutral-100 dark:bg-[#26302C] px-1.5 py-0.5 text-xs text-neutral-600 dark:text-[#9AA39F] dir-ltr">
                    {selectedClient.phone}
                 </span>
               )}
@@ -180,12 +180,12 @@ export function ClientCombobox({
             <button
               type="button"
               onClick={handleClear}
-              className="rounded p-1 text-xs text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+              className="rounded p-1 text-xs text-neutral-400 dark:text-[#9AA39F] hover:bg-neutral-100 dark:hover:bg-[#26302C] hover:text-neutral-700 dark:hover:text-[#ECEAE4]"
               title={t("clearSelection")}
             >
               ✕
             </button>
-            <span className="text-xs text-emerald-700 hover:underline">
+            <span className="text-xs text-emerald-700 dark:text-[#34D399] hover:underline">
               {t("clearSelection")}
             </span>
           </div>
@@ -193,13 +193,13 @@ export function ClientCombobox({
       ) : (
         <div
           onClick={() => !disabled && setIsOpen(true)}
-          className={`relative flex items-center rounded-lg border bg-white transition ${
+          className={`relative flex items-center rounded-lg border bg-white dark:bg-[#1E2824] transition ${
             isOpen
-              ? "border-emerald-600 ring-2 ring-emerald-100"
-              : "border-neutral-300 hover:border-emerald-600"
-          } ${disabled ? "cursor-not-allowed bg-neutral-100 opacity-60" : "cursor-pointer"}`}
+              ? "border-emerald-600 dark:border-[#34D399] ring-2 ring-emerald-100 dark:ring-[#34D399]/20"
+              : "border-neutral-300 dark:border-[#26302C] hover:border-emerald-600 dark:hover:border-[#34D399]"
+          } ${disabled ? "cursor-not-allowed bg-neutral-100 dark:bg-[#161E1B] opacity-60" : "cursor-pointer"}`}
         >
-          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-neutral-400">
+          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-neutral-400 dark:text-[#66706B]">
             <svg
               className="h-4 w-4"
               fill="none"
@@ -228,10 +228,10 @@ export function ClientCombobox({
             onKeyDown={handleKeyDown}
             placeholder={selectedClient ? selectedClient.name : t("searchPlaceholder")}
             disabled={disabled}
-            className="w-full bg-transparent py-2 pe-8 ps-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+            className="w-full bg-transparent py-2 pe-8 ps-9 text-sm text-neutral-900 dark:text-[#ECEAE4] placeholder:text-neutral-400 dark:placeholder:text-[#66706B] focus:outline-none"
           />
 
-          <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3 text-neutral-400">
+          <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3 text-neutral-400 dark:text-[#66706B]">
             <svg
               className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
               fill="none"
@@ -251,16 +251,16 @@ export function ClientCombobox({
 
       {/* Popover Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-hidden rounded-lg border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] shadow-lg">
           <ul
             ref={listRef}
             role="listbox"
-            className="max-h-56 divide-y divide-neutral-100 overflow-y-auto py-1 text-sm text-neutral-900 focus:outline-none"
+            className="max-h-56 divide-y divide-neutral-100 dark:divide-[#26302C] overflow-y-auto py-1 text-sm text-neutral-900 dark:text-[#ECEAE4] focus:outline-none"
           >
             {filteredClients.length === 0 ? (
-              <li className="px-4 py-3 text-center text-sm text-neutral-500">
+              <li className="px-4 py-3 text-center text-sm text-neutral-500 dark:text-[#9AA39F]">
                 {t("noClientsFound")}
-                {query && <span className="font-semibold text-neutral-800"> «{query}»</span>}
+                {query && <span className="font-semibold text-neutral-800 dark:text-[#ECEAE4]"> «{query}»</span>}
               </li>
             ) : (
               filteredClients.map((client, index) => {
@@ -276,12 +276,12 @@ export function ClientCombobox({
                     onClick={() => handleSelect(client)}
                     className={`flex cursor-pointer items-center justify-between px-3.5 py-2.5 transition ${
                       isHighlighted
-                        ? "bg-emerald-50 text-emerald-950"
-                        : "hover:bg-neutral-50"
-                    } ${isSelected ? "font-semibold bg-emerald-50/50" : ""}`}
+                        ? "bg-emerald-50 dark:bg-[#0F2E24] text-emerald-950 dark:text-[#34D399]"
+                        : "hover:bg-neutral-50 dark:hover:bg-[#1E2824]"
+                    } ${isSelected ? "font-semibold bg-emerald-50/50 dark:bg-[#0F2E24]/70" : ""}`}
                   >
                     <div className="flex min-w-0 items-center gap-2">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-xs text-neutral-600">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 dark:bg-[#1E2824] text-xs text-neutral-600 dark:text-[#9AA39F]">
                         {client.name.trim().charAt(0) || "?"}
                       </span>
                       <span className="truncate">{client.name}</span>
@@ -289,13 +289,13 @@ export function ClientCombobox({
 
                     <div className="flex shrink-0 items-center gap-2">
                       {client.phone && (
-                        <span className="inline-flex items-center rounded bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600 dir-ltr">
+                        <span className="inline-flex items-center rounded bg-neutral-100 dark:bg-[#1E2824] px-2 py-0.5 text-xs text-neutral-600 dark:text-[#9AA39F] dir-ltr">
                            {client.phone}
                         </span>
                       )}
                       {isSelected && (
                         <svg
-                          className="h-4 w-4 text-emerald-600"
+                          className="h-4 w-4 text-emerald-600 dark:text-[#34D399]"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"

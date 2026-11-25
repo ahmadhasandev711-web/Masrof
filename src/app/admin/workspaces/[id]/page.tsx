@@ -55,13 +55,13 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
     <div className="flex flex-col gap-6">
       {/* Breadcrumb & Top Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm text-neutral-500">
-          <Link href="/admin/workspaces" className="hover:text-neutral-900 transition flex items-center gap-1">
+        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-[#9AA39F]">
+          <Link href="/admin/workspaces" className="hover:text-neutral-900 transition flex items-center gap-1 dark:hover:text-[#ECEAE4]">
             <ArrowLeftIcon className="h-4 w-4 rtl:rotate-180" />
             <span>{t("title")}</span>
           </Link>
           <span>/</span>
-          <span className="font-semibold text-neutral-900">{workspace.name}</span>
+          <span className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{workspace.name}</span>
         </div>
 
         {/* Live Support Preview Button */}
@@ -69,28 +69,28 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
       </div>
 
       {/* Workspace Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 font-bold text-lg sm:text-xl shadow-xs">
+          <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 font-bold text-lg sm:text-xl shadow-xs dark:bg-[#10B981]/20 dark:text-[#34D399]">
             {workspace.name.slice(0, 2).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 truncate">{workspace.name}</h1>
-              <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700">
+              <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 truncate dark:text-[#ECEAE4]">{workspace.name}</h1>
+              <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700 dark:bg-[#1E2824] dark:text-[#ECEAE4]">
                 {getTypeLabel(workspace.type)}
               </span>
               {workspace.isArchived ? (
-                <span className="rounded-full bg-neutral-200 px-2.5 py-0.5 text-xs font-medium text-neutral-600">
+                <span className="rounded-full bg-neutral-200 px-2.5 py-0.5 text-xs font-medium text-neutral-600 dark:bg-[#1E2824] dark:text-[#9AA39F]">
                   {t("archived")}
                 </span>
               ) : (
-                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-[#10B981]/20 dark:text-[#34D399]">
                   {t("active")}
                 </span>
               )}
             </div>
-            <p className="mt-1 text-xs text-neutral-400 truncate">
+            <p className="mt-1 text-xs text-neutral-400 truncate dark:text-[#66706B]">
               {t("currency")}: {workspace.currency} • {t("createdAt")}:{" "}
               {format.dateTime(new Date(workspace.createdAt), {
                 day: "numeric",
@@ -103,15 +103,15 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
 
         {/* Subscription Badge */}
         <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3 text-right">
+          <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3 text-right dark:border-violet-800/40 dark:bg-violet-950/30">
             <div className="flex items-center justify-end gap-1.5">
-              <span className="text-xs text-neutral-500">{t("plan")}:</span>
+              <span className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("plan")}:</span>
               <span className="rounded-md bg-violet-600 px-2 py-0.5 text-xs font-bold text-white">
                 {tPlans(workspace.plan)}
               </span>
             </div>
             {workspace.planExpiresAt && (
-              <p className="mt-1 text-[11px] text-violet-700 font-medium">
+              <p className="mt-1 text-[11px] text-violet-700 font-medium dark:text-violet-300">
                 {t("validUntil")}{" "}
                 {format.dateTime(new Date(workspace.planExpiresAt), {
                   day: "numeric",
@@ -127,10 +127,10 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
       {/* Grid: Plan Management & Workspace Settings */}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Workspace Plan Controls Card */}
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col justify-between dark:border-[#26302C] dark:bg-[#161E1B]">
           <div>
-            <h2 className="text-sm font-bold text-neutral-900">{t("managePlan")}</h2>
-            <p className="mt-1 text-xs text-neutral-500 mb-4">{t("managePlanHint")}</p>
+            <h2 className="text-sm font-bold text-neutral-900 dark:text-[#ECEAE4]">{t("managePlan")}</h2>
+            <p className="mt-1 text-xs text-neutral-500 mb-4 dark:text-[#9AA39F]">{t("managePlanHint")}</p>
           </div>
           <WorkspacePlanControls
             workspaceId={workspace.id}
@@ -155,24 +155,24 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
       {/* Row: Owner Details Card & Financial Metrics */}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Owner Information Card */}
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col justify-between dark:border-[#26302C] dark:bg-[#161E1B]">
           <div>
-            <h2 className="text-sm font-bold text-neutral-900">{t("ownerInfo")}</h2>
+            <h2 className="text-sm font-bold text-neutral-900 dark:text-[#ECEAE4]">{t("ownerInfo")}</h2>
             <div className="mt-4 space-y-3 text-sm">
-              <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
-                <span className="text-neutral-500">{t("ownerName")}</span>
-                <span className="font-semibold text-neutral-900">{owner.name}</span>
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-[#26302C]">
+                <span className="text-neutral-500 dark:text-[#9AA39F]">{t("ownerName")}</span>
+                <span className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{owner.name}</span>
               </div>
-              <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
-                <span className="text-neutral-500">{t("ownerEmail")}</span>
-                <span className="font-mono text-xs text-neutral-700" dir="ltr">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-[#26302C]">
+                <span className="text-neutral-500 dark:text-[#9AA39F]">{t("ownerEmail")}</span>
+                <span className="font-mono text-xs text-neutral-700 dark:text-[#ECEAE4]" dir="ltr">
                   {owner.email}
                 </span>
               </div>
               {workspace.businessPhone && (
-                <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
-                  <span className="text-neutral-500">{t("businessPhone")}</span>
-                  <span className="font-mono text-xs text-neutral-700" dir="ltr">
+                <div className="flex items-center justify-between border-b border-neutral-100 pb-2 dark:border-[#26302C]">
+                  <span className="text-neutral-500 dark:text-[#9AA39F]">{t("businessPhone")}</span>
+                  <span className="font-mono text-xs text-neutral-700 dark:text-[#ECEAE4]" dir="ltr">
                     {workspace.businessPhone}
                   </span>
                 </div>
@@ -187,7 +187,7 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition"
+              className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
             >
               <span>💬</span>
               <span>{t("whatsappOwner")}</span>
@@ -197,23 +197,23 @@ export default async function AdminWorkspaceDetailsPage({ params }: PageProps) {
 
         {/* Activity & Financial Metrics Cards */}
         <div className="lg:col-span-2 grid gap-3 sm:grid-cols-2 sm:grid-rows-2">
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
-            <p className="text-xs text-neutral-500">{t("invoicesCount")}</p>
-            <p className="mt-2 text-2xl font-bold text-neutral-900">{metrics.invoicesCount}</p>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+            <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("invoicesCount")}</p>
+            <p className="mt-2 text-2xl font-bold text-neutral-900 dark:text-[#ECEAE4]">{metrics.invoicesCount}</p>
           </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
-            <p className="text-xs text-neutral-500">{t("invoicesVolume")}</p>
-            <p className="mt-2 text-2xl font-bold text-neutral-900">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+            <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("invoicesVolume")}</p>
+            <p className="mt-2 text-2xl font-bold text-neutral-900 dark:text-[#ECEAE4]">
               {formatMoney(metrics.invoicesTotalMinor, { currency: workspace.currency })}
             </p>
           </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
-            <p className="text-xs text-neutral-500">{t("clientsCount")}</p>
-            <p className="mt-2 text-2xl font-bold text-neutral-900">{metrics.clientsCount}</p>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+            <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("clientsCount")}</p>
+            <p className="mt-2 text-2xl font-bold text-neutral-900 dark:text-[#ECEAE4]">{metrics.clientsCount}</p>
           </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
-            <p className="text-xs text-neutral-500">{t("projectsCount")}</p>
-            <p className="mt-2 text-2xl font-bold text-neutral-900">{metrics.projectsCount}</p>
+          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+            <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("projectsCount")}</p>
+            <p className="mt-2 text-2xl font-bold text-neutral-900 dark:text-[#ECEAE4]">{metrics.projectsCount}</p>
           </div>
         </div>
       </div>

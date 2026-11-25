@@ -64,19 +64,19 @@ export function CreateAccountForm({
     <form
       ref={formRef}
       action={formAction}
-      className={hideHeader ? "flex flex-col gap-4" : "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"}
+      className={hideHeader ? "flex flex-col gap-4" : "flex flex-col gap-4 rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 shadow-sm"}
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <IdempotencyKeyInput value={idempotencyKey} />
 
       {!hideHeader && (
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
+          <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{tForm("title")}</h2>
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 dark:text-[#9AA39F] hover:bg-neutral-100 dark:hover:bg-[#1E2824] hover:text-neutral-700 dark:hover:text-[#ECEAE4]"
               aria-label={tCommon("cancel")}
             >
               ✕
@@ -86,15 +86,15 @@ export function CreateAccountForm({
       )}
 
       {accountType === "mobile_wallet" && (
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
-          <p className="mb-2 text-xs font-medium text-emerald-800">{tForm("walletPresets")}</p>
+        <div className="rounded-xl border border-emerald-100 dark:border-[#34D399]/25 bg-emerald-50/50 dark:bg-[#0F2E24]/50 p-3">
+          <p className="mb-2 text-xs font-medium text-emerald-800 dark:text-[#34D399]">{tForm("walletPresets")}</p>
           <div className="flex flex-wrap gap-2">
             {MOBILE_WALLET_PRESETS.map((preset) => (
               <button
                 key={preset.key}
                 type="button"
                 onClick={() => applyWalletPreset(tForm(`wallets.${preset.key}`))}
-                className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs text-neutral-700 transition hover:border-emerald-400 hover:bg-emerald-50"
+                className="rounded-full border border-emerald-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-3 py-1 text-xs text-neutral-700 dark:text-[#ECEAE4] transition hover:border-emerald-400 dark:hover:border-[#34D399] hover:bg-emerald-50 dark:hover:bg-[#0F2E24]"
               >
                 {preset.icon} {tForm(`wallets.${preset.key}`)}
               </button>
@@ -105,7 +105,7 @@ export function CreateAccountForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="account-name" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="account-name" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("name")}
           </label>
           <input
@@ -114,13 +114,13 @@ export function CreateAccountForm({
             name="name"
             type="text"
             placeholder={tForm("namePlaceholder")}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="account-type" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="account-type" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("type")}
           </label>
           <select
@@ -128,7 +128,7 @@ export function CreateAccountForm({
             name="type"
             value={accountType}
             onChange={(e) => setAccountType(e.target.value)}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
           >
             {ACCOUNT_TYPES.map((value) => (
               <option key={value} value={value}>
@@ -141,7 +141,7 @@ export function CreateAccountForm({
         <div className="flex flex-col gap-1.5 sm:col-span-2">
           <label
             htmlFor="account-opening-balance"
-            className="text-sm font-medium text-neutral-700"
+            className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]"
           >
             {tForm("balance")}
           </label>
@@ -153,20 +153,20 @@ export function CreateAccountForm({
             inputMode="decimal"
             dir="ltr"
             defaultValue={0}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-start font-mono font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-start font-mono font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
           />
         </div>
 
         {canUseMultiCurrency ? (
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <label htmlFor="account-currency" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="account-currency" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("currency")}
             </label>
             <select
               id="account-currency"
               name="currency"
               defaultValue={workspaceCurrency}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+              className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
             >
               {(Object.keys(CURRENCY_LABELS) as SupportedCurrency[]).map((currency) => (
                 <option key={currency} value={currency}>
@@ -181,7 +181,7 @@ export function CreateAccountForm({
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -190,7 +190,7 @@ export function CreateAccountForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-xl bg-[#065F46] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] disabled:opacity-60"
+          className="rounded-xl bg-[#065F46] dark:bg-[#10B981] px-5 py-2.5 text-sm font-semibold text-white dark:text-[#04231A] shadow-xs transition hover:bg-[#054E3A] dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("adding") : tForm("submit")}
         </button>
@@ -199,7 +199,7 @@ export function CreateAccountForm({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-xl border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
+            className="rounded-xl border border-neutral-200 dark:border-[#26302C] px-4 py-2.5 text-sm font-medium text-neutral-600 dark:text-[#9AA39F] hover:bg-neutral-100 dark:hover:bg-[#1E2824]"
           >
             {tCommon("cancel")}
           </button>

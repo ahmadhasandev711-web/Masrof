@@ -21,17 +21,17 @@ export function PlanConfigForm({ config }: { config: PlanConfigDocument }) {
   const [state, formAction, isPending] = useActionState(updatePlanConfigAction, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-sm">
+    <form action={formAction} className="flex flex-col gap-6 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-6 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
       <input type="hidden" name="planId" value={config.planId} />
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-4 dark:border-[#26302C]">
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-[#ECEAE4]">
             {config.nameAr} / {config.nameEn}
           </h2>
-          <p className="text-xs text-neutral-500">{t("planId")}: {config.planId}</p>
+          <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("planId")}: {config.planId}</p>
         </div>
-        <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm text-neutral-700 dark:text-[#ECEAE4]">
           <label className="flex items-center gap-2">
             <input type="checkbox" name="highlighted" defaultChecked={config.highlighted} />
             {t("highlighted")}
@@ -81,11 +81,11 @@ export function PlanConfigForm({ config }: { config: PlanConfigDocument }) {
         <TextArea label={t("featuresEn")} name="featuresEn" defaultValue={featuresToText(config.featuresEn)} rows={8} hint={t("featuresHint")} />
       </div>
 
-      <fieldset className="rounded-xl border border-neutral-200 p-4">
-        <legend className="px-2 text-sm font-semibold text-neutral-800">{t("featureFlags")}</legend>
+      <fieldset className="rounded-xl border border-neutral-200 p-4 dark:border-[#26302C]">
+        <legend className="px-2 text-sm font-semibold text-neutral-800 dark:text-[#ECEAE4]">{t("featureFlags")}</legend>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {PLAN_FLAG_KEYS.map((key) => (
-            <label key={key} className="flex items-start gap-2 rounded-lg border border-neutral-100 p-2 text-sm">
+            <label key={key} className="flex items-start gap-2 rounded-lg border border-neutral-100 p-2 text-sm dark:border-[#26302C] dark:bg-[#1E2824]">
               <input
                 type="checkbox"
                 name={`flag_${key}`}
@@ -93,15 +93,15 @@ export function PlanConfigForm({ config }: { config: PlanConfigDocument }) {
                 className="mt-0.5"
               />
               <span>
-                <span className="font-medium text-neutral-800">{tFlags(key)}</span>
+                <span className="font-medium text-neutral-800 dark:text-[#ECEAE4]">{tFlags(key)}</span>
               </span>
             </label>
           ))}
         </div>
       </fieldset>
 
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
-      {state.success && <p className="text-sm text-emerald-700">{t("saved")}</p>}
+      {state.error && <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>}
+      {state.success && <p className="text-sm text-emerald-700 dark:text-[#34D399]">{t("saved")}</p>}
 
       <button
         type="submit"
@@ -129,7 +129,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-medium text-neutral-700">
+      <label htmlFor={name} className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
         {label}
       </label>
       <input
@@ -137,9 +137,9 @@ function Field({
         name={name}
         type={type}
         defaultValue={defaultValue}
-        className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+        className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
       />
-      {hint && <p className="text-xs text-neutral-500">{hint}</p>}
+      {hint && <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{hint}</p>}
     </div>
   );
 }
@@ -155,7 +155,7 @@ function TextField({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-medium text-neutral-700">
+      <label htmlFor={name} className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
         {label}
       </label>
       <input
@@ -163,7 +163,7 @@ function TextField({
         name={name}
         type="text"
         defaultValue={defaultValue}
-        className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+        className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
       />
     </div>
   );
@@ -184,7 +184,7 @@ function TextArea({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-medium text-neutral-700">
+      <label htmlFor={name} className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
         {label}
       </label>
       <textarea
@@ -192,9 +192,9 @@ function TextArea({
         name={name}
         rows={rows}
         defaultValue={defaultValue}
-        className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+        className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
       />
-      {hint && <p className="text-xs text-neutral-500">{hint}</p>}
+      {hint && <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{hint}</p>}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 
 const NAV = [
@@ -30,8 +31,8 @@ function NavLink({
       href={href}
       className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold transition ${
         active
-          ? "bg-violet-100 text-violet-900 shadow-2xs"
-          : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+          ? "bg-violet-100 text-violet-900 shadow-2xs dark:bg-violet-950/60 dark:text-violet-200"
+          : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-[#9AA39F] dark:hover:bg-[#1E2824] dark:hover:text-[#ECEAE4]"
       }`}
     >
       {t(labelKey)}
@@ -49,27 +50,31 @@ export function AdminShell({
   const tShell = useTranslations("admin.shell");
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-neutral-900 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
-      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
+    <div
+      data-theme-scope="app"
+      className="min-h-screen bg-neutral-100 text-neutral-900 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] dark:bg-[#0E1412] dark:text-[#ECEAE4]"
+    >
+      <header className="sticky top-0 z-30 border-b border-neutral-200 bg-white/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)] dark:border-[#26302C] dark:bg-[#161E1B]/95">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
           <div className="min-w-0">
-            <Link href="/admin" className="text-base sm:text-lg font-bold text-violet-800 truncate block">
+            <Link href="/admin" className="text-base sm:text-lg font-bold text-violet-800 truncate block dark:text-violet-300">
               {tShell("title")}
             </Link>
-            <p className="text-[11px] sm:text-xs text-neutral-500 truncate max-w-[160px] sm:max-w-none">
+            <p className="text-[11px] sm:text-xs text-neutral-500 truncate max-w-[160px] sm:max-w-none dark:text-[#9AA39F]">
               {tShell("greeting", { name: userName })}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <ThemeSwitcher />
             <Link
               href="/dashboard"
-              className="rounded-lg border border-neutral-300 px-2.5 py-1 text-xs font-semibold sm:px-3 sm:py-1.5 sm:text-sm text-neutral-700 hover:bg-neutral-50 transition whitespace-nowrap"
+              className="rounded-lg border border-neutral-300 px-2.5 py-1 text-xs font-semibold sm:px-3 sm:py-1.5 sm:text-sm text-neutral-700 hover:bg-neutral-50 transition whitespace-nowrap dark:border-[#26302C] dark:text-[#ECEAE4] dark:hover:bg-[#1E2824]"
             >
               {tShell("financeApp")}
             </Link>
             <Link
               href="/"
-              className="hidden sm:inline-block rounded-lg border border-neutral-300 px-2.5 py-1 text-xs font-semibold sm:px-3 sm:py-1.5 sm:text-sm text-neutral-700 hover:bg-neutral-50 transition whitespace-nowrap"
+              className="hidden sm:inline-block rounded-lg border border-neutral-300 px-2.5 py-1 text-xs font-semibold sm:px-3 sm:py-1.5 sm:text-sm text-neutral-700 hover:bg-neutral-50 transition whitespace-nowrap dark:border-[#26302C] dark:text-[#ECEAE4] dark:hover:bg-[#1E2824]"
             >
               {tShell("website")}
             </Link>
@@ -79,7 +84,7 @@ export function AdminShell({
       </header>
 
       <div className="mx-auto grid max-w-6xl gap-4 sm:gap-6 px-3 py-4 sm:px-4 sm:py-6 lg:grid-cols-[220px_1fr] lg:px-8">
-        <aside className="flex flex-row gap-1.5 overflow-x-auto rounded-xl border border-neutral-200 bg-white p-1.5 sm:p-2 lg:flex-col lg:overflow-visible scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <aside className="flex flex-row gap-1.5 overflow-x-auto rounded-xl border border-neutral-200 bg-white p-1.5 sm:p-2 lg:flex-col lg:overflow-visible scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden dark:border-[#26302C] dark:bg-[#161E1B]">
           {NAV.map((item) => (
             <NavLink
               key={item.href}

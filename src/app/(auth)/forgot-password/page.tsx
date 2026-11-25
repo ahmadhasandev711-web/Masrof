@@ -8,7 +8,7 @@ export default async function ForgotPasswordPage() {
   const showDevEmailHint = !isAuthEmailConfigured();
 
   return (
-    <Card className="w-full max-w-sm border-[#E4DFD3]">
+    <Card className="w-full max-w-sm border-[#E4DFD3] dark:border-[#26302C]">
       <CardTitle>{t("forgot.title")}</CardTitle>
       <CardDescription className="mb-6">{t("forgot.description")}</CardDescription>
       <ForgotPasswordForm showDevEmailHint={showDevEmailHint} />

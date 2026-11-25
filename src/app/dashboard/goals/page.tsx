@@ -48,8 +48,8 @@ export default async function SavingsGoalsPage() {
     <div className="flex max-w-5xl flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
-          <p className="text-sm text-neutral-500">{t("subtitle")}</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-2xl">{t("title")}</h1>
+          <p className="text-sm text-neutral-500 dark:text-[#9AA39F]">{t("subtitle")}</p>
         </div>
         {plan.savingsGoals && !usage.atLimit && canWrite && (
           <SavingsGoalCreationManager workspaceId={workspaceId} />
@@ -62,33 +62,33 @@ export default async function SavingsGoalsPage() {
 
           {goals.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-              <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-                <p className="text-xs font-medium text-neutral-500">{t("totalTarget")}</p>
-                <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
+              <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+                <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("totalTarget")}</p>
+                <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
                   {formatMoney(totalTarget, formatOptions)}
                 </p>
               </div>
-              <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-                <p className="text-xs font-medium text-neutral-500">{t("totalSaved")}</p>
-                <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
+              <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+                <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("totalSaved")}</p>
+                <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
                   {formatMoney(totalSaved, formatOptions)}
                 </p>
               </div>
-              <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-                <p className="text-xs font-medium text-neutral-500">{t("totalRemaining")}</p>
-                <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
+              <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+                <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("totalRemaining")}</p>
+                <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
                   {formatMoney(totalRemaining, formatOptions)}
                 </p>
               </div>
-              <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-                <p className="text-xs font-medium text-neutral-500">{t("overallProgress")}</p>
+              <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+                <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("overallProgress")}</p>
                 <p
                   className={`mt-1 font-mono text-base font-bold tabular-nums sm:text-lg ${
                     overallProgress >= 100
-                      ? "text-emerald-700"
+                      ? "text-emerald-700 dark:text-[#34D399]"
                       : overallProgress >= 50
-                        ? "text-emerald-600"
-                        : "text-neutral-700"
+                        ? "text-emerald-600 dark:text-[#34D399]"
+                        : "text-neutral-700 dark:text-[#ECEAE4]"
                   }`}
                 >
                   {overallProgress}%
@@ -113,9 +113,9 @@ export default async function SavingsGoalsPage() {
           />
         </>
       ) : (
-        <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">
+        <div className="rounded-xl border border-[#065F46]/15 dark:border-[#34D399]/25 bg-[#ECFDF5]/50 dark:bg-[#0F2E24] p-4 text-sm text-[#1C1B1A]/70 dark:text-[#ECEAE4]">
           {tDashboard("featureGate.savingsGoals")}{" "}
-          <Link href="/pricing" className="font-medium text-[#065F46] hover:underline">
+          <Link href="/pricing" className="font-medium text-[#065F46] dark:text-[#34D399] hover:underline">
             {tPlan("viewPricing")}
           </Link>
           .

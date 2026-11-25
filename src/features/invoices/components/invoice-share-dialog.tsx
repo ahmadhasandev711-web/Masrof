@@ -128,12 +128,12 @@ export function InvoiceShareDialog({
     >
       <div className="flex flex-col gap-4">
         {/* Invoice Summary Pill */}
-        <div className="rounded-xl border border-neutral-100 bg-neutral-50 p-3 text-xs flex justify-between items-center">
+        <div className="rounded-xl border border-neutral-100 dark:border-[#26302C] bg-neutral-50 dark:bg-[#1E2824] p-3 text-xs flex justify-between items-center">
           <div>
-            <span className="font-semibold text-neutral-800">{invoice.invoiceNumber}</span>
-            <span className="text-neutral-500 ms-2">({invoice.clientName})</span>
+            <span className="font-semibold text-neutral-800 dark:text-[#ECEAE4]">{invoice.invoiceNumber}</span>
+            <span className="text-neutral-500 dark:text-[#9AA39F] ms-2">({invoice.clientName})</span>
           </div>
-          <span className="font-bold text-neutral-900">
+          <span className="font-bold text-neutral-900 dark:text-[#ECEAE4]">
             {formatMoney(invoice.remainingAmount, { currency })}
           </span>
         </div>
@@ -141,31 +141,31 @@ export function InvoiceShareDialog({
         {/* Viewed Status */}
         <div className="text-xs">
           {invoice.viewedAt ? (
-            <p className="flex items-center gap-1.5 text-emerald-700 font-medium">
+            <p className="flex items-center gap-1.5 text-emerald-700 dark:text-[#34D399] font-medium">
               <span>👁️</span>
               <span>{t("viewedAt", { date: formatDueDate(invoice.viewedAt) ?? "" })}</span>
             </p>
           ) : (
-            <p className="text-neutral-400">{t("notViewedYet")}</p>
+            <p className="text-neutral-400 dark:text-[#9AA39F]">{t("notViewedYet")}</p>
           )}
         </div>
 
         {actionError && (
-          <div className="rounded-lg bg-rose-50 p-2.5 text-xs text-rose-700 border border-rose-200">
+          <div className="rounded-lg bg-rose-50 dark:bg-rose-950/30 p-2.5 text-xs text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30">
             {actionError}
           </div>
         )}
 
         {/* Link Field */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-neutral-700">{t("directInvoiceLink")}</label>
+          <label className="text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">{t("directInvoiceLink")}</label>
           <div className="flex gap-2">
             <input
               type="text"
               readOnly
               value={loadingToken ? t("generating") : shareUrl}
               dir="ltr"
-              className="flex-1 rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-xs text-neutral-700 focus:outline-none"
+              className="flex-1 rounded-lg border border-neutral-300 dark:border-[#26302C] bg-neutral-50 dark:bg-[#1E2824] px-3 py-2 text-xs text-neutral-700 dark:text-[#ECEAE4] focus:outline-none"
             />
             <button
               type="button"
@@ -173,8 +173,8 @@ export function InvoiceShareDialog({
               onClick={handleCopy}
               className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${
                 copied
-                  ? "bg-emerald-600 text-white"
-                  : "bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50"
+                  ? "bg-emerald-600 dark:bg-[#10B981] text-white dark:text-[#04231A]"
+                  : "bg-neutral-900 dark:bg-[#ECEAE4] text-white dark:text-[#0E1412] hover:bg-neutral-800 dark:hover:bg-white disabled:opacity-50"
               }`}
             >
               {copied ? t("linkCopied") : t("copyLink")}
@@ -183,7 +183,7 @@ export function InvoiceShareDialog({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-2 pt-2 border-t border-neutral-100">
+        <div className="flex flex-col gap-2 pt-2 border-t border-neutral-100 dark:border-[#26302C]">
           {/* WhatsApp Button */}
           {canUseWhatsApp && (
             <a
@@ -204,7 +204,7 @@ export function InvoiceShareDialog({
               disabled={isPending}
               onClick={handleToggleShareable}
               className={`font-medium ${
-                isShareable ? "text-amber-700 hover:underline" : "text-emerald-700 hover:underline"
+                isShareable ? "text-amber-700 dark:text-amber-400 hover:underline" : "text-emerald-700 dark:text-[#34D399] hover:underline"
               }`}
             >
               {isShareable ? t("disableShare") : t("toggleShare")}
@@ -214,7 +214,7 @@ export function InvoiceShareDialog({
               type="button"
               disabled={isPending}
               onClick={handleRegenerate}
-              className="text-neutral-400 hover:text-neutral-700 hover:underline"
+              className="text-neutral-400 dark:text-[#9AA39F] hover:text-neutral-700 dark:hover:text-[#ECEAE4] hover:underline"
             >
               {isPending ? t("regenerating") : t("regenerateLink")}
             </button>
@@ -226,7 +226,7 @@ export function InvoiceShareDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-neutral-300 px-4 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2 text-xs font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#1E2824]"
           >
             {tCommon("close")}
           </button>

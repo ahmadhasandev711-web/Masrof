@@ -42,16 +42,16 @@ export function CreateSavingsGoalForm({
     <form
       ref={formRef}
       action={formAction}
-      className={showTitle ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm" : "flex flex-col gap-4"}
+      className={showTitle ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 shadow-sm" : "flex flex-col gap-4"}
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <IdempotencyKeyInput value={idempotencyKey} />
 
-      {showTitle && <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>}
+      {showTitle && <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{tForm("title")}</h2>}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="goal-name" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="goal-name" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("name")}
           </label>
           <input
@@ -59,13 +59,13 @@ export function CreateSavingsGoalForm({
             name="name"
             type="text"
             placeholder={tForm("namePlaceholder")}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="goal-target" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="goal-target" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("targetAmount")}
           </label>
           <input
@@ -75,26 +75,26 @@ export function CreateSavingsGoalForm({
             step="0.01"
             min="0.01"
             placeholder="0.00"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="goal-deadline" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="goal-deadline" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("deadline")} ({tShared("optional")})
           </label>
           <input
             id="goal-deadline"
             name="deadline"
             type="date"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
           />
         </div>
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -105,7 +105,7 @@ export function CreateSavingsGoalForm({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60"
+            className="rounded-xl border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-4 py-2 text-sm font-medium text-neutral-600 dark:text-[#9AA39F] transition hover:bg-neutral-50 dark:hover:bg-[#26302C] disabled:opacity-60"
           >
             {tCommon("cancel")}
           </button>
@@ -116,7 +116,7 @@ export function CreateSavingsGoalForm({
           onClick={() => {
             hasSubmitted.current = true;
           }}
-          className="rounded-xl bg-[#065F46] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#054E3A] disabled:opacity-60"
+          className="rounded-xl bg-[#065F46] dark:bg-[#10B981] px-4 py-2 text-sm font-medium text-white dark:text-[#04231A] transition hover:bg-[#054E3A] dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("adding") : tForm("submit")}
         </button>

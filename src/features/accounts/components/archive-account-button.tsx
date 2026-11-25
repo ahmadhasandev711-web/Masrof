@@ -22,7 +22,7 @@ export function ArchiveAccountButton({
         startTransition(() => archiveAccountAction(accountId, workspaceId));
       }}
       disabled={isPending}
-      className="text-sm text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
+      className="text-sm text-neutral-400 transition hover:text-red-600 disabled:opacity-60 dark:text-[#66706B] dark:hover:text-red-400"
     >
       {tCommon("archive")}
     </button>

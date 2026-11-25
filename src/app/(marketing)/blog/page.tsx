@@ -5,7 +5,6 @@ import type { AppLocale } from "@/i18n/config";
 import { listPublishedPosts, listPublishedCategories } from "@/features/blog/data";
 import { BlogPostCard } from "@/features/blog/components/blog-post-card";
 import { BlogCategoryFilter } from "@/features/blog/components/blog-category-filter";
-import { AdSlot } from "@/features/marketing/components/ad-slot";
 import { NewsletterForm } from "@/features/marketing/components/newsletter-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -62,7 +61,6 @@ export default async function BlogIndexPage({
         </div>
 
         <aside className="flex flex-col gap-6">
-          <AdSlot placement="sidebar" />
           <NewsletterForm />
           <div className="rounded-2xl border border-[#E4DFD3] bg-[#ECFDF5]/50 p-5">
             <p className="text-sm font-medium text-[#065F46]">{t("ctaTitle")}</p>

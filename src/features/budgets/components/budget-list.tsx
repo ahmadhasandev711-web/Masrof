@@ -17,10 +17,10 @@ type BudgetItem = {
 
 function budgetAlert(percentage: number, labels: { exceeded: string; nearLimit: string }) {
   if (percentage >= 100) {
-    return { text: labels.exceeded, className: "bg-red-100 text-red-700" };
+    return { text: labels.exceeded, className: "bg-red-100 dark:bg-rose-500/20 text-red-700 dark:text-rose-300" };
   }
   if (percentage >= 80) {
-    return { text: labels.nearLimit, className: "bg-amber-100 text-amber-800" };
+    return { text: labels.nearLimit, className: "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300" };
   }
   return null;
 }
@@ -28,7 +28,7 @@ function budgetAlert(percentage: number, labels: { exceeded: string; nearLimit: 
 function progressBarColor(percentage: number) {
   if (percentage >= 100) return "bg-red-600";
   if (percentage >= 80) return "bg-amber-500";
-  return "bg-emerald-600";
+  return "bg-emerald-600 dark:bg-[#10B981]";
 }
 
 export async function BudgetList({
@@ -57,7 +57,7 @@ export async function BudgetList({
 
   if (budgets.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-400">
+      <div className="rounded-2xl border border-dashed border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-8 text-center text-neutral-400 dark:text-[#9AA39F]">
         {tEmpty("noBudgets")}
       </div>
     );
@@ -87,23 +87,23 @@ export async function BudgetList({
         return (
           <li
             key={id}
-            className={`rounded-xl border bg-white p-5 shadow-sm ${
+            className={`rounded-xl border bg-white dark:bg-[#161E1B] p-5 shadow-sm ${
               budget.percentage == null
-                ? "border-neutral-200"
+                ? "border-neutral-200 dark:border-[#26302C]"
                 : budget.percentage >= 100
-                  ? "border-red-200"
+                  ? "border-red-200 dark:border-rose-500/30"
                   : budget.percentage >= 80
-                    ? "border-amber-200"
-                    : "border-neutral-200"
+                    ? "border-amber-200 dark:border-amber-500/30"
+                    : "border-neutral-200 dark:border-[#26302C]"
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div>
-                  <p className="font-medium text-neutral-900">
+                  <p className="font-medium text-neutral-900 dark:text-[#ECEAE4]">
                     {budget.categoryId?.icon ?? ""} {budget.name}
                   </p>
-                  <p className="text-xs text-neutral-500">{categoryLabel}</p>
+                  <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{categoryLabel}</p>
                 </div>
                 {alert && (
                   <span
@@ -116,7 +116,7 @@ export async function BudgetList({
               {canWrite && <ArchiveBudgetButton budgetId={id} workspaceId={workspaceId} />}
             </div>
 
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-[#1E2824]">
               <div
                 className={`h-full ${progressBarColor(clampedPercentage)}`}
                 style={{ width: `${clampedPercentage}%` }}
@@ -124,7 +124,7 @@ export async function BudgetList({
             </div>
 
             <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="font-mono tabular-nums text-neutral-500">
+              <span className="font-mono tabular-nums text-neutral-500 dark:text-[#9AA39F]">
                 {budget.spent == null ? tConversion("unavailable") : formatMoney(budget.spent, formatOptions)}
                 {" / "}
                 {formatMoney(budget.amount, formatOptions)}
@@ -132,8 +132,8 @@ export async function BudgetList({
               <span
                 className={`font-mono tabular-nums ${
                   budget.percentage != null && budget.percentage >= 100
-                    ? "font-semibold text-red-600"
-                    : "font-medium text-neutral-600"
+                    ? "font-semibold text-red-600 dark:text-rose-400"
+                    : "font-medium text-neutral-600 dark:text-[#9AA39F]"
                 }`}
               >
                 {budget.percentage == null ? tConversion("unavailable") : `${budget.percentage}%`}

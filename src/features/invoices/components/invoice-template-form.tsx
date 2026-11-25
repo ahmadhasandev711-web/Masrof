@@ -132,7 +132,7 @@ export function InvoiceTemplateForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-neutral-700">{t("name")}</label>
+        <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("name")}</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -143,11 +143,11 @@ export function InvoiceTemplateForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-medium text-neutral-700">{tForm("items")}</p>
+        <p className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("items")}</p>
         {rows.map((row) => (
           <div
             key={row.id}
-            className="grid gap-2 rounded-lg border border-neutral-200 p-3 sm:grid-cols-[1fr_88px_110px_auto]"
+            className="grid gap-2 rounded-lg border border-neutral-200 dark:border-[#26302C] p-3 sm:grid-cols-[1fr_88px_110px_auto]"
           >
             <input
               value={row.description}
@@ -182,7 +182,7 @@ export function InvoiceTemplateForm({
               type="button"
               onClick={() => removeRow(row.id)}
               disabled={rows.length <= 1}
-              className="min-h-11 text-sm text-neutral-400 hover:text-red-600 disabled:opacity-40"
+              className="min-h-11 text-sm text-neutral-400 dark:text-[#9AA39F] hover:text-red-600 dark:hover:text-rose-400 disabled:opacity-40"
             >
               {tCommon("delete")}
             </button>
@@ -191,19 +191,19 @@ export function InvoiceTemplateForm({
         <button
           type="button"
           onClick={addRow}
-          className="self-start text-sm font-medium text-emerald-700 hover:underline"
+          className="self-start text-sm font-medium text-emerald-700 dark:text-[#34D399] hover:underline"
         >
           {tForm("addItem")}
         </button>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 p-3">
-        <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-neutral-800">
+      <div className="rounded-lg border border-neutral-200 dark:border-[#26302C] p-3">
+        <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-neutral-800 dark:text-[#ECEAE4]">
           <input
             type="checkbox"
             checked={taxEnabled}
             onChange={(e) => setTaxEnabled(e.target.checked)}
-            className="h-4 w-4 rounded border-neutral-300"
+            className="h-4 w-4 rounded border-neutral-300 dark:border-[#26302C]"
           />
           {tForm("enableTax")}
         </label>
@@ -220,13 +220,13 @@ export function InvoiceTemplateForm({
             aria-label={tForm("taxRate")}
           />
         )}
-        <p className="mt-2 text-xs text-neutral-500 font-mono">
+        <p className="mt-2 text-xs text-neutral-500 dark:text-[#9AA39F] font-mono">
           {tForm("subtotal")}: {subtotalMajor.toFixed(2)}
         </p>
       </div>
 
       {error && (
-        <p role="alert" className="rounded-lg bg-red-50 p-2.5 text-sm text-red-700">
+        <p role="alert" className="rounded-lg bg-red-50 dark:bg-rose-950/30 p-2.5 text-sm text-red-700 dark:text-rose-300">
           {error}
         </p>
       )}
@@ -235,7 +235,7 @@ export function InvoiceTemplateForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
+          className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-5 py-2.5 text-sm font-semibold text-white dark:text-[#04231A] hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("saving") : template ? t("save") : t("create")}
         </button>
@@ -244,7 +244,7 @@ export function InvoiceTemplateForm({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-lg border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#1E2824]"
           >
             {tCommon("cancel")}
           </button>

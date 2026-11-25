@@ -56,7 +56,7 @@ export function RecurringExpenseList({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-6 text-center text-sm text-neutral-400">
+      <div className="rounded-2xl border border-dashed border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 text-center text-sm text-neutral-400 dark:text-[#9AA39F]">
         {tDashboard("recurringHint")}
       </div>
     );
@@ -141,13 +141,13 @@ function RecurringRow({
 
   return (
     <li
-      className={`rounded-xl border bg-white p-4 shadow-sm ${
-        due ? "border-amber-300 bg-amber-50/40" : "border-neutral-200"
+      className={`rounded-xl border bg-white dark:bg-[#161E1B] p-4 shadow-sm ${
+        due ? "border-amber-300 dark:border-amber-500/40 bg-amber-50/40 dark:bg-amber-950/20" : "border-neutral-200 dark:border-[#26302C]"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-medium text-neutral-900 flex items-center gap-2">
+          <p className="font-medium text-neutral-900 dark:text-[#ECEAE4] flex items-center gap-2">
             <CategoryIcon slug={item.categorySlug} kind="expense" className="h-4 w-4 shrink-0" />
             <span>
               {item.description ||
@@ -157,11 +157,11 @@ function RecurringRow({
                 )}
             </span>
           </p>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-1 text-xs text-neutral-500 dark:text-[#9AA39F]">
             <span className="font-mono tabular-nums">{formatMoney(item.amount, formatOptions)}</span> · {frequencyLabels[item.frequency]} ·{" "}
             {item.accountName}
           </p>
-          <p className={`mt-1 text-xs ${due ? "font-medium text-amber-700" : "text-neutral-400"}`}>
+          <p className={`mt-1 text-xs ${due ? "font-medium text-amber-700 dark:text-amber-300" : "text-neutral-400 dark:text-[#66706B]"}`}>
             {due ? tRecurring("dueNow") : tRecurring("nextDue")}
             <span className="font-mono tabular-nums">{formatDate(item.nextDueDate, locale)}</span>
           </p>
@@ -174,8 +174,8 @@ function RecurringRow({
               onClick={handleRecordClick}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-60 ${
                 due
-                  ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                  : "border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+                  ? "bg-emerald-700 dark:bg-[#10B981] text-white dark:text-[#04231A] hover:bg-emerald-800 dark:hover:bg-[#34D399]"
+                  : "border border-emerald-200 dark:border-[#34D399]/30 bg-white dark:bg-[#1E2824] text-emerald-800 dark:text-[#34D399] hover:bg-emerald-50 dark:hover:bg-[#0F2E24]"
               }`}
             >
               {tRecurring("recordNow")}
@@ -200,7 +200,7 @@ function RecurringRow({
               type="button"
               disabled={isPending}
               onClick={() => setStopConfirmOpen(true)}
-              className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-60"
+              className="text-xs text-neutral-400 dark:text-[#9AA39F] hover:text-red-600 dark:hover:text-rose-400 disabled:opacity-60"
             >
               {tRecurring("stop")}
             </button>

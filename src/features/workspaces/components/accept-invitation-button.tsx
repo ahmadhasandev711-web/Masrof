@@ -28,7 +28,7 @@ export function AcceptInvitationButton({ token }: { token: string }) {
       type="button"
       disabled={pending}
       onClick={handleAccept}
-      className="rounded-lg bg-[#065F46] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60"
+      className="rounded-lg bg-[#065F46] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
     >
       {pending ? t("accepting") : t("acceptInvite")}
     </button>
@@ -45,13 +45,13 @@ export function InviteLoginPrompt({ token, email }: { token: string; email: stri
     <div className="flex flex-wrap items-center justify-center gap-3">
       <Link
         href={loginHref}
-        className="rounded-lg border border-[#065F46] px-5 py-2.5 text-sm font-medium text-[#065F46] hover:bg-[#F3F0E8]"
+        className="rounded-lg border border-[#065F46] px-5 py-2.5 text-sm font-medium text-[#065F46] hover:bg-[#F3F0E8] dark:border-[#34D399] dark:text-[#34D399] dark:hover:bg-[#1E2824]"
       >
         {t("loginToAccept")}
       </Link>
       <Link
         href={registerHref}
-        className="rounded-lg bg-[#065F46] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#054d3a]"
+        className="rounded-lg bg-[#065F46] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#054d3a] dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
       >
         {t("registerToAccept")}
       </Link>

@@ -80,12 +80,12 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
 
   if (!hasItems) {
     return (
-      <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-6 text-center shadow-xs">
-        <span className="flex justify-center text-emerald-700">
+      <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-6 text-center shadow-xs dark:border-[#34D399]/30 dark:bg-[#10B981]/10">
+        <span className="flex justify-center text-emerald-700 dark:text-[#34D399]">
           <NavIcon name="check" className="h-10 w-10" />
         </span>
-        <h3 className="mt-2 text-base font-bold text-emerald-900">{t("noPendingActions")}</h3>
-        <p className="mt-1 text-xs text-emerald-700">
+        <h3 className="mt-2 text-base font-bold text-emerald-900 dark:text-[#34D399]">{t("noPendingActions")}</h3>
+        <p className="mt-1 text-xs text-emerald-700 dark:text-[#9AA39F]">
           جميع الحسابات والاشتراكات في حالة ممتازة ولا توجد اشتراكات مهددة بالانتهاء العاجل.
         </p>
       </div>
@@ -93,27 +93,27 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-100 pb-4">
+    <div className="rounded-2xl border border-neutral-200/90 bg-white p-6 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-100 pb-4 dark:border-[#26302C]">
         <div>
-          <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+          <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2 dark:text-[#ECEAE4]">
             <span className="flex h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
             <span>{t("actionQueueTitle")}</span>
           </h2>
-          <p className="mt-0.5 text-xs text-neutral-500">
+          <p className="mt-0.5 text-xs text-neutral-500 dark:text-[#9AA39F]">
             إجراءات تشغيلية سريعة بنقرة واحدة لدعم العملاء ومنع توقف الاشتراكات
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="inline-flex rounded-xl bg-neutral-100 p-1">
+        <div className="inline-flex rounded-xl bg-neutral-100 p-1 dark:bg-[#1E2824]">
           <button
             type="button"
             onClick={() => setActiveTab("unverified")}
             className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
               activeTab === "unverified"
-                ? "bg-white text-neutral-900 shadow-2xs"
-                : "text-neutral-600 hover:text-neutral-900"
+                ? "bg-white text-neutral-900 shadow-2xs dark:bg-[#161E1B] dark:text-[#ECEAE4]"
+                : "text-neutral-600 hover:text-neutral-900 dark:text-[#9AA39F] dark:hover:text-[#ECEAE4]"
             }`}
           >
             {t("unverifiedQueue")} ({unverifiedUsers.length})
@@ -123,8 +123,8 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
             onClick={() => setActiveTab("expiring")}
             className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
               activeTab === "expiring"
-                ? "bg-white text-neutral-900 shadow-2xs"
-                : "text-neutral-600 hover:text-neutral-900"
+                ? "bg-white text-neutral-900 shadow-2xs dark:bg-[#161E1B] dark:text-[#ECEAE4]"
+                : "text-neutral-600 hover:text-neutral-900 dark:text-[#9AA39F] dark:hover:text-[#ECEAE4]"
             }`}
           >
             {t("expiringQueue")} ({expiringSubscriptions.length})
@@ -133,31 +133,31 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
       </div>
 
       {successMsg && (
-        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800">
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800 dark:border-[#34D399]/30 dark:bg-[#10B981]/15 dark:text-[#34D399]">
            {successMsg}
         </div>
       )}
 
       {/* Tab: Unverified Users */}
       {activeTab === "unverified" && (
-        <div className="mt-4 divide-y divide-neutral-100">
+        <div className="mt-4 divide-y divide-neutral-100 dark:divide-[#26302C]">
           {unverifiedUsers.length === 0 ? (
-            <p className="py-6 text-center text-xs text-neutral-400">
+            <p className="py-6 text-center text-xs text-neutral-400 dark:text-[#66706B]">
               لا توجد حسابات غير مؤكدة حالياً.
             </p>
           ) : (
             unverifiedUsers.map((user) => (
               <div
                 key={user.id}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 hover:bg-neutral-50/60 rounded-xl px-2 transition"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 hover:bg-neutral-50/60 rounded-xl px-2 transition dark:hover:bg-[#1E2824]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 font-bold text-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 font-bold text-xs dark:bg-amber-950/40 dark:text-amber-300">
                     {user.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-neutral-900">{user.name}</p>
-                    <p className="text-xs font-mono text-neutral-500" dir="ltr">
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-[#ECEAE4]">{user.name}</p>
+                    <p className="text-xs font-mono text-neutral-500 dark:text-[#9AA39F]" dir="ltr">
                       {user.email}
                     </p>
                   </div>
@@ -168,14 +168,14 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
                     type="button"
                     disabled={pendingId === user.id}
                     onClick={() => handleVerify(user.id)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-2xs transition disabled:opacity-50 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
                   >
                     <NavIcon name="check" className="h-3.5 w-3.5" />
                     <span>{pendingId === user.id ? "جارِ التفعيل..." : t("verifyNow")}</span>
                   </button>
                   <Link
                     href={`/admin/users?q=${encodeURIComponent(user.email)}`}
-                    className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition"
+                    className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
                   >
                     تفاصيل الحساب
                   </Link>
@@ -188,29 +188,29 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
 
       {/* Tab: Expiring Subscriptions */}
       {activeTab === "expiring" && (
-        <div className="mt-4 divide-y divide-neutral-100">
+        <div className="mt-4 divide-y divide-neutral-100 dark:divide-[#26302C]">
           {expiringSubscriptions.length === 0 ? (
-            <p className="py-6 text-center text-xs text-neutral-400">
+            <p className="py-6 text-center text-xs text-neutral-400 dark:text-[#66706B]">
               لا توجد اشتراكات مهددة بالانتهاء خلال 14 يوماً.
             </p>
           ) : (
             expiringSubscriptions.map((sub) => (
               <div
                 key={sub.userId}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 hover:bg-neutral-50/60 rounded-xl px-2 transition"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 hover:bg-neutral-50/60 rounded-xl px-2 transition dark:hover:bg-[#1E2824]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-800 font-bold text-xs">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-800 font-bold text-xs dark:bg-violet-950/40 dark:text-violet-300">
                     {sub.userName.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-neutral-900">{sub.userName}</p>
-                      <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900">
+                      <p className="text-sm font-semibold text-neutral-900 dark:text-[#ECEAE4]">{sub.userName}</p>
+                      <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
                         {tUsers("daysLeft", { days: sub.daysRemaining })}
                       </span>
                     </div>
-                    <p className="text-xs font-mono text-neutral-500" dir="ltr">
+                    <p className="text-xs font-mono text-neutral-500 dark:text-[#9AA39F]" dir="ltr">
                       {sub.userEmail}
                     </p>
                   </div>
@@ -221,7 +221,7 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
                     type="button"
                     disabled={pendingId === `${sub.userId}-7d`}
                     onClick={() => handleExtend(sub.userId, "7d")}
-                    className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition disabled:opacity-50"
+                    className="rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition disabled:opacity-50 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300 dark:hover:bg-amber-950/50"
                     title={tUsers("extend7Days")}
                   >
                     {pendingId === `${sub.userId}-7d` ? "..." : tUsers("extend7Days")}
@@ -237,7 +237,7 @@ export function AdminActionQueue({ unverifiedUsers, expiringSubscriptions }: Pro
                   </button>
                   <Link
                     href={`/admin/users?q=${encodeURIComponent(sub.userEmail)}`}
-                    className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition"
+                    className="rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
                   >
                     تفاصيل
                   </Link>

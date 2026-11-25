@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AgencyShowcaseCard } from "@/features/marketing/components/agency-showcase-card";
-import { getDirection, type AppLocale } from "@/i18n/config";
+import { BlogPostCard } from "@/features/blog/components/blog-post-card";
+import { listLatestPublishedPosts } from "@/features/blog/data";
+import type { AppLocale } from "@/i18n/config";
 
 export const revalidate = 300;
 
@@ -37,8 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function MarketingHomePage() {
   const locale = (await getLocale()) as AppLocale;
-  const dir = getDirection(locale);
-  const t = await getTranslations("homepage.landing");
+  const [t, latestPosts] = await Promise.all([
+    getTranslations("homepage.landing"),
+    listLatestPublishedPosts(locale, 4),
+  ]);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://sanadat.site";
 
   const jsonLd = {
@@ -531,6 +535,42 @@ export default async function MarketingHomePage() {
             </div>
           </div>
         </section>
+
+        {/* ========================================================= */}
+        {/* 7.5. LATEST SEO BLOG GUIDES (4 FOCUSED ARTICLES)          */}
+        {/* ========================================================= */}
+        {latestPosts.length > 0 && (
+          <section className="border-b border-[#E4DFD3]/80 bg-white py-16 sm:py-20">
+            <div className="mx-auto max-w-5xl px-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="max-w-2xl">
+                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                    {t("blog.eyebrow")}
+                  </p>
+                  <h2 className="mt-2 font-[family-name:var(--font-marketing-display)] text-3xl font-bold text-[#1C1B1A] sm:text-4xl">
+                    {t("blog.title")}
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-[#1C1B1A]/65 sm:text-base">
+                    {t("blog.subtitle")}
+                  </p>
+                </div>
+                <Link
+                  href="/blog"
+                  className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-xl border border-emerald-800/25 bg-white px-4 py-2 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-50 hover:border-emerald-800 sm:self-auto"
+                >
+                  <span>{t("blog.viewAll")}</span>
+                  <span dir="ltr">→</span>
+                </Link>
+              </div>
+
+              <div className="mt-10 grid gap-6 md:grid-cols-2">
+                {latestPosts.map((post, index) => (
+                  <BlogPostCard key={post.slug} post={post} compact accentIndex={index} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ========================================================= */}
         {/* 8. FINAL CONVERSION CALL-TO-ACTION                        */}

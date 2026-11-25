@@ -204,7 +204,7 @@ export function CreateTransactionForm({
       ref={formRef}
       action={formAction}
       onSubmit={() => setHasSubmitted(true)}
-      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
@@ -217,8 +217,8 @@ export function CreateTransactionForm({
           onClick={() => setType("expense")}
           className={`flex-1 rounded-lg border px-4 py-2 font-medium transition ${
             type === "expense"
-              ? "border-red-300 bg-red-50 text-red-700"
-              : "border-neutral-200 text-neutral-500"
+              ? "border-red-300 dark:border-rose-500/40 bg-red-50 dark:bg-rose-500/15 text-red-700 dark:text-rose-400"
+              : "border-neutral-200 dark:border-[#26302C] text-neutral-500 dark:text-[#9AA39F]"
           }`}
         >
           {tForm("expense")}
@@ -228,8 +228,8 @@ export function CreateTransactionForm({
           onClick={() => setType("income")}
           className={`flex-1 rounded-lg border px-4 py-2 font-medium transition ${
             type === "income"
-              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-              : "border-neutral-200 text-neutral-500"
+              ? "border-emerald-300 dark:border-[#34D399]/40 bg-emerald-50 dark:bg-[#0F2E24] text-emerald-700 dark:text-[#34D399]"
+              : "border-neutral-200 dark:border-[#26302C] text-neutral-500 dark:text-[#9AA39F]"
           }`}
         >
           {tForm("income")}
@@ -239,7 +239,7 @@ export function CreateTransactionForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tx-amount" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="tx-amount" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("amount")}
           </label>
           <input
@@ -253,13 +253,13 @@ export function CreateTransactionForm({
             enterKeyHint="done"
             dir="ltr"
             placeholder="0.00"
-            className={`${MOBILE_FIELD} text-start font-mono font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-start font-mono font-bold focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tx-date" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="tx-date" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("date")}
           </label>
           <input
@@ -268,19 +268,19 @@ export function CreateTransactionForm({
             type="date"
             value={transactionDate}
             onChange={(e) => setTransactionDate(e.target.value)}
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="tx-account" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="tx-account" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("account")}
           </label>
           <select
             id="tx-account"
             name="accountId"
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
             required
           >
             {accounts.map((account) => (
@@ -293,7 +293,7 @@ export function CreateTransactionForm({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
-            <label htmlFor="tx-category" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="tx-category" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("category")}
             </label>
             {aiCategory && (
@@ -301,7 +301,7 @@ export function CreateTransactionForm({
                 type="button"
                 onClick={handleSuggestCategory}
                 disabled={suggesting || !description.trim()}
-                className="text-xs font-medium text-emerald-700 hover:underline disabled:opacity-50"
+                className="text-xs font-medium text-emerald-700 dark:text-[#34D399] hover:underline disabled:opacity-50"
               >
                 {suggesting ? tAi("suggesting") : tAi("suggestCategory")}
               </button>
@@ -312,7 +312,7 @@ export function CreateTransactionForm({
             name="categoryId"
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
             required
           >
             {filteredCategories.map((category) => (
@@ -325,7 +325,7 @@ export function CreateTransactionForm({
 
         {clients.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="tx-client" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="tx-client" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("clientOptional")}
             </label>
             <ClientCombobox
@@ -340,7 +340,7 @@ export function CreateTransactionForm({
 
         {projects.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="tx-project" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="tx-project" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("projectOptional")}
             </label>
             <select
@@ -360,25 +360,25 @@ export function CreateTransactionForm({
         )}
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label className="text-sm font-medium text-neutral-700">
+          <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("receipt")}
             {ocrReceipts && (
-              <span className="ms-2 text-xs font-normal text-emerald-700">{tAi("ocrEnabled")}</span>
+              <span className="ms-2 text-xs font-normal text-emerald-700 dark:text-[#34D399]">{tAi("ocrEnabled")}</span>
             )}
           </label>
-          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleReceiptChange} />
-          {uploading && <p className="text-xs text-neutral-500">{tShared("uploading")}</p>}
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleReceiptChange} className="text-xs text-neutral-600 dark:text-[#9AA39F]" />
+          {uploading && <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{tShared("uploading")}</p>}
           {attachmentUrl && (
-            <p className="text-xs text-emerald-700">
+            <p className="text-xs text-emerald-700 dark:text-[#34D399]">
               {tShared("uploaded")} {attachmentName}
             </p>
           )}
-          {scanHint && <p className="text-xs text-neutral-500">{scanHint}</p>}
-          {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
+          {scanHint && <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{scanHint}</p>}
+          {uploadError && <p className="text-xs text-red-600 dark:text-red-400">{uploadError}</p>}
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="tx-description" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="tx-description" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("descriptionOptional")}
           </label>
           <input
@@ -388,12 +388,12 @@ export function CreateTransactionForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={tForm("descriptionPlaceholder")}
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
           />
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="tx-notes" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="tx-notes" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("notesOptional")}
           </label>
           <textarea
@@ -401,13 +401,13 @@ export function CreateTransactionForm({
             name="notes"
             rows={2}
             placeholder={tForm("notesPlaceholder")}
-            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
           />
         </div>
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -416,7 +416,7 @@ export function CreateTransactionForm({
         <button
           type="submit"
           disabled={isPending || accounts.length === 0 || filteredCategories.length === 0}
-          className="rounded-xl bg-[#065F46] px-5 py-2.5 font-medium text-white shadow-xs transition hover:bg-[#054E3A] disabled:opacity-60"
+          className="rounded-xl bg-[#065F46] dark:bg-[#10B981] px-5 py-2.5 font-medium text-white dark:text-[#04231A] shadow-xs transition hover:bg-[#054E3A] dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("saving") : tForm("submit")}
         </button>
@@ -425,7 +425,7 @@ export function CreateTransactionForm({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-xl border border-neutral-300 px-4 py-2.5 font-medium text-neutral-700 transition hover:bg-neutral-100 disabled:opacity-60"
+            className="rounded-xl border border-neutral-300 dark:border-[#26302C] px-4 py-2.5 font-medium text-neutral-700 dark:text-[#ECEAE4] transition hover:bg-neutral-100 dark:hover:bg-[#1E2824] disabled:opacity-60"
           >
             {tCommon("cancel")}
           </button>
@@ -433,7 +433,7 @@ export function CreateTransactionForm({
       </div>
 
       {accounts.length === 0 && (
-        <p className="text-sm text-amber-600">{tForm("needsAccount")}</p>
+        <p className="text-sm text-amber-600 dark:text-amber-400">{tForm("needsAccount")}</p>
       )}
     </form>
   );

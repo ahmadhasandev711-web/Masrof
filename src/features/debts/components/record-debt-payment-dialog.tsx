@@ -72,16 +72,16 @@ export function RecordDebtPaymentDialog({
     >
       <div className="flex flex-col gap-4">
         {/* Debt Snapshot Badge */}
-        <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs">
+        <div className="flex items-center justify-between rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30 p-3 text-xs">
           <div>
-            <span className="font-semibold text-amber-900">{t("remainingToPay")}</span>
-            <p className="mt-0.5 text-base font-bold text-amber-950">
+            <span className="font-semibold text-amber-900 dark:text-amber-300">{t("remainingToPay")}</span>
+            <p className="mt-0.5 text-base font-bold text-amber-950 dark:text-[#ECEAE4]">
               {formatMoney(debt.remainingAmount, formatOptions)}
             </p>
           </div>
-          <div className="text-end text-neutral-600">
+          <div className="text-end text-neutral-600 dark:text-[#9AA39F]">
             <span>{t("totalLiabilitySnapshot")} </span>
-            <span className="font-semibold text-neutral-900">
+            <span className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">
               {formatMoney(debt.totalAmount, formatOptions)}
             </span>
           </div>
@@ -93,7 +93,7 @@ export function RecordDebtPaymentDialog({
           <input type="hidden" name="debtId" value={debt.id} />
 
           {state.error && (
-            <div className="rounded-lg bg-red-50 p-3 text-xs font-medium text-red-700">
+            <div className="rounded-lg bg-red-50 dark:bg-rose-950/30 p-3 text-xs font-medium text-red-700 dark:text-rose-300">
               {state.error}
             </div>
           )}
@@ -101,13 +101,13 @@ export function RecordDebtPaymentDialog({
           {/* Amount */}
           <div>
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
                 {t("paymentAmount", { currency })} *
               </label>
               <button
                 type="button"
                 onClick={() => setAmountInput(String(remainingMajor))}
-                className="text-xs font-medium text-[#065F46] hover:underline"
+                className="text-xs font-medium text-[#065F46] dark:text-[#34D399] hover:underline"
               >
                 {t("payFullBalance")}
               </button>
@@ -124,20 +124,20 @@ export function RecordDebtPaymentDialog({
               value={amountInput}
               onChange={(e) => setAmountInput(e.target.value)}
               enterKeyHint="done"
-              className={`mt-1 block w-full ${MOBILE_FIELD} text-start font-mono font-bold text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
+              className={`mt-1 block w-full ${MOBILE_FIELD} text-start font-mono font-bold text-neutral-900 dark:text-[#ECEAE4] focus:border-[#065F46] dark:focus:border-[#34D399] focus:outline-hidden focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
           {/* Account Selection */}
           <div>
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("deductFromAccount")} *
             </label>
             <select
               name="accountId"
               required
               defaultValue={accounts[0]?._id}
-              className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
+              className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 dark:text-[#ECEAE4] focus:border-[#065F46] dark:focus:border-[#34D399] focus:outline-hidden focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             >
               {accounts.map((acc) => (
                 <option key={acc._id} value={acc._id}>
@@ -145,7 +145,7 @@ export function RecordDebtPaymentDialog({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[11px] text-neutral-500">
+            <p className="mt-1 text-[11px] text-neutral-500 dark:text-[#9AA39F]">
               {t("autoExpenseHint")}
             </p>
           </div>
@@ -153,7 +153,7 @@ export function RecordDebtPaymentDialog({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Payment Date */}
             <div>
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
                 {t("paymentDate")} *
               </label>
               <input
@@ -161,34 +161,34 @@ export function RecordDebtPaymentDialog({
                 name="paymentDate"
                 required
                 defaultValue={todayIsoDate()}
-                className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
+                className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 dark:text-[#ECEAE4] focus:border-[#065F46] dark:focus:border-[#34D399] focus:outline-hidden focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
               />
             </div>
 
             {/* Reference */}
             <div>
-              <label className="block text-xs font-semibold text-neutral-700">
+              <label className="block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
                 {t("reference")}
               </label>
               <input
                 type="text"
                 name="reference"
                 placeholder={t("referencePlaceholder")}
-                className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
+                className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 dark:text-[#ECEAE4] focus:border-[#065F46] dark:focus:border-[#34D399] focus:outline-hidden focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
               />
             </div>
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-semibold text-neutral-700">
+            <label className="block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("paymentNotes")}
             </label>
             <input
               type="text"
               name="notes"
               placeholder={t("paymentNotesPlaceholder")}
-              className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 focus:border-[#065F46] focus:outline-hidden focus:ring-1 focus:ring-[#065F46]`}
+              className={`mt-1 block w-full ${MOBILE_FIELD} text-neutral-900 dark:text-[#ECEAE4] focus:border-[#065F46] dark:focus:border-[#34D399] focus:outline-hidden focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
@@ -196,14 +196,14 @@ export function RecordDebtPaymentDialog({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+              className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#1E2824]"
             >
               {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center justify-center rounded-lg bg-[#065F46] px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-[#065F46]/90 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-lg bg-[#065F46] dark:bg-[#10B981] px-5 py-2 text-sm font-semibold text-white dark:text-[#04231A] shadow-xs transition hover:bg-[#065F46]/90 dark:hover:bg-[#34D399] disabled:opacity-50"
             >
               {isPending ? t("recordingPayment") : t("confirmPayment")}
             </button>

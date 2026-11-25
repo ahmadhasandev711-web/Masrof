@@ -45,8 +45,8 @@ export default async function WorkspaceMembersPage() {
     <div className="flex max-w-5xl flex-col gap-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900">{t("pageTitle")}</h1>
-          <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-[#ECEAE4]">{t("pageTitle")}</h1>
+          <p className="text-sm text-neutral-500 dark:text-[#9AA39F]">{activeWorkspace.name}</p>
         </div>
         {isOwner && teamEnabled && !usage.atLimit && (
           <InviteMemberManager workspaceId={workspaceId} canInvite={true} />
@@ -54,18 +54,18 @@ export default async function WorkspaceMembersPage() {
       </div>
 
       {!isOwner && (
-        <p className="rounded-2xl border border-neutral-200 bg-neutral-50/70 px-5 py-3.5 text-sm text-neutral-600">
+        <p className="rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-neutral-50/70 dark:bg-[#1E2824] px-5 py-3.5 text-sm text-neutral-600 dark:text-[#9AA39F]">
           {t("memberViewHint")}
         </p>
       )}
 
       {isOwner && !teamEnabled && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 text-sm text-amber-900">
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30 p-5 text-sm text-amber-900 dark:text-amber-200">
           <p className="font-medium">{upgradeMessage}</p>
           <div className="mt-3">
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-emerald-800"
+              className="inline-flex items-center justify-center rounded-xl bg-emerald-700 dark:bg-[#10B981] px-4 py-2 text-sm font-semibold text-white dark:text-[#04231A] shadow-xs transition hover:bg-emerald-800 dark:hover:bg-[#34D399]"
             >
               {tPlan("viewPricing")}
             </Link>
@@ -74,7 +74,7 @@ export default async function WorkspaceMembersPage() {
       )}
 
       {isOwner && teamEnabled && (
-        <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs">
+        <div className="rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
           <PlanUsageMeter usage={usage} label={tUsage("members")} />
         </div>
       )}

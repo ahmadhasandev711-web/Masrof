@@ -105,21 +105,21 @@ export function ReportExportMenu({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending}
-        className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-neutral-800 shadow-2xs transition hover:bg-neutral-50 active:scale-95 disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-3.5 py-2 text-xs sm:text-sm font-semibold text-neutral-800 dark:text-[#ECEAE4] shadow-2xs transition hover:bg-neutral-50 dark:hover:bg-[#26302C] active:scale-95 disabled:opacity-60"
       >
         <span>{isPending ? tCommon("exporting") : t("exportMenu")}</span>
-        <span className="text-[10px] text-neutral-400">▼</span>
+        <span className="text-[10px] text-neutral-400 dark:text-[#66706B]">▼</span>
       </button>
 
       {isOpen && (
-        <div className="absolute end-0 mt-1.5 z-40 w-52 rounded-2xl border border-neutral-200/90 bg-white p-1.5 shadow-xl">
+        <div className="absolute end-0 mt-1.5 z-40 w-52 rounded-2xl border border-neutral-200/90 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-1.5 shadow-xl">
           {canCsv ? (
             <>
               <button
                 type="button"
                 onClick={handleExcelExport}
                 disabled={isPending}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition text-start disabled:opacity-50"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824] transition text-start disabled:opacity-50"
               >
                 <span>📊</span>
                 <span>{exportType === "excel" ? tCommon("exporting") : tExport("excel")}</span>
@@ -129,7 +129,7 @@ export function ReportExportMenu({
                 type="button"
                 onClick={handleCsvExport}
                 disabled={isPending}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition text-start disabled:opacity-50"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824] transition text-start disabled:opacity-50"
               >
                 <span>📄</span>
                 <span>{exportType === "csv" ? tCommon("exporting") : tExport("csv")}</span>
@@ -138,7 +138,7 @@ export function ReportExportMenu({
           ) : (
             <Link
               href="/pricing"
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-emerald-800 hover:bg-emerald-50 transition"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-emerald-800 dark:text-[#34D399] hover:bg-emerald-50 dark:hover:bg-[#0F2E24] transition"
             >
               <span>⚡</span>
               <span>{tExport("upgradeLink")}</span>
@@ -151,14 +151,14 @@ export function ReportExportMenu({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition text-start border-t border-neutral-100 mt-1 pt-2"
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824] transition text-start border-t border-neutral-100 dark:border-[#26302C] mt-1 pt-2"
             >
               <span>🖨️</span>
               <span>{tExport("printPdf")}</span>
             </Link>
           ) : null}
 
-          {error && <p className="px-3 py-1.5 text-xs text-rose-600">{error}</p>}
+          {error && <p className="px-3 py-1.5 text-xs text-rose-600 dark:text-rose-400">{error}</p>}
         </div>
       )}
     </div>

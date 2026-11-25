@@ -42,7 +42,7 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
     <form action={formAction} className="flex flex-col gap-5">
       <IdempotencyKeyInput value={idempotencyKey} />
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-sm font-medium text-neutral-700">
+        <label htmlFor="name" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
           {tForm("name")}
         </label>
         <input
@@ -50,17 +50,17 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
           name="name"
           type="text"
           placeholder={tForm("namePlaceholder")}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-neutral-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B] dark:focus:border-[#34D399] dark:focus:ring-[#34D399]/20"
           required
         />
       </div>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-medium text-neutral-700">{tForm("type")}</legend>
+        <legend className="mb-1 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("type")}</legend>
         {WORKSPACE_TYPE_OPTIONS.map((option, index) => (
           <label
             key={option}
-            className="flex cursor-pointer items-start gap-3 rounded-lg border border-neutral-200 p-3 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50"
+            className="flex cursor-pointer items-start gap-3 rounded-lg border border-neutral-200 p-3 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50 dark:border-[#26302C] dark:bg-[#161E1B] dark:has-[:checked]:border-[#34D399] dark:has-[:checked]:bg-[#10B981]/15"
           >
             <input
               type="radio"
@@ -68,26 +68,26 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
               value={option}
               defaultChecked={index === 0}
               onChange={() => setWorkspaceType(option)}
-              className="mt-1"
+              className="mt-1 accent-[#065F46] dark:accent-[#34D399]"
             />
             <span>
-              <span className="block font-medium text-neutral-800">{tWorkspaceType(option)}</span>
-              <span className="block text-sm text-neutral-500">{tWorkspaceType(`${option}Hint`)}</span>
+              <span className="block font-medium text-neutral-800 dark:text-[#ECEAE4]">{tWorkspaceType(option)}</span>
+              <span className="block text-sm text-neutral-500 dark:text-[#9AA39F]">{tWorkspaceType(`${option}Hint`)}</span>
             </span>
           </label>
         ))}
       </fieldset>
 
-      <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
-        <p className="text-sm font-medium text-emerald-900">{tForm("suggestedCategories")}</p>
-        <p className="mt-1 text-xs text-emerald-800/70">
+      <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 dark:border-[#34D399]/25 dark:bg-[#10B981]/10">
+        <p className="text-sm font-medium text-emerald-900 dark:text-[#34D399]">{tForm("suggestedCategories")}</p>
+        <p className="mt-1 text-xs text-emerald-800/70 dark:text-[#9AA39F]">
           {tForm("suggestedCategoriesHint")}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {suggestedIncome.map((category) => (
             <span
               key={category.slug}
-              className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs text-emerald-800 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs text-emerald-800 shadow-sm dark:bg-[#1E2824] dark:text-[#34D399]"
             >
               <CategoryIcon slug={category.slug} kind="income" className="h-3.5 w-3.5" />
               {resolveCategoryLabel(category, locale)}
@@ -96,7 +96,7 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
           {suggestedExpense.map((category) => (
             <span
               key={category.slug}
-              className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs text-neutral-700 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs text-neutral-700 shadow-sm dark:bg-[#1E2824] dark:text-[#ECEAE4]"
             >
               <CategoryIcon slug={category.slug} kind="expense" className="h-3.5 w-3.5" />
               {resolveCategoryLabel(category, locale)}
@@ -106,14 +106,14 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="currency" className="text-sm font-medium text-neutral-700">
+        <label htmlFor="currency" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
           {tForm("currency")}
         </label>
         <select
           id="currency"
           name="currency"
           defaultValue="EGP"
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-neutral-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:focus:border-[#34D399] dark:focus:ring-[#34D399]/20"
         >
           <option value="EGP">{tForm("currencyEGP")}</option>
           <option value="USD">{tForm("currencyUSD")}</option>
@@ -123,11 +123,11 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
         </select>
       </div>
 
-      <div className="border-t border-neutral-100 pt-4">
-        <p className="mb-3 text-sm font-medium text-neutral-700">{tForm("firstAccount")}</p>
+      <div className="border-t border-neutral-100 pt-4 dark:border-[#26302C]">
+        <p className="mb-3 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("firstAccount")}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="initialAccountName" className="text-sm text-neutral-600">
+            <label htmlFor="initialAccountName" className="text-sm text-neutral-600 dark:text-[#9AA39F]">
               {tForm("accountName")}
             </label>
             <input
@@ -136,20 +136,20 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
               type="text"
               placeholder={tForm("accountNamePlaceholder")}
               defaultValue={tForm("accountNameDefault")}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+              className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-neutral-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B] dark:focus:border-[#34D399] dark:focus:ring-[#34D399]/20"
               required
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="initialAccountType" className="text-sm text-neutral-600">
+            <label htmlFor="initialAccountType" className="text-sm text-neutral-600 dark:text-[#9AA39F]">
               {tForm("accountType")}
             </label>
             <select
               id="initialAccountType"
               name="initialAccountType"
               defaultValue="cash"
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+              className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-neutral-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:focus:border-[#34D399] dark:focus:ring-[#34D399]/20"
             >
               <option value="cash">{tAccountType("cash")}</option>
               <option value="bank">{tAccountType("bank")}</option>
@@ -160,7 +160,7 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <label htmlFor="initialAccountBalance" className="text-sm text-neutral-600">
+            <label htmlFor="initialAccountBalance" className="text-sm text-neutral-600 dark:text-[#9AA39F]">
               {tForm("openingBalance")}
             </label>
             <input
@@ -169,14 +169,14 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
               type="number"
               step="0.01"
               defaultValue={0}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+              className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-right text-neutral-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:focus:border-[#34D399] dark:focus:ring-[#34D399]/20"
             />
           </div>
         </div>
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -184,7 +184,7 @@ export function CreateWorkspaceForm({ mode = "onboarding" }: { mode?: "onboardin
       <button
         type="submit"
         disabled={isPending}
-        className="mt-2 rounded-lg bg-emerald-700 px-4 py-2.5 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
+        className="mt-2 rounded-lg bg-emerald-700 px-4 py-2.5 font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
       >
         {isPending
           ? tForm("creating")

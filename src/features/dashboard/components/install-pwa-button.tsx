@@ -81,7 +81,7 @@ export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
         onClick={() => (deferredPrompt ? handleNativeInstall() : setOpen((v) => !v))}
         aria-label={t("install")}
         title={t("install")}
-        className={`inline-flex items-center justify-center rounded-lg border border-[#065F46]/20 bg-[#ECFDF5] text-sm font-medium text-[#065F46] transition hover:bg-[#D1FAE5] ${
+        className={`inline-flex items-center justify-center rounded-lg border border-[#065F46]/20 bg-[#ECFDF5] text-sm font-medium text-[#065F46] transition hover:bg-[#D1FAE5] dark:border-[#26302C] dark:bg-[#0F2E24] dark:text-[#34D399] dark:hover:bg-[#153E30] ${
           compact ? "p-2" : "gap-1.5 px-3 py-1.5"
         }`}
       >
@@ -90,16 +90,16 @@ export function InstallPwaButton({ compact = false }: { compact?: boolean }) {
       </button>
 
       {open && !deferredPrompt && (
-        <div className="absolute start-0 top-full z-50 mt-2 w-72 rounded-xl border border-[#E4DFD3] bg-white p-4 text-sm shadow-lg">
-          <p className="font-medium text-[#1C1B1A]">{t("title")}</p>
+        <div className="absolute start-0 top-full z-50 mt-2 w-72 rounded-xl border border-[#E4DFD3] bg-white p-4 text-sm shadow-lg dark:border-[#26302C] dark:bg-[#161E1B]">
+          <p className="font-medium text-[#1C1B1A] dark:text-[#ECEAE4]">{t("title")}</p>
           {isIos() ? (
-            <ol className="mt-2 list-decimal space-y-1 ps-4 text-[#1C1B1A]/70">
+            <ol className="mt-2 list-decimal space-y-1 ps-4 text-[#1C1B1A]/70 dark:text-[#9AA39F]">
               <li>{t("ios1")}</li>
               <li>{t("ios2")}</li>
               <li>{t("ios3")}</li>
             </ol>
           ) : (
-            <ol className="mt-2 list-decimal space-y-1 ps-4 text-[#1C1B1A]/70">
+            <ol className="mt-2 list-decimal space-y-1 ps-4 text-[#1C1B1A]/70 dark:text-[#9AA39F]">
               <li>{t("android1")}</li>
               <li>{t("android2")}</li>
               <li>{t("android3")}</li>

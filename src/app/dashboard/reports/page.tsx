@@ -79,14 +79,14 @@ export default async function ReportsPage({
       {/* 1. Header with Title & Unified Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{tPages("title")}</h1>
-          <p className="text-xs text-neutral-500 mt-0.5">{activeWorkspace.name}</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-2xl">{tPages("title")}</h1>
+          <p className="text-xs text-neutral-500 dark:text-[#9AA39F] mt-0.5">{activeWorkspace.name}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/dashboard/reports/advanced"
-            className="inline-flex items-center gap-1 rounded-xl border border-[#065F46]/20 bg-[#ECFDF5] px-3.5 py-2 text-xs sm:text-sm font-semibold text-[#065F46] hover:bg-[#D1FAE5] transition"
+            className="inline-flex items-center gap-1 rounded-xl border border-[#065F46]/20 dark:border-[#34D399]/30 bg-[#ECFDF5] dark:bg-[#0F2E24] px-3.5 py-2 text-xs sm:text-sm font-semibold text-[#065F46] dark:text-[#34D399] hover:bg-[#D1FAE5] dark:hover:bg-[#0F2E24]/80 transition"
           >
             <span>📊</span>
             <span>{tPages("advanced")}</span>

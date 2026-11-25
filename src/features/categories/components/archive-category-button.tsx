@@ -23,7 +23,7 @@ export function ArchiveCategoryButton({
         type="button"
         onClick={() => setOpen(true)}
         disabled={isPending}
-        className="text-xs text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
+        className="text-xs text-neutral-400 dark:text-[#9AA39F] transition hover:text-red-600 dark:hover:text-red-400 disabled:opacity-60"
       >
         {tCommon("archive")}
       </button>

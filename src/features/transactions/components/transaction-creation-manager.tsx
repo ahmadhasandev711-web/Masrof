@@ -62,7 +62,7 @@ export function TransactionCreationManager({
         <button
           type="button"
           onClick={() => setModalType("transaction")}
-          className="flex items-center gap-2 rounded-xl bg-[#065F46] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#054E3A] active:scale-98"
+          className="flex items-center gap-2 rounded-xl bg-[#065F46] dark:bg-[#10B981] px-4 py-2.5 text-sm font-semibold text-white dark:text-[#04231A] shadow-xs transition hover:bg-[#054E3A] dark:hover:bg-[#34D399] active:scale-98"
         >
           <span className="text-base font-bold leading-none">+</span>
           <span>{t("newTransactionBtn")}</span>
@@ -71,7 +71,7 @@ export function TransactionCreationManager({
         <button
           type="button"
           onClick={() => setModalType("transfer")}
-          className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-2.5 text-sm font-semibold text-blue-900 shadow-2xs transition hover:bg-blue-100/70 active:scale-98"
+          className="flex items-center gap-2 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/60 dark:bg-blue-500/15 px-4 py-2.5 text-sm font-semibold text-blue-900 dark:text-blue-300 shadow-2xs transition hover:bg-blue-100/70 dark:hover:bg-blue-500/25 active:scale-98"
         >
           <span className="text-sm">⇄</span>
           <span>{t("transferBtn")}</span>
@@ -84,14 +84,14 @@ export function TransactionCreationManager({
         title={modalType === "transaction" ? t("modalTransactionTitle") : t("modalTransferTitle")}
         maxWidthClassName="max-w-2xl"
         headerExtra={
-          <div className="flex items-center rounded-xl bg-neutral-200/70 p-0.5 text-xs font-semibold">
+          <div className="flex items-center rounded-xl bg-neutral-200/70 dark:bg-[#1E2824] p-0.5 text-xs font-semibold">
             <button
               type="button"
               onClick={() => setModalType("transaction")}
               className={`rounded-lg px-2.5 py-1 transition ${
                 modalType === "transaction"
-                  ? "bg-white text-neutral-900 shadow-2xs"
-                  : "text-neutral-600 hover:text-neutral-900"
+                  ? "bg-white dark:bg-[#161E1B] text-neutral-900 dark:text-[#ECEAE4] shadow-2xs"
+                  : "text-neutral-600 dark:text-[#9AA39F] hover:text-neutral-900 dark:hover:text-[#ECEAE4]"
               }`}
             >
               {t("modalTransactionTitle")}
@@ -101,8 +101,8 @@ export function TransactionCreationManager({
               onClick={() => setModalType("transfer")}
               className={`rounded-lg px-2.5 py-1 transition ${
                 modalType === "transfer"
-                  ? "bg-white text-neutral-900 shadow-2xs"
-                  : "text-neutral-600 hover:text-neutral-900"
+                  ? "bg-white dark:bg-[#161E1B] text-neutral-900 dark:text-[#ECEAE4] shadow-2xs"
+                  : "text-neutral-600 dark:text-[#9AA39F] hover:text-neutral-900 dark:hover:text-[#ECEAE4]"
               }`}
             >
               {t("modalTransferTitle")}

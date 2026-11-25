@@ -30,12 +30,12 @@ export default async function InvoiceTemplatesPage() {
         <div>
           <Link
             href="/dashboard/invoices"
-            className="text-xs font-medium text-emerald-700 hover:underline"
+            className="text-xs font-medium text-emerald-700 dark:text-[#34D399] hover:underline"
           >
             ← {tInvoices("title")}
           </Link>
-          <h1 className="mt-1 text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
-          <p className="mt-0.5 text-sm text-neutral-500">{t("subtitle")}</p>
+          <h1 className="mt-1 text-xl font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-2xl">{t("title")}</h1>
+          <p className="mt-0.5 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("subtitle")}</p>
         </div>
       </div>
 

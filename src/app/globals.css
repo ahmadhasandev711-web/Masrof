@@ -1,10 +1,22 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Option A scope: dark mode activates only inside dashboard, auth, admin, onboarding, and invite views. */
+@custom-variant dark (&:where(html.dark [data-theme-scope="app"], html.dark [data-theme-scope="app"] *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
   color-scheme: light;
+}
+
+html.dark:has([data-theme-scope="app"]) {
+  color-scheme: dark;
+}
+
+html.dark:has([data-theme-scope="app"]) body {
+  background: #0E1412;
+  color: #ECEAE4;
 }
 
 @theme inline {
@@ -52,6 +64,31 @@ body {
   input[type="time"],
   input[type="number"] {
     color-scheme: light;
+  }
+
+  /* Dark mode form controls inside app scope (dashboard, auth, admin, onboarding) */
+  html.dark [data-theme-scope="app"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]),
+  html.dark [data-theme-scope="app"] select,
+  html.dark [data-theme-scope="app"] textarea {
+    color: #ECEAE4;
+    background-color: #161E1B;
+  }
+
+  html.dark [data-theme-scope="app"] input::placeholder,
+  html.dark [data-theme-scope="app"] textarea::placeholder {
+    color: #66706B;
+  }
+
+  html.dark [data-theme-scope="app"] option {
+    color: #ECEAE4;
+    background-color: #161E1B;
+  }
+
+  html.dark [data-theme-scope="app"] input[type="date"],
+  html.dark [data-theme-scope="app"] input[type="datetime-local"],
+  html.dark [data-theme-scope="app"] input[type="time"],
+  html.dark [data-theme-scope="app"] input[type="number"] {
+    color-scheme: dark;
   }
 
   /* Mobile PWA touch feel */

@@ -215,6 +215,12 @@ const homepage = {
  },
  },
 
+ blog: {
+ eyebrow: "From the blog",
+ title: "Practical guides to run your business finances",
+ subtitle: "Real-world playbooks on invoicing, project profitability, client statements, and cashflow.",
+ viewAll: "Browse all articles",
+ },
  faq: {
  eyebrow: "FAQ",
  title: "Answers to your questions",

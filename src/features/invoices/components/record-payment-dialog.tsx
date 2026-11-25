@@ -69,22 +69,22 @@ export function RecordPaymentDialog({
     >
       <div className="flex flex-col gap-4">
         {/* Invoice Summary Box */}
-        <div className="grid grid-cols-2 gap-3 rounded-xl bg-neutral-50 p-3 text-sm">
+        <div className="grid grid-cols-2 gap-3 rounded-xl bg-neutral-50 dark:bg-[#1E2824] p-3 text-sm">
           <div>
-            <span className="text-neutral-500">{t("total")}: </span>
-            <span className="font-semibold text-neutral-900">
+            <span className="text-neutral-500 dark:text-[#9AA39F]">{t("total")}: </span>
+            <span className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">
               {formatMoney(invoice.total, { currency })}
             </span>
           </div>
           <div>
-            <span className="text-neutral-500">{t("paidAmount")}: </span>
-            <span className="font-semibold text-emerald-700">
+            <span className="text-neutral-500 dark:text-[#9AA39F]">{t("paidAmount")}: </span>
+            <span className="font-semibold text-emerald-700 dark:text-[#34D399]">
               {formatMoney(invoice.paidAmount, { currency })}
             </span>
           </div>
-          <div className="col-span-2 border-t border-neutral-200/60 pt-2">
-            <span className="text-neutral-500">{t("remainingAmount")}: </span>
-            <span className="font-bold text-emerald-800">
+          <div className="col-span-2 border-t border-neutral-200/60 dark:border-[#26302C] pt-2">
+            <span className="text-neutral-500 dark:text-[#9AA39F]">{t("remainingAmount")}: </span>
+            <span className="font-bold text-emerald-800 dark:text-[#34D399]">
               {formatMoney(invoice.remainingAmount, { currency })}
             </span>
           </div>
@@ -98,13 +98,13 @@ export function RecordPaymentDialog({
           {/* Amount field */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label htmlFor="payment-amount" className="text-sm font-medium text-neutral-700">
+              <label htmlFor="payment-amount" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
                 {t("paymentAmount")} ({currency})
               </label>
               <button
                 type="button"
                 onClick={() => setAmountInput(String(remainingMajor))}
-                className="text-xs font-medium text-emerald-700 hover:underline"
+                className="text-xs font-medium text-emerald-700 dark:text-[#34D399] hover:underline"
               >
                 {t("fullPayment")}
               </button>
@@ -128,7 +128,7 @@ export function RecordPaymentDialog({
 
           {/* Account select */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="payment-account" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="payment-account" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {t("depositAccount")}
             </label>
             <select
@@ -149,7 +149,7 @@ export function RecordPaymentDialog({
           <div className="grid gap-3 sm:grid-cols-2">
             {/* Payment date */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="payment-date" className="text-sm font-medium text-neutral-700">
+              <label htmlFor="payment-date" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
                 {t("paymentDate")}
               </label>
               <input
@@ -164,7 +164,7 @@ export function RecordPaymentDialog({
 
             {/* Payment method */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="payment-method" className="text-sm font-medium text-neutral-700">
+              <label htmlFor="payment-method" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
                 {t("paymentMethod")}
               </label>
               <select
@@ -184,7 +184,7 @@ export function RecordPaymentDialog({
 
           {/* Reference & Notes */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="payment-reference" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="payment-reference" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {t("reference")}
             </label>
             <input
@@ -197,7 +197,7 @@ export function RecordPaymentDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="payment-notes" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="payment-notes" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {t("notes")}
             </label>
             <input
@@ -210,7 +210,7 @@ export function RecordPaymentDialog({
           </div>
 
           {state.error && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {state.error}
             </p>
           )}
@@ -219,14 +219,14 @@ export function RecordPaymentDialog({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+              className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#1E2824]"
             >
               {tCommon("cancel")}
             </button>
             <button
               type="submit"
               disabled={isPending || accounts.length === 0}
-              className="rounded-lg bg-emerald-700 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-60"
+              className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-5 py-2 text-sm font-medium text-white dark:text-[#04231A] hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
             >
               {isPending ? tCommon("saving") : t("confirmPayment")}
             </button>

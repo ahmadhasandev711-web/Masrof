@@ -56,17 +56,17 @@ export function ConfirmDialog({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl animate-in zoom-in-95 duration-150"
+        className="w-full max-w-sm rounded-2xl border border-transparent bg-white p-6 shadow-xl animate-in zoom-in-95 duration-150 dark:border-[#26302C] dark:bg-[#161E1B]"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
-        {message && <p className="mt-2 text-sm leading-relaxed text-neutral-600">{message}</p>}
+        <h2 className="text-lg font-semibold text-neutral-900 dark:text-[#ECEAE4]">{title}</h2>
+        {message && <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-[#9AA39F]">{message}</p>}
         <div className="mt-5 flex justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60"
+            className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
           >
             {tCommon("cancel")}
           </button>

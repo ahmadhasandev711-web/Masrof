@@ -46,7 +46,7 @@ export function CreateDebtDialog({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-xl bg-[#065F46] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#065F46]/90 active:scale-[0.98]"
+        className="inline-flex items-center gap-1.5 rounded-xl bg-[#065F46] dark:bg-[#10B981] px-4 py-2.5 text-sm font-semibold text-white dark:text-[#04231A] shadow-xs transition hover:bg-[#065F46]/90 dark:hover:bg-[#34D399] active:scale-[0.98]"
       >
         <span className="text-base leading-none">＋</span>
         <span>{t("addDebt")}</span>
@@ -65,7 +65,7 @@ export function CreateDebtDialog({
 
           {/* Debt Name / Title */}
           <div>
-            <label htmlFor="debt-name" className="mb-1 block text-xs font-semibold text-neutral-700">
+            <label htmlFor="debt-name" className="mb-1 block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("name")} <span className="text-rose-500">*</span>
             </label>
             <input
@@ -74,13 +74,13 @@ export function CreateDebtDialog({
               type="text"
               required
               placeholder={t("namePlaceholder")}
-              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
+              className={`w-full ${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-neutral-900 dark:text-[#ECEAE4] outline-none transition focus:border-[#065F46] dark:focus:border-[#34D399] focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
           {/* Creditor Person or Entity */}
           <div>
-            <label htmlFor="debt-creditor" className="mb-1 block text-xs font-semibold text-neutral-700">
+            <label htmlFor="debt-creditor" className="mb-1 block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("creditor")} <span className="text-rose-500">*</span>
             </label>
             <input
@@ -89,13 +89,13 @@ export function CreateDebtDialog({
               type="text"
               required
               placeholder={t("creditorPlaceholder")}
-              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
+              className={`w-full ${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-neutral-900 dark:text-[#ECEAE4] outline-none transition focus:border-[#065F46] dark:focus:border-[#34D399] focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
           {/* Amount */}
           <div>
-            <label htmlFor="debt-amount" className="mb-1 block text-xs font-semibold text-neutral-700">
+            <label htmlFor="debt-amount" className="mb-1 block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("totalAmount", { currency })} <span className="text-rose-500">*</span>
             </label>
             <input
@@ -108,26 +108,26 @@ export function CreateDebtDialog({
               inputMode="decimal"
               enterKeyHint="done"
               placeholder="0.00"
-              className={`w-full ${MOBILE_FIELD} bg-white text-start font-mono font-bold text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
+              className={`w-full ${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-start font-mono font-bold text-neutral-900 dark:text-[#ECEAE4] outline-none transition focus:border-[#065F46] dark:focus:border-[#34D399] focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
           {/* Due Date (Optional) */}
           <div>
-            <label htmlFor="debt-dueDate" className="mb-1 block text-xs font-semibold text-neutral-700">
+            <label htmlFor="debt-dueDate" className="mb-1 block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("dueDate")}
             </label>
             <input
               id="debt-dueDate"
               name="dueDate"
               type="date"
-              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
+              className={`w-full ${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-neutral-900 dark:text-[#ECEAE4] outline-none transition focus:border-[#065F46] dark:focus:border-[#34D399] focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
           {/* Category (Optional) */}
           <div>
-            <label htmlFor="debt-category" className="mb-1 block text-xs font-semibold text-neutral-700">
+            <label htmlFor="debt-category" className="mb-1 block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("category")}
             </label>
             <input
@@ -135,13 +135,13 @@ export function CreateDebtDialog({
               name="category"
               type="text"
               placeholder={t("categoryPlaceholder")}
-              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
+              className={`w-full ${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-neutral-900 dark:text-[#ECEAE4] outline-none transition focus:border-[#065F46] dark:focus:border-[#34D399] focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label htmlFor="debt-notes" className="mb-1 block text-xs font-semibold text-neutral-700">
+            <label htmlFor="debt-notes" className="mb-1 block text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4]">
               {t("notes")}
             </label>
             <textarea
@@ -149,12 +149,12 @@ export function CreateDebtDialog({
               name="notes"
               rows={2}
               placeholder={t("notesPlaceholder")}
-              className={`w-full ${MOBILE_FIELD} bg-white text-neutral-900 outline-none transition focus:border-[#065F46] focus:ring-1 focus:ring-[#065F46]`}
+              className={`w-full ${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-neutral-900 dark:text-[#ECEAE4] outline-none transition focus:border-[#065F46] dark:focus:border-[#34D399] focus:ring-1 focus:ring-[#065F46] dark:focus:ring-[#34D399]`}
             />
           </div>
 
           {state.error && (
-            <p role="alert" className="text-xs font-medium text-rose-600">
+            <p role="alert" className="text-xs font-medium text-rose-600 dark:text-rose-400">
               {state.error}
             </p>
           )}
@@ -163,14 +163,14 @@ export function CreateDebtDialog({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+              className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#1E2824]"
             >
               {t("cancel")}
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center justify-center rounded-lg bg-[#065F46] px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-[#065F46]/90 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-lg bg-[#065F46] dark:bg-[#10B981] px-5 py-2 text-sm font-semibold text-white dark:text-[#04231A] shadow-xs transition hover:bg-[#065F46]/90 dark:hover:bg-[#34D399] disabled:opacity-50"
             >
               {isPending ? t("saving") : t("save")}
             </button>

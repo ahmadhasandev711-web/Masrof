@@ -27,7 +27,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
 
   return (
     <div
-      className={`inline-flex items-center gap-0.5 rounded-lg border border-[#E4DFD3] bg-white p-0.5 text-xs ${className ?? ""}`}
+      className={`inline-flex items-center gap-0.5 rounded-lg border border-[#E4DFD3] bg-white p-0.5 text-xs dark:border-[#26302C] dark:bg-[#161E1B] ${className ?? ""}`}
       role="group"
       aria-label={t("label")}
     >
@@ -39,8 +39,8 @@ export function LocaleSwitcher({ className }: { className?: string }) {
           onClick={() => switchLocale(code)}
           className={`rounded-md px-2 py-1 font-medium transition ${
             locale === code
-              ? "bg-[#065F46] text-white"
-              : "text-[#1C1B1A]/65 hover:bg-[#F3F0E8] hover:text-[#065F46]"
+              ? "bg-[#065F46] text-white dark:bg-[#10B981] dark:text-[#04231A]"
+              : "text-[#1C1B1A]/65 hover:bg-[#F3F0E8] hover:text-[#065F46] dark:text-[#9AA39F] dark:hover:bg-[#1E2824] dark:hover:text-[#34D399]"
           }`}
           aria-pressed={locale === code}
         >

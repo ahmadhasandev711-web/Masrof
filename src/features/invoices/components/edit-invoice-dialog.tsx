@@ -163,7 +163,7 @@ export function EditInvoiceDialog({
       maxWidthClassName="max-w-3xl"
     >
       {invoice.paidAmount > 0 && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900">
+        <div className="mb-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30 p-3 text-xs text-amber-900 dark:text-amber-200">
           {tInvoices("paidAmountWarning", { amount: formatMoney(invoice.paidAmount, { currency }) })}
         </div>
       )}
@@ -171,7 +171,7 @@ export function EditInvoiceDialog({
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-neutral-700">{tForm("client")}</label>
+              <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("client")}</label>
               <ClientCombobox
                 clients={clients}
                 value={selectedClientId}
@@ -183,7 +183,7 @@ export function EditInvoiceDialog({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="edit-invoice-project" className="text-sm font-medium text-neutral-700">
+              <label htmlFor="edit-invoice-project" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
                 {tForm("project")} ({tShared("optional")})
               </label>
               <select
@@ -205,7 +205,7 @@ export function EditInvoiceDialog({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="edit-invoice-issue-date" className="text-sm font-medium text-neutral-700">
+              <label htmlFor="edit-invoice-issue-date" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
                 {tForm("issueDate")}
               </label>
               <input
@@ -219,7 +219,7 @@ export function EditInvoiceDialog({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="edit-invoice-due-date" className="text-sm font-medium text-neutral-700">
+              <label htmlFor="edit-invoice-due-date" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
                 {tForm("dueDate")} ({tShared("optional")})
               </label>
               <input
@@ -235,8 +235,8 @@ export function EditInvoiceDialog({
           {/* Line Items */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-neutral-700">{tForm("items")}</p>
-              <span className="text-xs font-semibold text-neutral-600">
+              <p className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("items")}</p>
+              <span className="text-xs font-semibold text-neutral-600 dark:text-[#9AA39F]">
                 {tInvoices("newTotalCalculated", {
                   amount: formatMoney(Math.round(totalCalculatedMajor * 100), { currency }),
                 })}
@@ -246,7 +246,7 @@ export function EditInvoiceDialog({
             {rows.map((row) => (
               <div
                 key={row.id}
-                className="grid gap-2 rounded-lg border border-neutral-200 bg-white/50 p-3 sm:grid-cols-[1fr_88px_110px_auto]"
+                className="grid gap-2 rounded-lg border border-neutral-200 dark:border-[#26302C] bg-white/50 dark:bg-[#1E2824]/40 p-3 sm:grid-cols-[1fr_88px_110px_auto]"
               >
                 <input
                   type="text"
@@ -286,7 +286,7 @@ export function EditInvoiceDialog({
                   type="button"
                   onClick={() => removeRow(row.id)}
                   disabled={rows.length <= 1}
-                  className="self-center min-h-11 rounded-lg border border-neutral-300 px-3 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-100 disabled:opacity-30"
+                  className="self-center min-h-11 rounded-lg border border-neutral-300 dark:border-[#26302C] px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-[#9AA39F] hover:bg-neutral-100 dark:hover:bg-[#1E2824] disabled:opacity-30"
                 >
                   {tCommon("delete")}
                 </button>
@@ -296,19 +296,19 @@ export function EditInvoiceDialog({
             <button
               type="button"
               onClick={addRow}
-              className="self-start rounded-lg border border-dashed border-neutral-300 px-4 py-1.5 text-xs font-medium text-neutral-600 hover:border-neutral-400"
+              className="self-start rounded-lg border border-dashed border-neutral-300 dark:border-[#26302C] px-4 py-1.5 text-xs font-medium text-neutral-600 dark:text-[#9AA39F] hover:border-neutral-400 dark:hover:border-[#34D399]/50"
             >
               + {tForm("addItem")}
             </button>
           </div>
 
-          <div className="rounded-lg border border-neutral-200 p-3">
-            <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-neutral-800">
+          <div className="rounded-lg border border-neutral-200 dark:border-[#26302C] p-3">
+            <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-neutral-800 dark:text-[#ECEAE4]">
               <input
                 type="checkbox"
                 checked={taxEnabled}
                 onChange={(e) => setTaxEnabled(e.target.checked)}
-                className="h-4 w-4 rounded border-neutral-300"
+                className="h-4 w-4 rounded border-neutral-300 dark:border-[#26302C]"
               />
               {tForm("enableTax")}
             </label>
@@ -325,7 +325,7 @@ export function EditInvoiceDialog({
                 aria-label={tForm("taxRate")}
               />
             )}
-            <div className="mt-2 space-y-1 text-xs text-neutral-600">
+            <div className="mt-2 space-y-1 text-xs text-neutral-600 dark:text-[#9AA39F]">
               <div className="flex justify-between">
                 <span>{tForm("subtotal")}</span>
                 <span className="font-mono">{formatMoney(Math.round(subtotalMajor * 100), { currency })}</span>
@@ -341,7 +341,7 @@ export function EditInvoiceDialog({
 
           {/* Notes */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="edit-invoice-notes" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="edit-invoice-notes" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("notes")} ({tShared("optional")})
             </label>
             <textarea
@@ -356,7 +356,7 @@ export function EditInvoiceDialog({
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 p-2.5 text-xs font-medium text-red-700 border border-red-200">
+            <p className="rounded-lg bg-red-50 dark:bg-rose-950/30 p-2.5 text-xs font-medium text-red-700 dark:text-rose-300 border border-red-200 dark:border-rose-500/30">
               {error}
             </p>
           )}
@@ -365,7 +365,7 @@ export function EditInvoiceDialog({
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-emerald-700 px-5 py-2.5 font-medium text-white hover:bg-emerald-800 disabled:opacity-60"
+              className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-5 py-2.5 font-medium text-white dark:text-[#04231A] hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
             >
               {isPending ? tCommon("saving") : tCommon("saveChanges")}
             </button>
@@ -373,7 +373,7 @@ export function EditInvoiceDialog({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded-lg border border-neutral-300 px-4 py-2.5 font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-60"
+              className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2.5 font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824] disabled:opacity-60"
             >
               {tCommon("cancel")}
             </button>

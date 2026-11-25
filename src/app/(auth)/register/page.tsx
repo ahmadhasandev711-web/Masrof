@@ -16,11 +16,11 @@ export default async function RegisterPage({
   const loginHref = withRedirectQuery("/login", redirectTo);
 
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-[#E4DFD3] bg-white p-8 shadow-sm">
-      <h1 className="mb-1 text-xl font-semibold text-neutral-900">{t("registerTitle")}</h1>
-      <p className="mb-6 text-sm text-neutral-500">{t("registerSubtitle")}</p>
+    <div className="w-full max-w-sm rounded-2xl border border-[#E4DFD3] bg-white p-8 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+      <h1 className="mb-1 text-xl font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("registerTitle")}</h1>
+      <p className="mb-6 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("registerSubtitle")}</p>
 
-      <Suspense fallback={<p className="text-sm text-neutral-400">{t("loading")}</p>}>
+      <Suspense fallback={<p className="text-sm text-neutral-400 dark:text-[#66706B]">{t("loading")}</p>}>
         <RegisterForm
           requiresEmailVerification={emailFeaturesEnabled}
           googleAuthEnabled={googleAuthEnabled}
@@ -28,9 +28,9 @@ export default async function RegisterPage({
         />
       </Suspense>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
+      <p className="mt-6 text-center text-sm text-neutral-500 dark:text-[#9AA39F]">
         {t("hasAccount")}{" "}
-        <Link href={loginHref} className="font-medium text-emerald-700">
+        <Link href={loginHref} className="font-medium text-emerald-700 dark:text-[#34D399]">
           {t("loginLink")}
         </Link>
       </p>

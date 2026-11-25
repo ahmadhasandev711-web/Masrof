@@ -24,12 +24,12 @@ export default async function BackupPage() {
   return (
     <div className="flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-        <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
+        <h1 className="text-xl font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("title")}</h1>
+        <p className="text-sm text-neutral-500 dark:text-[#9AA39F]">{activeWorkspace.name}</p>
       </div>
 
       {!isOwner ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-900 dark:text-amber-200">
           {t("ownerOnlyNotice")}
         </div>
       ) : plan.workspaceBackup ? (
@@ -39,9 +39,9 @@ export default async function BackupPage() {
           canUseBackup
         />
       ) : (
-        <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">
+        <div className="rounded-xl border border-[#065F46]/15 dark:border-[#34D399]/25 bg-[#ECFDF5]/50 dark:bg-[#0F2E24] p-4 text-sm text-[#1C1B1A]/70 dark:text-[#ECEAE4]">
           {tDashboard("featureGate.backup")}{" "}
-          <Link href="/pricing" className="font-medium text-[#065F46] hover:underline">
+          <Link href="/pricing" className="font-medium text-[#065F46] dark:text-[#34D399] hover:underline">
             {tPlan("viewPricing")}
           </Link>
           .

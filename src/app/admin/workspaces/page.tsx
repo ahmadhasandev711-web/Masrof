@@ -60,11 +60,11 @@ export default async function AdminWorkspacesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">{t("title")}</h1>
-          <p className="mt-1 text-sm text-neutral-500">{t("subtitle")}</p>
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("title")}</h1>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
             <BuildingIcon className="h-3.5 w-3.5" />
             {workspaces.length} {t("title")}
           </span>
@@ -74,26 +74,26 @@ export default async function AdminWorkspacesPage() {
       {/* Mobile Workspace Cards List */}
       <div className="block md:hidden space-y-3">
         {workspaces.length === 0 ? (
-          <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center text-xs text-neutral-400">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center text-xs text-neutral-400 dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#66706B]">
             {t("empty")}
           </div>
         ) : (
           workspaces.map((ws) => (
             <div
               key={ws.id}
-              className="rounded-2xl border border-neutral-200/90 bg-white p-4 shadow-xs flex flex-col gap-3"
+              className="rounded-2xl border border-neutral-200/90 bg-white p-4 shadow-xs flex flex-col gap-3 dark:border-[#26302C] dark:bg-[#161E1B]"
             >
               <div className="flex items-start justify-between gap-2">
                 <Link
                   href={`/admin/workspaces/${ws.id}`}
                   className="flex items-center gap-2.5 min-w-0"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm dark:bg-[#10B981]/20 dark:text-[#34D399]">
                     {ws.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-sm text-neutral-900 truncate">{ws.name}</p>
-                    <p className="text-[11px] text-neutral-500 truncate" dir="ltr">
+                    <p className="font-bold text-sm text-neutral-900 truncate dark:text-[#ECEAE4]">{ws.name}</p>
+                    <p className="text-[11px] text-neutral-500 truncate dark:text-[#9AA39F]" dir="ltr">
                       {ws.ownerEmail}
                     </p>
                   </div>
@@ -102,38 +102,38 @@ export default async function AdminWorkspacesPage() {
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
                     ws.plan === "pro"
-                      ? "bg-violet-50 text-violet-800 border border-violet-200/70"
-                      : "bg-neutral-100 text-neutral-600"
+                      ? "bg-violet-50 text-violet-800 border border-violet-200/70 dark:bg-violet-950/30 dark:text-violet-300 dark:border-violet-800/40"
+                      : "bg-neutral-100 text-neutral-600 dark:bg-[#1E2824] dark:text-[#9AA39F]"
                   }`}
                 >
                   {tPlans(ws.plan)}
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 rounded-xl bg-neutral-50/80 p-2 text-center text-xs">
+              <div className="grid grid-cols-3 gap-2 rounded-xl bg-neutral-50/80 p-2 text-center text-xs dark:bg-[#1E2824]">
                 <div>
-                  <p className="text-[10px] text-neutral-400 font-medium">{t("type")}</p>
-                  <p className="font-semibold text-neutral-700 mt-0.5">{getTypeLabel(ws.type)}</p>
+                  <p className="text-[10px] text-neutral-400 font-medium dark:text-[#66706B]">{t("type")}</p>
+                  <p className="font-semibold text-neutral-700 mt-0.5 dark:text-[#ECEAE4]">{getTypeLabel(ws.type)}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-neutral-400 font-medium">{t("membersCount")}</p>
-                  <p className="font-semibold text-neutral-700 mt-0.5">{ws.membersCount}</p>
+                  <p className="text-[10px] text-neutral-400 font-medium dark:text-[#66706B]">{t("membersCount")}</p>
+                  <p className="font-semibold text-neutral-700 mt-0.5 dark:text-[#ECEAE4]">{ws.membersCount}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-neutral-400 font-medium">{t("invoicesCount")}</p>
-                  <p className="font-semibold text-neutral-700 mt-0.5">{ws.invoicesCount}</p>
+                  <p className="text-[10px] text-neutral-400 font-medium dark:text-[#66706B]">{t("invoicesCount")}</p>
+                  <p className="font-semibold text-neutral-700 mt-0.5 dark:text-[#ECEAE4]">{ws.invoicesCount}</p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
+              <div className="flex items-center justify-between pt-1 border-t border-neutral-100 dark:border-[#26302C]">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] text-neutral-400">{ws.currency}</span>
+                  <span className="text-[11px] text-neutral-400 dark:text-[#66706B]">{ws.currency}</span>
                   {ws.isArchived ? (
-                    <span className="rounded-full bg-neutral-100 px-2 py-0.2 text-[10px] font-medium text-neutral-500">
+                    <span className="rounded-full bg-neutral-100 px-2 py-0.2 text-[10px] font-medium text-neutral-500 dark:bg-[#1E2824] dark:text-[#9AA39F]">
                       {t("archived")}
                     </span>
                   ) : (
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.2 text-[10px] font-medium text-emerald-700">
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.2 text-[10px] font-medium text-emerald-700 dark:bg-[#10B981]/20 dark:text-[#34D399]">
                       {t("active")}
                     </span>
                   )}
@@ -141,7 +141,7 @@ export default async function AdminWorkspacesPage() {
 
                 <Link
                   href={`/admin/workspaces/${ws.id}`}
-                  className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition"
+                  className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-neutral-800 transition dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
                 >
                   {t("viewDetails")} 
                 </Link>
@@ -152,9 +152,9 @@ export default async function AdminWorkspacesPage() {
       </div>
 
       {/* Desktop Workspaces Table */}
-      <div className="hidden md:block overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-xs">
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
         <table className="w-full min-w-[980px] text-right text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500">
+          <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#9AA39F]">
             <tr>
               <th className="px-4 py-3 font-medium">{t("name")}</th>
               <th className="px-4 py-3 font-medium">{t("type")}</th>
@@ -167,31 +167,31 @@ export default async function AdminWorkspacesPage() {
               <th className="px-4 py-3 font-medium">{t("actions")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody className="divide-y divide-neutral-100 dark:divide-[#26302C]">
             {workspaces.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-12 text-center text-neutral-400">
+                <td colSpan={9} className="px-4 py-12 text-center text-neutral-400 dark:text-[#66706B]">
                   {t("empty")}
                 </td>
               </tr>
             ) : (
               workspaces.map((ws) => (
-                <tr key={ws.id} className="hover:bg-neutral-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-neutral-900">
+                <tr key={ws.id} className="hover:bg-neutral-50 transition-colors dark:hover:bg-[#1E2824]">
+                  <td className="px-4 py-3 font-medium text-neutral-900 dark:text-[#ECEAE4]">
                     <Link
                       href={`/admin/workspaces/${ws.id}`}
                       className="group flex items-center gap-2 hover:opacity-80 transition"
                     >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 font-bold text-xs group-hover:bg-emerald-100 transition">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 font-bold text-xs group-hover:bg-emerald-100 transition dark:bg-[#10B981]/20 dark:text-[#34D399] dark:group-hover:bg-[#10B981]/30">
                         {ws.name.slice(0, 2).toUpperCase()}
                       </div>
-                      <span className="font-semibold text-neutral-900 underline-offset-2 group-hover:underline">
+                      <span className="font-semibold text-neutral-900 underline-offset-2 group-hover:underline dark:text-[#ECEAE4]">
                         {ws.name}
                       </span>
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-700">
+                    <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-700 dark:bg-[#1E2824] dark:text-[#ECEAE4]">
                       {getTypeLabel(ws.type)}
                     </span>
                   </td>
@@ -199,14 +199,14 @@ export default async function AdminWorkspacesPage() {
                     <span
                       className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                         ws.plan === "pro"
-                          ? "bg-violet-50 text-violet-800 border border-violet-200/70"
-                          : "bg-neutral-100 text-neutral-600"
+                          ? "bg-violet-50 text-violet-800 border border-violet-200/70 dark:bg-violet-950/30 dark:text-violet-300 dark:border-violet-800/40"
+                          : "bg-neutral-100 text-neutral-600 dark:bg-[#1E2824] dark:text-[#9AA39F]"
                       }`}
                     >
                       {tPlans(ws.plan)}
                     </span>
                     {ws.planExpiresAt && (
-                      <p className="mt-0.5 text-[10px] text-neutral-400">
+                      <p className="mt-0.5 text-[10px] text-neutral-400 dark:text-[#66706B]">
                         {format.dateTime(new Date(ws.planExpiresAt), {
                           day: "numeric",
                           month: "short",
@@ -217,34 +217,34 @@ export default async function AdminWorkspacesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col">
-                      <span className="font-medium text-neutral-900">{ws.ownerName}</span>
-                      <span className="text-xs text-neutral-400" dir="ltr">
+                      <span className="font-medium text-neutral-900 dark:text-[#ECEAE4]">{ws.ownerName}</span>
+                      <span className="text-xs text-neutral-400 dark:text-[#9AA39F]" dir="ltr">
                         {ws.ownerEmail}
                       </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 text-neutral-700 font-medium">
-                      <UsersIcon className="h-3.5 w-3.5 text-neutral-400" />
+                    <span className="inline-flex items-center gap-1 text-neutral-700 font-medium dark:text-[#ECEAE4]">
+                      <UsersIcon className="h-3.5 w-3.5 text-neutral-400 dark:text-[#66706B]" />
                       {ws.membersCount}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 text-neutral-700 font-medium">
-                      <InvoiceIcon className="h-3.5 w-3.5 text-neutral-400" />
+                    <span className="inline-flex items-center gap-1 text-neutral-700 font-medium dark:text-[#ECEAE4]">
+                      <InvoiceIcon className="h-3.5 w-3.5 text-neutral-400 dark:text-[#66706B]" />
                       {ws.invoicesCount}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-neutral-600 font-mono text-xs">
+                  <td className="px-4 py-3 text-neutral-600 font-mono text-xs dark:text-[#9AA39F]">
                     {ws.currency}
                   </td>
                   <td className="px-4 py-3">
                     {ws.isArchived ? (
-                      <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">
+                      <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500 dark:bg-[#1E2824] dark:text-[#9AA39F]">
                         {t("archived")}
                       </span>
                     ) : (
-                      <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-[#10B981]/20 dark:text-[#34D399]">
                         {t("active")}
                       </span>
                     )}
@@ -252,7 +252,7 @@ export default async function AdminWorkspacesPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/workspaces/${ws.id}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 shadow-2xs transition"
+                      className="inline-flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 shadow-2xs transition dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
                     >
                       {t("viewDetails")}
                     </Link>

@@ -21,7 +21,7 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
     return (
       <Alert>
         {t("reset.invalidLink")}{" "}
-        <Link href="/forgot-password" className="font-medium text-emerald-700">
+        <Link href="/forgot-password" className="font-medium text-emerald-700 dark:text-[#34D399]">
           {t("reset.requestNewLink")}
         </Link>
       </Alert>

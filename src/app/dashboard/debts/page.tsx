@@ -27,10 +27,10 @@ export default async function DebtsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-[#ECEAE4]">
             {t("gateTitle")}
           </h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">
             {t("gateDescription")}
           </p>
         </div>
@@ -61,14 +61,14 @@ export default async function DebtsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-[#ECEAE4]">
               {t("title")}
             </h1>
-            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+            <span className="rounded-full bg-emerald-50 dark:bg-[#0F2E24] px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:text-[#34D399]">
               PRO
             </span>
           </div>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">
             {t("subtitle")}
           </p>
         </div>

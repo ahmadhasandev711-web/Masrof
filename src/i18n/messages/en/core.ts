@@ -43,6 +43,12 @@ const core = {
  ar: "عربي",
  en: "EN",
  },
+ theme: {
+ label: "Theme",
+ system: "System",
+ light: "Light",
+ dark: "Dark",
+ },
  nav: {
  home: "Home",
  transactions: "Transactions",

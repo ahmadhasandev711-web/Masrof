@@ -26,12 +26,12 @@ function Field({
   hint?: string;
 }) {
   const className =
-    "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900";
+    "w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]";
 
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium text-neutral-700">{label}</span>
-      {hint && <span className="text-xs text-neutral-400">{hint}</span>}
+      <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{label}</span>
+      {hint && <span className="text-xs text-neutral-400 dark:text-[#66706B]">{hint}</span>}
       {multiline ? (
         <textarea name={name} defaultValue={defaultValue} rows={3} className={className} />
       ) : (
@@ -49,8 +49,8 @@ export function HomepageContentForm({ content }: { content: HomepageContent }) {
   return (
     <div className="flex flex-col gap-6">
       <form action={formAction} className="flex flex-col gap-8">
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-          <h2 className="font-medium text-neutral-900">{t("heroSection")}</h2>
+        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+          <h2 className="font-medium text-neutral-900 dark:text-[#ECEAE4]">{t("heroSection")}</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field label={tFields("heroBadge")} name="heroBadge" defaultValue={content.heroBadge} />
             <Field
@@ -75,8 +75,8 @@ export function HomepageContentForm({ content }: { content: HomepageContent }) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-          <h2 className="font-medium text-neutral-900">{t("stepsSection")}</h2>
+        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+          <h2 className="font-medium text-neutral-900 dark:text-[#ECEAE4]">{t("stepsSection")}</h2>
           <Field
             label={tFields("stepsTitle")}
             name="stepsTitle"
@@ -84,8 +84,8 @@ export function HomepageContentForm({ content }: { content: HomepageContent }) {
           />
           <div className="mt-4 grid gap-4 lg:grid-cols-3">
             {content.steps.map((step, index) => (
-              <div key={step.number} className="rounded-xl border border-neutral-200 p-4">
-                <p className="mb-3 text-sm font-medium text-violet-700">{t("stepLabel", { index: index + 1 })}</p>
+              <div key={step.number} className="rounded-xl border border-neutral-200 p-4 dark:border-[#26302C] dark:bg-[#1E2824]">
+                <p className="mb-3 text-sm font-medium text-violet-700 dark:text-violet-400">{t("stepLabel", { index: index + 1 })}</p>
                 <div className="flex flex-col gap-3">
                   <Field
                     label={tFields("stepNumber")}
@@ -100,8 +100,8 @@ export function HomepageContentForm({ content }: { content: HomepageContent }) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-          <h2 className="font-medium text-neutral-900">{t("contentSection")}</h2>
+        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+          <h2 className="font-medium text-neutral-900 dark:text-[#ECEAE4]">{t("contentSection")}</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Field label={tFields("blogTitle")} name="blogTitle" defaultValue={content.blogTitle} />
             <Field
@@ -150,8 +150,8 @@ export function HomepageContentForm({ content }: { content: HomepageContent }) {
           </div>
         </section>
 
-        {state.error && <p className="text-sm text-red-600">{state.error}</p>}
-        {state.success && <p className="text-sm text-emerald-700">{t("saved")}</p>}
+        {state.error && <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>}
+        {state.success && <p className="text-sm text-emerald-700 dark:text-[#34D399]">{t("saved")}</p>}
 
         <div className="flex flex-wrap gap-3">
           <button
@@ -164,7 +164,7 @@ export function HomepageContentForm({ content }: { content: HomepageContent }) {
           <Link
             href="/"
             target="_blank"
-            className="rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50"
+            className="rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 dark:border-[#26302C] dark:text-[#ECEAE4] dark:hover:bg-[#1E2824]"
           >
             {t("previewSite")}
           </Link>
@@ -178,7 +178,7 @@ export function HomepageContentForm({ content }: { content: HomepageContent }) {
       >
         <button
           type="submit"
-          className="text-sm text-neutral-500 hover:text-red-600"
+          className="text-sm text-neutral-500 hover:text-red-600 dark:text-[#9AA39F] dark:hover:text-red-400"
         >
           {t("restore")}
         </button>

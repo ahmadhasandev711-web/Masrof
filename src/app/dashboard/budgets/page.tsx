@@ -82,17 +82,17 @@ export default async function BudgetsPage() {
   return (
     <div className="flex max-w-5xl flex-col gap-8">
       <div>
-        <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
-        <p className="text-sm text-neutral-500">{t("subtitle")}</p>
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-2xl">{t("title")}</h1>
+        <p className="text-sm text-neutral-500 dark:text-[#9AA39F]">{t("subtitle")}</p>
       </div>
 
       <section className="flex flex-col gap-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
+            <h2 className="text-base font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
               {tDashboard("budgets.monthlySection")}
             </h2>
-            <p className="text-xs text-neutral-500">{activeWorkspace.name}</p>
+            <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{activeWorkspace.name}</p>
           </div>
           {plan.budgets && canWrite && (
             <BudgetCreationManager
@@ -104,35 +104,35 @@ export default async function BudgetsPage() {
 
         {plan.budgets && budgets.length > 0 && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-              <p className="text-xs font-medium text-neutral-500">{t("totalBudgeted")}</p>
-              <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
+            <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+              <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("totalBudgeted")}</p>
+              <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
                 {formatMoney(totalBudgeted, formatOptions)}
               </p>
             </div>
-            <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-              <p className="text-xs font-medium text-neutral-500">{t("totalSpent")}</p>
-              <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
+            <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+              <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("totalSpent")}</p>
+              <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
                 {totalSpent == null ? tConversion("unavailable") : formatMoney(totalSpent, formatOptions)}
               </p>
             </div>
-            <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-              <p className="text-xs font-medium text-neutral-500">{t("totalRemaining")}</p>
-              <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 sm:text-lg">
+            <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+              <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("totalRemaining")}</p>
+              <p className="mt-1 font-mono text-base font-bold tabular-nums text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
                 {totalRemaining == null ? tConversion("unavailable") : formatMoney(totalRemaining, formatOptions)}
               </p>
             </div>
-            <div className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xs">
-              <p className="text-xs font-medium text-neutral-500">{t("consumptionRate")}</p>
+            <div className="rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs">
+              <p className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">{t("consumptionRate")}</p>
               <p
                 className={`mt-1 font-mono text-base font-bold tabular-nums sm:text-lg ${
                   overallPercentage == null
-                    ? "text-neutral-500"
+                    ? "text-neutral-500 dark:text-[#9AA39F]"
                     : overallPercentage >= 100
-                      ? "text-red-600"
+                      ? "text-red-600 dark:text-rose-400"
                       : overallPercentage >= 80
-                        ? "text-amber-600"
-                        : "text-emerald-700"
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-emerald-700 dark:text-[#34D399]"
                 }`}
               >
                 {overallPercentage == null ? tConversion("unavailable") : `${overallPercentage}%`}
@@ -172,9 +172,9 @@ export default async function BudgetsPage() {
             canWrite={canWrite}
           />
         ) : (
-          <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">
+          <div className="rounded-xl border border-[#065F46]/15 dark:border-[#34D399]/25 bg-[#ECFDF5]/50 dark:bg-[#0F2E24] p-4 text-sm text-[#1C1B1A]/70 dark:text-[#ECEAE4]">
             {tDashboard("plan.featureGate.budgets")}{" "}
-            <Link href="/pricing" className="font-medium text-[#065F46] hover:underline">
+            <Link href="/pricing" className="font-medium text-[#065F46] dark:text-[#34D399] hover:underline">
               {tPlan("viewPricing")}
             </Link>
             .
@@ -182,13 +182,13 @@ export default async function BudgetsPage() {
         )}
       </section>
 
-      <section id="recurring" className="flex flex-col gap-4 border-t border-neutral-200 pt-8">
+      <section id="recurring" className="flex flex-col gap-4 border-t border-neutral-200 dark:border-[#26302C] pt-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-bold text-neutral-900 sm:text-lg">
+            <h2 className="text-base font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-lg">
               {tDashboard("budgets.recurringSection")}
             </h2>
-            <p className="mt-1 text-xs leading-relaxed text-neutral-500">
+            <p className="mt-1 text-xs leading-relaxed text-neutral-500 dark:text-[#9AA39F]">
               {tDashboard("budgets.recurringHint")}
             </p>
           </div>
@@ -214,9 +214,9 @@ export default async function BudgetsPage() {
             />
           </>
         ) : (
-          <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">
+          <div className="rounded-xl border border-[#065F46]/15 dark:border-[#34D399]/25 bg-[#ECFDF5]/50 dark:bg-[#0F2E24] p-4 text-sm text-[#1C1B1A]/70 dark:text-[#ECEAE4]">
             {tDashboard("featureGate.recurring")}{" "}
-            <Link href="/pricing" className="font-medium text-[#065F46] hover:underline">
+            <Link href="/pricing" className="font-medium text-[#065F46] dark:text-[#34D399] hover:underline">
               {tPlan("viewPricing")}
             </Link>
             .

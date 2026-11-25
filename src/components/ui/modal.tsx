@@ -42,7 +42,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-[#FBF9F4] sm:bg-transparent sm:items-center sm:justify-center sm:p-4"
+      className="fixed inset-0 z-50 flex flex-col bg-[#FBF9F4] sm:bg-transparent sm:items-center sm:justify-center sm:p-4 dark:bg-[#0E1412] dark:sm:bg-transparent"
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel || (typeof title === "string" ? title : undefined)}
@@ -57,14 +57,14 @@ export function Modal({
 
       {/* Modal Container: Full Screen on Mobile, Rounded Card on Desktop */}
       <div
-        className={`relative z-10 flex h-full w-full flex-col bg-[#FBF9F4] sm:h-auto sm:max-h-[90vh] ${maxWidthClassName} sm:rounded-3xl sm:border sm:border-[#E4DFD3] sm:shadow-2xl animate-in fade-in-0 duration-150`}
+        className={`relative z-10 flex h-full w-full flex-col bg-[#FBF9F4] sm:h-auto sm:max-h-[90vh] ${maxWidthClassName} sm:rounded-3xl sm:border sm:border-[#E4DFD3] sm:shadow-2xl animate-in fade-in-0 duration-150 dark:bg-[#161E1B] dark:sm:border-[#26302C]`}
         style={{ contain: "layout paint" }}
       >
         {/* Sticky Header */}
-        <div className="shrink-0 flex items-center justify-between gap-3 border-b border-[#E4DFD3] bg-[#FBF9F4] px-4 pb-3.5 pt-[max(0.875rem,calc(0.5rem+env(safe-area-inset-top,0px)))] sm:rounded-t-3xl sm:px-6 sm:pt-5">
+        <div className="shrink-0 flex items-center justify-between gap-3 border-b border-[#E4DFD3] bg-[#FBF9F4] px-4 pb-3.5 pt-[max(0.875rem,calc(0.5rem+env(safe-area-inset-top,0px)))] sm:rounded-t-3xl sm:px-6 sm:pt-5 dark:border-[#26302C] dark:bg-[#161E1B]">
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-base font-bold text-neutral-900 sm:text-lg">{title}</h2>
-            {subtitle && <p className="truncate text-xs text-neutral-500">{subtitle}</p>}
+            <h2 className="truncate text-base font-bold text-neutral-900 sm:text-lg dark:text-[#ECEAE4]">{title}</h2>
+            {subtitle && <p className="truncate text-xs text-neutral-500 dark:text-[#9AA39F]">{subtitle}</p>}
           </div>
 
           {headerExtra && <div className="shrink-0">{headerExtra}</div>}
@@ -72,7 +72,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-neutral-500 hover:bg-neutral-200/70 hover:text-neutral-900 active:scale-95 transition-transform"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-neutral-500 hover:bg-neutral-200/70 hover:text-neutral-900 active:scale-95 transition-transform dark:text-[#9AA39F] dark:hover:bg-[#1E2824] dark:hover:text-[#ECEAE4]"
             aria-label={tCommon("close")}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

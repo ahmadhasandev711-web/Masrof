@@ -27,28 +27,28 @@ function formatDate(isoDate: string, locale = "ar") {
 function statusClass(status: InvoiceDisplayStatus) {
   switch (status) {
     case "paid":
-      return "bg-emerald-50 text-emerald-800 border-emerald-200";
+      return "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-[#10B981]/20 dark:text-[#34D399] dark:border-[#34D399]/30";
     case "overdue":
-      return "bg-red-50 text-red-700 border-red-200";
+      return "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40";
     case "draft":
-      return "bg-neutral-100 text-neutral-600 border-neutral-200";
+      return "bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-[#1E2824] dark:text-[#9AA39F] dark:border-[#26302C]";
     case "cancelled":
-      return "bg-neutral-100 text-neutral-500 border-neutral-200 line-through";
+      return "bg-neutral-100 text-neutral-500 border-neutral-200 line-through dark:bg-[#1E2824] dark:text-[#66706B] dark:border-[#26302C]";
     default:
-      return "bg-sky-50 text-sky-800 border-sky-200";
+      return "bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-800/40";
   }
 }
 
 function financialStatusClass(status: InvoiceFinancialStatus) {
   switch (status) {
     case "paid":
-      return "bg-emerald-50 text-emerald-800 border-emerald-200";
+      return "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-[#10B981]/20 dark:text-[#34D399] dark:border-[#34D399]/30";
     case "partially_paid":
-      return "bg-amber-50 text-amber-800 border-amber-200";
+      return "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-800/40";
     case "legacy_paid":
-      return "bg-neutral-100 text-neutral-700 border-neutral-300";
+      return "bg-neutral-100 text-neutral-700 border-neutral-300 dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:border-[#26302C]";
     default:
-      return "bg-neutral-50 text-neutral-600 border-neutral-200";
+      return "bg-neutral-50 text-neutral-600 border-neutral-200 dark:bg-[#1E2824] dark:text-[#9AA39F] dark:border-[#26302C]";
   }
 }
 
@@ -81,7 +81,7 @@ export function InvoiceList({
 
   if (invoices.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-400">
+      <div className="rounded-2xl border border-dashed border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-8 text-center text-neutral-400 dark:text-[#9AA39F]">
         {tEmpty("noInvoices")}
       </div>
     );
@@ -151,17 +151,17 @@ function InvoiceRow({
 
   return (
     <>
-      <li className="flex flex-col gap-3.5 rounded-2xl border border-neutral-200/90 bg-white p-4 sm:p-5 shadow-xs transition hover:shadow-sm">
+      <li className="flex flex-col gap-3.5 rounded-2xl border border-neutral-200/90 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 sm:p-5 shadow-xs transition hover:shadow-sm">
         {/* Top Header: Invoice # & Single Smart Status Badge */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 dark:border-[#26302C] pb-3">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-sm sm:text-base font-bold text-[#065F46]">
+            <span className="font-mono text-sm sm:text-base font-bold text-[#065F46] dark:text-[#34D399]">
               {invoice.invoiceNumber}
             </span>
             {invoice.viewedAt && (
               <span
                 title={new Date(invoice.viewedAt).toLocaleString("ar-EG")}
-                className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-800"
+                className="inline-flex items-center gap-1 rounded-full border border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/15 px-2 py-0.5 text-[11px] font-medium text-sky-800 dark:text-sky-300"
               >
                 <span>👁</span>
                 <span>{tForm("viewedBadge")}</span>
@@ -170,27 +170,27 @@ function InvoiceRow({
           </div>
           <div className="flex items-center gap-1.5">
             {invoice.status === "cancelled" ? (
-              <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-500 line-through">
+              <span className="rounded-full border border-neutral-200 dark:border-[#26302C] bg-neutral-100 dark:bg-[#1E2824] px-2.5 py-0.5 text-xs font-semibold text-neutral-500 dark:text-[#66706B] line-through">
                 {tStatus("cancelled")}
               </span>
             ) : invoice.financialStatus === "paid" ? (
-              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+              <span className="rounded-full border border-emerald-200 dark:border-[#34D399]/30 bg-emerald-50 dark:bg-[#0F2E24] px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:text-[#34D399]">
                 {tForm("financialStatuses.paid")}
               </span>
             ) : invoice.financialStatus === "partially_paid" ? (
-              <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+              <span className="rounded-full border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:text-amber-300">
                 {tForm("financialStatuses.partially_paid")}
               </span>
             ) : invoice.displayStatus === "overdue" ? (
-              <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-800">
+              <span className="rounded-full border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/15 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:text-rose-400">
                 {tStatus("overdue")}
               </span>
             ) : invoice.displayStatus === "draft" ? (
-              <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-600">
+              <span className="rounded-full border border-neutral-200 dark:border-[#26302C] bg-neutral-100 dark:bg-[#1E2824] px-2.5 py-0.5 text-xs font-semibold text-neutral-600 dark:text-[#9AA39F]">
                 {tStatus("draft")}
               </span>
             ) : (
-              <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800">
+              <span className="rounded-full border border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/15 px-2.5 py-0.5 text-xs font-semibold text-sky-800 dark:text-sky-300">
                 {tStatus("sent")}
               </span>
             )}
@@ -200,20 +200,20 @@ function InvoiceRow({
         {/* Client & Date Details */}
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-neutral-400 text-xs">👤</span>
-            <p className="font-bold text-neutral-900 text-sm sm:text-base">
+            <span className="text-neutral-400 dark:text-[#66706B] text-xs">👤</span>
+            <p className="font-bold text-neutral-900 dark:text-[#ECEAE4] text-sm sm:text-base">
               {invoice.clientName}
             </p>
             {invoice.projectName && (
-              <span className="font-medium text-xs text-purple-700 bg-purple-50 border border-purple-200/60 px-2 py-0.5 rounded-md">
+              <span className="font-medium text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-500/15 border border-purple-200/60 dark:border-purple-500/30 px-2 py-0.5 rounded-md">
                 📁 {invoice.projectName}
               </span>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500 dark:text-[#9AA39F]">
             <span>📅 {formatDate(invoice.issueDate, locale)}</span>
             {invoice.dueDate && (
-              <span className={`font-medium ${invoice.displayStatus === "overdue" ? "text-rose-700 font-bold" : "text-neutral-600"}`}>
+              <span className={`font-medium ${invoice.displayStatus === "overdue" ? "text-rose-700 dark:text-rose-400 font-bold" : "text-neutral-600 dark:text-[#9AA39F]"}`}>
                 ⏳ {tForm("dueDate")}: {formatDate(invoice.dueDate, locale)}
               </span>
             )}
@@ -221,24 +221,24 @@ function InvoiceRow({
         </div>
 
         {/* Financial Amount Box */}
-        <div className="rounded-xl bg-[#FBF9F4] p-3 border border-[#E4DFD3]/70 flex flex-wrap items-center justify-between gap-2">
+        <div className="rounded-xl bg-[#FBF9F4] dark:bg-[#1E2824] p-3 border border-[#E4DFD3]/70 dark:border-[#26302C] flex flex-wrap items-center justify-between gap-2">
           <div>
-            <p className="text-[11px] text-neutral-500 font-medium">{tForm("total")}</p>
-            <p className="font-mono text-base sm:text-lg font-bold tabular-nums text-neutral-900">
+            <p className="text-[11px] text-neutral-500 dark:text-[#9AA39F] font-medium">{tForm("total")}</p>
+            <p className="font-mono text-base sm:text-lg font-bold tabular-nums text-neutral-900 dark:text-[#ECEAE4]">
               {formatMoney(invoice.total, { currency, locale })}
             </p>
           </div>
           {invoice.financialStatus === "partially_paid" ? (
             <div className="text-left rtl:text-right text-xs">
-              <p className="text-neutral-500">
-                {tForm("paidAmount")}: <span className="font-mono font-bold tabular-nums text-emerald-700">{formatMoney(invoice.paidAmount, { currency, locale })}</span>
+              <p className="text-neutral-500 dark:text-[#9AA39F]">
+                {tForm("paidAmount")}: <span className="font-mono font-bold tabular-nums text-emerald-700 dark:text-[#34D399]">{formatMoney(invoice.paidAmount, { currency, locale })}</span>
               </p>
-              <p className="text-amber-800 font-bold">
+              <p className="text-amber-800 dark:text-amber-300 font-bold">
                 {tForm("remainingAmount")}: <span className="font-mono font-bold tabular-nums">{formatMoney(invoice.remainingAmount, { currency, locale })}</span>
               </p>
             </div>
           ) : invoice.financialStatus === "paid" ? (
-            <div className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+            <div className="text-xs font-semibold text-emerald-700 dark:text-[#34D399] flex items-center gap-1">
               <span>✓</span>
               <span>{tForm("financialStatuses.paid")}</span>
             </div>
@@ -247,12 +247,12 @@ function InvoiceRow({
 
         {/* Action Error Message */}
         {actionError && (
-          <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">
+          <div className="flex items-center justify-between rounded-xl border border-red-200 dark:border-rose-500/30 bg-red-50 dark:bg-rose-950/30 p-2.5 text-xs text-red-700 dark:text-rose-300">
             <span>⚠️ {actionError}</span>
             <button
               type="button"
               onClick={() => setActionError(null)}
-              className="px-1 font-bold text-red-500 hover:text-red-700"
+              className="px-1 font-bold text-red-500 dark:text-rose-400 hover:text-red-700 dark:hover:text-rose-300"
             >
               ✕
             </button>
@@ -261,7 +261,7 @@ function InvoiceRow({
 
         {/* Cancel Confirmation Banner */}
         {cancelConfirm && (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 p-3 text-xs text-amber-900 dark:text-amber-200">
             <span>
               {tPages("cancelConfirmQuestion", { number: invoice.invoiceNumber })}
             </span>
@@ -287,7 +287,7 @@ function InvoiceRow({
                 type="button"
                 disabled={isCancelling}
                 onClick={() => setCancelConfirm(false)}
-                className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 font-medium text-neutral-700 hover:bg-neutral-50"
+                className="rounded-lg border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-2.5 py-1 font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#26302C]"
               >
                 {tPages("back")}
               </button>
@@ -297,7 +297,7 @@ function InvoiceRow({
 
         {/* Archive / Delete Confirmation Banner */}
         {archiveConfirm && (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 dark:border-rose-500/30 bg-red-50 dark:bg-rose-950/30 p-3 text-xs text-red-900 dark:text-rose-200">
             <span>
               {tPages("deleteConfirmQuestion", { number: invoice.invoiceNumber })}
             </span>
@@ -323,7 +323,7 @@ function InvoiceRow({
                 type="button"
                 disabled={isArchiving}
                 onClick={() => setArchiveConfirm(false)}
-                className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 font-medium text-neutral-700 hover:bg-neutral-50"
+                className="rounded-lg border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-2.5 py-1 font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#26302C]"
               >
                 {tPages("back")}
               </button>
@@ -350,7 +350,7 @@ function InvoiceRow({
               <button
                 type="button"
                 onClick={() => setIsShareOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-center text-xs sm:text-sm font-semibold text-sky-800 transition hover:bg-sky-100 active:scale-95"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/15 px-3 py-2 text-center text-xs sm:text-sm font-semibold text-sky-800 dark:text-sky-300 transition hover:bg-sky-100 dark:hover:bg-sky-500/25 active:scale-95"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -362,23 +362,23 @@ function InvoiceRow({
 
           {/* Secondary: print + manage */}
           <div className="flex flex-col gap-2 sm:ms-auto sm:items-end">
-            <div className="inline-flex w-full items-center rounded-xl border border-neutral-200 bg-neutral-50 p-0.5 text-xs font-semibold sm:w-auto">
+            <div className="inline-flex w-full items-center rounded-xl border border-neutral-200 dark:border-[#26302C] bg-neutral-50 dark:bg-[#1E2824] p-0.5 text-xs font-semibold sm:w-auto">
               <Link
                 href={`/print/invoice/${invoice._id}?format=a4`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 py-2 text-neutral-800 transition hover:bg-white hover:shadow-2xs sm:flex-none sm:px-4"
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 py-2 text-neutral-800 dark:text-[#ECEAE4] transition hover:bg-white dark:hover:bg-[#161E1B] hover:shadow-2xs sm:flex-none sm:px-4"
               >
                 A4
               </Link>
-              <span className="text-neutral-300" aria-hidden>
+              <span className="text-neutral-300 dark:text-[#66706B]" aria-hidden>
                 |
               </span>
               <Link
                 href={`/print/invoice/${invoice._id}?format=pos`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 py-2 text-neutral-800 transition hover:bg-white hover:shadow-2xs sm:flex-none sm:px-4"
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 py-2 text-neutral-800 dark:text-[#ECEAE4] transition hover:bg-white dark:hover:bg-[#161E1B] hover:shadow-2xs sm:flex-none sm:px-4"
               >
                 {tForm("printThermal80")}
               </Link>
@@ -389,7 +389,7 @@ function InvoiceRow({
                 <button
                   type="button"
                   onClick={() => setIsHistoryOpen(true)}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-3 py-2 text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4] transition hover:bg-neutral-50 dark:hover:bg-[#26302C]"
                 >
                   <NavIcon name="inbox" className="h-4 w-4 shrink-0" />
                   <span>{tForm("paymentHistory")}</span>
@@ -401,7 +401,7 @@ function InvoiceRow({
                   <button
                     type="button"
                     onClick={() => setIsEditOpen(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-3 py-2 text-xs font-semibold text-neutral-700 dark:text-[#ECEAE4] transition hover:bg-neutral-50 dark:hover:bg-[#26302C]"
                   >
                     <NavIcon name="edit" className="h-4 w-4 shrink-0" />
                     <span>{tPages("edit")}</span>
@@ -417,7 +417,7 @@ function InvoiceRow({
                           setCancelConfirm(true);
                         }
                       }}
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/15 px-3 py-2 text-xs font-semibold text-amber-900 dark:text-amber-300 transition hover:bg-amber-100 dark:hover:bg-amber-500/25"
                     >
                       <NavIcon name="ban" className="h-4 w-4 shrink-0" />
                       <span>{tPages("cancel")}</span>
@@ -433,7 +433,7 @@ function InvoiceRow({
                         setArchiveConfirm(true);
                       }
                     }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-800 transition hover:bg-rose-100"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-800 dark:text-rose-400 transition hover:bg-rose-100 dark:hover:bg-rose-500/25"
                   >
                     <NavIcon name="trash" className="h-4 w-4 shrink-0" />
                     <span>{tCommon("delete")}</span>

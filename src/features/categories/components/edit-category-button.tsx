@@ -32,7 +32,7 @@ export function EditCategoryButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs text-neutral-500 transition hover:text-emerald-700"
+        className="text-xs text-neutral-500 dark:text-[#9AA39F] transition hover:text-emerald-700 dark:hover:text-[#34D399]"
       >
         {tCommon("edit")}
       </button>
@@ -72,26 +72,26 @@ function EditCategoryForm({
     if (state.success) onDone();
   }, [state.success, onDone]);
 
-  const field = `${MOBILE_FIELD} bg-white text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`;
+  const field = `${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`;
 
   return (
     <form action={formAction} className="flex w-full flex-col gap-4">
       <input type="hidden" name="categoryId" value={categoryId} />
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-neutral-700">{tForm("nameAr")}</label>
+        <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("nameAr")}</label>
         <input name="name" defaultValue={name} required className={field} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-neutral-700">
+        <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
           {tForm("nameEn")}{" "}
-          <span className="font-normal text-neutral-400">({tForm("nameEnOptional")})</span>
+          <span className="font-normal text-neutral-400 dark:text-[#66706B]">({tForm("nameEnOptional")})</span>
         </label>
         <input name="nameEn" defaultValue={nameEn} placeholder={tForm("nameEnPlaceholder")} className={field} />
-        <p className="text-xs text-neutral-500">{tForm("nameEnHint")}</p>
+        <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{tForm("nameEnHint")}</p>
       </div>
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -99,7 +99,7 @@ function EditCategoryForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
+          className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-4 py-2 text-sm font-medium text-white dark:text-[#04231A] transition hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("saving") : tCommon("saveChanges")}
         </button>
@@ -107,7 +107,7 @@ function EditCategoryForm({
           type="button"
           onClick={onDone}
           disabled={isPending}
-          className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60"
+          className="rounded-lg border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-4 py-2 text-sm text-neutral-600 dark:text-[#9AA39F] transition hover:bg-neutral-50 dark:hover:bg-[#26302C] disabled:opacity-60"
         >
           {tCommon("cancel")}
         </button>

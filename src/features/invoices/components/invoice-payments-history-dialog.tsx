@@ -83,14 +83,14 @@ export function InvoicePaymentsHistoryDialog({
     >
       <div className="flex flex-col gap-4">
         {loading ? (
-          <p className="py-8 text-center text-sm text-neutral-400">{tCommon("loading")}</p>
+          <p className="py-8 text-center text-sm text-neutral-400 dark:text-[#9AA39F]">{tCommon("loading")}</p>
         ) : payments.length === 0 ? (
-          <p className="py-8 text-center text-sm text-neutral-400">{t("noPaymentsRecorded")}</p>
+          <p className="py-8 text-center text-sm text-neutral-400 dark:text-[#9AA39F]">{t("noPaymentsRecorded")}</p>
         ) : (
           <div className="flex flex-col gap-2 overflow-x-auto">
             <table className="w-full text-right text-sm">
               <thead>
-                <tr className="border-b border-neutral-200 text-xs text-neutral-500">
+                <tr className="border-b border-neutral-200 dark:border-[#26302C] text-xs text-neutral-500 dark:text-[#9AA39F]">
                   <th className="pb-2 font-medium">{t("paymentDate")}</th>
                   <th className="pb-2 font-medium">{t("depositAccount")}</th>
                   <th className="pb-2 font-medium">{t("paymentMethod")}</th>
@@ -98,16 +98,16 @@ export function InvoicePaymentsHistoryDialog({
                   {canWrite && <th className="pb-2" />}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-100 dark:divide-[#26302C]">
                 {payments.map((p) => (
-                  <tr key={p._id} className="text-neutral-700">
-                    <td className="py-2.5 text-xs text-neutral-600">{formatDate(p.paymentDate)}</td>
+                  <tr key={p._id} className="text-neutral-700 dark:text-[#ECEAE4]">
+                    <td className="py-2.5 text-xs text-neutral-600 dark:text-[#9AA39F]">{formatDate(p.paymentDate)}</td>
                     <td className="py-2.5">{p.accountName || "—"}</td>
-                    <td className="py-2.5 text-xs text-neutral-500">
+                    <td className="py-2.5 text-xs text-neutral-500 dark:text-[#9AA39F]">
                       {tMethods(p.paymentMethod as any) || p.paymentMethod}
                       {p.reference ? ` (${p.reference})` : ""}
                     </td>
-                    <td className="py-2.5 text-left font-semibold text-emerald-800">
+                    <td className="py-2.5 text-left font-semibold text-emerald-800 dark:text-[#34D399]">
                       {formatMoney(p.amount, { currency })}
                     </td>
                     {canWrite && (
@@ -116,7 +116,7 @@ export function InvoicePaymentsHistoryDialog({
                           type="button"
                           disabled={voidingId === p._id}
                           onClick={() => voidPayment(p._id)}
-                          className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-800 hover:bg-rose-100 disabled:opacity-60"
+                          className="rounded-lg border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/15 px-2 py-1 text-xs font-semibold text-rose-800 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/25 disabled:opacity-60"
                         >
                           {voidingId === p._id ? t("voidingPayment") : t("voidPayment")}
                         </button>
@@ -130,16 +130,16 @@ export function InvoicePaymentsHistoryDialog({
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-rose-700">
+          <p role="alert" className="text-sm text-rose-700 dark:text-rose-400">
             {error}
           </p>
         )}
 
-        <div className="mt-4 flex justify-end border-t border-neutral-100 pt-3">
+        <div className="mt-4 flex justify-end border-t border-neutral-100 dark:border-[#26302C] pt-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#1E2824]"
           >
             {tCommon("close")}
           </button>

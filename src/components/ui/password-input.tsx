@@ -21,7 +21,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           type={visible ? "text" : "password"}
           dir={isRtl ? "rtl" : "ltr"}
           className={cn(
-            "w-full rounded-lg border border-neutral-300 bg-white py-2 text-neutral-900 placeholder:text-neutral-400 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100",
+            "w-full rounded-lg border border-neutral-300 bg-white py-2 text-neutral-900 placeholder:text-neutral-400 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B] dark:focus:border-[#34D399] dark:focus:ring-[#0F2E24]",
             isRtl ? "pl-11 pr-3 text-right" : "pr-11 pl-3 text-left",
             className,
           )}
@@ -31,7 +31,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           type="button"
           onClick={() => setVisible((prev) => !prev)}
           className={cn(
-            "absolute top-1/2 -translate-y-1/2 flex items-center justify-center p-1 text-neutral-400 transition hover:text-neutral-700 focus:outline-none",
+            "absolute top-1/2 -translate-y-1/2 flex items-center justify-center p-1 text-neutral-400 transition hover:text-neutral-700 focus:outline-none dark:text-[#66706B] dark:hover:text-[#ECEAE4]",
             isRtl ? "left-2.5" : "right-2.5",
           )}
           aria-label={toggleLabel}

@@ -69,8 +69,8 @@ export function EditTransactionForm({
           onClick={() => setType("expense")}
           className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
             type === "expense"
-              ? "border-red-300 bg-red-50 text-red-700"
-              : "border-neutral-200 bg-white text-neutral-500"
+              ? "border-red-300 dark:border-rose-500/40 bg-red-50 dark:bg-rose-500/15 text-red-700 dark:text-rose-400"
+              : "border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] text-neutral-500 dark:text-[#9AA39F]"
           }`}
         >
           {tForm("expense")}
@@ -80,8 +80,8 @@ export function EditTransactionForm({
           onClick={() => setType("income")}
           className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
             type === "income"
-              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-              : "border-neutral-200 bg-white text-neutral-500"
+              ? "border-emerald-300 dark:border-[#34D399]/40 bg-emerald-50 dark:bg-[#0F2E24] text-emerald-700 dark:text-[#34D399]"
+              : "border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] text-neutral-500 dark:text-[#9AA39F]"
           }`}
         >
           {tForm("income")}
@@ -91,7 +91,7 @@ export function EditTransactionForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-neutral-600">{tForm("amount")}</label>
+          <label className="text-xs font-medium text-neutral-600 dark:text-[#9AA39F]">{tForm("amount")}</label>
           <input
             name="amount"
             type="number"
@@ -100,28 +100,28 @@ export function EditTransactionForm({
             inputMode="decimal"
             enterKeyHint="done"
             defaultValue={transaction.amount}
-            className={`${MOBILE_FIELD} bg-white text-right`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right`}
             required
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-neutral-600">{tForm("date")}</label>
+          <label className="text-xs font-medium text-neutral-600 dark:text-[#9AA39F]">{tForm("date")}</label>
           <input
             name="transactionDate"
             type="date"
             defaultValue={transaction.transactionDate}
-            className={`${MOBILE_FIELD} bg-white text-right`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right`}
             required
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-neutral-600">{tForm("account")}</label>
+          <label className="text-xs font-medium text-neutral-600 dark:text-[#9AA39F]">{tForm("account")}</label>
           <select
             name="accountId"
             defaultValue={transaction.accountId}
-            className={`${MOBILE_FIELD} bg-white text-right`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right`}
             required
           >
             {accounts.map((account) => (
@@ -133,11 +133,11 @@ export function EditTransactionForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-neutral-600">{tForm("category")}</label>
+          <label className="text-xs font-medium text-neutral-600 dark:text-[#9AA39F]">{tForm("category")}</label>
           <select
             name="categoryId"
             defaultValue={transaction.categoryId}
-            className={`${MOBILE_FIELD} bg-white text-right`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right`}
             required
           >
             {filteredCategories.map((category) => (
@@ -149,28 +149,28 @@ export function EditTransactionForm({
         </div>
 
         <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs font-medium text-neutral-600">{tForm("descriptionOptional")}</label>
+          <label className="text-xs font-medium text-neutral-600 dark:text-[#9AA39F]">{tForm("descriptionOptional")}</label>
           <input
             name="description"
             type="text"
             defaultValue={transaction.description}
-            className={`${MOBILE_FIELD} bg-white text-right`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right`}
           />
         </div>
 
         <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs font-medium text-neutral-600">{tForm("notesOptional")}</label>
+          <label className="text-xs font-medium text-neutral-600 dark:text-[#9AA39F]">{tForm("notesOptional")}</label>
           <textarea
             name="notes"
             rows={2}
             defaultValue={transaction.notes}
-            className={`${MOBILE_FIELD} bg-white text-right`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right`}
           />
         </div>
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -179,14 +179,14 @@ export function EditTransactionForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-60"
+          className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-4 py-2 text-sm font-medium text-white dark:text-[#04231A] hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("saving") : tCommon("saveChanges")}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+          className="rounded-lg border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-4 py-2 text-sm text-neutral-600 dark:text-[#9AA39F] hover:bg-neutral-50 dark:hover:bg-[#26302C]"
         >
           {tCommon("cancel")}
         </button>

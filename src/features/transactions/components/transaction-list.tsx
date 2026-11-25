@@ -53,7 +53,7 @@ export async function TransactionList({
   const tEmpty = await getTranslations("empty");
   if (transactions.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-400">
+      <div className="rounded-2xl border border-dashed border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-8 text-center text-neutral-400 dark:text-[#9AA39F]">
         {tEmpty("noTransactions")}
       </div>
     );

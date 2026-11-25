@@ -66,9 +66,9 @@ export function WorkspaceSwitcher({
 
   if (workspaces.length <= 1) {
     return (
-      <div className={`inline-flex items-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-2xs sm:text-sm ${className ?? ""}`}>
+      <div className={`inline-flex items-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-2xs sm:text-sm dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#ECEAE4] ${className ?? ""}`}>
         <svg
-          className="h-4 w-4 shrink-0 text-emerald-700"
+          className="h-4 w-4 shrink-0 text-emerald-700 dark:text-[#34D399]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -80,7 +80,7 @@ export function WorkspaceSwitcher({
             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
           />
         </svg>
-        <span className="truncate max-w-[150px] sm:max-w-[200px] text-neutral-900">
+        <span className="truncate max-w-[150px] sm:max-w-[200px] text-neutral-900 dark:text-[#ECEAE4]">
           {active?.name ?? "..."}
         </span>
       </div>
@@ -96,11 +96,11 @@ export function WorkspaceSwitcher({
         disabled={isPending}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-neutral-200/90 bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-2xs hover:border-neutral-300 hover:bg-neutral-50/90 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 transition sm:text-sm"
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-neutral-200/90 bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-2xs hover:border-neutral-300 hover:bg-neutral-50/90 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 transition sm:text-sm dark:border-[#26302C] dark:bg-[#161E1B] dark:text-[#ECEAE4] dark:hover:border-[#33403B] dark:hover:bg-[#1E2824]"
       >
         <div className="flex items-center gap-1.5 min-w-0">
           <svg
-            className="h-4 w-4 shrink-0 text-emerald-700"
+            className="h-4 w-4 shrink-0 text-emerald-700 dark:text-[#34D399]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -112,7 +112,7 @@ export function WorkspaceSwitcher({
               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
             />
           </svg>
-          <span className="truncate max-w-[130px] sm:max-w-[170px] text-neutral-900">
+          <span className="truncate max-w-[130px] sm:max-w-[170px] text-neutral-900 dark:text-[#ECEAE4]">
             {active?.name ?? "..."}
           </span>
         </div>
@@ -121,8 +121,8 @@ export function WorkspaceSwitcher({
           <span className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent shrink-0" />
         ) : (
           <svg
-            className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform duration-200 ${
-              isOpen ? "rotate-180 text-emerald-700" : ""
+            className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform duration-200 dark:text-[#66706B] ${
+              isOpen ? "rotate-180 text-emerald-700 dark:text-[#34D399]" : ""
             }`}
             fill="none"
             viewBox="0 0 24 24"
@@ -138,12 +138,12 @@ export function WorkspaceSwitcher({
       {isOpen && (
         <div
           role="menu"
-          className="absolute end-0 top-full mt-1.5 w-64 sm:w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-neutral-200/90 bg-white p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100"
+          className="absolute end-0 top-full mt-1.5 w-64 sm:w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-neutral-200/90 bg-white p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100 dark:border-[#26302C] dark:bg-[#161E1B]"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-2.5 py-1.5 text-xs text-neutral-400 font-semibold border-b border-neutral-100 mb-1">
+          <div className="flex items-center justify-between px-2.5 py-1.5 text-xs text-neutral-400 font-semibold border-b border-neutral-100 mb-1 dark:border-[#26302C] dark:text-[#66706B]">
             <span>{tNav("workspacesTitle")}</span>
-            <span className="rounded-full bg-neutral-100 px-1.5 py-0.2 text-[10px] text-neutral-600">
+            <span className="rounded-full bg-neutral-100 px-1.5 py-0.2 text-[10px] text-neutral-600 dark:bg-[#1E2824] dark:text-[#9AA39F]">
               {workspaces.length}
             </span>
           </div>
@@ -164,15 +164,15 @@ export function WorkspaceSwitcher({
                   disabled={isPending}
                   className={`w-full flex items-center justify-between rounded-xl px-2.5 py-2 text-right transition ${
                     isActive
-                      ? "bg-emerald-50/80 border border-emerald-200/70 text-emerald-950 font-medium"
-                      : "hover:bg-neutral-50 text-neutral-700 border border-transparent"
+                      ? "bg-emerald-50/80 border border-emerald-200/70 text-emerald-950 font-medium dark:bg-[#0F2E24] dark:border-emerald-800/60 dark:text-[#ECEAE4]"
+                      : "hover:bg-neutral-50 text-neutral-700 border border-transparent dark:text-[#9AA39F] dark:hover:bg-[#1E2824]"
                   }`}
                 >
                   <div className="flex flex-col min-w-0 pr-1">
-                    <span className="truncate text-xs font-semibold text-neutral-900">
+                    <span className="truncate text-xs font-semibold text-neutral-900 dark:text-[#ECEAE4]">
                       {workspace.name}
                     </span>
-                    <span className="text-[10px] text-neutral-400">
+                    <span className="text-[10px] text-neutral-400 dark:text-[#66706B]">
                       {tWorkspaceType(workspace.type)}
                     </span>
                   </div>

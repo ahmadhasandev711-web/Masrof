@@ -3,17 +3,23 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { MarketingMobileNav } from "@/features/marketing/components/marketing-mobile-nav";
 
-export async function MarketingHeader() {
+export async function MarketingHeader({ allowDark = false }: { allowDark?: boolean } = {}) {
   const t = await getTranslations("marketing");
   const common = await getTranslations("common");
   const nav = await getTranslations("nav");
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
+    <header
+      className={`sticky top-0 z-20 border-b border-[#E4DFD3]/80 bg-[#FBF9F4]/90 backdrop-blur-md pt-[env(safe-area-inset-top,0px)] ${
+        allowDark ? "dark:border-[#26302C] dark:bg-[#0E1412]/95" : ""
+      }`}
+    >
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <Link
           href="/"
-          className="flex items-center gap-2.5 min-w-0 truncate font-[family-name:var(--font-marketing-display)] text-xl font-semibold text-[#065F46] sm:text-2xl"
+          className={`flex items-center gap-2.5 min-w-0 truncate font-[family-name:var(--font-marketing-display)] text-xl font-semibold text-[#065F46] sm:text-2xl ${
+            allowDark ? "dark:text-[#34D399]" : ""
+          }`}
         >
           <Image
             src="/icons/brand-logo.png"
@@ -34,6 +40,7 @@ export async function MarketingHeader() {
           startFree={t("startFree")}
           menuLabel={nav("openMenu")}
           closeMenu={nav("closeMenu")}
+          allowDark={allowDark}
         />
       </div>
     </header>

@@ -11,8 +11,8 @@ export default async function AdminPlansPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">{t("title")}</h1>
-        <p className="mt-1 text-sm text-neutral-500">{t("subtitle")}</p>
+        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("title")}</h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">{t("subtitle")}</p>
       </div>
 
       <div className="flex flex-col gap-8">

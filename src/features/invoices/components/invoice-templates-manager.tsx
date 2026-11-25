@@ -70,7 +70,7 @@ export function InvoiceTemplatesManager({
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-[#065F46] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#054E3A]"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-[#065F46] dark:bg-[#10B981] px-4 py-2.5 text-sm font-semibold text-white dark:text-[#04231A] hover:bg-[#054E3A] dark:hover:bg-[#34D399]"
           >
             <span>+</span>
             <span>{t("newTemplate")}</span>
@@ -79,13 +79,13 @@ export function InvoiceTemplatesManager({
       )}
 
       {error && (
-        <p role="alert" className="rounded-lg bg-red-50 p-2.5 text-sm text-red-700">
+        <p role="alert" className="rounded-lg bg-red-50 dark:bg-rose-950/30 p-2.5 text-sm text-red-700 dark:text-rose-300">
           {error}
         </p>
       )}
 
       {ordered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">
+        <div className="rounded-2xl border border-dashed border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-10 text-center text-sm text-neutral-500 dark:text-[#9AA39F]">
           {t("empty")}
         </div>
       ) : (
@@ -93,26 +93,26 @@ export function InvoiceTemplatesManager({
           {ordered.map((template, index) => (
             <li
               key={template.id}
-              className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-xs"
+              className="rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 shadow-xs"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="font-semibold text-neutral-900">{template.name}</h2>
-                  <p className="mt-1 text-xs text-neutral-500">
+                  <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{template.name}</h2>
+                  <p className="mt-1 text-xs text-neutral-500 dark:text-[#9AA39F]">
                     {t("itemsCount", { count: template.items.length })}
                     {" · "}
                     {template.taxEnabled
                       ? t("taxOn", { rate: template.taxRatePercent })
                       : t("taxOff")}
                   </p>
-                  <ul className="mt-2 space-y-0.5 text-xs text-neutral-600">
+                  <ul className="mt-2 space-y-0.5 text-xs text-neutral-600 dark:text-[#9AA39F]">
                     {template.items.slice(0, 3).map((item, i) => (
                       <li key={`${template.id}-${i}`}>
                         {item.quantity} × {item.description}
                       </li>
                     ))}
                     {template.items.length > 3 && (
-                      <li className="text-neutral-400">…</li>
+                      <li className="text-neutral-400 dark:text-[#66706B]">…</li>
                     )}
                   </ul>
                 </div>
@@ -123,7 +123,7 @@ export function InvoiceTemplatesManager({
                       type="button"
                       disabled={isPending || index === 0}
                       onClick={() => move(template.id, -1)}
-                      className={`${MOBILE_ACTION_BTN} border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 disabled:opacity-40`}
+                      className={`${MOBILE_ACTION_BTN} border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#26302C] disabled:opacity-40`}
                     >
                       <span>{t("moveUp")}</span>
                     </button>
@@ -131,7 +131,7 @@ export function InvoiceTemplatesManager({
                       type="button"
                       disabled={isPending || index === ordered.length - 1}
                       onClick={() => move(template.id, 1)}
-                      className={`${MOBILE_ACTION_BTN} border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 disabled:opacity-40`}
+                      className={`${MOBILE_ACTION_BTN} border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#26302C] disabled:opacity-40`}
                     >
                       <span>{t("moveDown")}</span>
                     </button>
@@ -139,7 +139,7 @@ export function InvoiceTemplatesManager({
                       type="button"
                       disabled={isPending}
                       onClick={() => setEditing(template)}
-                      className={`${MOBILE_ACTION_BTN} border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50`}
+                      className={`${MOBILE_ACTION_BTN} border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#26302C]`}
                     >
                       <NavIcon name="edit" className="h-4 w-4 shrink-0" />
                       <span>{t("editTemplate")}</span>
@@ -148,7 +148,7 @@ export function InvoiceTemplatesManager({
                       type="button"
                       disabled={isPending}
                       onClick={() => archive(template.id)}
-                      className={`${MOBILE_ACTION_BTN} border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100`}
+                      className={`${MOBILE_ACTION_BTN} border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/15 text-rose-800 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/25`}
                     >
                       <NavIcon name="trash" className="h-4 w-4 shrink-0" />
                       <span>{t("archive")}</span>

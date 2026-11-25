@@ -158,20 +158,20 @@ export function CreateInvoiceForm({
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+      className="flex flex-col gap-4 rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 shadow-sm"
     >
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <IdempotencyKeyInput value={idempotencyKey} />
       <input type="hidden" name="taxEnabled" value={taxEnabled ? "true" : "false"} />
 
       <div>
-        <h2 className="font-semibold text-neutral-900">{tForm("title")}</h2>
-        <p className="mt-1 text-sm text-neutral-500">{tForm("submit")}</p>
+        <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{tForm("title")}</h2>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-[#9AA39F]">{tForm("submit")}</p>
       </div>
 
       {templates.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-neutral-700">{tForm("applyTemplate")}</label>
+          <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("applyTemplate")}</label>
           <select
             className={`${MOBILE_FIELD} text-right`}
             defaultValue=""
@@ -192,7 +192,7 @@ export function CreateInvoiceForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="invoice-client" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="invoice-client" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("client")}
           </label>
           <ClientCombobox
@@ -209,7 +209,7 @@ export function CreateInvoiceForm({
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label htmlFor="invoice-project" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="invoice-project" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("project")} ({tShared("optional")})
           </label>
           <select
@@ -218,7 +218,7 @@ export function CreateInvoiceForm({
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
             disabled={!selectedClientId || availableProjects.length === 0}
-            className={`${MOBILE_FIELD} text-right disabled:bg-neutral-100 disabled:text-neutral-400`}
+            className={`${MOBILE_FIELD} text-right disabled:bg-neutral-100 dark:disabled:bg-[#1E2824]/50 disabled:text-neutral-400 dark:disabled:text-[#66706B]`}
           >
             <option value="">{tForm("noProject")}</option>
             {availableProjects.map((project) => (
@@ -230,7 +230,7 @@ export function CreateInvoiceForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="invoice-issue-date" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="invoice-issue-date" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("issueDate")}
           </label>
           <input
@@ -244,7 +244,7 @@ export function CreateInvoiceForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="invoice-due-date" className="text-sm font-medium text-neutral-700">
+          <label htmlFor="invoice-due-date" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
             {tForm("dueDate")} ({tShared("optional")})
           </label>
           <input
@@ -257,7 +257,7 @@ export function CreateInvoiceForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-medium text-neutral-700">{tForm("items")}</p>
+        <p className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("items")}</p>
         {rows.map((row, index) => {
           const qty = parseFloat(row.quantity);
           const price = parseFloat(row.unitPrice);
@@ -266,7 +266,7 @@ export function CreateInvoiceForm({
           return (
             <div
               key={row.id}
-              className="grid gap-2 rounded-lg border border-neutral-200 p-3 sm:grid-cols-[1fr_88px_110px_110px_auto]"
+              className="grid gap-2 rounded-lg border border-neutral-200 dark:border-[#26302C] p-3 sm:grid-cols-[1fr_88px_110px_110px_auto]"
             >
               <input
                 name={`itemDescription_${index}`}
@@ -305,14 +305,14 @@ export function CreateInvoiceForm({
                 className={`${MOBILE_FIELD} text-start font-mono font-bold`}
                 required
               />
-              <div className={`${MOBILE_FIELD} flex items-center justify-start bg-neutral-50 font-mono text-sm text-neutral-700`}>
+              <div className={`${MOBILE_FIELD} flex items-center justify-start bg-neutral-50 dark:bg-[#1E2824] font-mono text-sm text-neutral-700 dark:text-[#ECEAE4]`}>
                 {lineTotal > 0 ? lineTotal.toFixed(2) : "—"}
               </div>
               <button
                 type="button"
                 onClick={() => removeRow(row.id)}
                 disabled={rows.length <= 1}
-                className="min-h-11 text-sm text-neutral-400 hover:text-red-600 disabled:opacity-40"
+                className="min-h-11 text-sm text-neutral-400 dark:text-[#9AA39F] hover:text-red-600 dark:hover:text-rose-400 disabled:opacity-40"
               >
                 {tCommon("delete")}
               </button>
@@ -322,25 +322,25 @@ export function CreateInvoiceForm({
         <button
           type="button"
           onClick={addRow}
-          className="self-start text-sm font-medium text-emerald-700 hover:underline"
+          className="self-start text-sm font-medium text-emerald-700 dark:text-[#34D399] hover:underline"
         >
           {tForm("addItem")}
         </button>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 p-3">
-        <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-neutral-800">
+      <div className="rounded-lg border border-neutral-200 dark:border-[#26302C] p-3">
+        <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-neutral-800 dark:text-[#ECEAE4]">
           <input
             type="checkbox"
             checked={taxEnabled}
             onChange={(e) => setTaxEnabled(e.target.checked)}
-            className="h-4 w-4 rounded border-neutral-300"
+            className="h-4 w-4 rounded border-neutral-300 dark:border-[#26302C]"
           />
           {tForm("enableTax")}
         </label>
         {taxEnabled && (
           <div className="mt-3 flex flex-col gap-1.5">
-            <label htmlFor="tax-rate" className="text-xs font-semibold text-neutral-600">
+            <label htmlFor="tax-rate" className="text-xs font-semibold text-neutral-600 dark:text-[#9AA39F]">
               {tForm("taxRate")}
             </label>
             <input
@@ -359,7 +359,7 @@ export function CreateInvoiceForm({
           </div>
         )}
         {!taxEnabled && <input type="hidden" name="taxRatePercent" value="0" />}
-        <div className="mt-3 space-y-1 text-sm text-neutral-700">
+        <div className="mt-3 space-y-1 text-sm text-neutral-700 dark:text-[#ECEAE4]">
           <div className="flex justify-between">
             <span>{tForm("subtotal")}</span>
             <span className="font-mono">{subtotalMajor.toFixed(2)}</span>
@@ -370,7 +370,7 @@ export function CreateInvoiceForm({
               <span className="font-mono">{taxMajor.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between border-t border-neutral-200 pt-1 font-semibold">
+          <div className="flex justify-between border-t border-neutral-200 dark:border-[#26302C] pt-1 font-semibold">
             <span>{tForm("total")}</span>
             <span className="font-mono">{totalMajor.toFixed(2)}</span>
           </div>
@@ -378,7 +378,7 @@ export function CreateInvoiceForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="invoice-notes" className="text-sm font-medium text-neutral-700">
+        <label htmlFor="invoice-notes" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
           {tForm("notes")}
         </label>
         <textarea
@@ -391,12 +391,12 @@ export function CreateInvoiceForm({
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
       {templateMessage && (
-        <p className="text-sm text-neutral-600" role="status">
+        <p className="text-sm text-neutral-600 dark:text-[#9AA39F]" role="status">
           {templateMessage}
         </p>
       )}
@@ -405,7 +405,7 @@ export function CreateInvoiceForm({
         <button
           type="submit"
           disabled={isPending || clients.length === 0}
-          className="rounded-lg bg-emerald-700 px-5 py-2.5 font-medium text-white hover:bg-emerald-800 disabled:opacity-60"
+          className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-5 py-2.5 font-medium text-white dark:text-[#04231A] hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("saving") : tForm("submit")}
         </button>
@@ -413,7 +413,7 @@ export function CreateInvoiceForm({
           type="button"
           onClick={handleSaveTemplate}
           disabled={templateSaving || isPending}
-          className="rounded-lg border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+          className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#1E2824] disabled:opacity-60"
         >
           {tForm("saveAsTemplate")}
         </button>
@@ -422,7 +422,7 @@ export function CreateInvoiceForm({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-lg border border-neutral-300 px-4 py-2.5 font-medium text-neutral-700 hover:bg-neutral-100"
+            className="rounded-lg border border-neutral-300 dark:border-[#26302C] px-4 py-2.5 font-medium text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824]"
           >
             {tCommon("cancel")}
           </button>

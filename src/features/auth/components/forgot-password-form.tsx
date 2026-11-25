@@ -62,8 +62,8 @@ export function ForgotPasswordForm({ showDevEmailHint = false }: { showDevEmailH
         {isSubmitting ? t("submit.sending") : t("submit.sendReset")}
       </Button>
 
-      <p className="text-center text-sm text-neutral-500">
-        <Link href="/login" className="font-medium text-emerald-700">
+      <p className="text-center text-sm text-neutral-500 dark:text-[#9AA39F]">
+        <Link href="/login" className="font-medium text-emerald-700 dark:text-[#34D399]">
           {t("forgot.backToLogin")}
         </Link>
       </p>

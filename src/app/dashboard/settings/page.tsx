@@ -21,8 +21,8 @@ export default async function WorkspaceSettingsPage() {
     <div className="flex max-w-2xl flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-          <p className="text-sm text-neutral-500">{activeWorkspace.name}</p>
+          <h1 className="text-xl font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("title")}</h1>
+          <p className="text-sm text-neutral-500 dark:text-[#9AA39F]">{activeWorkspace.name}</p>
         </div>
       </div>
 
@@ -44,7 +44,7 @@ export default async function WorkspaceSettingsPage() {
           />
         </>
       ) : (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <p className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
           {t("ownerOnly")}
         </p>
       )}

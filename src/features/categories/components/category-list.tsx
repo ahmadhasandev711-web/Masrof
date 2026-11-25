@@ -36,21 +36,21 @@ function CategoryGroup({
   canWrite?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-3">
+    <div className="rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 shadow-sm">
+      <div className="mb-4 flex items-center justify-between border-b border-neutral-100 dark:border-[#26302C] pb-3">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 text-neutral-700">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-[#1E2824] text-neutral-700 dark:text-[#ECEAE4]">
             {headerIcon}
           </span>
-          <h2 className="font-semibold text-neutral-900">{title}</h2>
+          <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{title}</h2>
         </div>
-        <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-neutral-600">
+        <span className="inline-flex items-center rounded-full bg-neutral-100 dark:bg-[#1E2824] px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-neutral-600 dark:text-[#9AA39F]">
           {categories.length}
         </span>
       </div>
       {categories.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-neutral-200 p-8 text-center">
-          <p className="text-sm text-neutral-400">{emptyLabel}</p>
+        <div className="rounded-xl border border-dashed border-neutral-200 dark:border-[#26302C] p-8 text-center">
+          <p className="text-sm text-neutral-400 dark:text-[#9AA39F]">{emptyLabel}</p>
         </div>
       ) : (
         <ul className="flex flex-wrap gap-2.5">
@@ -59,14 +59,14 @@ function CategoryGroup({
             return (
               <li
                 key={id}
-                className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50/80 px-3 py-1.5 text-sm transition hover:border-neutral-300 hover:bg-neutral-50"
+                className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-[#26302C] bg-neutral-50/80 dark:bg-[#1E2824] px-3 py-1.5 text-sm transition hover:border-neutral-300 dark:hover:border-[#34D399]/30 hover:bg-neutral-50 dark:hover:bg-[#26302C]/60"
               >
                 <CategoryIcon slug={category.slug} kind={category.kind} className="h-4 w-4 shrink-0" />
-                <span className="font-medium text-neutral-800">
+                <span className="font-medium text-neutral-800 dark:text-[#ECEAE4]">
                   {resolveCategoryLabel(category, locale)}
                 </span>
                 {category.isSystem ? (
-                  <span className="rounded bg-neutral-200/70 px-1.5 py-0.5 text-[10px] text-neutral-500">
+                  <span className="rounded bg-neutral-200/70 dark:bg-[#26302C] px-1.5 py-0.5 text-[10px] text-neutral-500 dark:text-[#9AA39F]">
                     {systemBadgeLabel}
                   </span>
                 ) : canWrite ? (
@@ -111,7 +111,7 @@ export async function CategoryList({
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <CategoryGroup
         title={tCategory("kindIncome")}
-        headerIcon={<NavIcon name="trending-up" className="h-4 w-4 text-emerald-700" />}
+        headerIcon={<NavIcon name="trending-up" className="h-4 w-4 text-emerald-700 dark:text-[#34D399]" />}
         categories={incomeCategories}
         workspaceId={workspaceId}
         emptyLabel={tEmpty("noCategories")}
@@ -121,7 +121,7 @@ export async function CategoryList({
       />
       <CategoryGroup
         title={tCategory("kindExpense")}
-        headerIcon={<NavIcon name="trending-down" className="h-4 w-4 text-amber-700" />}
+        headerIcon={<NavIcon name="trending-down" className="h-4 w-4 text-amber-700 dark:text-amber-400" />}
         categories={expenseCategories}
         workspaceId={workspaceId}
         emptyLabel={tEmpty("noCategories")}

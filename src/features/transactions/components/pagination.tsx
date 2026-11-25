@@ -47,9 +47,9 @@ export function TransactionPagination({
   }
 
   return (
-    <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-neutral-200/90 bg-white px-4 py-3 shadow-xs sm:flex-row sm:px-5">
+    <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-neutral-200/90 dark:border-[#26302C] bg-white dark:bg-[#161E1B] px-4 py-3 shadow-xs sm:flex-row sm:px-5">
       {/* 1. Showing range */}
-      <div className="text-xs font-medium text-neutral-500">
+      <div className="text-xs font-medium text-neutral-500 dark:text-[#9AA39F]">
         {tCommon("showingRange", { from, to, total: totalItems })}
       </div>
 
@@ -63,8 +63,8 @@ export function TransactionPagination({
             aria-disabled={page <= 1}
             className={`flex h-8 items-center justify-center rounded-lg px-2.5 font-semibold transition ${
               page <= 1
-                ? "pointer-events-none text-neutral-300"
-                : "border border-neutral-200 text-neutral-700 hover:bg-neutral-100"
+                ? "pointer-events-none text-neutral-300 dark:text-[#66706B]"
+                : "border border-neutral-200 dark:border-[#26302C] text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824]"
             }`}
           >
             {tCommon("previous")}
@@ -76,11 +76,11 @@ export function TransactionPagination({
               <Link
                 href={buildHref(1)}
                 scroll={false}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 font-semibold text-neutral-700 hover:bg-neutral-100"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 dark:border-[#26302C] font-semibold text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824]"
               >
                 1
               </Link>
-              {startPage > 2 && <span className="px-1 text-neutral-400">...</span>}
+              {startPage > 2 && <span className="px-1 text-neutral-400 dark:text-[#66706B]">...</span>}
             </>
           )}
 
@@ -94,8 +94,8 @@ export function TransactionPagination({
                 scroll={false}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition ${
                   isActive
-                    ? "bg-[#065F46] text-white shadow-2xs"
-                    : "border border-neutral-200 text-neutral-700 hover:bg-neutral-100"
+                    ? "bg-[#065F46] dark:bg-[#10B981] text-white dark:text-[#04231A] shadow-2xs"
+                    : "border border-neutral-200 dark:border-[#26302C] text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824]"
                 }`}
               >
                 {p}
@@ -106,11 +106,11 @@ export function TransactionPagination({
           {/* Last page if far */}
           {endPage < totalPages && (
             <>
-              {endPage < totalPages - 1 && <span className="px-1 text-neutral-400">...</span>}
+              {endPage < totalPages - 1 && <span className="px-1 text-neutral-400 dark:text-[#66706B]">...</span>}
               <Link
                 href={buildHref(totalPages)}
                 scroll={false}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 font-semibold text-neutral-700 hover:bg-neutral-100"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-neutral-200 dark:border-[#26302C] font-semibold text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824]"
               >
                 {totalPages}
               </Link>
@@ -124,8 +124,8 @@ export function TransactionPagination({
             aria-disabled={page >= totalPages}
             className={`flex h-8 items-center justify-center rounded-lg px-2.5 font-semibold transition ${
               page >= totalPages
-                ? "pointer-events-none text-neutral-300"
-                : "border border-neutral-200 text-neutral-700 hover:bg-neutral-100"
+                ? "pointer-events-none text-neutral-300 dark:text-[#66706B]"
+                : "border border-neutral-200 dark:border-[#26302C] text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-100 dark:hover:bg-[#1E2824]"
             }`}
           >
             {tCommon("next")}
@@ -134,7 +134,7 @@ export function TransactionPagination({
       )}
 
       {/* 3. Page Size Selector */}
-      <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+      <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-[#9AA39F]">
         <span>{tCommon("perPage")}</span>
         {[20, 50, 100].map((size) => {
           const isCurrent = size === pageSize;
@@ -146,8 +146,8 @@ export function TransactionPagination({
               scroll={false}
               className={`rounded-lg px-2 py-1 font-bold transition ${
                 isCurrent
-                  ? "bg-neutral-900 text-white"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                  ? "bg-neutral-900 dark:bg-[#ECEAE4] text-white dark:text-[#0E1412]"
+                  : "bg-neutral-100 dark:bg-[#1E2824] text-neutral-600 dark:text-[#9AA39F] hover:bg-neutral-200 dark:hover:bg-[#26302C]"
               }`}
             >
               {size}

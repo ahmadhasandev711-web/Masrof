@@ -74,31 +74,31 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col gap-5">
+    <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-xs flex flex-col gap-5 dark:border-[#26302C] dark:bg-[#161E1B]">
       <div>
-        <h2 className="text-sm font-bold text-neutral-900">{t("settingsTitle")}</h2>
-        <p className="mt-1 text-xs text-neutral-500">{t("settingsSubtitle")}</p>
+        <h2 className="text-sm font-bold text-neutral-900 dark:text-[#ECEAE4]">{t("settingsTitle")}</h2>
+        <p className="mt-1 text-xs text-neutral-500 dark:text-[#9AA39F]">{t("settingsSubtitle")}</p>
       </div>
 
       {/* Edit Form */}
       <form onSubmit={handleSaveInfo} className="grid gap-3 sm:grid-cols-2 text-xs">
         <div className="flex flex-col gap-1">
-          <label className="font-semibold text-neutral-700">{t("workspaceName")}:</label>
+          <label className="font-semibold text-neutral-700 dark:text-[#ECEAE4]">{t("workspaceName")}:</label>
           <input
             type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="font-semibold text-neutral-700">{t("workspaceType")}:</label>
+          <label className="font-semibold text-neutral-700 dark:text-[#ECEAE4]">{t("workspaceType")}:</label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
           >
             {WORKSPACE_TYPES.map((wType) => (
               <option key={wType} value={wType}>
@@ -113,11 +113,11 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="font-semibold text-neutral-700">{t("currency")}:</label>
+          <label className="font-semibold text-neutral-700 dark:text-[#ECEAE4]">{t("currency")}:</label>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
           >
             {SUPPORTED_CURRENCIES.map((curr) => (
               <option key={curr} value={curr}>
@@ -128,13 +128,13 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="font-semibold text-neutral-700">{t("businessPhone")}:</label>
+          <label className="font-semibold text-neutral-700 dark:text-[#ECEAE4]">{t("businessPhone")}:</label>
           <input
             type="text"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+201..."
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 shadow-xs focus:border-violet-500 focus:outline-hidden dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B]"
             dir="ltr"
           />
         </div>
@@ -143,7 +143,7 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-neutral-900 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-neutral-800 disabled:opacity-50 transition"
+            className="rounded-lg bg-neutral-900 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-neutral-800 disabled:opacity-50 transition dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
           >
             {isPending ? t("saving") : t("saveChanges")}
           </button>
@@ -151,14 +151,14 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
       </form>
 
       {/* Danger Zone */}
-      <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3.5 flex flex-col gap-3">
-        <p className="text-xs font-bold text-rose-900">{t("dangerZone")}</p>
+      <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3.5 flex flex-col gap-3 dark:border-rose-800/40 dark:bg-rose-950/20">
+        <p className="text-xs font-bold text-rose-900 dark:text-rose-300">{t("dangerZone")}</p>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <button
             type="button"
             disabled={isPending}
             onClick={handleToggleArchive}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-50 transition"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-50 transition dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
           >
             {workspace.isArchived ? t("unarchiveWorkspace") : t("archiveWorkspace")}
           </button>
@@ -168,13 +168,13 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
               type="button"
               disabled={isPending}
               onClick={() => setDeleteConfirmOpen(true)}
-              className="rounded-lg border border-rose-300 bg-rose-100 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-200 disabled:opacity-50 transition"
+              className="rounded-lg border border-rose-300 bg-rose-100 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-200 disabled:opacity-50 transition dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-950/60"
             >
               {t("deleteWorkspace")}
             </button>
           ) : (
-            <div className="flex flex-wrap items-center gap-2 w-full pt-2 border-t border-rose-200">
-              <span className="text-xs text-rose-800">
+            <div className="flex flex-wrap items-center gap-2 w-full pt-2 border-t border-rose-200 dark:border-rose-800/40">
+              <span className="text-xs text-rose-800 dark:text-rose-300">
                 {t("typeNameToDelete", { name: workspace.name })}:
               </span>
               <input
@@ -182,7 +182,7 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
                 value={deleteInputName}
                 onChange={(e) => setDeleteInputName(e.target.value)}
                 placeholder={workspace.name}
-                className="rounded-md border border-rose-300 bg-white px-2 py-1 text-xs text-neutral-900 focus:outline-hidden"
+                className="rounded-md border border-rose-300 bg-white px-2 py-1 text-xs text-neutral-900 focus:outline-hidden dark:border-rose-800/50 dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B]"
               />
               <button
                 type="button"
@@ -198,7 +198,7 @@ export function WorkspaceSettingsAdminCard({ workspace }: Props) {
                   setDeleteConfirmOpen(false);
                   setDeleteInputName("");
                 }}
-                className="rounded-md border border-neutral-300 bg-white px-2.5 py-1 text-xs text-neutral-600 hover:bg-neutral-100"
+                className="rounded-md border border-neutral-300 bg-white px-2.5 py-1 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
               >
                 {t("cancel")}
               </button>

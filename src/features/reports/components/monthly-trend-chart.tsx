@@ -25,16 +25,16 @@ export async function MonthlyTrendChart({
   const maxValue = Math.max(...months.flatMap((m) => [m.income ?? 0, m.expense ?? 0]), 1);
 
   return (
-    <div className="rounded-3xl border border-neutral-200/90 bg-white p-4 sm:p-6 shadow-xs">
+    <div className="rounded-3xl border border-neutral-200/90 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-4 sm:p-6 shadow-xs">
       {/* Header with Title & Legend */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-base">📈</span>
-          <h3 className="text-sm sm:text-base font-bold text-neutral-900">{t("incomeVsExpense")}</h3>
+          <h3 className="text-sm sm:text-base font-bold text-neutral-900 dark:text-[#ECEAE4]">{t("incomeVsExpense")}</h3>
         </div>
-        <div className="flex items-center gap-4 text-xs font-semibold text-neutral-600">
+        <div className="flex items-center gap-4 text-xs font-semibold text-neutral-600 dark:text-[#9AA39F]">
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#065F46]" /> {t("income")}
+            <span className="h-2.5 w-2.5 rounded-full bg-[#065F46] dark:bg-[#10B981]" /> {t("income")}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-rose-500" /> {t("expense")}
@@ -61,12 +61,12 @@ export async function MonthlyTrendChart({
                 <div className="group relative flex h-full flex-col justify-end">
                   <div
                     title={`${t("income")}: ${incomeLabel}`}
-                    className="w-3.5 sm:w-4 rounded-t-md bg-[#065F46] transition-all hover:bg-[#054d3a] hover:opacity-90 active:scale-95"
+                    className="w-3.5 sm:w-4 rounded-t-md bg-[#065F46] dark:bg-[#10B981] transition-all hover:bg-[#054d3a] dark:hover:bg-[#34D399] hover:opacity-90 active:scale-95"
                     style={{ height: `${barHeight(month.income, maxValue)}%` }}
                   />
                   {/* Tooltip on hover */}
                   <div className="pointer-events-none absolute bottom-full mb-1 start-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center z-20">
-                    <span className="whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-bold text-white shadow-md font-mono">
+                    <span className="whitespace-nowrap rounded-lg bg-neutral-900 dark:bg-[#1E2824] px-2 py-1 text-[10px] font-bold text-white dark:text-[#ECEAE4] shadow-md font-mono">
                       {incomeLabel}
                     </span>
                   </div>
@@ -81,7 +81,7 @@ export async function MonthlyTrendChart({
                   />
                   {/* Tooltip on hover */}
                   <div className="pointer-events-none absolute bottom-full mb-1 start-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center z-20">
-                    <span className="whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-bold text-white shadow-md font-mono">
+                    <span className="whitespace-nowrap rounded-lg bg-neutral-900 dark:bg-[#1E2824] px-2 py-1 text-[10px] font-bold text-white dark:text-[#ECEAE4] shadow-md font-mono">
                       {expenseLabel}
                     </span>
                   </div>
@@ -90,11 +90,11 @@ export async function MonthlyTrendChart({
 
               {/* Month Label (Mobile-friendly: compact without clumsy wrap) */}
               <div className="text-center">
-                <span className={`block text-[11px] font-semibold leading-tight ${isLatest ? "text-[#065F46] font-bold" : "text-neutral-500"}`}>
+                <span className={`block text-[11px] font-semibold leading-tight ${isLatest ? "text-[#065F46] dark:text-[#34D399] font-bold" : "text-neutral-500 dark:text-[#9AA39F]"}`}>
                   {monthShort}
                 </span>
                 {yearPart && (
-                  <span className="hidden sm:block text-[9px] text-neutral-400">
+                  <span className="hidden sm:block text-[9px] text-neutral-400 dark:text-[#66706B]">
                     {yearPart}
                   </span>
                 )}

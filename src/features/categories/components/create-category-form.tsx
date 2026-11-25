@@ -46,19 +46,19 @@ export function CreateCategoryForm({
       }}
       className={
         showTitle
-          ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+          ? "flex flex-col gap-4 rounded-2xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-6 shadow-sm"
           : "flex flex-col gap-4"
       }
     >
       {showTitle && (
-        <h2 className="text-base font-semibold text-neutral-900">{tForm("title")}</h2>
+        <h2 className="text-base font-semibold text-neutral-900 dark:text-[#ECEAE4]">{tForm("title")}</h2>
       )}
 
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <IdempotencyKeyInput value={idempotencyKey} />
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="category-name" className="text-sm font-medium text-neutral-700">
+        <label htmlFor="category-name" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
           {tForm("nameAr")}
         </label>
         <input
@@ -66,35 +66,35 @@ export function CreateCategoryForm({
           name="name"
           type="text"
           placeholder={tForm("nameArPlaceholder")}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
           required
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="category-name-en" className="text-sm font-medium text-neutral-700">
+        <label htmlFor="category-name-en" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
           {tForm("nameEn")}{" "}
-          <span className="font-normal text-neutral-400">({tForm("nameEnOptional")})</span>
+          <span className="font-normal text-neutral-400 dark:text-[#66706B]">({tForm("nameEnOptional")})</span>
         </label>
         <input
           id="category-name-en"
           name="nameEn"
           type="text"
           placeholder={tForm("nameEnPlaceholder")}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
         />
-        <p className="text-xs text-neutral-500">{tForm("nameEnHint")}</p>
+        <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{tForm("nameEnHint")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="category-kind" className="text-sm font-medium text-neutral-700">
+        <label htmlFor="category-kind" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
           {tForm("kind")}
         </label>
         <select
           id="category-kind"
           name="kind"
           defaultValue="expense"
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-3 py-2 text-start focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
         >
           <option value="expense">{tForm("kindExpense")}</option>
           <option value="income">{tForm("kindIncome")}</option>
@@ -102,7 +102,7 @@ export function CreateCategoryForm({
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -113,7 +113,7 @@ export function CreateCategoryForm({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60"
+            className="rounded-xl border border-neutral-200 dark:border-[#26302C] px-4 py-2 text-sm font-medium text-neutral-600 dark:text-[#9AA39F] transition hover:bg-neutral-50 dark:hover:bg-[#1E2824] disabled:opacity-60"
           >
             {tCommon("cancel")}
           </button>
@@ -121,7 +121,7 @@ export function CreateCategoryForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-xl bg-emerald-700 px-5 py-2 text-sm font-semibold text-white shadow-xs transition hover:bg-emerald-800 disabled:opacity-60"
+          className="rounded-xl bg-emerald-700 dark:bg-[#10B981] px-5 py-2 text-sm font-semibold text-white dark:text-[#04231A] shadow-xs transition hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("adding") : tForm("submit")}
         </button>

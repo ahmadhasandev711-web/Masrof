@@ -96,25 +96,25 @@ export function BackupPanel({
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-neutral-800">{tDashboard("exportTitle")}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-[#26302C] dark:bg-[#161E1B]">
+        <h2 className="text-sm font-semibold text-neutral-800 dark:text-[#ECEAE4]">{tDashboard("exportTitle")}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-[#9AA39F]">
           {tDashboard("exportDescription")}
         </p>
         <button
           type="button"
           onClick={handleExport}
           disabled={!canUseBackup || isExporting}
-          className="mt-4 rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60"
+          className="mt-4 rounded-lg bg-[#065F46] px-4 py-2 text-sm font-medium text-white hover:bg-[#054d3a] disabled:opacity-60 dark:bg-[#10B981] dark:text-[#04231A] dark:hover:bg-[#34D399]"
         >
           {isExporting ? tCommon("exporting") : tDashboard("exportButton")}
         </button>
-        {exportError && <p className="mt-2 text-sm text-red-600">{exportError}</p>}
+        {exportError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{exportError}</p>}
       </section>
 
-      <section className="rounded-2xl border border-amber-200 bg-amber-50/40 p-6">
-        <h2 className="text-sm font-semibold text-amber-900">{tDashboard("restoreTitle")}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-amber-900/80">
+      <section className="rounded-2xl border border-amber-200 bg-amber-50/40 p-6 dark:border-amber-800/40 dark:bg-amber-950/20">
+        <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-300">{tDashboard("restoreTitle")}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-amber-900/80 dark:text-amber-200/80">
           {tDashboard("restoreDescription")}
         </p>
 
@@ -122,24 +122,24 @@ export function BackupPanel({
           <input type="hidden" name="backupJson" value={backupJson} />
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-neutral-700">{tForm("file")}</label>
+            <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("file")}</label>
             <input
               ref={fileInputRef}
               type="file"
               accept="application/json,.json"
               disabled={!canUseBackup || isRestoring}
               onChange={handleFileChange}
-              className="text-sm"
+              className="text-sm text-neutral-700 dark:text-[#ECEAE4]"
             />
             {fileLabel && (
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">
                 {tDashboard("restoreFileSelected")} {fileLabel}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="restore-workspace-name" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="restore-workspace-name" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("workspaceName")}
             </label>
             <input
@@ -148,12 +148,12 @@ export function BackupPanel({
               type="text"
               placeholder={tDashboard("restoreWorkspacePlaceholder", { name: workspaceName })}
               disabled={!canUseBackup || isRestoring}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B]"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="restore-confirmation" className="text-sm font-medium text-neutral-700">
+            <label htmlFor="restore-confirmation" className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">
               {tForm("confirmation")}
             </label>
             <input
@@ -161,21 +161,21 @@ export function BackupPanel({
               name="confirmation"
               type="text"
               disabled={!canUseBackup || isRestoring}
-              className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B]"
             />
           </div>
 
           <button
             type="submit"
             disabled={!canUseBackup || isRestoring || !backupJson}
-            className="self-start rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-60"
+            className="self-start rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100 disabled:opacity-60 dark:border-amber-700/50 dark:bg-[#1E2824] dark:text-amber-300 dark:hover:bg-amber-950/50"
           >
             {isRestoring ? tDashboard("restoring") : tDashboard("restoreButton")}
           </button>
 
-          {restoreState.error && <p className="text-sm text-red-600">{restoreState.error}</p>}
+          {restoreState.error && <p className="text-sm text-red-600 dark:text-red-400">{restoreState.error}</p>}
           {restoreState.success && (
-            <p className="text-sm text-emerald-700">
+            <p className="text-sm text-emerald-700 dark:text-[#34D399]">
               {tDashboard("restoreSuccess")}
             </p>
           )}

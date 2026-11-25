@@ -17,6 +17,9 @@ import "@fontsource/ibm-plex-mono/600.css";
 import "./globals.css";
 import { getDirection, type AppLocale } from "@/i18n/config";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { ThemeProvider } from "@/components/theme-provider";
+
+const THEME_INIT_SCRIPT = `(function(){try{var m=localStorage.getItem("sanadat.themeMode");var d=m==="dark"||(m!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d)document.documentElement.classList.add("dark");document.documentElement.dataset.themeMode=m||"system";}catch(e){}})();`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -60,10 +63,15 @@ export default async function RootLayout({
   const dir = getDirection(locale);
 
   return (
-    <html lang={locale} dir={dir} className="h-full antialiased" style={{ colorScheme: "light" }}>
+    <html lang={locale} dir={dir} className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col font-sans">
         <ServiceWorkerRegister />
-        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

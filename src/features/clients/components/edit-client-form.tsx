@@ -49,41 +49,41 @@ export function EditClientForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5 sm:col-span-2">
-          <label className="text-sm font-medium text-neutral-700">{tForm("name")}</label>
+          <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("name")}</label>
           <input
             name="name"
             type="text"
             defaultValue={client.name}
-            className={`${MOBILE_FIELD} bg-white text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-neutral-700">{tForm("email")}</label>
+          <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("email")}</label>
           <input
             name="email"
             type="email"
             defaultValue={client.email ?? ""}
             placeholder={tShared("optional")}
-            className={`${MOBILE_FIELD} bg-white text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-neutral-700">{tForm("phone")}</label>
+          <label className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{tForm("phone")}</label>
           <input
             name="phone"
             type="tel"
             defaultValue={client.phone ?? ""}
             placeholder={tShared("optional")}
-            className={`${MOBILE_FIELD} bg-white text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100`}
+            className={`${MOBILE_FIELD} bg-white dark:bg-[#1E2824] text-right focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20`}
           />
         </div>
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -92,7 +92,7 @@ export function EditClientForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
+          className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-4 py-2 text-sm font-medium text-white dark:text-[#04231A] transition hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
         >
           {isPending ? tCommon("saving") : tForm("editSubmit")}
         </button>
@@ -100,7 +100,7 @@ export function EditClientForm({
           type="button"
           onClick={onCancel}
           disabled={isPending}
-          className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-600 transition hover:bg-neutral-50 disabled:opacity-60"
+          className="rounded-lg border border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-4 py-2 text-sm text-neutral-600 dark:text-[#9AA39F] transition hover:bg-neutral-50 dark:hover:bg-[#26302C] disabled:opacity-60"
         >
           {tCommon("cancel")}
         </button>

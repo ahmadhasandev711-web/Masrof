@@ -49,7 +49,7 @@ export function GoogleSignInButton({
       type="button"
       onClick={handleClick}
       disabled={disabled}
-      className="flex w-full items-center justify-center gap-3 rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50 disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-3 rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 transition hover:bg-neutral-50 disabled:opacity-60 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:hover:bg-[#26302C]"
     >
       <GoogleIcon />
       {label ?? t("google.continue")}
@@ -63,10 +63,10 @@ export function AuthDivider() {
   return (
     <div className="relative my-1">
       <div className="absolute inset-0 flex items-center" aria-hidden>
-        <div className="w-full border-t border-neutral-200" />
+        <div className="w-full border-t border-neutral-200 dark:border-[#26302C]" />
       </div>
       <div className="relative flex justify-center text-xs">
-        <span className="bg-white px-2 text-neutral-400">{t("divider.or")}</span>
+        <span className="bg-white px-2 text-neutral-400 dark:bg-[#161E1B] dark:text-[#66706B]">{t("divider.or")}</span>
       </div>
     </div>
   );

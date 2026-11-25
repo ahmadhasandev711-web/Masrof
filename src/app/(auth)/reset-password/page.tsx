@@ -17,20 +17,20 @@ export default async function ResetPasswordPage({
   const error = params.error;
 
   return (
-    <Card className="w-full max-w-sm border-[#E4DFD3]">
+    <Card className="w-full max-w-sm border-[#E4DFD3] dark:border-[#26302C]">
       <CardTitle>{t("reset.title")}</CardTitle>
       <CardDescription className="mb-6">{t("reset.description")}</CardDescription>
 
       {error === "INVALID_TOKEN" ? (
-        <p className="mb-4 text-sm text-red-600">
+        <p className="mb-4 text-sm text-red-600 dark:text-red-400">
           {t("reset.invalidToken")}{" "}
-          <Link href="/forgot-password" className="font-medium text-emerald-700">
+          <Link href="/forgot-password" className="font-medium text-emerald-700 dark:text-[#34D399]">
             {t("reset.requestNewLink")}
           </Link>
         </p>
       ) : null}
 
-      <Suspense fallback={<p className="text-sm text-neutral-400">{t("loading")}</p>}>
+      <Suspense fallback={<p className="text-sm text-neutral-400 dark:text-[#66706B]">{t("loading")}</p>}>
         <ResetPasswordForm token={token} />
       </Suspense>
     </Card>

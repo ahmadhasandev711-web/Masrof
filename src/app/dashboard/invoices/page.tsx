@@ -113,15 +113,15 @@ export default async function InvoicesPage({
       {/* 1. Header with Title & Quick Action Modals */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900 sm:text-2xl">{t("title")}</h1>
-          <p className="text-xs text-neutral-500 mt-0.5">{activeWorkspace.name}</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-[#ECEAE4] sm:text-2xl">{t("title")}</h1>
+          <p className="text-xs text-neutral-500 dark:text-[#9AA39F] mt-0.5">{activeWorkspace.name}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {plan.clientsAndProjects && (
             <Link
               href="/dashboard/invoices/templates"
-              className="inline-flex min-h-11 items-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+              className="inline-flex min-h-11 items-center rounded-xl border border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] px-4 py-2.5 text-sm font-semibold text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#26302C]"
             >
               {t("manageTemplates")}
             </Link>
@@ -195,9 +195,9 @@ export default async function InvoicesPage({
           />
         </>
       ) : (
-        <div className="rounded-xl border border-[#065F46]/15 bg-[#ECFDF5]/50 p-4 text-sm text-[#1C1B1A]/70">
+        <div className="rounded-xl border border-[#065F46]/15 dark:border-[#34D399]/25 bg-[#ECFDF5]/50 dark:bg-[#0F2E24] p-4 text-sm text-[#1C1B1A]/70 dark:text-[#ECEAE4]">
           {tDashboard("featureGate.clientsProjects")}{" "}
-          <Link href="/pricing" className="font-medium text-[#065F46] hover:underline">
+          <Link href="/pricing" className="font-medium text-[#065F46] dark:text-[#34D399] hover:underline">
             {tPlan("viewPricing")}
           </Link>
           .

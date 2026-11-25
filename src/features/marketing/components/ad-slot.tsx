@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import {
   getAdSenseClientId,
   getAdSlotId,
@@ -23,25 +22,15 @@ export async function AdSlot({ placement = "inline", label }: AdSlotProps) {
     }
   }
 
-  const t = await getTranslations("marketing.adSlot");
-  const resolvedLabel = label ?? t("default");
-
   if (!isAdPlacementReady(placement)) {
-    return (
-      <div
-        className="my-8 flex min-h-24 items-center justify-center rounded-sm border border-dashed border-[#E4DFD3] bg-[#FBF9F4] px-4 text-center text-xs text-[#1C1B1A]/30"
-        aria-hidden={process.env.NODE_ENV === "production"}
-      >
-        {resolvedLabel}
-      </div>
-    );
+    return null;
   }
 
   const clientId = getAdSenseClientId()!;
   const slotId = getAdSlotId(placement)!;
 
   return (
-    <div className="my-8 overflow-hidden rounded-sm" data-ad-placement={placement}>
+    <div className="my-8 overflow-hidden rounded-sm" data-ad-placement={placement} aria-label={label}>
       <AdSenseUnit clientId={clientId} slotId={slotId} />
     </div>
   );

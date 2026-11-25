@@ -70,26 +70,26 @@ export function WorkspaceMembersPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+        <div className="flex items-center justify-between border-b border-neutral-100 pb-4 dark:border-[#26302C]">
           <div className="flex items-center gap-2">
-            <NavIcon name="team" className="h-5 w-5 text-neutral-700" />
-            <h2 className="font-semibold text-neutral-900">{t("membersTitle")}</h2>
+            <NavIcon name="team" className="h-5 w-5 text-neutral-700 dark:text-[#9AA39F]" />
+            <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("membersTitle")}</h2>
           </div>
-          <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-neutral-600">
+          <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-neutral-600 dark:bg-[#1E2824] dark:text-[#9AA39F]">
             {members.length}
           </span>
         </div>
-        <ul className="mt-2 divide-y divide-neutral-100">
+        <ul className="mt-2 divide-y divide-neutral-100 dark:divide-[#26302C]">
           {members.map((member) => (
             <li key={member.userId} className="flex items-center justify-between gap-3 py-3.5 text-sm">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-bold text-emerald-800">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-bold text-emerald-800 dark:bg-[#10B981]/20 dark:text-[#34D399]">
                   {member.name ? member.name.charAt(0).toUpperCase() : "U"}
                 </div>
                 <div>
-                  <p className="font-semibold text-neutral-900">{member.name}</p>
-                  <p className="text-xs text-neutral-500" dir="ltr">
+                  <p className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{member.name}</p>
+                  <p className="text-xs text-neutral-500 dark:text-[#9AA39F]" dir="ltr">
                     {member.email}
                   </p>
                 </div>
@@ -98,10 +98,10 @@ export function WorkspaceMembersPanel({
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                     member.role === "owner"
-                      ? "bg-emerald-100 text-emerald-800"
+                      ? "bg-emerald-100 text-emerald-800 dark:bg-[#10B981]/20 dark:text-[#34D399]"
                       : member.role === "viewer"
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-neutral-100 text-neutral-700"
+                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                        : "bg-neutral-100 text-neutral-700 dark:bg-[#1E2824] dark:text-[#ECEAE4]"
                   }`}
                 >
                   {roleLabel(member.role, t)}
@@ -111,7 +111,7 @@ export function WorkspaceMembersPanel({
                     type="button"
                     disabled={pending}
                     onClick={() => setTargetRemoveUser(member)}
-                    className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"
                   >
                     {t("removeMember")}
                   </button>
@@ -123,30 +123,30 @@ export function WorkspaceMembersPanel({
       </section>
 
       {isOwner && invitations.length > 0 && (
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs">
-          <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-xs dark:border-[#26302C] dark:bg-[#161E1B]">
+          <div className="flex items-center justify-between border-b border-neutral-100 pb-4 dark:border-[#26302C]">
             <div className="flex items-center gap-2">
-              <NavIcon name="inbox" className="h-5 w-5 text-amber-700" />
-              <h2 className="font-semibold text-neutral-900">{t("pendingTitle")}</h2>
+              <NavIcon name="inbox" className="h-5 w-5 text-amber-700 dark:text-amber-400" />
+              <h2 className="font-semibold text-neutral-900 dark:text-[#ECEAE4]">{t("pendingTitle")}</h2>
             </div>
-            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-amber-700">
+            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 font-mono text-xs font-medium tabular-nums text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
               {invitations.length}
             </span>
           </div>
-          <ul className="mt-2 divide-y divide-neutral-100">
+          <ul className="mt-2 divide-y divide-neutral-100 dark:divide-[#26302C]">
             {invitations.map((invite) => (
               <li key={invite.id} className="flex items-center justify-between gap-3 py-3.5 text-sm">
                 <div>
-                  <p className="font-medium text-neutral-900" dir="ltr">
+                  <p className="font-medium text-neutral-900 dark:text-[#ECEAE4]" dir="ltr">
                     {invite.email}
                   </p>
-                  <p className="text-xs text-neutral-500">{t("pendingExpires")}</p>
+                  <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">{t("pendingExpires")}</p>
                 </div>
                 <button
                   type="button"
                   disabled={pending}
                   onClick={() => setTargetCancelInvite(invite)}
-                  className="rounded-lg px-2.5 py-1 text-xs font-medium text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 disabled:opacity-50"
+                  className="rounded-lg px-2.5 py-1 text-xs font-medium text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 disabled:opacity-50 dark:text-[#9AA39F] dark:hover:bg-[#1E2824] dark:hover:text-red-400"
                 >
                   {t("cancelInvite")}
                 </button>

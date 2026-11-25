@@ -31,20 +31,20 @@ export function TransactionTabs({
   }
 
   return (
-    <div className="flex w-full rounded-2xl bg-neutral-100 p-1">
+    <div className="flex w-full rounded-2xl bg-neutral-100 dark:bg-[#1E2824] p-1">
       <Link
         href={buildHref("transactions")}
         scroll={false}
         className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs sm:text-sm font-bold transition ${
           activeTab === "transactions"
-            ? "bg-[#065F46] text-white shadow-xs"
-            : "text-neutral-600 hover:text-neutral-900"
+            ? "bg-[#065F46] dark:bg-[#10B981] text-white dark:text-[#04231A] shadow-xs"
+            : "text-neutral-600 dark:text-[#9AA39F] hover:text-neutral-900 dark:hover:text-[#ECEAE4]"
         }`}
       >
         <span>{t("ledgerTab")}</span>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-            activeTab === "transactions" ? "bg-white/20 text-white" : "bg-neutral-200 text-neutral-700"
+            activeTab === "transactions" ? "bg-white/20 text-white dark:bg-[#04231A]/15 dark:text-[#04231A]" : "bg-neutral-200 dark:bg-[#26302C] text-neutral-700 dark:text-[#ECEAE4]"
           }`}
         >
           {transactionsCount}
@@ -56,14 +56,14 @@ export function TransactionTabs({
         scroll={false}
         className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs sm:text-sm font-bold transition ${
           activeTab === "transfers"
-            ? "bg-blue-700 text-white shadow-xs"
-            : "text-neutral-600 hover:text-neutral-900"
+            ? "bg-blue-700 dark:bg-blue-500 text-white shadow-xs"
+            : "text-neutral-600 dark:text-[#9AA39F] hover:text-neutral-900 dark:hover:text-[#ECEAE4]"
         }`}
       >
         <span>{t("transfersTab")}</span>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-            activeTab === "transfers" ? "bg-white/20 text-white" : "bg-neutral-200 text-neutral-700"
+            activeTab === "transfers" ? "bg-white/20 text-white" : "bg-neutral-200 dark:bg-[#26302C] text-neutral-700 dark:text-[#ECEAE4]"
           }`}
         >
           {transfersCount}

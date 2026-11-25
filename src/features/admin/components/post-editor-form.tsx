@@ -53,7 +53,7 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
     <form action={formAction} className="flex flex-col gap-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 sm:col-span-2">
-          <span className="text-sm font-medium text-neutral-700">{t("fields.title")}</span>
+          <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.title")}</span>
           <input
             name="title"
             value={title}
@@ -65,17 +65,17 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
               }
             }}
             required
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
           />
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-neutral-700">{t("fields.locale")}</span>
+          <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.locale")}</span>
           <select
             name="locale"
             value={locale}
             onChange={(e) => setLocale(e.target.value as AppLocale)}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
           >
             <option value="ar">{t("localeAr")}</option>
             <option value="en">{t("localeEn")}</option>
@@ -83,7 +83,7 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-neutral-700">{t("fields.slug")}</span>
+          <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.slug")}</span>
           <input
             name="slug"
             value={slug}
@@ -93,16 +93,16 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
             }}
             dir="ltr"
             required
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-left text-neutral-900"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-left text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
           />
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-neutral-700">{t("fields.category")}</span>
+          <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.category")}</span>
           <select
             name="category"
             defaultValue={post?.category ?? ""}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
           >
             <option value="">{t("noCategory")}</option>
             {categories.map((category) => (
@@ -114,12 +114,12 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
         </label>
 
         <label className="flex flex-col gap-1.5 sm:col-span-2">
-          <span className="text-sm font-medium text-neutral-700">{t("fields.tags")}</span>
+          <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.tags")}</span>
           <input
             name="tags"
             defaultValue={formatTagsForInput(post?.tags)}
             placeholder={t("fields.categoryPlaceholder")}
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900"
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] dark:placeholder:text-[#66706B]"
           />
         </label>
 
@@ -128,21 +128,21 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
             type="checkbox"
             name="isPublished"
             defaultChecked={post?.isPublished ?? false}
-            className="h-4 w-4 rounded border-neutral-300"
+            className="h-4 w-4 rounded border-neutral-300 dark:border-[#26302C]"
           />
-          <span className="text-sm font-medium text-neutral-700">{t("fields.publish")}</span>
+          <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.publish")}</span>
         </label>
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-neutral-700">{t("fields.excerpt")}</span>
+        <span className="text-sm font-medium text-neutral-700 dark:text-[#ECEAE4]">{t("fields.excerpt")}</span>
         <textarea
           name="excerpt"
           defaultValue={post?.excerpt}
           rows={2}
           maxLength={300}
           required
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900"
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4]"
         />
       </label>
 
@@ -155,7 +155,7 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
       <MarkdownEditor name="content" defaultValue={post?.content} />
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -168,14 +168,14 @@ export function PostEditorForm({ post }: { post?: PostFormValues }) {
         >
           {isPending ? t("saving") : isEdit ? t("save") : t("create")}
         </button>
-        <Link href="/admin/posts" className="text-sm text-neutral-500 hover:text-neutral-800">
+        <Link href="/admin/posts" className="text-sm text-neutral-500 hover:text-neutral-800 dark:text-[#9AA39F] dark:hover:text-[#ECEAE4]">
           {t("backToList")}
         </Link>
         {isEdit && post?.slug && (
           <Link
             href={`/blog/${post.slug}`}
             target="_blank"
-            className="text-sm text-violet-700 hover:underline"
+            className="text-sm text-violet-700 hover:underline dark:text-violet-400"
           >
             {t("preview")}
           </Link>

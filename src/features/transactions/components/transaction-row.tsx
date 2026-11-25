@@ -85,14 +85,14 @@ export function TransactionRow({
   };
 
   return (
-    <li className="flex flex-col gap-2.5 rounded-2xl border border-neutral-200/80 bg-white p-3.5 shadow-xs transition hover:border-neutral-300 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+    <li className="flex flex-col gap-2.5 rounded-2xl border border-neutral-200/80 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-3.5 shadow-xs transition hover:border-neutral-300 dark:hover:border-[#34D399]/30 sm:flex-row sm:items-center sm:justify-between sm:p-4">
       {/* Left: Category Icon & Details */}
       <div className="flex min-w-0 items-start gap-3 sm:items-center">
         <div
           className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl ${
             isIncome
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-              : "bg-neutral-100 text-neutral-700 border border-neutral-200/60"
+              ? "bg-emerald-50 dark:bg-[#0F2E24] text-emerald-700 dark:text-[#34D399] border border-emerald-100 dark:border-[#34D399]/25"
+              : "bg-neutral-100 dark:bg-[#1E2824] text-neutral-700 dark:text-[#ECEAE4] border border-neutral-200/60 dark:border-[#26302C]"
           }`}
         >
           <CategoryIcon
@@ -104,13 +104,13 @@ export function TransactionRow({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2 sm:justify-start">
-            <p className="truncate text-sm font-bold text-neutral-900">
+            <p className="truncate text-sm font-bold text-neutral-900 dark:text-[#ECEAE4]">
               {transaction.description || transaction.categoryName || tShared("none")}
             </p>
             {/* Mobile Amount: Placed at top-right of card for quick glance */}
             <span
               className={`sm:hidden shrink-0 font-mono text-sm font-bold tabular-nums ${
-                isIncome ? "text-emerald-700" : "text-rose-600"
+                isIncome ? "text-emerald-700 dark:text-[#34D399]" : "text-rose-600 dark:text-rose-400"
               }`}
             >
               {isIncome ? "+" : "-"}
@@ -119,19 +119,19 @@ export function TransactionRow({
           </div>
 
           {/* Metadata badges & details */}
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-500">
-            <span className="font-semibold text-neutral-700">{transaction.categoryName}</span>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-500 dark:text-[#9AA39F]">
+            <span className="font-semibold text-neutral-700 dark:text-[#ECEAE4]">{transaction.categoryName}</span>
             <span>·</span>
-            <span className="text-neutral-600">{transaction.accountName}</span>
+            <span className="text-neutral-600 dark:text-[#9AA39F]">{transaction.accountName}</span>
             <span>·</span>
-            <span className="text-neutral-400">{formatDate(transaction.transactionDate, locale)}</span>
+            <span className="text-neutral-400 dark:text-[#66706B]">{formatDate(transaction.transactionDate, locale)}</span>
             {transaction.clientName && (
-              <span className="rounded-md bg-blue-50 px-1.5 py-0.5 font-medium text-blue-700">
+              <span className="rounded-md bg-blue-50 dark:bg-blue-500/15 px-1.5 py-0.5 font-medium text-blue-700 dark:text-blue-300">
                  {transaction.clientName}
               </span>
             )}
             {transaction.projectName && (
-              <span className="rounded-md bg-purple-50 px-1.5 py-0.5 font-medium text-purple-700">
+              <span className="rounded-md bg-purple-50 dark:bg-purple-500/15 px-1.5 py-0.5 font-medium text-purple-700 dark:text-purple-300">
                  {transaction.projectName}
               </span>
             )}
@@ -140,7 +140,7 @@ export function TransactionRow({
                 href={transaction.attachmentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 px-1.5 py-0.5 font-medium text-amber-800 hover:underline"
+                className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 dark:bg-amber-500/15 px-1.5 py-0.5 font-medium text-amber-800 dark:text-amber-300 hover:underline"
               >
                  {transaction.attachmentName ?? tForm("receipt")}
               </a>
@@ -150,11 +150,11 @@ export function TransactionRow({
       </div>
 
       {/* Right: Desktop Amount & Action Buttons */}
-      <div className="flex shrink-0 items-center justify-between border-t border-neutral-100 pt-2 sm:border-0 sm:pt-0 sm:justify-end gap-3">
+      <div className="flex shrink-0 items-center justify-between border-t border-neutral-100 dark:border-[#26302C] pt-2 sm:border-0 sm:pt-0 sm:justify-end gap-3">
         {/* Desktop Amount */}
         <span
           className={`hidden sm:inline-block font-mono text-base font-bold tabular-nums ${
-            isIncome ? "text-emerald-700" : "text-rose-600"
+            isIncome ? "text-emerald-700 dark:text-[#34D399]" : "text-rose-600 dark:text-rose-400"
           }`}
         >
           {isIncome ? "+" : "-"}
@@ -166,7 +166,7 @@ export function TransactionRow({
           <Link
             href={transaction.linkedInvoiceNumber != null ? "/dashboard/invoices" : "/dashboard/debts"}
             title={tForm("linkedPaymentHint")}
-            className={`${MOBILE_ACTION_BTN} ms-auto border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100 sm:ms-0`}
+            className={`${MOBILE_ACTION_BTN} ms-auto border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/15 text-sky-800 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-500/25 sm:ms-0`}
           >
             <NavIcon name={transaction.linkedInvoiceNumber != null ? "invoices" : "debts"} className="h-4 w-4 shrink-0" />
             <span>
@@ -180,7 +180,7 @@ export function TransactionRow({
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className={`${MOBILE_ACTION_BTN} border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50`}
+              className={`${MOBILE_ACTION_BTN} border-neutral-200 dark:border-[#26302C] bg-white dark:bg-[#1E2824] text-neutral-700 dark:text-[#ECEAE4] hover:bg-neutral-50 dark:hover:bg-[#26302C]`}
             >
               <NavIcon name="edit" className="h-4 w-4 shrink-0" />
               <span>{tForm("editTitle")}</span>

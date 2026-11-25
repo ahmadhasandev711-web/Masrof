@@ -48,7 +48,7 @@ function UpdateProgressForm({
       <input type="hidden" name="workspaceId" value={workspaceId} />
       <input type="hidden" name="goalId" value={goalId} />
       <div className="flex flex-col gap-1">
-        <label htmlFor={`progress-${goalId}`} className="text-xs text-neutral-500">
+        <label htmlFor={`progress-${goalId}`} className="text-xs text-neutral-500 dark:text-[#9AA39F]">
           {tForm("addAmount")}
         </label>
         <input
@@ -58,19 +58,19 @@ function UpdateProgressForm({
           step="0.01"
           min="0.01"
           placeholder="0.00"
-          className="w-28 rounded-lg border border-neutral-300 px-2 py-1.5 text-right text-sm focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="w-28 rounded-lg border border-neutral-300 dark:border-[#26302C] dark:bg-[#1E2824] dark:text-[#ECEAE4] px-2 py-1.5 text-right text-sm focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-[#34D399]/20"
           required
         />
       </div>
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-800 disabled:opacity-60"
+        className="rounded-lg bg-emerald-700 dark:bg-[#10B981] px-3 py-1.5 text-sm font-medium text-white dark:text-[#04231A] transition hover:bg-emerald-800 dark:hover:bg-[#34D399] disabled:opacity-60"
       >
         {isPending ? "..." : tForm("update")}
       </button>
       {state.error && (
-        <p role="alert" className="w-full text-xs text-red-600">
+        <p role="alert" className="w-full text-xs text-red-600 dark:text-red-400">
           {state.error}
         </p>
       )}
@@ -90,7 +90,7 @@ function ArchiveGoalButton({ goalId, workspaceId }: { goalId: string; workspaceI
         type="button"
         onClick={() => setOpen(true)}
         disabled={isPending}
-        className="text-xs text-neutral-400 transition hover:text-red-600 disabled:opacity-60"
+        className="text-xs text-neutral-400 dark:text-[#9AA39F] transition hover:text-red-600 dark:hover:text-rose-400 disabled:opacity-60"
       >
         {tCommon("delete")}
       </button>
@@ -138,7 +138,7 @@ export function SavingsGoalList({
 
   if (goals.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-400">
+      <div className="rounded-2xl border border-dashed border-neutral-300 dark:border-[#26302C] bg-white dark:bg-[#161E1B] p-8 text-center text-neutral-400 dark:text-[#9AA39F]">
         {tEmpty("noGoals")}
       </div>
     );
@@ -154,18 +154,18 @@ export function SavingsGoalList({
         return (
           <li
             key={goal._id}
-            className={`rounded-xl border bg-white p-5 shadow-sm ${
-              isComplete ? "border-emerald-200" : "border-neutral-200"
+            className={`rounded-xl border bg-white dark:bg-[#161E1B] p-5 shadow-sm ${
+              isComplete ? "border-emerald-200 dark:border-[#34D399]/30" : "border-neutral-200 dark:border-[#26302C]"
             }`}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-neutral-900">
+                <p className="font-medium text-neutral-900 dark:text-[#ECEAE4]">
                   {isComplete ? " " : " "}
                   {goal.name}
                 </p>
                 {deadlineLabel && (
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-neutral-500 dark:text-[#9AA39F]">
                     {tDashboard("dueDate")}{" "}
                     <span className="font-mono tabular-nums">{deadlineLabel}</span>
                   </p>
@@ -174,7 +174,7 @@ export function SavingsGoalList({
               {canWrite && <ArchiveGoalButton goalId={goal._id} workspaceId={workspaceId} />}
             </div>
 
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-[#1E2824]">
               <div
                 className={`h-full ${progressBarColor(goal.percentage)}`}
                 style={{ width: `${clampedPercentage}%` }}
@@ -182,14 +182,14 @@ export function SavingsGoalList({
             </div>
 
             <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="font-mono tabular-nums text-neutral-500">
+              <span className="font-mono tabular-nums text-neutral-500 dark:text-[#9AA39F]">
                 {formatMoney(goal.currentAmount, formatOptions)} / {formatMoney(goal.targetAmount, formatOptions)}
               </span>
-              <span className="font-mono tabular-nums font-medium text-neutral-600">{goal.percentage}%</span>
+              <span className="font-mono tabular-nums font-medium text-neutral-600 dark:text-[#ECEAE4]">{goal.percentage}%</span>
             </div>
 
             {goal.remaining > 0 && (
-              <p className="mt-1 text-xs text-neutral-400">
+              <p className="mt-1 text-xs text-neutral-400 dark:text-[#66706B]">
                 {tDashboard("remaining")}{" "}
                 <span className="font-mono tabular-nums">{formatMoney(goal.remaining, formatOptions)}</span>
               </p>
